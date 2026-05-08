@@ -1,0 +1,62 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TunnelAgent.ViewModels"
+             x:Class="TunnelAgent.Views.AgentsView"
+             x:DataType="vm:MainWindowViewModel">
+    <StackPanel Spacing="0">
+        <Grid Margin="0,0,0,14" ColumnDefinitions="*,Auto">
+            <StackPanel>
+                <TextBlock Classes="page-title" Text="Agents" />
+                <TextBlock Classes="page-sub" Text="Route each CLI tool through a connected provider." />
+            </StackPanel>
+            <Button Grid.Column="1" Classes="app" Content="Detect" VerticalAlignment="Bottom" />
+        </Grid>
+
+        <Border Classes="card">
+            <ItemsControl ItemsSource="{Binding Agents}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:AgentViewModel">
+                        <StackPanel>
+                            <Grid Margin="14,12" ColumnDefinitions="22,*,Auto">
+                                <TextBlock Grid.Column="0" Text="▸" FontSize="14" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource FgMutedBrush}"/>
+                                <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Classes="row-label" Text="{Binding Name}" />
+                                        <Border Classes="chip" Background="#14000000"
+                                                IsVisible="{Binding !Installed}">
+                                            <TextBlock Text="Not installed"
+                                                       Foreground="{DynamicResource FgMutedBrush}" />
+                                        </Border>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="6"
+                                                IsVisible="{Binding Installed}">
+                                        <TextBlock Text="{Binding Binary}"
+                                                   FontFamily="Cascadia Mono,Consolas,monospace"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource FgMutedBrush}"/>
+                                        <TextBlock Text="→" FontSize="11"
+                                                   Foreground="{DynamicResource FgFaintBrush}"/>
+                                        <TextBlock Text="{Binding RouteProviderId}"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource FgMutedBrush}"/>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding Hint}" Classes="row-desc"
+                                               IsVisible="{Binding !Installed}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <ToggleSwitch Classes="app" IsChecked="{Binding Enabled}"
+                                                  IsVisible="{Binding Installed}" />
+                                    <Button Classes="app" Content="Install"
+                                            IsVisible="{Binding !Installed}" />
+                                </StackPanel>
+                            </Grid>
+                            <Border Classes="row-divider" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
+
+    </StackPanel>
+</UserControl>

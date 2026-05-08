@@ -1,0 +1,228 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TunnelAgent.ViewModels"
+             xmlns:cv="using:TunnelAgent.Converters"
+             xmlns:si="using:IconPacks.Avalonia.SimpleIcons"
+             xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+             x:Class="TunnelAgent.Views.ProvidersView"
+             x:Name="Root"
+             x:DataType="vm:MainWindowViewModel">
+    <UserControl.Resources>
+        <cv:ServerStateRunningConverter x:Key="StateIsRunning" />
+        <cv:ServerStateToTextConverter  x:Key="StateToText" />
+        <cv:ServerStateToBrushConverter x:Key="StateToBrush" />
+        <cv:HexToBrushConverter         x:Key="HexBrush" />
+    </UserControl.Resources>
+
+    <StackPanel Spacing="0">
+        <!-- Header -->
+        <Grid Margin="0,0,0,14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Classes="page-title" Text="Providers" />
+                <TextBlock Classes="page-sub" Text="Local OpenAI-compatible endpoint for your CLI agents." />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
+                <Button Classes="endpoint" ToolTip.Tip="Copy endpoint" Click="OnCopyEndpoint">
+                    <StackPanel Orientation="Horizontal" Spacing="7">
+                        <TextBlock Text="{Binding EndpointUrl}"
+                                   TextTrimming="CharacterEllipsis"
+                                   VerticalAlignment="Center" />
+                        <lucide:PackIconLucide Kind="Copy" Width="13" Height="13"
+                                               Foreground="{DynamicResource FgMutedBrush}"
+                                               VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Classes="app primary"
+                        Content="Start"
+                        Command="{Binding StartServerCommand}"
+                        IsVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}, ConverterParameter=Invert}" />
+                <Button Classes="app"
+                        Content="Stop"
+                        Command="{Binding StopServerCommand}"
+                        IsVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}}" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Settings card -->
+        <Border Classes="card">
+            <StackPanel>
+                <Grid Margin="14,12" ColumnDefinitions="22,*,Auto">
+                    <TextBlock Grid.Column="0" Text="◉" FontSize="14" VerticalAlignment="Center"
+                               Foreground="{Binding ServerState, Converter={StaticResource StateToBrush}}"/>
+                    <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                        <TextBlock Classes="row-label" Text="Server status" />
+                        <TextBlock Classes="row-desc">
+                            <Run Text="Localhost proxy on port " />
+                            <Run Text="{Binding Port}" />
+                        </TextBlock>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <Grid Classes="status-indicator">
+                            <Ellipse Classes="status-pulse"
+                                     Fill="{Binding ServerState, Converter={StaticResource StateToBrush}}"
+                                     IsVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}}" />
+                            <Ellipse Classes="status-dot"
+                                     Fill="{Binding ServerState, Converter={StaticResource StateToBrush}}" />
+                        </Grid>
+                        <TextBlock Text="{Binding ServerState, Converter={StaticResource StateToText}}"
+                                   Classes="status" Foreground="{Binding ServerState, Converter={StaticResource StateToBrush}}" />
+                    </StackPanel>
+                </Grid>
+
+            </StackPanel>
+        </Border>
+
+        <TextBlock Classes="section-label" Text="CONNECTED SERVICES" />
+
+        <!-- Provider list card -->
+        <Border Classes="card">
+            <ItemsControl ItemsSource="{Binding Providers}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ProviderViewModel">
+                        <StackPanel>
+                            <Grid Margin="14,12" ColumnDefinitions="30,*,Auto">
+                                <Border Grid.Column="0" Classes="provider-logo"
+                                        Background="{Binding LogoColor, Converter={StaticResource HexBrush}}">
+                                    <si:PackIconSimpleIcons Kind="{Binding IconKind}"
+                                                            Foreground="White"
+                                                            Width="16" Height="16"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Classes="row-label" Text="{Binding Name}" />
+                                    <TextBlock Classes="row-desc" Text="{Binding Description}"
+                                               IsVisible="{Binding !Connected}"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="0"
+                                                IsVisible="{Binding Connected}">
+                                        <TextBlock Classes="row-desc" Text="Connected as " />
+                                        <TextBlock Classes="row-desc" Text="{Binding Account}"
+                                                   Foreground="{DynamicResource FgBrush}" FontWeight="SemiBold"/>
+                                        <TextBlock Classes="row-desc" Text=" · " />
+                                        <TextBlock Classes="row-desc" Text="{Binding Model}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8"
+                                            VerticalAlignment="Center">
+                                    <Border Classes="chip"
+                                            Background="{DynamicResource AccentSoftBrush}"
+                                            MinHeight="24"
+                                            VerticalAlignment="Center"
+                                            IsVisible="{Binding Connected}">
+                                        <TextBlock Text="✓ Active" Foreground="{DynamicResource AccentBrush}" />
+                                    </Border>
+                                    <Button Classes="app"
+                                            Content="Disconnect"
+                                            IsVisible="{Binding Connected}"
+                                            Command="{Binding #Root.DataContext.ToggleProviderCommand}"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Classes="app primary"
+                                            Content="Connect"
+                                            IsVisible="{Binding !Connected}"
+                                            Command="{Binding #Root.DataContext.ToggleProviderCommand}"
+                                            CommandParameter="{Binding}"/>
+                                </StackPanel>
+                            </Grid>
+                            <Border Classes="row-divider" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
+
+        <TextBlock Classes="section-label" Text="AVAILABLE MODELS" />
+        <Border Classes="card">
+            <StackPanel>
+                <Grid Margin="14,12" ColumnDefinitions="30,*,Auto">
+                    <Border Grid.Column="0" Classes="provider-logo" Background="{DynamicResource AccentSoftBrush}">
+                        <lucide:PackIconLucide Kind="Brain" Width="16" Height="16"
+                                               Foreground="{DynamicResource AccentBrush}"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                        <TextBlock Classes="row-label" Text="Available models" />
+                        <TextBlock Classes="row-desc" Text="Models exposed by connected providers." />
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Text="{Binding TotalAvailableModelCount, StringFormat='{}{0} total'}"
+                               Classes="status" Foreground="{DynamicResource FgMutedBrush}" />
+                </Grid>
+                <Border Classes="row-divider" />
+
+                <ItemsControl ItemsSource="{Binding AvailableModelGroups}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:AvailableModelGroupViewModel">
+                            <StackPanel>
+                                <ToggleButton Classes="model-group"
+                                              IsChecked="{Binding IsExpanded, Mode=TwoWay}">
+                                    <Grid ColumnDefinitions="30,*,Auto,24">
+                                        <Border Grid.Column="0" Classes="provider-logo" Background="#14000000">
+                                            <lucide:PackIconLucide Kind="Boxes" Width="15" Height="15"
+                                                                   Foreground="{DynamicResource FgMutedBrush}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center" />
+                                        </Border>
+                                        <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                                            <TextBlock Classes="row-label" Text="{Binding ProviderName}" />
+                                            <TextBlock Classes="row-desc" Text="Connected service" />
+                                        </StackPanel>
+                                        <Border Grid.Column="2" Classes="chip" Background="#14000000" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding ModelCount, StringFormat='{}{0} models'}"
+                                                       Foreground="{DynamicResource FgMutedBrush}" />
+                                        </Border>
+                                        <Grid Grid.Column="3" Width="18" Height="18" Margin="6,0,0,0"
+                                              VerticalAlignment="Center">
+                                            <lucide:PackIconLucide Kind="ChevronRight" Width="14" Height="14"
+                                                                   Foreground="{DynamicResource FgMutedBrush}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"
+                                                                   IsVisible="{Binding !IsExpanded}" />
+                                            <lucide:PackIconLucide Kind="ChevronDown" Width="14" Height="14"
+                                                                   Foreground="{DynamicResource FgMutedBrush}"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"
+                                                                   IsVisible="{Binding IsExpanded}" />
+                                        </Grid>
+                                    </Grid>
+                                </ToggleButton>
+
+                                <ItemsControl ItemsSource="{Binding Models}" IsVisible="{Binding IsExpanded}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:AvailableModelViewModel">
+                                            <Grid Margin="54,6,14,8" ColumnDefinitions="*,Auto,Auto">
+                                                <StackPanel Grid.Column="0" MinWidth="0">
+                                                    <TextBlock Text="{Binding Name}"
+                                                               FontFamily="Cascadia Mono,Consolas,monospace"
+                                                               FontSize="12"
+                                                               FontWeight="SemiBold"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               Foreground="{DynamicResource FgBrush}" />
+                                                    <TextBlock Classes="row-desc" Text="{Binding Context}" />
+                                                </StackPanel>
+                                                <Border Grid.Column="1" Classes="chip" Background="#14000000" Margin="10,0,8,0"
+                                                        VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Provider}" Foreground="{DynamicResource FgMutedBrush}" />
+                                                </Border>
+                                                <Border Grid.Column="2" Classes="chip" Background="{DynamicResource AccentSoftBrush}"
+                                                        VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding AuthKind}" Foreground="{DynamicResource AccentBrush}" />
+                                                </Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <Border Classes="row-divider" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
+    </StackPanel>
+</UserControl>
