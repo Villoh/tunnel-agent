@@ -1,0 +1,16 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="TunnelAgent.App">
+    <Application.Styles>
+        <FluentTheme>
+            <FluentTheme.Palettes>
+                <ColorPaletteResources x:Key="Light" Accent="#0A84FF" />
+                <ColorPaletteResources x:Key="Dark" Accent="#4DA3FF" />
+            </FluentTheme.Palettes>
+        </FluentTheme>
+        <StyleInclude Source="avares://IconPacks.Avalonia.SimpleIcons/SimpleIcons.axaml" />
+        <StyleInclude Source="avares://IconPacks.Avalonia.Lucide/Lucide.axaml" />
+        <StyleInclude Source="avares://TunnelAgent/Themes/Brushes.axaml" />
+        <StyleInclude Source="avares://TunnelAgent/Themes/Controls.axaml" />
+    </Application.Styles>
+</Application>

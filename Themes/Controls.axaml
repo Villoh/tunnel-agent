@@ -1,0 +1,254 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:lucide="using:IconPacks.Avalonia.Lucide">
+
+    <!-- Borderless-window resize hit targets -->
+    <Style Selector="Border.resize-handle">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="ZIndex" Value="100" />
+    </Style>
+
+    <!-- Card container -->
+    <Style Selector="Border.card">
+        <Setter Property="Background" Value="{DynamicResource CardBgBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+    </Style>
+
+    <!-- Row separator -->
+    <Style Selector="Border.row-divider">
+        <Setter Property="Background" Value="{DynamicResource RowDividerBrush}" />
+        <Setter Property="Height" Value="1" />
+        <Setter Property="Margin" Value="14,0" />
+    </Style>
+
+    <!-- Section label -->
+    <Style Selector="TextBlock.section-label">
+        <Setter Property="Foreground" Value="{DynamicResource FgFaintBrush}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="LetterSpacing" Value="1" />
+        <Setter Property="Margin" Value="4,18,4,8" />
+        <Setter Property="Text" Value="" />
+    </Style>
+
+    <!-- Page title / subtitle -->
+    <Style Selector="TextBlock.page-title">
+        <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.page-sub">
+        <Setter Property="Foreground" Value="{DynamicResource FgMutedBrush}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Margin" Value="0,2,0,0" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.row-label">
+        <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="Medium" />
+    </Style>
+    <Style Selector="TextBlock.row-desc">
+        <Setter Property="Foreground" Value="{DynamicResource FgMutedBrush}" />
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="Margin" Value="0,2,0,0" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <!-- Default app button -->
+    <Style Selector="Button.app">
+        <Setter Property="Background" Value="{DynamicResource BtnBgBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BtnBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="7" />
+        <Setter Property="Padding" Value="12,4" />
+        <Setter Property="MinHeight" Value="26" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Medium" />
+    </Style>
+    <Style Selector="Button.app:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource BtnHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BtnBorderBrush}" />
+    </Style>
+
+    <Style Selector="Button.app.primary">
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.app.primary:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="Opacity" Value="0.9" />
+    </Style>
+
+    <Style Selector="Button.app.danger">
+        <Setter Property="Foreground" Value="{DynamicResource ErrBrush}" />
+    </Style>
+
+    <Style Selector="Button.icon">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Width" Value="28" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Foreground" Value="{DynamicResource FgMutedBrush}" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.icon:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#1A000000" />
+    </Style>
+
+    <!-- Custom titlebar traffic-light buttons -->
+    <Style Selector="Button.traffic">
+        <Setter Property="Width" Value="16" />
+        <Setter Property="Height" Value="16" />
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="Button.traffic.minimize">
+        <Setter Property="Background" Value="#F6D58A" />
+    </Style>
+    <Style Selector="Button.traffic.maximize">
+        <Setter Property="Background" Value="#82D982" />
+    </Style>
+    <Style Selector="Button.traffic.close">
+        <Setter Property="Background" Value="#F17C9A" />
+    </Style>
+    <Style Selector="Button.traffic:pointerover /template/ ContentPresenter">
+        <Setter Property="Opacity" Value="0.85" />
+    </Style>
+
+    <!-- Sidebar item -->
+    <Style Selector="Button.side">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="Margin" Value="0,1" />
+    </Style>
+    <Style Selector="Button.side:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#0F000000" />
+    </Style>
+    <Style Selector="Button.side.selected /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="TextElement.Foreground" Value="White" />
+    </Style>
+    <Style Selector="Button.side.selected:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="Button.side lucide|PackIconLucide">
+        <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
+    </Style>
+    <Style Selector="Button.side.selected lucide|PackIconLucide">
+        <Setter Property="Foreground" Value="White" />
+    </Style>
+
+    <!-- In-card expandable model group header -->
+    <Style Selector="ToggleButton.model-group">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Padding" Value="14,12,14,8" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+    <Style Selector="ToggleButton.model-group:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#0F000000" />
+    </Style>
+    <Style Selector="ToggleButton.model-group:checked /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <!-- ToggleSwitch: hide On/Off content -->
+    <Style Selector="ToggleSwitch.app">
+        <Setter Property="OnContent" Value="" />
+        <Setter Property="OffContent" Value="" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+
+    <!-- Status indicator -->
+    <Style Selector="Grid.status-indicator">
+        <Setter Property="Width" Value="18" />
+        <Setter Property="Height" Value="18" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Ellipse.status-dot">
+        <Setter Property="Width" Value="8" />
+        <Setter Property="Height" Value="8" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Ellipse.status-pulse">
+        <Setter Property="Width" Value="8" />
+        <Setter Property="Height" Value="8" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Opacity" Value="0.35" />
+        <Style.Animations>
+            <Animation Duration="0:0:1.4" IterationCount="Infinite">
+                <KeyFrame Cue="0%">
+                    <Setter Property="Width" Value="8" />
+                    <Setter Property="Height" Value="8" />
+                    <Setter Property="Opacity" Value="0.35" />
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                    <Setter Property="Width" Value="18" />
+                    <Setter Property="Height" Value="18" />
+                    <Setter Property="Opacity" Value="0" />
+                </KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+
+    <!-- Status pill text -->
+    <Style Selector="TextBlock.status">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- Endpoint pill -->
+    <Style Selector="Button.endpoint">
+        <Setter Property="Background" Value="#0D000000" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="9,3,6,3" />
+        <Setter Property="FontFamily" Value="Cascadia Mono,Consolas,monospace" />
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
+        <Setter Property="MaxWidth" Value="220" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+    </Style>
+
+    <!-- Provider logo -->
+    <Style Selector="Border.provider-logo">
+        <Setter Property="Width" Value="30" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+
+    <!-- Chips -->
+    <Style Selector="Border.chip">
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="Padding" Value="7,1" />
+    </Style>
+    <Style Selector="Border.chip TextBlock">
+        <Setter Property="FontSize" Value="10.5" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextAlignment" Value="Center" />
+    </Style>
+</Styles>
