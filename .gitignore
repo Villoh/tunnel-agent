@@ -1,0 +1,26 @@
+# Build output
+bin/
+obj/
+
+# User/local files
+*.user
+*.rsuser
+*.suo
+.vs/
+.idea/
+*.DotSettings.user
+
+# Logs and temp
+*.log
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Agent/local automation artifacts
+.agents/
+.claude/
+skills-lock.json
+autoresearch.jsonl
+autoresearch.ideas.md

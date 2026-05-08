@@ -1,0 +1,61 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TunnelAgent.ViewModels"
+             xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+             x:Class="TunnelAgent.Views.ActivityView"
+             x:DataType="vm:MainWindowViewModel">
+    <StackPanel Spacing="0">
+        <Grid Margin="0,0,0,14" ColumnDefinitions="*,Auto">
+            <StackPanel>
+                <TextBlock Classes="page-title" Text="Recent Activity" />
+                <TextBlock Classes="page-sub" Text="Requests handled by the local proxy and routed to connected providers." />
+            </StackPanel>
+            <Button Grid.Column="1" Classes="app" Content="Clear" VerticalAlignment="Bottom" />
+        </Grid>
+
+        <Border Classes="card">
+            <ItemsControl ItemsSource="{Binding ActivityLogs}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ActivityLogViewModel">
+                        <StackPanel>
+                            <Grid Margin="14,12" ColumnDefinitions="30,*,Auto,Auto">
+                                <Border Grid.Column="0" Classes="provider-logo" Background="#1A0A84FF">
+                                    <lucide:PackIconLucide Kind="Logs" Width="15" Height="15"
+                                                           Foreground="{DynamicResource AccentBrush}"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                    <TextBlock>
+                                        <Run Text="{Binding Method}" FontFamily="Cascadia Mono,Consolas,monospace"
+                                             FontWeight="SemiBold" Foreground="{DynamicResource FgBrush}" />
+                                        <Run Text=" " />
+                                        <Run Text="{Binding Path}" FontFamily="Cascadia Mono,Consolas,monospace"
+                                             Foreground="{DynamicResource FgMutedBrush}" />
+                                    </TextBlock>
+                                    <StackPanel Orientation="Horizontal" Spacing="0">
+                                        <TextBlock Classes="row-desc" Text="{Binding Agent}" />
+                                        <TextBlock Classes="row-desc" Text=" · " />
+                                        <TextBlock Classes="row-desc" Text="{Binding Provider}" />
+                                        <TextBlock Classes="row-desc" Text=" · " />
+                                        <TextBlock Classes="row-desc" Text="{Binding Model}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <Border Grid.Column="2" Classes="chip" Background="#141F8A5B" Margin="0,0,8,0">
+                                    <TextBlock Text="{Binding Status}" Foreground="{DynamicResource OkBrush}" />
+                                </Border>
+                                <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                    <TextBlock Text="{Binding Elapsed}" FontSize="11"
+                                               Foreground="{DynamicResource FgMutedBrush}" HorizontalAlignment="Right" />
+                                    <TextBlock Text="{Binding When}" FontSize="11"
+                                               Foreground="{DynamicResource FgFaintBrush}" HorizontalAlignment="Right" />
+                                </StackPanel>
+                            </Grid>
+                            <Border Classes="row-divider" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
+    </StackPanel>
+</UserControl>
