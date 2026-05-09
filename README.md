@@ -58,13 +58,7 @@
 
 ## Credits
 
-Tunnel Agent is inspired by [VibeProxy](https://github.com/automazeio/vibeproxy), a native macOS menu bar app that routes CLI agent traffic through AI provider subscriptions.
-
-Special thanks to the VibeProxy project for the concept and the push to build a native Windows equivalent.
-
-VibeProxy is built on top of [CLIProxyAPIPlus](https://github.com/router-for-me/CLIProxyAPIPlus), an excellent unified proxy server for AI services with support for third-party providers.
-
-Special thanks to the CLIProxyAPIPlus project for providing the core functionality that makes VibeProxy possible.
+Tunnel Agent is inspired by [VibeProxy](https://github.com/automazeio/vibeproxy), a native macOS menu bar app that routes CLI agent traffic through AI provider subscriptions. Tunnel Agent is built on top of [CLIProxyAPIPlus](https://github.com/router-for-me/CLIProxyAPIPlus), an excellent unified proxy server for AI services with support for third-party providers. Special thanks to both projects for the concept and the foundation that made this possible.
 
 ## Contributing
 
