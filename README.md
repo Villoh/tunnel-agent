@@ -5,10 +5,10 @@
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-28a745"></a>
-  <img alt="Platform" src="https://img.shields.io/badge/Platform-Windows-0078d4">
-  <img alt=".NET" src="https://img.shields.io/badge/.NET-10-512bd4">
-  <img alt="Version" src="https://img.shields.io/badge/Version-0.0.1-orange">
+  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-0A84FF?style=for-the-badge&labelColor=0f0f0f&logoColor=ffffff&logo=opensourceinitiative"></a>
+  <img alt="Platform" src="https://img.shields.io/badge/Platform-Windows-0A84FF?style=for-the-badge&labelColor=0f0f0f&logoColor=ffffff&logo=windows">
+  <img alt=".NET" src="https://img.shields.io/badge/.NET-10-0A84FF?style=for-the-badge&labelColor=0f0f0f&logoColor=ffffff&logo=dotnet">
+  <img alt="Version" src="https://img.shields.io/badge/Version-0.0.1-0A84FF?style=for-the-badge&labelColor=0f0f0f">
 </p>
 
 **Route your local CLI agent traffic through supported AI providers — from a single Windows desktop app.**
@@ -31,22 +31,16 @@ Tunnel Agent exposes an OpenAI-compatible HTTP endpoint on `127.0.0.1:7890` and 
 - ⚙️ **Configuration** — Control startup behaviour, network port, and credential actions
 - 🪟 **Tiling WM Friendly** — Compatible with GlazeWM and other tiling window managers
 
-## Requirements
-
-| Requirement | Version |
-|-------------|---------|
-| OS | Windows 10 or later |
-| .NET SDK | 10.0.203 or later |
-
 ## Build from Source
+
+**Requirements:** Windows 10 or later · [.NET SDK 10.0.203+](https://dotnet.microsoft.com/download)
 
 1. Clone the repository:
    ```pwsh
    git clone https://github.com/Villoh/tunnel-agent.git
    cd tunnel-agent
    ```
-2. Install [.NET SDK 10.0.203+](https://dotnet.microsoft.com/download)
-3. Restore dependencies and run:
+2. Restore dependencies and run:
    ```pwsh
    dotnet restore
    dotnet run
@@ -54,19 +48,15 @@ Tunnel Agent exposes an OpenAI-compatible HTTP endpoint on `127.0.0.1:7890` and 
 
 > If the app is already running, stop it before rebuilding — Windows locks `TunnelAgent.exe` while it is open.
 
-## Project Layout
+## Credits
 
-```text
-.
-├── App.axaml(.cs)          # App theme/resources and startup
-├── Program.cs              # Desktop entrypoint
-├── Themes/                 # Brushes and shared control styles
-├── Views/                  # Main window and section views
-├── ViewModels/             # Main state and row/group view models
-├── Services/               # Proxy/credential service abstractions
-├── Converters/             # UI value converters
-└── Assets/                 # Avalonia resources
-```
+Tunnel Agent is inspired by [VibeProxy](https://github.com/automazeio/vibeproxy), a native macOS menu bar app that routes CLI agent traffic through AI provider subscriptions.
+
+Special thanks to the VibeProxy project for the concept and the push to build a native Windows equivalent.
+
+VibeProxy is built on top of [CLIProxyAPIPlus](https://github.com/router-for-me/CLIProxyAPIPlus), an excellent unified proxy server for AI services with support for third-party providers.
+
+Special thanks to the CLIProxyAPIPlus project for providing the core functionality that makes VibeProxy possible.
 
 ## Contributing
 
