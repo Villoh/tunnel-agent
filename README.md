@@ -1,7 +1,19 @@
-# Tunnel Agent
-
 <p align="center">
   <img src="Assets/logo.png" width="128" height="128" alt="Tunnel Agent Icon">
+</p>
+
+<h1 align="center">Tunnel Agent</h1>
+
+<p align="center">
+  <b>Route your local CLI agent traffic through supported AI providers — from a single Windows desktop app.<br>Exposes an OpenAI-compatible endpoint so any agent can connect without touching config files.</b>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Villoh/tunnel-agent/releases">Download</a>
+  ·
+  <a href="https://github.com/Villoh/tunnel-agent/issues">Issues</a>
+  ·
+  <a href="CONTRIBUTING.md">Contributing</a>
 </p>
 
 <p align="center">
@@ -11,13 +23,7 @@
   <img alt="Version" src="https://img.shields.io/badge/Version-0.0.1-0A84FF?style=for-the-badge&labelColor=0f0f0f">
 </p>
 
-**Route your local CLI agent traffic through supported AI providers — from a single Windows desktop app.**
-
-Tunnel Agent exposes an OpenAI-compatible HTTP endpoint on `127.0.0.1:7890` and lets you manage provider connections, credentials, and model availability without touching config files.
-
 > **Early development** — provider wiring and credential storage are scaffolded, not yet connected to real services.
-
----
 
 ## Features
 
