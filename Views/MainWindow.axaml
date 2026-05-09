@@ -10,7 +10,10 @@
         Width="820" Height="600"
         MinWidth="680" MinHeight="460"
         CanResize="True"
-        SystemDecorations="BorderOnly"
+        SystemDecorations="Full"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="-1"
         Background="{DynamicResource WinBgBrush}">
     <Window.Resources>
         <cv:ServerStateToTextConverter  x:Key="StateToText" />
