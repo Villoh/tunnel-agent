@@ -66,8 +66,8 @@ public partial class MainWindow : Window
         if (handle == IntPtr.Zero)
             return;
 
-        // BorderOnly is needed for GlazeWM tiling, but Windows paints an accent-colored
-        // native border. Match it to our window background so it visually disappears.
+        // Hide the thin DWM border that Windows draws even with ExtendClientArea by matching
+        // it to the window background color.
         var dark = Application.Current?.ActualThemeVariant == ThemeVariant.Dark ||
                    Application.Current?.RequestedThemeVariant == ThemeVariant.Dark;
         var color = dark ? ToColorRef(0x1F, 0x21, 0x28) : ToColorRef(0xFC, 0xFC, 0xFD);
