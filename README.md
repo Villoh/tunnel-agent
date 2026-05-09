@@ -25,6 +25,8 @@
 
 > **Early development** — provider wiring and credential storage are scaffolded, not yet connected to real services.
 
+---
+
 ## Features
 
 - 🖥️ **Native Windows Experience** — Clean Avalonia UI that respects your system theme (light/dark)
