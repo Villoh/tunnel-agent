@@ -90,7 +90,7 @@
                                     <Button Grid.Column="1" Classes="icon" HorizontalAlignment="Right"
                                             ToolTip.Tip="Toggle light / dark mode"
                                             Command="{Binding ToggleThemeCommand}">
-                                        <Grid Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Grid Width="18" Height="18" Classes="theme-icon" HorizontalAlignment="Center" VerticalAlignment="Center">
                                             <lucide:PackIconLucide Kind="Moon" Width="15" Height="15"
                                                                    HorizontalAlignment="Center" VerticalAlignment="Center"
                                                                    Foreground="{DynamicResource FgMutedBrush}"
@@ -106,7 +106,7 @@
                                         IsVisible="{Binding IsSidebarCollapsed}"
                                         ToolTip.Tip="Toggle light / dark mode"
                                         Command="{Binding ToggleThemeCommand}">
-                                    <Grid Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Grid Width="18" Height="18" Classes="theme-icon" HorizontalAlignment="Center" VerticalAlignment="Center">
                                         <lucide:PackIconLucide Kind="Moon" Width="15" Height="15"
                                                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                                                Foreground="{DynamicResource FgMutedBrush}"
@@ -218,9 +218,9 @@
                 </Border>
 
                 <!-- Content area -->
-                <ScrollViewer Grid.Column="1" Padding="18,16,18,44"
+                <ScrollViewer Grid.Column="1"
                               HorizontalScrollBarVisibility="Auto">
-                    <ContentControl HorizontalContentAlignment="Stretch">
+                    <ContentControl HorizontalContentAlignment="Stretch" Padding="18,16,18,44">
                         <ContentControl.Content>
                             <Grid>
                                 <v:ProvidersView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Providers}" />

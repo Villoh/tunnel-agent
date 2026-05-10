@@ -178,6 +178,23 @@
         <Setter Property="Padding" Value="0" />
     </Style>
 
+    <!-- Theme toggle icon: scale on hover, spin+shrink on press -->
+    <Style Selector="Grid.theme-icon">
+        <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+        <Setter Property="RenderTransform" Value="scale(1)" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15" Easing="CubicEaseInOut" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Grid.theme-icon:pointerover">
+        <Setter Property="RenderTransform" Value="scale(1.2)" />
+    </Style>
+    <Style Selector="Button:pressed > Grid.theme-icon">
+        <Setter Property="RenderTransform" Value="rotate(180deg) scale(0.85)" />
+    </Style>
+
     <!-- Status indicator -->
     <Style Selector="Grid.status-indicator">
         <Setter Property="Width" Value="18" />
