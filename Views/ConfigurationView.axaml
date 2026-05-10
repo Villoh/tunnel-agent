@@ -38,6 +38,15 @@
 
         <!-- ENGINE -->
         <TextBlock Classes="section-label" Text="ENGINE"/>
+
+        <!-- Update success banner -->
+        <Border IsVisible="{Binding ShowUpdateSuccess}"
+                Background="{DynamicResource AccentBrush}"
+                CornerRadius="8" Padding="12,8" Margin="0,0,0,8">
+            <TextBlock Text="{Binding InstalledVersion, StringFormat='Successfully updated to {0}'}"
+                       Foreground="White" FontSize="12" FontWeight="Medium"/>
+        </Border>
+
         <Border Classes="card">
             <StackPanel>
                 <!-- Version row -->

@@ -28,6 +28,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _updateAvailable;
     [ObservableProperty] private bool _configHasBadge;
     [ObservableProperty] private bool _showUpdateToast;
+    [ObservableProperty] private bool _showUpdateSuccess;
     [ObservableProperty] private string _engineStatusText = "Stopped";
 
     // Settings-backed properties
@@ -168,13 +169,31 @@ public partial class MainWindowViewModel : ViewModelBase
     private async Task UpdateEngine()
     {
         if (!_engine.UpdateAvailable) return;
+
+        // Navigate to Configuration so the progress bar is visible
+        SelectedSection = SectionKey.Configuration;
+        ShowUpdateToast = false;
+
         var wasRunning = _engine.IsRunning;
         if (wasRunning) await _engine.StopAsync();
-        try { await _engine.DownloadAndInstallAsync(); }
-        catch { return; }
+        try
+        {
+            await _engine.DownloadAndInstallAsync();
+        }
+        catch
+        {
+            return;
+        }
+
         if (wasRunning) await _engine.StartAsync(_settings.Current.Port, _settings.Current.BindAddress);
-        ShowUpdateToast = false;
+
         ConfigHasBadge = false;
+        _updateToastShown = false;
+
+        // Show success banner briefly
+        ShowUpdateSuccess = true;
+        _ = Task.Delay(4000).ContinueWith(_ =>
+            Dispatcher.UIThread.Post(() => ShowUpdateSuccess = false));
     }
 
     [RelayCommand]
