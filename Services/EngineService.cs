@@ -21,8 +21,13 @@ public sealed partial class EngineService : IProxyServer
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "TunnelAgent", "engine");
 
+    // Name used as the destination binary on disk
     private static readonly string BinaryName =
         OperatingSystem.IsWindows() ? "CLIProxyAPI.exe" : "CLIProxyAPI";
+
+    // Name of the binary inside the release archive (cli-proxy-api or cli-proxy-api.exe)
+    private static readonly string ArchiveBinaryName =
+        OperatingSystem.IsWindows() ? "cli-proxy-api.exe" : "cli-proxy-api";
 
     public static string BinaryPath => Path.Combine(EngineDir, BinaryName);
 
@@ -303,7 +308,7 @@ public sealed partial class EngineService : IProxyServer
 
     private static string? FindBinary(string dir)
     {
-        foreach (var file in Directory.EnumerateFiles(dir, BinaryName, SearchOption.AllDirectories))
+        foreach (var file in Directory.EnumerateFiles(dir, ArchiveBinaryName, SearchOption.AllDirectories))
             return file;
         return null;
     }
