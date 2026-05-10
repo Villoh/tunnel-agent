@@ -1,34 +1,208 @@
+// ViewModels/MainWindowViewModel.cs
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IconPacks.Avalonia.SimpleIcons;
+using TunnelAgent.Services;
 
 namespace TunnelAgent.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
+    private readonly EngineService _engine;
+    private readonly SettingsService _settings;
+
     [ObservableProperty] private SectionKey _selectedSection = SectionKey.Providers;
-    [ObservableProperty] private ServerState _serverState = ServerState.Running;
-    [ObservableProperty] private int _port = 7890;
-    [ObservableProperty] private bool _launchAtLogin = true;
-    [ObservableProperty] private bool _telemetry;
-    [ObservableProperty] private bool _useKeychain = true;
-    [ObservableProperty] private string _logLevel = "info";
-    [ObservableProperty] private string _bindAddress = "127.0.0.1";
-    [ObservableProperty] private bool _isDark;
     [ObservableProperty] private bool _isSidebarCollapsed;
+    [ObservableProperty] private bool _isDark;
+
+    // Engine-forwarded state
+    [ObservableProperty] private EngineState _engineState = EngineState.Stopped;
+    [ObservableProperty] private string? _installedVersion;
+    [ObservableProperty] private string? _latestVersion;
+    [ObservableProperty] private double _downloadProgress;
+    [ObservableProperty] private bool _updateAvailable;
+    [ObservableProperty] private bool _configHasBadge;
+    [ObservableProperty] private bool _showUpdateToast;
+    [ObservableProperty] private string _engineStatusText = "Stopped";
+
+    // Settings-backed properties
+    public int Port
+    {
+        get => _settings.Current.Port;
+        set { _settings.Current.Port = value; _settings.Save(); OnPropertyChanged(); OnPropertyChanged(nameof(EndpointUrl)); }
+    }
+    public string BindAddress
+    {
+        get => _settings.Current.BindAddress;
+        set { _settings.Current.BindAddress = value; _settings.Save(); OnPropertyChanged(); OnPropertyChanged(nameof(EndpointUrl)); }
+    }
+    public bool LaunchAtLogin
+    {
+        get => _settings.Current.LaunchAtLogin;
+        set { _settings.Current.LaunchAtLogin = value; _settings.Save(); OnPropertyChanged(); }
+    }
+    public string LogLevel
+    {
+        get => _settings.Current.LogLevel;
+        set { _settings.Current.LogLevel = value; _settings.Save(); OnPropertyChanged(); }
+    }
+    public bool AutoCheckForUpdates
+    {
+        get => _settings.Current.AutoCheckForUpdates;
+        set { _settings.Current.AutoCheckForUpdates = value; _settings.Save(); OnPropertyChanged(); }
+    }
+    public bool AutoUpdate
+    {
+        get => _settings.Current.AutoUpdate;
+        set { _settings.Current.AutoUpdate = value; _settings.Save(); OnPropertyChanged(); UpdateBadgeState(); }
+    }
+
+    // Kept for sidebar status dot (maps EngineState → ServerState colors)
+    public ServerState ServerState => EngineState switch
+    {
+        EngineState.Running   => ServerState.Running,
+        EngineState.Starting  => ServerState.Starting,
+        EngineState.Error     => ServerState.Error,
+        _                     => ServerState.Stopped
+    };
+
+    public string[] LogLevels { get; } = { "error", "warn", "info", "debug" };
+    public string[] BindAddresses { get; } = { "127.0.0.1", "0.0.0.0" };
 
     public ObservableCollection<ProviderViewModel> Providers { get; } = new();
     public ObservableCollection<AgentViewModel> Agents { get; } = new();
     public ObservableCollection<AvailableModelGroupViewModel> AvailableModelGroups { get; } = new();
     public ObservableCollection<ActivityLogViewModel> ActivityLogs { get; } = new();
 
-    public string[] LogLevels { get; } = { "error", "warn", "info", "debug" };
-    public string[] BindAddresses { get; } = { "127.0.0.1", "0.0.0.0" };
+    public string EndpointUrl => $"http://{BindAddress}:{Port}";
 
-    public MainWindowViewModel()
+    public int ConnectedProviderCount   => Providers.Count(p => p.Connected);
+    public int EnabledAgentCount        => Agents.Count(a => a.Installed && a.Enabled);
+    public int ActivityLogCount         => ActivityLogs.Count;
+    public int TotalAvailableModelCount => AvailableModelGroups.Sum(g => g.ModelCount);
+
+    public MainWindowViewModel() : this(new SettingsService(), null!) { }
+
+    public MainWindowViewModel(SettingsService settings, EngineService engine)
+    {
+        _settings = settings;
+        _engine = engine ?? new EngineService(settings);
+
+        _engine.StateChanged += OnEngineStateChanged;
+
+        SeedDemoData();
+    }
+
+    private void OnEngineStateChanged(object? sender, EventArgs e)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            EngineState = _engine.State;
+            InstalledVersion = _engine.InstalledVersion;
+            LatestVersion = _engine.LatestVersion;
+            DownloadProgress = _engine.DownloadProgress;
+            UpdateAvailable = _engine.UpdateAvailable;
+            EngineStatusText = BuildEngineStatusText();
+            UpdateBadgeState();
+            OnPropertyChanged(nameof(ServerState));
+        });
+    }
+
+    private string BuildEngineStatusText() => _engine.State switch
+    {
+        EngineState.Downloading => $"Downloading {_engine.DownloadProgress:0}%",
+        EngineState.Installing  => "Installing…",
+        EngineState.Running     => $"{_engine.InstalledVersion} · Running",
+        EngineState.Starting    => "Starting…",
+        EngineState.Error       => "Engine error — click to restart",
+        EngineState.NotInstalled => "Not installed",
+        _                       => "Stopped"
+    };
+
+    private void UpdateBadgeState()
+    {
+        ConfigHasBadge = _engine.UpdateAvailable && !AutoUpdate;
+    }
+
+    public async Task InitializeAsync()
+    {
+        await _settings.LoadAsync();
+        await _engine.InitializeAsync();
+
+        if (_engine.UpdateAvailable && AutoUpdate)
+        {
+            _ = _engine.DownloadAndInstallAsync();
+        }
+        else if (_engine.UpdateAvailable && !AutoUpdate)
+        {
+            ShowUpdateToast = true;
+            ConfigHasBadge = true;
+            // Auto-dismiss toast after 8 seconds
+            _ = Task.Delay(8000).ContinueWith(_ =>
+                Dispatcher.UIThread.Post(() => ShowUpdateToast = false));
+        }
+
+        if (_engine.State == EngineState.Stopped)
+            await _engine.StartAsync(_settings.Current.Port, _settings.Current.BindAddress);
+    }
+
+    [RelayCommand] private void SelectProviders()     => SelectedSection = SectionKey.Providers;
+    [RelayCommand] private void SelectAgents()        => SelectedSection = SectionKey.Agents;
+    [RelayCommand] private void SelectActivity()      => SelectedSection = SectionKey.Activity;
+    [RelayCommand] private void SelectConfiguration() => SelectedSection = SectionKey.Configuration;
+    [RelayCommand] private void ToggleSidebar()       => IsSidebarCollapsed = !IsSidebarCollapsed;
+    [RelayCommand] private void ToggleTheme()         => IsDark = !IsDark;
+    [RelayCommand] private void DismissToast()        => ShowUpdateToast = false;
+
+    [RelayCommand]
+    private async Task UpdateEngine()
+    {
+        if (!_engine.UpdateAvailable) return;
+        var wasRunning = _engine.IsRunning;
+        if (wasRunning) await _engine.StopAsync();
+        try { await _engine.DownloadAndInstallAsync(); }
+        catch { return; }
+        if (wasRunning) await _engine.StartAsync(_settings.Current.Port, _settings.Current.BindAddress);
+        ShowUpdateToast = false;
+        ConfigHasBadge = false;
+    }
+
+    [RelayCommand]
+    private async Task RestartEngine()
+    {
+        await _engine.StopAsync();
+        await _engine.StartAsync(_settings.Current.Port, _settings.Current.BindAddress);
+    }
+
+    [RelayCommand]
+    private async Task StartServer()
+    {
+        if (_engine.State == EngineState.Stopped)
+            await _engine.StartAsync(_settings.Current.Port, _settings.Current.BindAddress);
+    }
+
+    [RelayCommand] private void StopServer() => _ = _engine.StopAsync();
+
+    [RelayCommand]
+    private void ToggleProvider(ProviderViewModel p)
+    {
+        p.Connected = !p.Connected;
+        OnPropertyChanged(nameof(ConnectedProviderCount));
+    }
+
+    [RelayCommand]
+    private void ToggleAgent(AgentViewModel a)
+    {
+        a.Enabled = !a.Enabled;
+        OnPropertyChanged(nameof(EnabledAgentCount));
+    }
+
+    private void SeedDemoData()
     {
         var claude = new ProviderViewModel("claude", "Claude Code", PackIconSimpleIconsKind.Claude, "#D97757", "Anthropic models via OAuth.")
         { Connected = true, Account = "alex@studio.dev", Model = "sonnet-4.5" };
@@ -63,43 +237,4 @@ public partial class MainWindowViewModel : ViewModelBase
         ActivityLogs.Add(new ActivityLogViewModel("POST", "/v1/responses", "Codex CLI", "OpenAI", "gpt-5-codex", "200", "842ms", "48s ago"));
         ActivityLogs.Add(new ActivityLogViewModel("GET", "/v1/models", "Cursor Agent", "Claude", "-", "200", "31ms", "2m ago"));
     }
-
-    [RelayCommand] private void SelectProviders()     => SelectedSection = SectionKey.Providers;
-    [RelayCommand] private void SelectAgents()        => SelectedSection = SectionKey.Agents;
-    [RelayCommand] private void SelectActivity()      => SelectedSection = SectionKey.Activity;
-    [RelayCommand] private void SelectConfiguration() => SelectedSection = SectionKey.Configuration;
-    [RelayCommand] private void ToggleSidebar()       => IsSidebarCollapsed = !IsSidebarCollapsed;
-    [RelayCommand] private void ToggleTheme()         => IsDark = !IsDark;
-
-    [RelayCommand] private async Task StartServer()
-    {
-        ServerState = ServerState.Starting;
-        await Task.Delay(700);
-        ServerState = ServerState.Running;
-    }
-
-    [RelayCommand] private void StopServer() => ServerState = ServerState.Stopped;
-
-    [RelayCommand]
-    private void ToggleProvider(ProviderViewModel p)
-    {
-        p.Connected = !p.Connected;
-        OnPropertyChanged(nameof(ConnectedProviderCount));
-    }
-
-    [RelayCommand]
-    private void ToggleAgent(AgentViewModel a)
-    {
-        a.Enabled = !a.Enabled;
-        OnPropertyChanged(nameof(EnabledAgentCount));
-    }
-
-    public string EndpointUrl => $"http://{BindAddress}:{Port}";
-    partial void OnPortChanged(int value)        => OnPropertyChanged(nameof(EndpointUrl));
-    partial void OnBindAddressChanged(string value) => OnPropertyChanged(nameof(EndpointUrl));
-
-    public int ConnectedProviderCount  => Providers.Count(p => p.Connected);
-    public int EnabledAgentCount       => Agents.Count(a => a.Installed && a.Enabled);
-    public int ActivityLogCount        => ActivityLogs.Count;
-    public int TotalAvailableModelCount => AvailableModelGroups.Sum(g => g.ModelCount);
 }
