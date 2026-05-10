@@ -81,3 +81,18 @@ public sealed class SidebarWidthConverter : IValueConverter
 
     public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
 }
+
+// Converter used in ConfigurationView to show/hide the download progress bar.
+// ConverterParameter="IsDownloading" returns true when state is Downloading or Installing.
+public sealed class EngineStateToTextConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (parameter is string p && p == "IsDownloading")
+            return value is TunnelAgent.ViewModels.EngineState s &&
+                   (s == TunnelAgent.ViewModels.EngineState.Downloading ||
+                    s == TunnelAgent.ViewModels.EngineState.Installing);
+        return value is TunnelAgent.ViewModels.EngineState state ? state.ToString() : "";
+    }
+    public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
+}

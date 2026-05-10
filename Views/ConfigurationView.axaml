@@ -1,14 +1,78 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TunnelAgent.ViewModels"
+             xmlns:cv="using:TunnelAgent.Converters"
              x:Class="TunnelAgent.Views.ConfigurationView"
              x:DataType="vm:MainWindowViewModel">
+    <UserControl.Resources>
+        <cv:EngineStateToTextConverter x:Key="EngineStateToText" />
+    </UserControl.Resources>
+
     <StackPanel Spacing="0">
         <StackPanel Margin="0,0,0,14">
             <TextBlock Classes="page-title" Text="Configuration" />
             <TextBlock Classes="page-sub" Text="App, network, and security preferences." />
         </StackPanel>
 
+        <!-- ENGINE -->
+        <TextBlock Classes="section-label" Text="ENGINE" Margin="4,0,4,8"/>
+        <Border Classes="card">
+            <StackPanel>
+                <!-- Version row -->
+                <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                    <StackPanel>
+                        <TextBlock Classes="row-label" Text="CLIProxyAPI"/>
+                        <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,2,0,0">
+                            <TextBlock Classes="row-desc"
+                                       Text="{Binding InstalledVersion, StringFormat='Installed: {0}', FallbackValue='Not installed'}" />
+                            <TextBlock Classes="row-desc" Text="→"
+                                       IsVisible="{Binding UpdateAvailable}" />
+                            <TextBlock Classes="row-desc" Foreground="{DynamicResource AccentBrush}"
+                                       Text="{Binding LatestVersion, StringFormat='\{0\} available'}"
+                                       IsVisible="{Binding UpdateAvailable}" />
+                        </StackPanel>
+                    </StackPanel>
+                    <Button Grid.Column="1" Classes="app primary" Content="Update now"
+                            Command="{Binding UpdateEngineCommand}"
+                            IsVisible="{Binding UpdateAvailable}" />
+                </Grid>
+
+                <!-- Download progress (only visible while downloading/installing) -->
+                <StackPanel Margin="14,0,14,11"
+                            IsVisible="{Binding EngineState, Converter={StaticResource EngineStateToText}, ConverterParameter=IsDownloading}">
+                    <ProgressBar Value="{Binding DownloadProgress}" Minimum="0" Maximum="100"
+                                 Height="4" CornerRadius="2"
+                                 Foreground="{DynamicResource AccentBrush}"
+                                 Background="{DynamicResource RowDividerBrush}" />
+                    <TextBlock Classes="row-desc" Margin="0,4,0,0"
+                               Text="{Binding EngineStatusText}" />
+                </StackPanel>
+
+                <Border Classes="row-divider"/>
+
+                <!-- Auto-check for updates -->
+                <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                    <StackPanel>
+                        <TextBlock Classes="row-label" Text="Auto-check for updates"/>
+                        <TextBlock Classes="row-desc" Text="Check GitHub for a new engine version on startup."/>
+                    </StackPanel>
+                    <ToggleSwitch Grid.Column="1" Classes="app" IsChecked="{Binding AutoCheckForUpdates}" />
+                </Grid>
+
+                <Border Classes="row-divider"/>
+
+                <!-- Auto-update -->
+                <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                    <StackPanel>
+                        <TextBlock Classes="row-label" Text="Auto-update"/>
+                        <TextBlock Classes="row-desc" Text="Automatically download and install new engine versions."/>
+                    </StackPanel>
+                    <ToggleSwitch Grid.Column="1" Classes="app" IsChecked="{Binding AutoUpdate}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- GENERAL -->
         <TextBlock Classes="section-label" Text="GENERAL" Margin="4,0,4,8"/>
         <Border Classes="card">
             <StackPanel>
@@ -27,7 +91,6 @@
                     </StackPanel>
                     <ToggleSwitch Grid.Column="1" Classes="app" IsChecked="{Binding IsDark}" />
                 </Grid>
-
             </StackPanel>
         </Border>
 
@@ -44,7 +107,6 @@
                                    Width="160" MinWidth="160"
                                    HorizontalContentAlignment="Center" />
                 </Grid>
-
             </StackPanel>
         </Border>
 
