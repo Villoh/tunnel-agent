@@ -1,6 +1,4 @@
 // Services/AppSettings.cs
-using System.Text.Json.Serialization;
-
 namespace TunnelAgent.Services;
 
 public sealed class AppSettings
@@ -13,6 +11,5 @@ public sealed class AppSettings
     public bool AutoCheckForUpdates { get; set; } = true;
     public bool AutoUpdate { get; set; } = false;
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? InstalledEngineVersion { get; set; }
+
 }
