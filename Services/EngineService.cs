@@ -17,9 +17,7 @@ public sealed partial class EngineService : IProxyServer
     private readonly SettingsService _settings;
     private static readonly IPlatformInfo Platform = IPlatformInfo.Current;
 
-    private static readonly string EngineDir = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "TunnelAgent", "engine");
+    private static readonly string EngineDir = Path.Combine(Platform.LocalDataDirectory, "engine");
 
     public static string BinaryPath => Path.Combine(EngineDir, Platform.BinaryName);
 
