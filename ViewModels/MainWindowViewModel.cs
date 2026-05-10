@@ -1,4 +1,3 @@
-// ViewModels/MainWindowViewModel.cs
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -37,11 +36,6 @@ public partial class MainWindowViewModel : ViewModelBase
         get => _settings.Current.Port;
         set { _settings.Current.Port = value; _settings.Save(); OnPropertyChanged(); OnPropertyChanged(nameof(EndpointUrl)); }
     }
-    public string BindAddress
-    {
-        get => _settings.Current.BindAddress;
-        set { _settings.Current.BindAddress = value; _settings.Save(); OnPropertyChanged(); OnPropertyChanged(nameof(EndpointUrl)); }
-    }
     public bool LaunchAtLogin
     {
         get => _settings.Current.LaunchAtLogin;
@@ -73,14 +67,13 @@ public partial class MainWindowViewModel : ViewModelBase
     };
 
     public string[] LogLevels { get; } = { "error", "warn", "info", "debug" };
-    public string[] BindAddresses { get; } = { "127.0.0.1", "0.0.0.0" };
 
     public ObservableCollection<ProviderViewModel> Providers { get; } = new();
     public ObservableCollection<AgentViewModel> Agents { get; } = new();
     public ObservableCollection<AvailableModelGroupViewModel> AvailableModelGroups { get; } = new();
     public ObservableCollection<ActivityLogViewModel> ActivityLogs { get; } = new();
 
-    public string EndpointUrl => $"http://{BindAddress}:{Port}";
+    public string EndpointUrl => $"http://127.0.0.1:{Port}";
 
     public int ConnectedProviderCount   => Providers.Count(p => p.Connected);
     public int EnabledAgentCount        => Agents.Count(a => a.Installed && a.Enabled);
@@ -136,13 +129,13 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private string BuildEngineStatusText() => _engine.State switch
     {
-        EngineState.Downloading => $"Downloading {_engine.DownloadProgress:0}%",
-        EngineState.Installing  => "Installing…",
-        EngineState.Running     => $"{_engine.InstalledVersion} · Running",
-        EngineState.Starting    => "Starting…",
-        EngineState.Error       => _engine.LastError is not null ? $"Error: {_engine.LastError}" : "Engine error — click to restart",
+        EngineState.Downloading  => $"Downloading {_engine.DownloadProgress:0}%",
+        EngineState.Installing   => "Installing…",
+        EngineState.Running      => $"{_engine.InstalledVersion} · Running",
+        EngineState.Starting     => "Starting…",
+        EngineState.Error        => _engine.LastError is not null ? $"Error: {_engine.LastError}" : "Engine error",
         EngineState.NotInstalled => "Not installed",
-        _                       => "Stopped"
+        _                        => "Stopped"
     };
 
     private void UpdateBadgeState()
@@ -170,27 +163,15 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (!_engine.UpdateAvailable) return;
 
-        // Navigate to Configuration so the progress bar is visible
         SelectedSection = SectionKey.Configuration;
         ShowUpdateToast = false;
 
-        var wasRunning = _engine.IsRunning;
-        if (wasRunning) await _engine.StopAsync();
-        try
-        {
-            await _engine.DownloadAndInstallAsync();
-        }
-        catch
-        {
-            return;
-        }
-
-        if (wasRunning) await _engine.StartAsync(_settings.Current.Port, _settings.Current.BindAddress);
+        try { await _engine.DownloadAndInstallAsync(); }
+        catch { return; }
 
         ConfigHasBadge = false;
         _updateToastShown = false;
 
-        // Show success banner briefly
         ShowUpdateSuccess = true;
         _ = Task.Delay(4000).ContinueWith(_ =>
             Dispatcher.UIThread.Post(() => ShowUpdateSuccess = false));
@@ -200,14 +181,14 @@ public partial class MainWindowViewModel : ViewModelBase
     private async Task RestartEngine()
     {
         await _engine.StopAsync();
-        await _engine.StartAsync(_settings.Current.Port, _settings.Current.BindAddress);
+        await _engine.StartAsync();
     }
 
     [RelayCommand]
     private async Task StartServer()
     {
         if (_engine.State == EngineState.Stopped)
-            await _engine.StartAsync(_settings.Current.Port, _settings.Current.BindAddress);
+            await _engine.StartAsync();
     }
 
     [RelayCommand] private void StopServer() => _ = _engine.StopAsync();
