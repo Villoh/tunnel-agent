@@ -14,7 +14,7 @@ public sealed class EngineConfigService
     private readonly SettingsService _settings;
 
     public string ConfigPath { get; } = Path.Combine(
-        IPlatformInfo.Current.SettingsDirectory, "config.yaml");
+        IPlatformInfo.Current.SettingsDirectory, "proxy-config.yaml");
 
     public EngineConfigService(SettingsService settings) => _settings = settings;
 
