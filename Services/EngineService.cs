@@ -94,12 +94,92 @@ public sealed partial class EngineService : IProxyServer
     internal static string GetArchiveExtension() =>
         OperatingSystem.IsWindows() ? ".zip" : ".tar.gz";
 
-    // Stubs — full implementation in Task 5
-    public Task StartAsync(int port, string bindAddress, CancellationToken ct = default) =>
-        throw new NotImplementedException();
+    private Process? _process;
 
-    public Task StopAsync(CancellationToken ct = default) =>
-        throw new NotImplementedException();
+    public async Task InitializeAsync()
+    {
+        if (!IsBinaryInstalled())
+        {
+            State = EngineState.NotInstalled;
+            // Fetch latest version info first so we know what to download
+            await CheckForUpdateAsync();
+            try
+            {
+                await DownloadAndInstallAsync();
+            }
+            catch
+            {
+                State = EngineState.Error;
+                return;
+            }
+        }
+        else
+        {
+            // Use cached version if available, otherwise run --version
+            InstalledVersion = _settings.Current.InstalledEngineVersion
+                ?? await ReadInstalledVersionAsync();
+
+            if (InstalledVersion != null)
+            {
+                _settings.Current.InstalledEngineVersion = InstalledVersion;
+                _settings.Save();
+            }
+
+            State = EngineState.Stopped;
+        }
+
+        if (_settings.Current.AutoCheckForUpdates)
+            _ = CheckForUpdateAsync(); // fire-and-forget, non-blocking
+    }
+
+    public async Task StartAsync(int port, string bindAddress, CancellationToken ct = default)
+    {
+        if (!IsBinaryInstalled()) return;
+
+        Port = port;
+        State = EngineState.Starting;
+
+        _process = new Process
+        {
+            StartInfo = new ProcessStartInfo(BinaryPath)
+            {
+                Arguments = $"--port {port} --bind {bindAddress}",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = false,
+                RedirectStandardError = false
+            },
+            EnableRaisingEvents = true
+        };
+
+        _process.Exited += (_, _) =>
+        {
+            if (State == EngineState.Running)
+                State = EngineState.Error;
+        };
+
+        _process.Start();
+        // Brief delay to let the process bind its port before callers use it
+        await Task.Delay(600, ct);
+        State = EngineState.Running;
+    }
+
+    public Task StopAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            if (_process is { HasExited: false })
+            {
+                _process.Kill(entireProcessTree: true);
+                _process.Dispose();
+                _process = null;
+            }
+        }
+        catch { }
+
+        State = EngineState.Stopped;
+        return Task.CompletedTask;
+    }
 
     private static readonly HttpClient Http;
 
