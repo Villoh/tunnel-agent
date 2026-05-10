@@ -74,6 +74,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _                     => ServerState.Stopped
     };
 
+    public string AppVersion { get; } = TunnelAgent.AppVersion.Current;
     public string[] LogLevels { get; } = { "error", "warn", "info", "debug" };
 
     public ObservableCollection<ProviderViewModel> Providers { get; } = new();

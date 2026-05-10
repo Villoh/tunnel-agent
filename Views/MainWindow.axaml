@@ -46,7 +46,7 @@
                     <TextBlock Text="Tunnel Agent"
                                FontSize="13" FontWeight="SemiBold"
                                Foreground="{DynamicResource FgBrush}" />
-                    <TextBlock Text="v0.0.1" FontSize="11"
+                    <TextBlock Text="{Binding AppVersion, StringFormat='v{0}'}" FontSize="11"
                                Foreground="{DynamicResource FgFaintBrush}"
                                VerticalAlignment="Center" />
                 </StackPanel>
@@ -82,7 +82,7 @@
                             <Grid>
                                 <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding !IsSidebarCollapsed}">
                                     <StackPanel Grid.Column="0" Spacing="2">
-                                        <TextBlock Text="v0.0.1 · MIT" FontSize="11"
+                                        <TextBlock Text="{Binding AppVersion, StringFormat='v{0} · MIT'}" FontSize="11"
                                                    Foreground="{DynamicResource FgFaintBrush}" />
                                         <TextBlock Text="Report an issue" FontSize="11"
                                                    Foreground="{DynamicResource AccentBrush}"
