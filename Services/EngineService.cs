@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
@@ -200,11 +201,18 @@ public sealed partial class EngineService : IProxyServer
     }
 
     private static readonly HttpClient Http;
+    private static readonly HttpClient HttpNoRedirect;
 
     static EngineService()
     {
+        // AllowAutoRedirect=true (default) but we need to read the redirect Location
+        // for version detection, so we use a separate no-redirect client for that.
         Http = new HttpClient();
         Http.DefaultRequestHeaders.UserAgent.Add(
+            new ProductInfoHeaderValue("TunnelAgent", "0.0.1"));
+
+        HttpNoRedirect = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false });
+        HttpNoRedirect.DefaultRequestHeaders.UserAgent.Add(
             new ProductInfoHeaderValue("TunnelAgent", "0.0.1"));
     }
 
@@ -212,17 +220,29 @@ public sealed partial class EngineService : IProxyServer
     {
         try
         {
-            var json = await Http.GetStringAsync(
-                "https://api.github.com/repos/router-for-me/CLIProxyAPI/releases/latest");
+            // Use the HTML redirect instead of the API to avoid the 60 req/h rate limit.
+            // GET /releases/latest returns a 302 to /releases/tag/vX.Y.Z — we read the
+            // Location header without following the redirect to extract the version tag.
+            using var request = new HttpRequestMessage(HttpMethod.Get,
+                "https://github.com/router-for-me/CLIProxyAPI/releases/latest");
+            using var response = await HttpNoRedirect.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
-            using var doc = JsonDocument.Parse(json);
-            var tag = doc.RootElement.GetProperty("tag_name").GetString();
+            var location = response.Headers.Location?.ToString()
+                ?? response.RequestMessage?.RequestUri?.ToString();
+
+            if (location is null)
+                return;
+
+            // Location is https://github.com/.../releases/tag/v7.0.2
+            var tag = location.Split('/').LastOrDefault(p => p.StartsWith('v'));
+            if (tag is null)
+                return;
+
             LatestVersion = tag;
             StateChanged?.Invoke(this, EventArgs.Empty);
         }
         catch (Exception ex)
         {
-            // Network unavailable or rate limited — silently ignore
             System.Diagnostics.Debug.WriteLine($"[EngineService] CheckForUpdateAsync failed: {ex.Message}");
         }
     }
