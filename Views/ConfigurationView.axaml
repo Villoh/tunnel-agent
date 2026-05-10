@@ -14,8 +14,30 @@
             <TextBlock Classes="page-sub" Text="App, network, and security preferences." />
         </StackPanel>
 
+        <!-- GENERAL -->
+        <TextBlock Classes="section-label" Text="GENERAL" Margin="4,0,4,8"/>
+        <Border Classes="card">
+            <StackPanel>
+                <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                    <StackPanel>
+                        <TextBlock Classes="row-label" Text="Launch at login"/>
+                        <TextBlock Classes="row-desc" Text="Start automatically and stay in the system tray."/>
+                    </StackPanel>
+                    <ToggleSwitch Grid.Column="1" Classes="app" IsChecked="{Binding LaunchAtLogin}" />
+                </Grid>
+                <Border Classes="row-divider"/>
+                <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                    <StackPanel>
+                        <TextBlock Classes="row-label" Text="Dark mode"/>
+                        <TextBlock Classes="row-desc" Text="Use a dark color scheme."/>
+                    </StackPanel>
+                    <ToggleSwitch Grid.Column="1" Classes="app" IsChecked="{Binding IsDark}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
         <!-- ENGINE -->
-        <TextBlock Classes="section-label" Text="ENGINE" Margin="4,0,4,8"/>
+        <TextBlock Classes="section-label" Text="ENGINE"/>
         <Border Classes="card">
             <StackPanel>
                 <!-- Version row -->
@@ -68,28 +90,6 @@
                         <TextBlock Classes="row-desc" Text="Automatically download and install new engine versions."/>
                     </StackPanel>
                     <ToggleSwitch Grid.Column="1" Classes="app" IsChecked="{Binding AutoUpdate}" />
-                </Grid>
-            </StackPanel>
-        </Border>
-
-        <!-- GENERAL -->
-        <TextBlock Classes="section-label" Text="GENERAL" Margin="4,0,4,8"/>
-        <Border Classes="card">
-            <StackPanel>
-                <Grid Margin="14,11" ColumnDefinitions="*,Auto">
-                    <StackPanel>
-                        <TextBlock Classes="row-label" Text="Launch at login"/>
-                        <TextBlock Classes="row-desc" Text="Start automatically and stay in the system tray."/>
-                    </StackPanel>
-                    <ToggleSwitch Grid.Column="1" Classes="app" IsChecked="{Binding LaunchAtLogin}" />
-                </Grid>
-                <Border Classes="row-divider"/>
-                <Grid Margin="14,11" ColumnDefinitions="*,Auto">
-                    <StackPanel>
-                        <TextBlock Classes="row-label" Text="Dark mode"/>
-                        <TextBlock Classes="row-desc" Text="Use a dark color scheme."/>
-                    </StackPanel>
-                    <ToggleSwitch Grid.Column="1" Classes="app" IsChecked="{Binding IsDark}" />
                 </Grid>
             </StackPanel>
         </Border>
