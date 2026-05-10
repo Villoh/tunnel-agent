@@ -39,7 +39,7 @@ public sealed class EngineProcessService
         {
             StartInfo = new ProcessStartInfo(binaryPath)
             {
-                ArgumentList = { "--config", configPath },
+                ArgumentList = { "-config", configPath },
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 RedirectStandardOutput = false,
