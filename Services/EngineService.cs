@@ -127,12 +127,6 @@ public sealed partial class EngineService : IProxyServer
             // which can be stale if the binary was replaced manually.
             InstalledVersion = await ReadInstalledVersionAsync();
 
-            if (InstalledVersion != null)
-            {
-                _settings.Current.InstalledEngineVersion = InstalledVersion;
-                _settings.Save();
-            }
-
             State = EngineState.Stopped;
         }
 
@@ -292,9 +286,6 @@ public sealed partial class EngineService : IProxyServer
             Directory.Delete(extractDir, true);
 
             InstalledVersion = LatestVersion;
-            _settings.Current.InstalledEngineVersion = InstalledVersion;
-            _settings.Save();
-
             State = EngineState.Stopped;
         }
         catch
