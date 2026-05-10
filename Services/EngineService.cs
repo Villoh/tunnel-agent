@@ -107,8 +107,9 @@ public sealed partial class EngineService : IProxyServer
         }
         else
         {
-            InstalledVersion = _settings.Current.InstalledEngineVersion
-                ?? await ReadInstalledVersionAsync();
+            // Always read the actual binary version — don't trust the cached value,
+            // which can be stale if the binary was replaced manually.
+            InstalledVersion = await ReadInstalledVersionAsync();
 
             if (InstalledVersion != null)
             {

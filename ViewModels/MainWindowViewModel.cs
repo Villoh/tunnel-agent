@@ -98,10 +98,14 @@ public partial class MainWindowViewModel : ViewModelBase
         SeedDemoData();
     }
 
+    private bool _updateToastShown;
+
     private void OnEngineStateChanged(object? sender, EventArgs e)
     {
         Dispatcher.UIThread.Post(() =>
         {
+            var wasAvailable = UpdateAvailable;
+
             EngineState = _engine.State;
             InstalledVersion = _engine.InstalledVersion;
             LatestVersion = _engine.LatestVersion;
@@ -110,6 +114,22 @@ public partial class MainWindowViewModel : ViewModelBase
             EngineStatusText = BuildEngineStatusText();
             UpdateBadgeState();
             OnPropertyChanged(nameof(ServerState));
+
+            // Show toast the first time an update becomes available this session
+            if (UpdateAvailable && !wasAvailable && !_updateToastShown)
+            {
+                _updateToastShown = true;
+                if (AutoUpdate)
+                {
+                    _ = _engine.DownloadAndInstallAsync();
+                }
+                else
+                {
+                    ShowUpdateToast = true;
+                    _ = Task.Delay(8000).ContinueWith(_ =>
+                        Dispatcher.UIThread.Post(() => ShowUpdateToast = false));
+                }
+            }
         });
     }
 
@@ -133,21 +153,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         await _settings.LoadAsync();
         await _engine.InitializeAsync();
-
-        if (_engine.UpdateAvailable && AutoUpdate)
-        {
-            _ = _engine.DownloadAndInstallAsync();
-        }
-        else if (_engine.UpdateAvailable && !AutoUpdate)
-        {
-            ShowUpdateToast = true;
-            ConfigHasBadge = true;
-            // Auto-dismiss toast after 8 seconds
-            _ = Task.Delay(8000).ContinueWith(_ =>
-                Dispatcher.UIThread.Post(() => ShowUpdateToast = false));
-        }
-
-        // Don't auto-start — user starts the server explicitly via the Start button
+        // Toast/badge/auto-update are handled reactively in OnEngineStateChanged
     }
 
     [RelayCommand] private void SelectProviders()     => SelectedSection = SectionKey.Providers;
