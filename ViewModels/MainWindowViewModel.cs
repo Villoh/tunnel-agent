@@ -34,7 +34,15 @@ public partial class MainWindowViewModel : ViewModelBase
     public int Port
     {
         get => _settings.Current.Port;
-        set { _settings.Current.Port = value; _settings.Save(); OnPropertyChanged(); OnPropertyChanged(nameof(EndpointUrl)); }
+        set
+        {
+            if (_settings.Current.Port == value) return;
+            _settings.Current.Port = value;
+            _settings.Save();
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(EndpointUrl));
+            _ = ApplyPortChangeAsync();
+        }
     }
     public bool LaunchAtLogin
     {
@@ -141,6 +149,15 @@ public partial class MainWindowViewModel : ViewModelBase
     private void UpdateBadgeState()
     {
         ConfigHasBadge = _engine.UpdateAvailable && !AutoUpdate;
+    }
+
+    private async Task ApplyPortChangeAsync()
+    {
+        // Rewrite config with the new port. If the server is running, restart it.
+        var wasRunning = _engine.IsRunning;
+        if (wasRunning) await _engine.StopAsync();
+        await _engine.WriteConfigAsync();
+        if (wasRunning) await _engine.StartAsync();
     }
 
     public async Task InitializeAsync()

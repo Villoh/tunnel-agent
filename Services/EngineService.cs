@@ -91,6 +91,8 @@ public sealed class EngineService
 
     public Task StopAsync() => _process.StopAsync();
 
+    public Task WriteConfigAsync() => _config.WriteConfigAsync();
+
     public Task CheckForUpdateAsync() => _download.CheckForUpdateAsync();
 
     public async Task DownloadAndInstallAsync()
