@@ -28,7 +28,7 @@
                             <TextBlock Classes="row-desc" Text="→"
                                        IsVisible="{Binding UpdateAvailable}" />
                             <TextBlock Classes="row-desc" Foreground="{DynamicResource AccentBrush}"
-                                       Text="{Binding LatestVersion, StringFormat='\{0\} available'}"
+                                       Text="{Binding LatestVersion, StringFormat='{}{0} available'}"
                                        IsVisible="{Binding UpdateAvailable}" />
                         </StackPanel>
                     </StackPanel>
