@@ -2,7 +2,11 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using TunnelAgent.ViewModels;
@@ -96,4 +100,152 @@ public sealed partial class EngineService : IProxyServer
 
     public Task StopAsync(CancellationToken ct = default) =>
         throw new NotImplementedException();
+
+    private static readonly HttpClient Http = new();
+
+    public async Task CheckForUpdateAsync()
+    {
+        try
+        {
+            Http.DefaultRequestHeaders.UserAgent.Clear();
+            Http.DefaultRequestHeaders.UserAgent.Add(
+                new ProductInfoHeaderValue("TunnelAgent", "0.0.1"));
+
+            var json = await Http.GetStringAsync(
+                "https://api.github.com/repos/router-for-me/CLIProxyAPI/releases/latest");
+
+            using var doc = JsonDocument.Parse(json);
+            var tag = doc.RootElement.GetProperty("tag_name").GetString();
+            LatestVersion = tag;
+            StateChanged?.Invoke(this, EventArgs.Empty);
+        }
+        catch
+        {
+            // Network unavailable — silently ignore
+        }
+    }
+
+    public async Task DownloadAndInstallAsync()
+    {
+        if (LatestVersion is null) return;
+
+        var prevState = State;
+        try
+        {
+            State = EngineState.Downloading;
+            DownloadProgress = 0;
+            StateChanged?.Invoke(this, EventArgs.Empty);
+
+            // Build asset URL
+            var ver = LatestVersion.TrimStart('v');
+            var suffix = GetPlatformSuffix();
+            var ext = GetArchiveExtension();
+            var assetName = $"CLIProxyAPI_{ver}_{suffix}{ext}";
+            var url = $"https://github.com/router-for-me/CLIProxyAPI/releases/download/{LatestVersion}/{assetName}";
+
+            // Download with progress
+            Directory.CreateDirectory(EngineDir);
+            var tmpPath = Path.Combine(EngineDir, assetName + ".tmp");
+
+            using (var response = await Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
+            {
+                response.EnsureSuccessStatusCode();
+                var total = response.Content.Headers.ContentLength ?? -1L;
+                await using var stream = await response.Content.ReadAsStreamAsync();
+                await using var file = File.Create(tmpPath);
+
+                var buffer = new byte[81920];
+                long downloaded = 0;
+                int read;
+                while ((read = await stream.ReadAsync(buffer)) > 0)
+                {
+                    await file.WriteAsync(buffer.AsMemory(0, read));
+                    downloaded += read;
+                    if (total > 0)
+                    {
+                        DownloadProgress = downloaded * 100.0 / total;
+                        StateChanged?.Invoke(this, EventArgs.Empty);
+                    }
+                }
+            }
+
+            // Extract
+            State = EngineState.Installing;
+            DownloadProgress = 100;
+            StateChanged?.Invoke(this, EventArgs.Empty);
+
+            var extractDir = Path.Combine(EngineDir, "extract_tmp");
+            if (Directory.Exists(extractDir)) Directory.Delete(extractDir, true);
+
+            if (OperatingSystem.IsWindows())
+                ZipFile.ExtractToDirectory(tmpPath, extractDir);
+            else
+                await ExtractTarGzAsync(tmpPath, extractDir);
+
+            // Find and move binary
+            var extracted = FindBinary(extractDir);
+            if (extracted is null)
+                throw new FileNotFoundException("Binary not found in archive.");
+
+            if (File.Exists(BinaryPath)) File.Delete(BinaryPath);
+            File.Move(extracted, BinaryPath);
+
+            if (!OperatingSystem.IsWindows())
+                await MakeExecutableAsync(BinaryPath);
+
+            // Cleanup
+            File.Delete(tmpPath);
+            Directory.Delete(extractDir, true);
+
+            InstalledVersion = LatestVersion;
+            _settings.Current.InstalledEngineVersion = InstalledVersion;
+            _settings.Save();
+
+            State = EngineState.Stopped;
+            StateChanged?.Invoke(this, EventArgs.Empty);
+        }
+        catch
+        {
+            State = prevState == EngineState.NotInstalled ? EngineState.NotInstalled : EngineState.Error;
+            StateChanged?.Invoke(this, EventArgs.Empty);
+            throw;
+        }
+    }
+
+    private static string? FindBinary(string dir)
+    {
+        foreach (var file in Directory.EnumerateFiles(dir, BinaryName, SearchOption.AllDirectories))
+            return file;
+        return null;
+    }
+
+    private static async Task ExtractTarGzAsync(string archivePath, string destDir)
+    {
+        Directory.CreateDirectory(destDir);
+        // Use tar command (available on macOS and modern Linux)
+        using var proc = new Process
+        {
+            StartInfo = new ProcessStartInfo("tar", $"-xzf \"{archivePath}\" -C \"{destDir}\"")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        proc.Start();
+        await proc.WaitForExitAsync();
+    }
+
+    private static async Task MakeExecutableAsync(string path)
+    {
+        using var proc = new Process
+        {
+            StartInfo = new ProcessStartInfo("chmod", $"+x \"{path}\"")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        proc.Start();
+        await proc.WaitForExitAsync();
+    }
 }
