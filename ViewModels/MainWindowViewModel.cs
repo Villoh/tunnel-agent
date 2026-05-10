@@ -147,8 +147,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 Dispatcher.UIThread.Post(() => ShowUpdateToast = false));
         }
 
-        if (_engine.State == EngineState.Stopped)
-            await _engine.StartAsync(_settings.Current.Port, _settings.Current.BindAddress);
+        // Don't auto-start — user starts the server explicitly via the Start button
     }
 
     [RelayCommand] private void SelectProviders()     => SelectedSection = SectionKey.Providers;
