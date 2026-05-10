@@ -10,11 +10,8 @@ namespace TunnelAgent.Services;
 /// </summary>
 public interface IPlatformInfo
 {
-    /// <summary>Filename used on disk, e.g. CLIProxyAPI.exe / CLIProxyAPI</summary>
+    /// <summary>Binary filename, both inside the archive and on disk. e.g. cli-proxy-api / cli-proxy-api.exe</summary>
     string BinaryName { get; }
-
-    /// <summary>Filename inside the release archive, e.g. cli-proxy-api.exe / cli-proxy-api</summary>
-    string ArchiveBinaryName { get; }
 
     /// <summary>OS segment of the release asset name, e.g. windows / darwin / linux</summary>
     string OsSuffix { get; }
@@ -64,8 +61,7 @@ public interface IPlatformInfo
 
 public sealed class WindowsPlatform(string arch) : IPlatformInfo
 {
-    public string BinaryName          => "CLIProxyAPI.exe";
-    public string ArchiveBinaryName   => "cli-proxy-api.exe";
+    public string BinaryName          => "cli-proxy-api.exe";
     public string OsSuffix            => "windows";
     public string ArchSuffix          => arch;
     public string ArchiveExtension    => ".zip";
@@ -80,8 +76,7 @@ public sealed class WindowsPlatform(string arch) : IPlatformInfo
 
 public sealed class MacOsPlatform(string arch) : IPlatformInfo
 {
-    public string BinaryName          => "CLIProxyAPI";
-    public string ArchiveBinaryName   => "cli-proxy-api";
+    public string BinaryName          => "cli-proxy-api";
     public string OsSuffix            => "darwin";
     public string ArchSuffix          => arch;
     public string ArchiveExtension    => ".tar.gz";
@@ -97,8 +92,7 @@ public sealed class MacOsPlatform(string arch) : IPlatformInfo
 
 public sealed class LinuxPlatform(string arch) : IPlatformInfo
 {
-    public string BinaryName          => "CLIProxyAPI";
-    public string ArchiveBinaryName   => "cli-proxy-api";
+    public string BinaryName          => "cli-proxy-api";
     public string OsSuffix            => "linux";
     public string ArchSuffix          => arch;
     public string ArchiveExtension    => ".tar.gz";
