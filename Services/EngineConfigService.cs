@@ -34,6 +34,8 @@ public sealed class EngineConfigService
             auth-dir: "{authDir}"
             api-keys: []
             debug: {(s.LogLevel == "debug" ? "true" : "false")}
+            remote-management:
+              disable-control-panel: true
             """;
 
         Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath)!);
