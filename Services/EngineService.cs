@@ -40,6 +40,7 @@ public sealed partial class EngineService : IProxyServer
 
     public string? InstalledVersion { get; private set; }
     public string? LatestVersion { get; private set; }
+    public string? LastError { get; private set; }
     public bool UpdateAvailable => InstalledVersion != null && LatestVersion != null && LatestVersion != InstalledVersion;
     public double DownloadProgress { get; private set; }
 
@@ -112,8 +113,10 @@ public sealed partial class EngineService : IProxyServer
             {
                 await DownloadAndInstallAsync();
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"[EngineService] InitializeAsync download failed: {ex.Message}");
+                LastError = ex.Message;
                 State = EngineState.Error;
                 return;
             }
@@ -217,15 +220,22 @@ public sealed partial class EngineService : IProxyServer
             LatestVersion = tag;
             StateChanged?.Invoke(this, EventArgs.Empty);
         }
-        catch
+        catch (Exception ex)
         {
-            // Network unavailable — silently ignore
+            // Network unavailable or rate limited — silently ignore
+            System.Diagnostics.Debug.WriteLine($"[EngineService] CheckForUpdateAsync failed: {ex.Message}");
         }
     }
 
     public async Task DownloadAndInstallAsync()
     {
-        if (LatestVersion is null) return;
+        // If we don't know the latest version yet, fetch it now (may happen if the
+        // background check failed or hasn't run yet).
+        if (LatestVersion is null)
+            await CheckForUpdateAsync();
+
+        if (LatestVersion is null)
+            throw new InvalidOperationException("Could not determine latest CLIProxyAPI version. Check your network connection.");
 
         var prevState = State;
         try

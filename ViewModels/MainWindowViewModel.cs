@@ -119,7 +119,7 @@ public partial class MainWindowViewModel : ViewModelBase
         EngineState.Installing  => "Installing…",
         EngineState.Running     => $"{_engine.InstalledVersion} · Running",
         EngineState.Starting    => "Starting…",
-        EngineState.Error       => "Engine error — click to restart",
+        EngineState.Error       => _engine.LastError is not null ? $"Error: {_engine.LastError}" : "Engine error — click to restart",
         EngineState.NotInstalled => "Not installed",
         _                       => "Stopped"
     };
