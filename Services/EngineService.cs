@@ -101,16 +101,19 @@ public sealed partial class EngineService : IProxyServer
     public Task StopAsync(CancellationToken ct = default) =>
         throw new NotImplementedException();
 
-    private static readonly HttpClient Http = new();
+    private static readonly HttpClient Http;
+
+    static EngineService()
+    {
+        Http = new HttpClient();
+        Http.DefaultRequestHeaders.UserAgent.Add(
+            new ProductInfoHeaderValue("TunnelAgent", "0.0.1"));
+    }
 
     public async Task CheckForUpdateAsync()
     {
         try
         {
-            Http.DefaultRequestHeaders.UserAgent.Clear();
-            Http.DefaultRequestHeaders.UserAgent.Add(
-                new ProductInfoHeaderValue("TunnelAgent", "0.0.1"));
-
             var json = await Http.GetStringAsync(
                 "https://api.github.com/repos/router-for-me/CLIProxyAPI/releases/latest");
 
@@ -134,7 +137,6 @@ public sealed partial class EngineService : IProxyServer
         {
             State = EngineState.Downloading;
             DownloadProgress = 0;
-            StateChanged?.Invoke(this, EventArgs.Empty);
 
             // Build asset URL
             var ver = LatestVersion.TrimStart('v');
@@ -172,7 +174,6 @@ public sealed partial class EngineService : IProxyServer
             // Extract
             State = EngineState.Installing;
             DownloadProgress = 100;
-            StateChanged?.Invoke(this, EventArgs.Empty);
 
             var extractDir = Path.Combine(EngineDir, "extract_tmp");
             if (Directory.Exists(extractDir)) Directory.Delete(extractDir, true);
@@ -202,12 +203,10 @@ public sealed partial class EngineService : IProxyServer
             _settings.Save();
 
             State = EngineState.Stopped;
-            StateChanged?.Invoke(this, EventArgs.Empty);
         }
         catch
         {
             State = prevState == EngineState.NotInstalled ? EngineState.NotInstalled : EngineState.Error;
-            StateChanged?.Invoke(this, EventArgs.Empty);
             throw;
         }
     }
@@ -225,27 +224,33 @@ public sealed partial class EngineService : IProxyServer
         // Use tar command (available on macOS and modern Linux)
         using var proc = new Process
         {
-            StartInfo = new ProcessStartInfo("tar", $"-xzf \"{archivePath}\" -C \"{destDir}\"")
+            StartInfo = new ProcessStartInfo("tar")
             {
+                ArgumentList = { "-xzf", archivePath, "-C", destDir },
                 UseShellExecute = false,
                 CreateNoWindow = true
             }
         };
         proc.Start();
         await proc.WaitForExitAsync();
+        if (proc.ExitCode != 0)
+            throw new Exception($"tar exited with code {proc.ExitCode}");
     }
 
     private static async Task MakeExecutableAsync(string path)
     {
         using var proc = new Process
         {
-            StartInfo = new ProcessStartInfo("chmod", $"+x \"{path}\"")
+            StartInfo = new ProcessStartInfo("chmod")
             {
+                ArgumentList = { "+x", path },
                 UseShellExecute = false,
                 CreateNoWindow = true
             }
         };
         proc.Start();
         await proc.WaitForExitAsync();
+        if (proc.ExitCode != 0)
+            throw new Exception($"chmod exited with code {proc.ExitCode}");
     }
 }
