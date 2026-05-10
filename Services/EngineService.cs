@@ -19,7 +19,7 @@ public sealed partial class EngineService : IProxyServer
     private readonly SettingsService _settings;
 
     private static readonly string EngineDir = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "TunnelAgent", "engine");
 
     // Name used as the destination binary on disk
