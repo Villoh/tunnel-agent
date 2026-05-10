@@ -28,6 +28,7 @@
             BorderThickness="0"
             CornerRadius="0"
             ClipToBounds="True">
+        <Panel>
         <Grid RowDefinitions="38,*">
             <!-- Custom titlebar -->
             <Grid Grid.Row="0" PointerPressed="OnTitlebarPressed"
@@ -191,11 +192,16 @@
 
                             <Button Classes="side" Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Configuration}"
                                     Command="{Binding SelectConfigurationCommand}">
-                                <Grid ColumnDefinitions="20,*">
+                                <Grid ColumnDefinitions="20,*,Auto">
                                     <lucide:PackIconLucide Grid.Column="0" Kind="Settings" Width="15" Height="15"
                                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="1" Text="Configuration" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
                                                IsVisible="{Binding !IsSidebarCollapsed}"/>
+                                    <!-- Update badge dot -->
+                                    <Ellipse Grid.Column="2" Width="7" Height="7"
+                                             Fill="{DynamicResource AccentBrush}"
+                                             Margin="4,0,0,0"
+                                             IsVisible="{Binding ConfigHasBadge}" />
                                 </Grid>
                             </Button>
 
@@ -233,5 +239,31 @@
                 </ScrollViewer>
             </Grid>
         </Grid>
+
+        <!-- Update toast overlay -->
+        <Border IsVisible="{Binding ShowUpdateToast}"
+                Background="{DynamicResource CardBgBrush}"
+                BorderBrush="{DynamicResource CardBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="14,10"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Margin="0,0,0,20"
+                MaxWidth="380"
+                ZIndex="50">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Spacing="2">
+                    <TextBlock Classes="row-label" Text="Engine update available"/>
+                    <TextBlock Classes="row-desc"
+                               Text="{Binding LatestVersion, StringFormat='CLIProxyAPI {0} is ready to install.'}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="12,0,0,0" VerticalAlignment="Center">
+                    <Button Classes="app primary" Content="Update" Command="{Binding UpdateEngineCommand}" />
+                    <Button Classes="app" Content="Dismiss" Command="{Binding DismissToastCommand}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+        </Panel>
     </Border>
 </Window>
