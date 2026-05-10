@@ -306,7 +306,7 @@ public sealed partial class EngineService : IProxyServer
 
     private static string? FindBinary(string dir)
     {
-        foreach (var file in Directory.EnumerateFiles(dir, Platform.ArchiveBinaryName, SearchOption.AllDirectories))
+        foreach (var file in Directory.EnumerateFiles(dir, Platform.BinaryName, SearchOption.AllDirectories))
             return file;
         return null;
     }
