@@ -31,7 +31,8 @@ public sealed partial class EngineService : IProxyServer
     public string? InstalledVersion { get; private set; }
     public string? LatestVersion { get; private set; }
     public string? LastError { get; private set; }
-    public bool UpdateAvailable => InstalledVersion != null && LatestVersion != null && LatestVersion != InstalledVersion;
+    public bool UpdateAvailable => InstalledVersion != null && LatestVersion != null &&
+        LatestVersion.TrimStart('v') != InstalledVersion.TrimStart('v');
     public double DownloadProgress { get; private set; }
 
     // IProxyServer
@@ -63,24 +64,39 @@ public sealed partial class EngineService : IProxyServer
         if (!IsBinaryInstalled()) return null;
         try
         {
+            // CLIProxyAPI uses Go single-dash flags. It prints to stderr on flag errors,
+            // so we capture both stdout and stderr and read whichever has content.
+            // Output format: "CLIProxyAPI Version: 7.0.2, Commit: ..., BuiltAt: ..."
             using var proc = new Process
             {
-                StartInfo = new ProcessStartInfo(BinaryPath, "--version")
+                StartInfo = new ProcessStartInfo(BinaryPath)
                 {
+                    ArgumentList = { "-version" },
                     RedirectStandardOutput = true,
+                    RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true
                 }
             };
             proc.Start();
-            var output = await proc.StandardOutput.ReadToEndAsync();
+            var stdout = await proc.StandardOutput.ReadToEndAsync();
+            var stderr = await proc.StandardError.ReadToEndAsync();
             await proc.WaitForExitAsync();
-            // Output is typically "CLIProxyAPI version v7.0.2" or just "v7.0.2"
-            var parts = output.Trim().Split(' ');
-            foreach (var part in parts)
-                if (part.StartsWith('v') && part.Length > 1)
-                    return part;
-            return output.Trim().Length > 0 ? output.Trim() : null;
+
+            var output = stdout.Length > 0 ? stdout : stderr;
+
+            // Parse "CLIProxyAPI Version: 7.0.2, ..." → "v7.0.2"
+            // Also handles plain "v7.0.2" or "7.0.2" tokens
+            foreach (var part in output.Split([' ', ',', '\n', '\r'], StringSplitOptions.RemoveEmptyEntries))
+            {
+                var candidate = part.TrimEnd(',');
+                if (candidate.StartsWith('v') && candidate.Length > 1 && char.IsDigit(candidate[1]))
+                    return candidate;
+                // "7.0.2" style — ensure it looks like a semver
+                if (candidate.Contains('.') && char.IsDigit(candidate[0]))
+                    return $"v{candidate}";
+            }
+            return null;
         }
         catch { return null; }
     }
