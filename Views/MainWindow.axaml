@@ -7,6 +7,7 @@
         x:Class="TunnelAgent.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="Tunnel Agent"
+        Icon="/Assets/logo.ico"
         Width="820" Height="600"
         MinWidth="680" MinHeight="460"
         CanResize="True"
@@ -41,8 +42,10 @@
                 <Border Grid.ColumnSpan="3" VerticalAlignment="Bottom" Height="1"
                         Background="{DynamicResource WinBorderBrush}" Opacity="0.8" />
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6"
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="7"
                             HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Image Source="/Assets/logo-20.png" Width="18" Height="18"
+                           VerticalAlignment="Center" RenderOptions.BitmapInterpolationMode="HighQuality"/>
                     <TextBlock Text="Tunnel Agent"
                                FontSize="13" FontWeight="SemiBold"
                                Foreground="{DynamicResource FgBrush}" />
@@ -123,9 +126,16 @@
 
                         <StackPanel Margin="8,10" Spacing="2">
                             <Grid Margin="0,0,0,4">
-                                <Grid ColumnDefinitions="*,Auto" Margin="10,0,0,0" IsVisible="{Binding !IsSidebarCollapsed}">
-                                    <TextBlock Classes="section-label" Text="WORKSPACE" Margin="0" />
-                                    <Button Grid.Column="1" Classes="icon" Width="24" Height="24"
+                                <!-- Expanded: logo + app name + collapse button -->
+                                <Grid ColumnDefinitions="Auto,*,Auto" Margin="6,0,0,0" IsVisible="{Binding !IsSidebarCollapsed}">
+                                    <Image Grid.Column="0" Source="/Assets/logo-20.png" Width="20" Height="20"
+                                           VerticalAlignment="Center"
+                                           RenderOptions.BitmapInterpolationMode="HighQuality"/>
+                                    <TextBlock Grid.Column="1" Text="Tunnel Agent"
+                                               FontSize="12" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource FgBrush}"
+                                               VerticalAlignment="Center" Margin="7,0,0,0"/>
+                                    <Button Grid.Column="2" Classes="icon" Width="24" Height="24"
                                             ToolTip.Tip="Collapse sidebar"
                                             Command="{Binding ToggleSidebarCommand}">
                                         <Grid Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -135,16 +145,14 @@
                                         </Grid>
                                     </Button>
                                 </Grid>
-                                <Button Classes="icon" Width="24" Height="24"
+                                <!-- Collapsed: logo acts as expand button -->
+                                <Button Classes="icon" Width="36" Height="28"
                                         HorizontalAlignment="Center" VerticalAlignment="Center"
                                         IsVisible="{Binding IsSidebarCollapsed}"
                                         ToolTip.Tip="Expand sidebar"
                                         Command="{Binding ToggleSidebarCommand}">
-                                    <Grid Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <lucide:PackIconLucide Kind="PanelLeftOpen" Width="15" Height="15"
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource FgMutedBrush}" />
-                                    </Grid>
+                                    <Image Source="/Assets/logo-20.png" Width="20" Height="20"
+                                           RenderOptions.BitmapInterpolationMode="HighQuality"/>
                                 </Button>
                             </Grid>
 
