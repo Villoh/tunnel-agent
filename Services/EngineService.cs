@@ -139,11 +139,16 @@ public sealed partial class EngineService : IProxyServer
         Port = port;
         State = EngineState.Starting;
 
+        if (_process is not null)
+        {
+            _process.Dispose();
+            _process = null;
+        }
+
         _process = new Process
         {
             StartInfo = new ProcessStartInfo(BinaryPath)
             {
-                Arguments = $"--port {port} --bind {bindAddress}",
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 RedirectStandardOutput = false,
@@ -151,6 +156,11 @@ public sealed partial class EngineService : IProxyServer
             },
             EnableRaisingEvents = true
         };
+
+        _process.StartInfo.ArgumentList.Add("--port");
+        _process.StartInfo.ArgumentList.Add(port.ToString());
+        _process.StartInfo.ArgumentList.Add("--bind");
+        _process.StartInfo.ArgumentList.Add(bindAddress);
 
         _process.Exited += (_, _) =>
         {
