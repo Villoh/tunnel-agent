@@ -42,6 +42,7 @@ public sealed class SettingsService
     public void Save()
     {
         _debounceCts?.Cancel();
+        _debounceCts?.Dispose();
         _debounceCts = new CancellationTokenSource();
         var token = _debounceCts.Token;
 
@@ -53,6 +54,10 @@ public sealed class SettingsService
                 await SaveImmediateAsync();
             }
             catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[SettingsService] Save failed: {ex.Message}");
+            }
         });
     }
 
