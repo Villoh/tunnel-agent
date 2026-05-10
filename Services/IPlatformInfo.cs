@@ -41,6 +41,15 @@ public interface IPlatformInfo
     /// </summary>
     string LocalDataDirectory { get; }
 
+    /// <summary>
+    /// Absolute path to the CLIProxyAPI OAuth credentials directory.
+    /// This is the default auth-dir the binary uses; always absolute (no ~).
+    /// Windows: %UserProfile%\.cli-proxy-api
+    /// macOS:   ~/Library/Application Support/.cli-proxy-api  (inside home)
+    /// Linux:   ~/.cli-proxy-api
+    /// </summary>
+    string AuthDirectory { get; }
+
     /// <summary>Any post-install steps needed after the binary is placed (e.g. chmod +x).</summary>
     Task PostInstallAsync(string binaryPath);
 
@@ -71,6 +80,9 @@ public sealed class WindowsPlatform(string arch) : IPlatformInfo
     public string LocalDataDirectory  => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "TunnelAgent");
+    public string AuthDirectory       => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+        ".cli-proxy-api");
     public Task PostInstallAsync(string binaryPath) => Task.CompletedTask;
 }
 
@@ -86,6 +98,9 @@ public sealed class MacOsPlatform(string arch) : IPlatformInfo
     public string LocalDataDirectory  => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.Personal),
         "Library", "Application Support", "TunnelAgent");
+    public string AuthDirectory       => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.Personal),
+        ".cli-proxy-api");
     public async Task PostInstallAsync(string binaryPath) =>
         await UnixHelper.ChmodExecutableAsync(binaryPath);
 }
@@ -102,6 +117,9 @@ public sealed class LinuxPlatform(string arch) : IPlatformInfo
     public string LocalDataDirectory  => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "TunnelAgent");
+    public string AuthDirectory       => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+        ".cli-proxy-api");
     public async Task PostInstallAsync(string binaryPath) =>
         await UnixHelper.ChmodExecutableAsync(binaryPath);
 }
