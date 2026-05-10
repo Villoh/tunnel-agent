@@ -35,13 +35,14 @@ public sealed class EngineDownloadService
 
     static EngineDownloadService()
     {
+        var version = AppVersion.Current;
         Http = new HttpClient();
         Http.DefaultRequestHeaders.UserAgent.Add(
-            new ProductInfoHeaderValue("TunnelAgent", "0.0.1"));
+            new ProductInfoHeaderValue("TunnelAgent", version));
 
         HttpNoRedirect = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false });
         HttpNoRedirect.DefaultRequestHeaders.UserAgent.Add(
-            new ProductInfoHeaderValue("TunnelAgent", "0.0.1"));
+            new ProductInfoHeaderValue("TunnelAgent", version));
     }
 
     public static bool IsBinaryInstalled() => File.Exists(BinaryPath);
