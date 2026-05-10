@@ -126,33 +126,25 @@
 
                         <StackPanel Margin="8,10" Spacing="2">
                             <Grid Margin="0,0,0,4">
-                                <!-- Expanded: logo + app name + collapse button -->
-                                <Grid ColumnDefinitions="Auto,*,Auto" Margin="6,0,0,0" IsVisible="{Binding !IsSidebarCollapsed}">
-                                    <Image Grid.Column="0" Source="/Assets/logo-20.png" Width="20" Height="20"
-                                           VerticalAlignment="Center"
-                                           RenderOptions.BitmapInterpolationMode="HighQuality"/>
-                                    <TextBlock Grid.Column="1" Text="Tunnel Agent"
-                                               FontSize="12" FontWeight="SemiBold"
-                                               Foreground="{DynamicResource FgBrush}"
-                                               VerticalAlignment="Center" Margin="7,0,0,0"/>
-                                    <Button Grid.Column="2" Classes="icon" Width="24" Height="24"
-                                            ToolTip.Tip="Collapse sidebar"
-                                            Command="{Binding ToggleSidebarCommand}">
-                                        <Grid Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <lucide:PackIconLucide Kind="PanelLeftClose" Width="15" Height="15"
-                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                                   Foreground="{DynamicResource FgMutedBrush}" />
-                                        </Grid>
-                                    </Button>
-                                </Grid>
-                                <!-- Collapsed: logo acts as expand button -->
-                                <Button Classes="icon" Width="36" Height="28"
+                                <!-- Expanded: collapse button aligned right -->
+                                <Button Classes="icon" Width="24" Height="24"
+                                        HorizontalAlignment="Right" VerticalAlignment="Center"
+                                        IsVisible="{Binding !IsSidebarCollapsed}"
+                                        ToolTip.Tip="Collapse sidebar"
+                                        Command="{Binding ToggleSidebarCommand}">
+                                    <lucide:PackIconLucide Kind="PanelLeftClose" Width="15" Height="15"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource FgMutedBrush}" />
+                                </Button>
+                                <!-- Collapsed: expand button centered -->
+                                <Button Classes="icon" Width="24" Height="24"
                                         HorizontalAlignment="Center" VerticalAlignment="Center"
                                         IsVisible="{Binding IsSidebarCollapsed}"
                                         ToolTip.Tip="Expand sidebar"
                                         Command="{Binding ToggleSidebarCommand}">
-                                    <Image Source="/Assets/logo-20.png" Width="20" Height="20"
-                                           RenderOptions.BitmapInterpolationMode="HighQuality"/>
+                                    <lucide:PackIconLucide Kind="PanelLeftOpen" Width="15" Height="15"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource FgMutedBrush}" />
                                 </Button>
                             </Grid>
 
