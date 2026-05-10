@@ -1,4 +1,3 @@
-// Services/EngineService.cs
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -6,7 +5,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,20 +15,13 @@ namespace TunnelAgent.Services;
 public sealed partial class EngineService : IProxyServer
 {
     private readonly SettingsService _settings;
+    private static readonly IPlatformInfo Platform = IPlatformInfo.Current;
 
     private static readonly string EngineDir = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "TunnelAgent", "engine");
 
-    // Name used as the destination binary on disk
-    private static readonly string BinaryName =
-        OperatingSystem.IsWindows() ? "CLIProxyAPI.exe" : "CLIProxyAPI";
-
-    // Name of the binary inside the release archive (cli-proxy-api or cli-proxy-api.exe)
-    private static readonly string ArchiveBinaryName =
-        OperatingSystem.IsWindows() ? "cli-proxy-api.exe" : "cli-proxy-api";
-
-    public static string BinaryPath => Path.Combine(EngineDir, BinaryName);
+    public static string BinaryPath => Path.Combine(EngineDir, Platform.BinaryName);
 
     private EngineState _state = EngineState.NotInstalled;
     public EngineState State
@@ -49,6 +40,21 @@ public sealed partial class EngineService : IProxyServer
     public bool IsRunning => State == EngineState.Running;
     public int Port { get; private set; }
     public event EventHandler? StateChanged;
+
+    private static readonly HttpClient Http;
+    private static readonly HttpClient HttpNoRedirect;
+
+    static EngineService()
+    {
+        Http = new HttpClient();
+        Http.DefaultRequestHeaders.UserAgent.Add(
+            new ProductInfoHeaderValue("TunnelAgent", "0.0.1"));
+
+        // Separate no-redirect client for version detection via Location header
+        HttpNoRedirect = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false });
+        HttpNoRedirect.DefaultRequestHeaders.UserAgent.Add(
+            new ProductInfoHeaderValue("TunnelAgent", "0.0.1"));
+    }
 
     public EngineService(SettingsService settings) => _settings = settings;
 
@@ -81,26 +87,6 @@ public sealed partial class EngineService : IProxyServer
         catch { return null; }
     }
 
-    // Resolve platform asset name suffix: e.g. "windows_amd64", "darwin_aarch64"
-    internal static string GetPlatformSuffix()
-    {
-        string os = OperatingSystem.IsWindows() ? "windows"
-                  : OperatingSystem.IsMacOS()   ? "darwin"
-                  : "linux";
-
-        string arch = RuntimeInformation.ProcessArchitecture switch
-        {
-            Architecture.Arm64 => "aarch64",
-            _                  => "amd64"
-        };
-
-        return $"{os}_{arch}";
-    }
-
-    // Resolve asset file extension: zip on Windows, tar.gz elsewhere
-    internal static string GetArchiveExtension() =>
-        OperatingSystem.IsWindows() ? ".zip" : ".tar.gz";
-
     private Process? _process;
 
     public async Task InitializeAsync()
@@ -108,7 +94,6 @@ public sealed partial class EngineService : IProxyServer
         if (!IsBinaryInstalled())
         {
             State = EngineState.NotInstalled;
-            // Fetch latest version info first so we know what to download
             await CheckForUpdateAsync();
             try
             {
@@ -116,7 +101,7 @@ public sealed partial class EngineService : IProxyServer
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[EngineService] InitializeAsync download failed: {ex.Message}");
+                Debug.WriteLine($"[EngineService] InitializeAsync download failed: {ex.Message}");
                 LastError = ex.Message;
                 State = EngineState.Error;
                 return;
@@ -124,7 +109,6 @@ public sealed partial class EngineService : IProxyServer
         }
         else
         {
-            // Use cached version if available, otherwise run --version
             InstalledVersion = _settings.Current.InstalledEngineVersion
                 ?? await ReadInstalledVersionAsync();
 
@@ -138,7 +122,7 @@ public sealed partial class EngineService : IProxyServer
         }
 
         if (_settings.Current.AutoCheckForUpdates)
-            _ = CheckForUpdateAsync(); // fire-and-forget, non-blocking
+            _ = CheckForUpdateAsync();
     }
 
     public async Task StartAsync(int port, string bindAddress, CancellationToken ct = default)
@@ -178,7 +162,6 @@ public sealed partial class EngineService : IProxyServer
         };
 
         _process.Start();
-        // Brief delay to let the process bind its port before callers use it
         await Task.Delay(600, ct);
         State = EngineState.Running;
     }
@@ -200,29 +183,12 @@ public sealed partial class EngineService : IProxyServer
         return Task.CompletedTask;
     }
 
-    private static readonly HttpClient Http;
-    private static readonly HttpClient HttpNoRedirect;
-
-    static EngineService()
-    {
-        // AllowAutoRedirect=true (default) but we need to read the redirect Location
-        // for version detection, so we use a separate no-redirect client for that.
-        Http = new HttpClient();
-        Http.DefaultRequestHeaders.UserAgent.Add(
-            new ProductInfoHeaderValue("TunnelAgent", "0.0.1"));
-
-        HttpNoRedirect = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false });
-        HttpNoRedirect.DefaultRequestHeaders.UserAgent.Add(
-            new ProductInfoHeaderValue("TunnelAgent", "0.0.1"));
-    }
-
     public async Task CheckForUpdateAsync()
     {
         try
         {
             // Use the HTML redirect instead of the API to avoid the 60 req/h rate limit.
-            // GET /releases/latest returns a 302 to /releases/tag/vX.Y.Z — we read the
-            // Location header without following the redirect to extract the version tag.
+            // GET /releases/latest returns 302 to /releases/tag/vX.Y.Z — read Location header.
             using var request = new HttpRequestMessage(HttpMethod.Get,
                 "https://github.com/router-for-me/CLIProxyAPI/releases/latest");
             using var response = await HttpNoRedirect.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
@@ -230,27 +196,22 @@ public sealed partial class EngineService : IProxyServer
             var location = response.Headers.Location?.ToString()
                 ?? response.RequestMessage?.RequestUri?.ToString();
 
-            if (location is null)
-                return;
+            if (location is null) return;
 
-            // Location is https://github.com/.../releases/tag/v7.0.2
             var tag = location.Split('/').LastOrDefault(p => p.StartsWith('v'));
-            if (tag is null)
-                return;
+            if (tag is null) return;
 
             LatestVersion = tag;
             StateChanged?.Invoke(this, EventArgs.Empty);
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[EngineService] CheckForUpdateAsync failed: {ex.Message}");
+            Debug.WriteLine($"[EngineService] CheckForUpdateAsync failed: {ex.Message}");
         }
     }
 
     public async Task DownloadAndInstallAsync()
     {
-        // If we don't know the latest version yet, fetch it now (may happen if the
-        // background check failed or hasn't run yet).
         if (LatestVersion is null)
             await CheckForUpdateAsync();
 
@@ -263,14 +224,10 @@ public sealed partial class EngineService : IProxyServer
             State = EngineState.Downloading;
             DownloadProgress = 0;
 
-            // Build asset URL
             var ver = LatestVersion.TrimStart('v');
-            var suffix = GetPlatformSuffix();
-            var ext = GetArchiveExtension();
-            var assetName = $"CLIProxyAPI_{ver}_{suffix}{ext}";
+            var assetName = $"CLIProxyAPI_{ver}_{Platform.PlatformSuffix}{Platform.ArchiveExtension}";
             var url = $"https://github.com/router-for-me/CLIProxyAPI/releases/download/{LatestVersion}/{assetName}";
 
-            // Download with progress
             Directory.CreateDirectory(EngineDir);
             var tmpPath = Path.Combine(EngineDir, assetName + ".tmp");
 
@@ -296,19 +253,17 @@ public sealed partial class EngineService : IProxyServer
                 }
             }
 
-            // Extract
             State = EngineState.Installing;
             DownloadProgress = 100;
 
             var extractDir = Path.Combine(EngineDir, "extract_tmp");
             if (Directory.Exists(extractDir)) Directory.Delete(extractDir, true);
 
-            if (OperatingSystem.IsWindows())
+            if (Platform.ArchiveExtension == ".zip")
                 ZipFile.ExtractToDirectory(tmpPath, extractDir);
             else
-                await ExtractTarGzAsync(tmpPath, extractDir);
+                await UnixHelper.ExtractTarGzAsync(tmpPath, extractDir);
 
-            // Find and move binary
             var extracted = FindBinary(extractDir);
             if (extracted is null)
                 throw new FileNotFoundException("Binary not found in archive.");
@@ -316,10 +271,8 @@ public sealed partial class EngineService : IProxyServer
             if (File.Exists(BinaryPath)) File.Delete(BinaryPath);
             File.Move(extracted, BinaryPath);
 
-            if (!OperatingSystem.IsWindows())
-                await MakeExecutableAsync(BinaryPath);
+            await Platform.PostInstallAsync(BinaryPath);
 
-            // Cleanup
             File.Delete(tmpPath);
             Directory.Delete(extractDir, true);
 
@@ -338,44 +291,8 @@ public sealed partial class EngineService : IProxyServer
 
     private static string? FindBinary(string dir)
     {
-        foreach (var file in Directory.EnumerateFiles(dir, ArchiveBinaryName, SearchOption.AllDirectories))
+        foreach (var file in Directory.EnumerateFiles(dir, Platform.ArchiveBinaryName, SearchOption.AllDirectories))
             return file;
         return null;
-    }
-
-    private static async Task ExtractTarGzAsync(string archivePath, string destDir)
-    {
-        Directory.CreateDirectory(destDir);
-        // Use tar command (available on macOS and modern Linux)
-        using var proc = new Process
-        {
-            StartInfo = new ProcessStartInfo("tar")
-            {
-                ArgumentList = { "-xzf", archivePath, "-C", destDir },
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-        proc.Start();
-        await proc.WaitForExitAsync();
-        if (proc.ExitCode != 0)
-            throw new Exception($"tar exited with code {proc.ExitCode}");
-    }
-
-    private static async Task MakeExecutableAsync(string path)
-    {
-        using var proc = new Process
-        {
-            StartInfo = new ProcessStartInfo("chmod")
-            {
-                ArgumentList = { "+x", path },
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-        proc.Start();
-        await proc.WaitForExitAsync();
-        if (proc.ExitCode != 0)
-            throw new Exception($"chmod exited with code {proc.ExitCode}");
     }
 }
