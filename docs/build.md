@@ -26,13 +26,14 @@ Produces **one `.exe`** (~106MB) — all managed DLLs and native libs bundled in
 ```pwsh
 dotnet publish -c Release -r win-x64 --self-contained false `
   -p:PublishSingleFile=true `
-  -p:IncludeNativeLibrariesForSelfExtract=true
+  -p:IncludeNativeLibrariesForSelfExtract=true `
+  -p:EnableCompressionInSingleFile=true
 ```
 
 | | |
 |---|---|
 | Output | `bin/Release/net10.0-windows/win-x64/publish/TunnelAgent.exe` |
-| Size | ~106 MB |
+| Size | ~51 MB |
 | Files | 1 (+ `.pdb` debug symbols, can be dropped) |
 | Requires | .NET 10 Runtime on target machine |
 
@@ -147,6 +148,7 @@ Every argument explained:
 | `-p:IncludeNativeLibrariesForSelfExtract=true` | Also embed unmanaged native DLLs (Skia, HarfBuzz, ANGLE) inside the exe. They extract to a temp folder at first run. Without this they sit alongside the exe as separate files. |
 | `-p:PublishTrimmed=true` | Remove unused .NET framework code via static analysis. Reduces self-contained size by ~50%. Risk: can break code that relies on reflection (like Avalonia bindings). |
 | `-p:PublishReadyToRun=true` | Pre-JIT the managed code to native during publish. Faster cold startup at the cost of slightly larger output. Only useful with `--self-contained true`. |
+| `-p:EnableCompressionInSingleFile=true` | Compress all bundled DLLs and native libs inside the exe. Roughly halves the output size. Adds ~100-200ms to cold startup while decompressing to temp. |
 | `-p:DebugType=None` | Do not produce a `.pdb` debug symbols file. Fine for distribution — only useful if you want crash stack traces from users. |
 | `-p:DebugSymbols=false` | Companion to `DebugType=None`. Together they ensure no symbol files are emitted. |
 
@@ -158,8 +160,9 @@ Every argument explained:
 dotnet publish -c Release -r win-x64 --self-contained false `
   -p:PublishSingleFile=true `
   -p:IncludeNativeLibrariesForSelfExtract=true `
+  -p:EnableCompressionInSingleFile=true `
   -p:DebugType=None `
   -p:DebugSymbols=false
 ```
 
-Produces a single `TunnelAgent.exe` (~106MB, no debug symbols) requiring .NET 10 on the target machine.
+Produces a single `TunnelAgent.exe` (~51MB, no debug symbols) requiring .NET 10 on the target machine.
