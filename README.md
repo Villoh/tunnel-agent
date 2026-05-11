@@ -71,7 +71,3 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md). Do not open a public 
 ## License
 
 MIT License — see [LICENSE](LICENSE) for details.
-
----
-
-© 2025 Villoh. All rights reserved.
