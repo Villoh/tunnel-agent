@@ -132,6 +132,26 @@ dotnet publish ... -p:DebugType=None -p:DebugSymbols=false
 
 ---
 
+## Argument reference
+
+Every argument explained:
+
+| Argument | What it does |
+|---|---|
+| `publish` | Compiles and prepares output for deployment. Unlike `build`, it resolves all dependencies and produces a distributable folder. |
+| `-c Release` | Build configuration. `Release` enables optimizations and disables debug info. `Debug` is the default for `dotnet run`. |
+| `-r win-x64` | Runtime identifier — the target OS and CPU architecture. Tells the compiler which native binaries to include. See the RID table above. |
+| `--self-contained false` | Do **not** bundle the .NET runtime. The user's machine must have .NET 10 installed. Makes the output much smaller. |
+| `--self-contained true` | Bundle the entire .NET runtime inside the output. The user needs nothing installed. Makes output ~80MB larger. |
+| `-p:PublishSingleFile=true` | Pack all managed DLLs into a single executable. Without this you get a folder full of `.dll` files. |
+| `-p:IncludeNativeLibrariesForSelfExtract=true` | Also embed unmanaged native DLLs (Skia, HarfBuzz, ANGLE) inside the exe. They extract to a temp folder at first run. Without this they sit alongside the exe as separate files. |
+| `-p:PublishTrimmed=true` | Remove unused .NET framework code via static analysis. Reduces self-contained size by ~50%. Risk: can break code that relies on reflection (like Avalonia bindings). |
+| `-p:PublishReadyToRun=true` | Pre-JIT the managed code to native during publish. Faster cold startup at the cost of slightly larger output. Only useful with `--self-contained true`. |
+| `-p:DebugType=None` | Do not produce a `.pdb` debug symbols file. Fine for distribution — only useful if you want crash stack traces from users. |
+| `-p:DebugSymbols=false` | Companion to `DebugType=None`. Together they ensure no symbol files are emitted. |
+
+---
+
 ## Current release command
 
 ```pwsh
