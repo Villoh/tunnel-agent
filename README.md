@@ -17,10 +17,10 @@
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-0A84FF?style=for-the-badge&labelColor=0f0f0f&logoColor=ffffff&logo=opensourceinitiative"></a>
-  <img alt="Platform" src="https://img.shields.io/badge/Platform-Windows-0A84FF?style=for-the-badge&labelColor=0f0f0f&logoColor=ffffff&logo=windows">
-  <img alt=".NET" src="https://img.shields.io/badge/.NET-10-0A84FF?style=for-the-badge&labelColor=0f0f0f&logoColor=ffffff&logo=dotnet">
-  <img alt="Version" src="https://img.shields.io/github/v/tag/Villoh/tunnel-agent?label=Version&style=for-the-badge&color=0A84FF&labelColor=0f0f0f">
+  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-0A84FF?style=for-the-badge&labelColor=ffffff&logoColor=000000&logo=opensourceinitiative"></a>
+  <img alt="Platform" src="https://img.shields.io/badge/Platform-Windows-0A84FF?style=for-the-badge&labelColor=ffffff&logoColor=000000&logo=windows">
+  <img alt=".NET" src="https://img.shields.io/badge/.NET-10-0A84FF?style=for-the-badge&labelColor=ffffff&logoColor=000000&logo=dotnet">
+  <img alt="Version" src="https://img.shields.io/github/v/tag/Villoh/tunnel-agent?label=Version&style=for-the-badge&color=0A84FF&labelColor=ffffff">
 </p>
 
 > **Early development** — provider wiring and credential storage are scaffolded, not yet connected to real services.
