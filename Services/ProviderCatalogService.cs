@@ -172,14 +172,16 @@ public sealed class ProviderCatalogService : IDisposable
         // 1. Built-in OAuth providers
         foreach (var meta in BuiltinOAuthProviders)
         {
-            var ps      = _settings.Current.Providers.FirstOrDefault(p => p.Id == meta.Id);
-            var enabled = ps?.Enabled ?? true;
+            var ps       = _settings.Current.Providers.FirstOrDefault(p => p.Id == meta.Id);
             var accounts = oauthAccounts.TryGetValue(meta.Id, out var accs) ? accs : [];
+            var hasAccts = accounts.Any(a => !a.IsDisabled);
+            // Only respect saved enabled=true if there are actually accounts
+            var enabled  = hasAccts && (ps?.Enabled ?? true);
 
             var vm = new ProviderViewModel(meta.Id, meta.Name, meta.Icon, meta.Color, meta.Description, isOAuth: true)
             {
                 IsEnabled = enabled,
-                Connected = accounts.Any(a => !a.IsDisabled),
+                Connected = hasAccts,
             };
 
             SyncOAuthAccounts(vm, accounts);
@@ -270,8 +272,11 @@ public sealed class ProviderCatalogService : IDisposable
             // Update OAuth providers
             foreach (var vm in Providers.Where(p => p.IsOAuth))
             {
-                var accounts = oauthAccounts.TryGetValue(vm.Id, out var accs) ? accs : [];
-                vm.Connected = accounts.Any(a => !a.IsDisabled);
+                var accounts  = oauthAccounts.TryGetValue(vm.Id, out var accs) ? accs : [];
+                var hasAccts  = accounts.Any(a => !a.IsDisabled);
+                vm.Connected  = hasAccts;
+                // Auto-disable toggle when last account is removed
+                if (!hasAccts) vm.IsEnabled = false;
                 SyncOAuthAccounts(vm, accounts);
             }
 
