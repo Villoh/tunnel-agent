@@ -140,6 +140,23 @@ public sealed class ProviderCatalogService : IDisposable
         _watcher.NotifyNow();
     }
 
+    /// <summary>Remove a single OAuth account by deleting its token file.</summary>
+    public void RemoveOAuthAccount(string providerId, string email)
+    {
+        if (!OAuthTokenDetector.KnownProviders.TryGetValue(providerId, out var prefix)) return;
+        if (!System.IO.Directory.Exists(IPlatformInfo.Current.AuthDirectory)) return;
+
+        foreach (var file in System.IO.Directory.GetFiles(
+            IPlatformInfo.Current.AuthDirectory, $"{prefix}-{email}*.json"))
+        {
+            if (System.IO.Path.GetFileName(file).StartsWith("openai-compat-", StringComparison.OrdinalIgnoreCase))
+                continue;
+            try { System.IO.File.Delete(file); } catch { }
+        }
+
+        _watcher.NotifyNow();
+    }
+
     /// <summary>Toggle enabled/disabled for a provider and rewrite config.yaml.</summary>
     public async Task SetProviderEnabledAsync(string providerId, bool enabled)
     {

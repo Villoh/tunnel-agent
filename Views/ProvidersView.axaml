@@ -270,7 +270,7 @@
                                                                     Command="{Binding #Root.DataContext.RemoveAccountCommand}"
                                                                     CommandParameter="{Binding}"
                                                                     VerticalAlignment="Center">
-                                                                <lucide:PackIconLucide Kind="Trash2" Width="13" Height="13"
+                                                                <lucide:PackIconLucide Kind="LogOut" Width="13" Height="13"
                                                                                        Foreground="{DynamicResource FgMutedBrush}" />
                                                             </Button>
                                                         </Grid>
