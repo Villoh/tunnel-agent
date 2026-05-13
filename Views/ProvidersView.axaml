@@ -224,9 +224,9 @@
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="vm:ProviderAccountViewModel">
                                                 <Border Background="#08FFFFFF"
-                                                        Margin="16,0,16,8"
+                                                        Margin="16,0,16,10"
                                                         CornerRadius="8"
-                                                        Padding="14,12">
+                                                        Padding="14,12,14,14">
                                                     <StackPanel Spacing="10">
 
                                                         <!-- Account header: email + plan badge + actions -->
