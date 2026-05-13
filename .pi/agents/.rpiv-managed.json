@@ -1,0 +1,16 @@
+{
+  "claim-verifier.md": "91ecd2e30777cf5ccca0fc8eab96ef9d5dd90657da4ec628bc6d3af8ecc3c50b",
+  "codebase-analyzer.md": "b49c2d2e118c1f979ff671f1dff8544d03470571c06ed45c809eea548e3b6f63",
+  "codebase-locator.md": "f9787089cea6134e55de09b6188200a994767cfd80c340a3a21b8ad037b1ec4b",
+  "codebase-pattern-finder.md": "b8117aba7a5828adf8688d3d7c86b608c04e5154ca30f532bd37c7946a473662",
+  "diff-auditor.md": "f12f1f1834ed089075595eca093da7f4128e43fea2285f66f307d6327282c943",
+  "integration-scanner.md": "eeac5e2e47e79640ddf19313355f10830ff7d81c31786f2bd392ea3a431df8ec",
+  "peer-comparator.md": "6216e023a915bbe9b88ae966fe750efecc1de9c38e276970b21fe2923d914c71",
+  "plan-reviewer.md": "e3472448fc8b36ac71c69f4e44a780c843bc5701bd1f39a6be2f9c17a5ba7990",
+  "precedent-locator.md": "8365ccd88b5eaa696d122b8292f8bdda305a230262e34f77d29271efe80fe870",
+  "scope-tracer.md": "2a2064465dd81c27278dc8c0a7e7b549f9cc3e31487e77ad3d35a9f9b2827fdc",
+  "test-case-locator.md": "c67c95442ffafb66ededa5f0fbfb11efe5f6cce5a7a61adcf29895465535115a",
+  "thoughts-analyzer.md": "ab693f876c6076cfb141ebf30a99b4e4617078eb90058ba9e1276bf5e4de29d2",
+  "thoughts-locator.md": "5f175e1c177c6e8446a4771c858772c18fc383005719d96ecc45511b4823476f",
+  "web-search-researcher.md": "621963a90b58d6cea58be52dbfe51a40964e89ef3c7ae08737b2a074b453d62d"
+}
