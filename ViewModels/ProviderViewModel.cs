@@ -35,6 +35,9 @@ public partial class ProviderAccountViewModel : ViewModelBase
     [ObservableProperty] private string _label;
     [ObservableProperty] private bool   _isDisabled;
 
+    public event System.EventHandler<bool>? IsDisabledChanged;
+    partial void OnIsDisabledChanged(bool value) => IsDisabledChanged?.Invoke(this, value);
+
     /// <summary>Email or username shown in the expanded account row.</summary>
     [ObservableProperty] private string _email = "";
 

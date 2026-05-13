@@ -308,7 +308,7 @@ public sealed class ProviderCatalogService : IDisposable
         });
     }
 
-    private static void SyncOAuthAccounts(ProviderViewModel vm, List<OAuthAccount> accounts)
+    private void SyncOAuthAccounts(ProviderViewModel vm, List<OAuthAccount> accounts)
     {
         // Remove stale (keyed by email)
         var toRemove = vm.Accounts
@@ -324,6 +324,7 @@ public sealed class ProviderCatalogService : IDisposable
                 Email     = r.Email,
                 PlanBadge = r.Plan,
             };
+            WireAccountDisable(acct);
             vm.Accounts.Add(acct);
         }
 
@@ -341,7 +342,7 @@ public sealed class ProviderCatalogService : IDisposable
         vm.RefreshAccountCount();
     }
 
-    private static void SyncCustomAccounts(ProviderViewModel vm, List<ProviderCredentialRecord> records)
+    private void SyncCustomAccounts(ProviderViewModel vm, List<ProviderCredentialRecord> records)
     {
         // Remove stale
         var toRemove = vm.Accounts
@@ -351,7 +352,11 @@ public sealed class ProviderCatalogService : IDisposable
 
         // Add new
         foreach (var r in records.Where(r => !vm.Accounts.Any(a => a.ApiKey == r.ApiKey)))
-            vm.Accounts.Add(new ProviderAccountViewModel(r.ProviderId, r.ApiKey, r.Label, r.IsDisabled));
+        {
+            var acct = new ProviderAccountViewModel(r.ProviderId, r.ApiKey, r.Label, r.IsDisabled);
+            WireAccountDisable(acct);
+            vm.Accounts.Add(acct);
+        }
 
         // Update disabled state
         foreach (var a in vm.Accounts)
@@ -361,6 +366,17 @@ public sealed class ProviderCatalogService : IDisposable
         }
 
         vm.RefreshAccountCount();
+    }
+
+    private void WireAccountDisable(ProviderAccountViewModel acct)
+    {
+        acct.IsDisabledChanged += (_, disabled) =>
+        {
+            if (acct.IsCustomKey)
+                _store.SetDisabled(acct.ProviderId, acct.ApiKey, disabled);
+            else
+                _oauthDetector.SetDisabled(acct.ProviderId, acct.Email, disabled);
+        };
     }
 
     private static string TitleCase(string id) =>
