@@ -72,7 +72,9 @@ public partial class ProvidersView : UserControl
     {
         if (DataContext is not MainWindowViewModel vm) return;
         if (sender is not Button { Tag: ProviderAccountViewModel account }) return;
-        await vm.RefreshQuotaAsync(account);
+        account.IsRefreshing = true;
+        try   { await vm.RefreshQuotaAsync(account); }
+        finally { account.IsRefreshing = false; }
     }
 
     private async void OnConfirmAddAccount(object? sender, RoutedEventArgs e)

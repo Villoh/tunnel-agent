@@ -292,7 +292,8 @@
                                                                     Tag="{Binding}"
                                                                     VerticalAlignment="Center">
                                                                 <lucide:PackIconLucide Kind="RefreshCw" Width="13" Height="13"
-                                                                                       Foreground="{DynamicResource FgMutedBrush}" />
+                                                                                       Foreground="{DynamicResource FgMutedBrush}"
+                                                                                       Classes.spin="{Binding IsRefreshing}" />
                                                             </Button>
 
                                                             <!-- Remove button -->

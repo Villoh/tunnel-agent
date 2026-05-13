@@ -46,6 +46,8 @@ public partial class ProviderAccountViewModel : ViewModelBase
 
     public bool HasQuota => QuotaBars.Count > 0;
 
+    [ObservableProperty] private bool _isRefreshing;
+
     public ProviderAccountViewModel(string providerId, string apiKey, string label, bool isDisabled)
     {
         ProviderId  = providerId;
