@@ -249,10 +249,10 @@
                                                                                Foreground="{DynamicResource AccentBrush}"
                                                                                FontWeight="Bold" />
                                                                 </Border>
-                                                                <!-- Masked key chip (for custom providers without email) -->
+                                                                <!-- Masked key chip (for custom API-key providers) -->
                                                                 <Border Classes="chip"
                                                                         Background="#14000000"
-                                                                        IsVisible="{Binding Email, Converter={StaticResource InvertBool}}">
+                                                                        IsVisible="{Binding IsCustomKey}">
                                                                     <TextBlock Text="{Binding MaskedKey}"
                                                                                Foreground="{DynamicResource FgMutedBrush}"
                                                                                FontFamily="Cascadia Mono,Consolas,monospace"

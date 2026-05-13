@@ -46,9 +46,11 @@ public partial class ProviderAccountViewModel : ViewModelBase
 
     public bool HasQuota => QuotaBars.Count > 0;
 
-    public string MaskedKey => ApiKey.Length > 12
-        ? $"{ApiKey[..8]}...{ApiKey[^4..]}"
-        : ApiKey;
+    public string MaskedKey => string.IsNullOrEmpty(ApiKey) ? "" :
+        ApiKey.Length > 12 ? $"{ApiKey[..8]}...{ApiKey[^4..]}" : ApiKey;
+
+    /// <summary>True when this is a custom API-key account (no email, shows masked key).</summary>
+    public bool IsCustomKey => !string.IsNullOrEmpty(ApiKey);
 
     /// <summary>Display name: email if available, else label, else masked key.</summary>
     public string DisplayName =>

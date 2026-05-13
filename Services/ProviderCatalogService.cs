@@ -159,7 +159,7 @@ public sealed class ProviderCatalogService : IDisposable
     {
         Providers.Clear();
 
-        var connectedOAuth   = _oauthDetector.GetConnectedProviderIds();
+        var oauthAccounts    = _oauthDetector.GetAccounts();
         var customCredentials = _store.LoadAll()
             .GroupBy(r => r.ProviderId)
             .ToDictionary(g => g.Key, g => g.ToList());
@@ -169,13 +169,15 @@ public sealed class ProviderCatalogService : IDisposable
         {
             var ps      = _settings.Current.Providers.FirstOrDefault(p => p.Id == meta.Id);
             var enabled = ps?.Enabled ?? true;
+            var accounts = oauthAccounts.TryGetValue(meta.Id, out var accs) ? accs : [];
 
             var vm = new ProviderViewModel(meta.Id, meta.Name, meta.Icon, meta.Color, meta.Description, isOAuth: true)
             {
                 IsEnabled = enabled,
-                Connected = connectedOAuth.Contains(meta.Id),
+                Connected = accounts.Any(a => !a.IsDisabled),
             };
 
+            SyncOAuthAccounts(vm, accounts);
             WireEvents(vm);
             Providers.Add(vm);
         }
@@ -248,27 +250,64 @@ public sealed class ProviderCatalogService : IDisposable
     {
         Dispatcher.UIThread.Post(() =>
         {
-            var connectedOAuth = _oauthDetector.GetConnectedProviderIds();
-            var customCreds    = _store.LoadAll()
+            var oauthAccounts = _oauthDetector.GetAccounts();
+            var customCreds   = _store.LoadAll()
                 .GroupBy(r => r.ProviderId)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
-            // Update OAuth connection state
+            // Update OAuth providers
             foreach (var vm in Providers.Where(p => p.IsOAuth))
-                vm.Connected = connectedOAuth.Contains(vm.Id);
+            {
+                var accounts = oauthAccounts.TryGetValue(vm.Id, out var accs) ? accs : [];
+                vm.Connected = accounts.Any(a => !a.IsDisabled);
+                SyncOAuthAccounts(vm, accounts);
+            }
 
             // Update custom provider account lists
             foreach (var vm in Providers.Where(p => !p.IsOAuth))
             {
                 var records = customCreds.TryGetValue(vm.Id, out var r) ? r : [];
-                SyncAccounts(vm, records);
+                SyncCustomAccounts(vm, records);
             }
 
             ProvidersRefreshed?.Invoke(this, EventArgs.Empty);
         });
     }
 
-    private static void SyncAccounts(ProviderViewModel vm, List<ProviderCredentialRecord> records)
+    private static void SyncOAuthAccounts(ProviderViewModel vm, List<OAuthAccount> accounts)
+    {
+        // Remove stale (keyed by email)
+        var toRemove = vm.Accounts
+            .Where(a => !accounts.Any(r => r.Email == a.Email))
+            .ToList();
+        foreach (var a in toRemove) vm.Accounts.Remove(a);
+
+        // Add new
+        foreach (var r in accounts.Where(r => !vm.Accounts.Any(a => a.Email == r.Email)))
+        {
+            var acct = new ProviderAccountViewModel(r.ProviderId, apiKey: "", label: r.Email, r.IsDisabled)
+            {
+                Email     = r.Email,
+                PlanBadge = r.Plan,
+            };
+            vm.Accounts.Add(acct);
+        }
+
+        // Update disabled state
+        foreach (var a in vm.Accounts)
+        {
+            var match = accounts.FirstOrDefault(r => r.Email == a.Email);
+            if (match is not null)
+            {
+                a.IsDisabled = match.IsDisabled;
+                a.PlanBadge  = match.Plan;
+            }
+        }
+
+        vm.RefreshAccountCount();
+    }
+
+    private static void SyncCustomAccounts(ProviderViewModel vm, List<ProviderCredentialRecord> records)
     {
         // Remove stale
         var toRemove = vm.Accounts
