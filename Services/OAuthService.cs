@@ -64,6 +64,12 @@ public sealed class OAuthService : IDisposable
         if (!File.Exists(configPath))
             await _config.WriteConfigAsync();
 
+        // Start branded callback page server
+        var callbackPort   = OAuthCallbackServer.FindFreePort(54200);
+        var callbackServer = new OAuthCallbackServer(callbackPort);
+        var providerDisplayName = ProviderDisplayName(providerId);
+        callbackServer.Start(providerDisplayName);
+
         var psi = new ProcessStartInfo(binaryPath)
         {
             UseShellExecute        = false,
@@ -75,6 +81,8 @@ public sealed class OAuthService : IDisposable
         psi.ArgumentList.Add("--config");
         psi.ArgumentList.Add(configPath);
         psi.ArgumentList.Add($"-{flag}");
+        psi.ArgumentList.Add("-oauth-callback-port");
+        psi.ArgumentList.Add(callbackPort.ToString());
 
         var process = new Process { StartInfo = psi, EnableRaisingEvents = true };
 
@@ -90,6 +98,9 @@ public sealed class OAuthService : IDisposable
         process.Exited += (_, _) =>
         {
             lock (_lock) { if (_authProcess == process) _authProcess = null; }
+            // Dispose callback server 30s after process exits (allow page to be seen)
+            _ = Task.Delay(TimeSpan.FromSeconds(30))
+                    .ContinueWith(_ => callbackServer.Dispose());
         };
 
         try
@@ -160,6 +171,18 @@ public sealed class OAuthService : IDisposable
     public void Dispose() => CancelPreviousAuth();
 
     // ── helpers ───────────────────────────────────────────────────────────────
+
+    private static string ProviderDisplayName(string providerId) => providerId switch
+    {
+        "claude"         => "Claude Code",
+        "codex"          => "OpenAI Codex",
+        "gemini-cli"     => "Gemini CLI",
+        "kimi"           => "Kimi",
+        "github-copilot" => "GitHub Copilot",
+        "antigravity"    => "Antigravity",
+        "qwen"           => "Qwen",
+        _                => providerId,
+    };
 
     private static async Task SendDelayedNewlineAsync(Process process, TimeSpan delay)
     {
