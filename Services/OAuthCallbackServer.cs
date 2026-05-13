@@ -90,64 +90,70 @@ public sealed class OAuthCallbackServer : IDisposable
             *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
             body {
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-              background: #1a1a1f;
+              background: #17171c;
               color: #e8e8ea;
               display: flex;
+              flex-direction: column;
               align-items: center;
               justify-content: center;
               min-height: 100vh;
+              gap: 0;
             }
             .card {
-              background: #25252c;
-              border: 1px solid #333340;
-              border-radius: 16px;
-              padding: 48px 56px;
+              background: #22222a;
+              border: 1px solid #2e2e3a;
+              border-radius: 14px;
+              padding: 44px 52px;
               text-align: center;
-              max-width: 420px;
+              max-width: 400px;
               width: 90%;
-              animation: rise 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+              animation: rise 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             }
             @keyframes rise {
-              from { opacity: 0; transform: translateY(16px); }
+              from { opacity: 0; transform: translateY(12px); }
               to   { opacity: 1; transform: translateY(0); }
             }
             .icon {
-              width: 64px;
-              height: 64px;
-              background: #1a3a2a;
+              width: 56px;
+              height: 56px;
+              background: #1b3328;
               border-radius: 50%;
               display: flex;
               align-items: center;
               justify-content: center;
-              margin: 0 auto 24px;
+              margin: 0 auto 20px;
             }
-            .icon svg { width: 32px; height: 32px; }
+            .icon svg { width: 26px; height: 26px; }
+            .provider {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              background: #2a2a34;
+              border: 1px solid #35353f;
+              border-radius: 6px;
+              padding: 3px 10px;
+              font-size: 12px;
+              font-weight: 500;
+              color: #9090a8;
+              margin-bottom: 18px;
+              letter-spacing: 0.02em;
+            }
+            .dot { width: 6px; height: 6px; border-radius: 50%; background: #3cb371; }
             h1 {
-              font-size: 22px;
+              font-size: 20px;
               font-weight: 600;
-              margin-bottom: 10px;
-              color: #f0f0f2;
+              margin-bottom: 8px;
+              color: #f0f0f4;
             }
             p {
-              font-size: 14px;
-              color: #888898;
-              line-height: 1.6;
-            }
-            .provider {
-              display: inline-block;
-              background: #2e2e38;
-              border: 1px solid #3a3a48;
-              border-radius: 6px;
-              padding: 2px 10px;
               font-size: 13px;
-              font-weight: 500;
-              color: #c8c8d8;
-              margin-bottom: 24px;
+              color: #6a6a80;
+              line-height: 1.65;
             }
-            .close-hint {
-              margin-top: 32px;
-              font-size: 12px;
-              color: #555568;
+            .hint {
+              margin-top: 28px;
+              font-size: 11px;
+              color: #42424f;
             }
           </style>
         </head>
@@ -159,13 +165,11 @@ public sealed class OAuthCallbackServer : IDisposable
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
             </div>
-            <span class="provider">{{providerName}}</span>
-            <h1>Authentication successful</h1>
-            <p>Your account has been connected.<br>
-               You can close this tab and return to TunnelAgent.</p>
-            <p class="close-hint">This tab will close automatically in a few seconds.</p>
+            <div class="provider"><span class="dot"></span>{{providerName}}</div>
+            <h1>Account connected</h1>
+            <p>Authentication complete.<br>Return to TunnelAgent — this tab can be closed.</p>
+            <p class="hint">You can close this tab now.</p>
           </div>
-          <script>setTimeout(() => window.close(), 3000);</script>
         </body>
         </html>
         """;
