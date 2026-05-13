@@ -250,7 +250,11 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     public async Task RemoveAccountAsync(ProviderAccountViewModel account)
     {
-        await _catalog.RemoveAccountAsync(account.ProviderId, account.ApiKey);
+        if (account.IsCustomKey)
+            await _catalog.RemoveAccountAsync(account.ProviderId, account.ApiKey);
+        else
+            _catalog.RemoveOAuthAccount(account.ProviderId, account.Email);
+
         OnPropertyChanged(nameof(ConnectedProviderCount));
     }
 
