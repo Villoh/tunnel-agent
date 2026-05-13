@@ -324,6 +324,24 @@
         <Setter Property="Background" Value="#3CB371" />
     </Style>
 
+    <!-- Name cell inside provider row: click to expand, no visual chrome -->
+    <Style Selector="Button.provider-row-name">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.provider-row-name /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.provider-row-name:disabled /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+
     <!-- Provider row expand button (full-width, no chrome) -->
     <Style Selector="Button.provider-row">
         <Setter Property="Background" Value="Transparent" />

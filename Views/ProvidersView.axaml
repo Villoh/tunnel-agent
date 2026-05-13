@@ -85,60 +85,54 @@
                             <DataTemplate x:DataType="vm:ProviderViewModel">
                                 <StackPanel>
 
-                                    <!-- Main provider row (clickable to expand) -->
-                                    <Button Classes="provider-row"
-                                            Command="{Binding ToggleExpandCommand}"
-                                            IsEnabled="{Binding HasAccounts}">
-                                        <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+                                    <!-- Main provider row -->
+                                    <Border Padding="16,12">
+                                    <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
 
-                                            <!-- Toggle pill -->
-                                            <ToggleButton Grid.Column="0"
-                                                          Classes="enable-toggle"
-                                                          IsChecked="{Binding IsEnabled, Mode=TwoWay}"
-                                                          VerticalAlignment="Center"
-                                                          Margin="0,0,12,0" />
+                                        <!-- Toggle pill (independent, always enabled) -->
+                                        <ToggleButton Grid.Column="0"
+                                                      Classes="enable-toggle"
+                                                      IsChecked="{Binding IsEnabled, Mode=TwoWay}"
+                                                      VerticalAlignment="Center"
+                                                      Margin="0,0,12,0" />
 
-                                            <!-- Provider icon -->
-                                            <Border Grid.Column="1"
-                                                    Classes="provider-logo"
-                                                    Width="28" Height="28"
-                                                    Background="{Binding LogoColor, Converter={StaticResource HexBrush}}"
-                                                    Opacity="{Binding IsEnabled, Converter={StaticResource BoolToOpacity}}"
-                                                    Margin="0,0,10,0">
-                                                <si:PackIconSimpleIcons Kind="{Binding IconKind}"
-                                                                        Foreground="White"
-                                                                        Width="14" Height="14"
-                                                                        HorizontalAlignment="Center"
-                                                                        VerticalAlignment="Center" />
-                                            </Border>
+                                        <!-- Provider icon -->
+                                        <Border Grid.Column="1"
+                                                Classes="provider-logo"
+                                                Width="28" Height="28"
+                                                Background="{Binding LogoColor, Converter={StaticResource HexBrush}}"
+                                                Opacity="{Binding IsEnabled, Converter={StaticResource BoolToOpacity}}"
+                                                Margin="0,0,10,0">
+                                            <si:PackIconSimpleIcons Kind="{Binding IconKind}"
+                                                                    Foreground="White"
+                                                                    Width="14" Height="14"
+                                                                    HorizontalAlignment="Center"
+                                                                    VerticalAlignment="Center" />
+                                        </Border>
 
-                                            <!-- Name + sub-status -->
-                                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="1">
+                                        <!-- Name + sub-status (clickable area for expand) -->
+                                        <Button Grid.Column="2"
+                                                Classes="provider-row-name"
+                                                Command="{Binding ToggleExpandCommand}"
+                                                IsEnabled="{Binding HasAccounts}">
+                                            <StackPanel VerticalAlignment="Center" Spacing="1">
                                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                                     <TextBlock Classes="row-label"
                                                                Text="{Binding Name}"
                                                                VerticalAlignment="Center" />
-                                                    <!-- "disabled" badge when toggled off -->
                                                     <Border Classes="chip"
                                                             Background="#22FF7A00"
                                                             IsVisible="{Binding IsEnabled, Converter={StaticResource InvertBool}}"
                                                             VerticalAlignment="Center">
-                                                        <TextBlock Text="disabled"
-                                                                   Foreground="#CC7A2B"
-                                                                   FontSize="10" />
+                                                        <TextBlock Text="disabled" Foreground="#CC7A2B" FontSize="10" />
                                                     </Border>
-                                                    <!-- Connecting spinner text -->
                                                     <Border Classes="chip"
                                                             Background="#22AAAAFF"
                                                             IsVisible="{Binding IsConnecting}"
                                                             VerticalAlignment="Center">
-                                                        <TextBlock Text="connecting…"
-                                                                   Foreground="#8888FF"
-                                                                   FontSize="10" />
+                                                        <TextBlock Text="connecting…" Foreground="#8888FF" FontSize="10" />
                                                     </Border>
                                                 </StackPanel>
-
-                                                <!-- Sub-status line -->
                                                 <StackPanel Orientation="Horizontal" Spacing="2"
                                                             IsVisible="{Binding IsEnabled}">
                                                     <TextBlock Text="{Binding ConnectedSubText}"
@@ -150,6 +144,7 @@
                                                                IsVisible="{Binding HasAccounts}" />
                                                 </StackPanel>
                                             </StackPanel>
+                                        </Button>
 
                                             <!-- Add Account / Connect / Disconnect buttons -->
                                             <StackPanel Grid.Column="3"
@@ -231,8 +226,8 @@
                                                                         Foreground="{DynamicResource FgFaintBrush}"
                                                                         IsVisible="{Binding IsExpanded}" />
                                             </Grid>
-                                        </Grid>
-                                    </Button>
+                                    </Grid>
+                                    </Border>
 
                                     <!-- ── Expanded accounts panel ──────────────────────── -->
                                     <ItemsControl ItemsSource="{Binding Accounts}"
