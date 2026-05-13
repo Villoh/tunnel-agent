@@ -68,6 +68,13 @@ public partial class ProvidersView : UserControl
             vm.ShowOAuthStatus = false;
     }
 
+    private async void OnRefreshQuota(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        if (sender is not Button { Tag: ProviderAccountViewModel account }) return;
+        await vm.RefreshQuotaAsync(account);
+    }
+
     private async void OnConfirmAddAccount(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not MainWindowViewModel vm) return;

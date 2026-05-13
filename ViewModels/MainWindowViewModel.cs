@@ -217,6 +217,14 @@ public partial class MainWindowViewModel : ViewModelBase
     public void DisconnectOAuth(string providerId) =>
         _catalog.DisconnectOAuth(providerId);
 
+    public Task RefreshQuotaAsync(ProviderAccountViewModel account)
+    {
+        var provider = Providers.FirstOrDefault(p => p.Accounts.Contains(account));
+        return provider is not null
+            ? _catalog.RefreshAccountQuotaAsync(provider, account)
+            : Task.CompletedTask;
+    }
+
     // ── Add-account flow ─────────────────────────────────────────────────────
 
     private void OnAddAccountRequested(object? sender, EventArgs e)

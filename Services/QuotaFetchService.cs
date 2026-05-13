@@ -29,6 +29,10 @@ public sealed class QuotaFetchService
         await Task.WhenAll(tasks);
     }
 
+    public Task FetchAccountPublicAsync(string providerId, ProviderAccountViewModel account,
+        CancellationToken ct = default) =>
+        FetchAccountAsync(providerId, account, ct);
+
     private Task FetchAccountAsync(string providerId, ProviderAccountViewModel account, CancellationToken ct) =>
         providerId switch
         {
