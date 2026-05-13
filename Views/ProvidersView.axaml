@@ -89,10 +89,11 @@
                                     <Border Padding="16,12">
                                     <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
 
-                                        <!-- Toggle pill (independent, always enabled) -->
+                                        <!-- Toggle pill: disabled when no accounts (nothing to route to) -->
                                         <ToggleButton Grid.Column="0"
                                                       Classes="enable-toggle"
                                                       IsChecked="{Binding IsEnabled, Mode=TwoWay}"
+                                                      IsEnabled="{Binding HasAccounts}"
                                                       VerticalAlignment="Center"
                                                       Margin="0,0,12,0" />
 
@@ -146,64 +147,40 @@
                                             </StackPanel>
                                         </Button>
 
-                                            <!-- Add Account / Connect / Disconnect buttons -->
+                                            <!-- Action buttons -->
                                             <StackPanel Grid.Column="3"
                                                         Orientation="Horizontal"
-                                                        Spacing="6"
+                                                        Spacing="2"
                                                         VerticalAlignment="Center"
                                                         Margin="8,0">
 
-                                                <!-- OAuth: Connecting spinner -->
-                                                <Button Classes="app"
+                                                <!-- OAuth: connecting spinner chip -->
+                                                <Border Classes="chip" Background="#22AAAAFF"
                                                         IsVisible="{Binding IsConnecting}"
-                                                        IsEnabled="False"
-                                                        Content="Connecting…"
-                                                        FontSize="12" Padding="10,3" />
+                                                        VerticalAlignment="Center" Margin="0,0,4,0">
+                                                    <TextBlock Text="connecting…" Foreground="#8888FF" FontSize="10" />
+                                                </Border>
 
-                                                <!-- OAuth: + Add account (when connected, not connecting) -->
+                                                <!-- OAuth: + (connect / add account) -->
                                                 <Button Classes="icon-btn"
-                                                        ToolTip.Tip="Add another account"
+                                                        ToolTip.Tip="{Binding Connected, Converter={StaticResource InvertBool}, ConverterParameter=tip}"
+                                                        IsVisible="{Binding IsOAuth}"
+                                                        IsEnabled="{Binding IsConnecting, Converter={StaticResource InvertBool}}"
                                                         Click="OnOAuthConnect"
                                                         Tag="{Binding}">
-                                                    <Button.IsVisible>
-                                                        <MultiBinding Converter="{x:Static cv:MultiBoolAndConverter.Instance}">
-                                                            <Binding Path="Connected" />
-                                                            <Binding Path="IsConnecting" Converter="{StaticResource InvertBool}" />
-                                                            <Binding Path="IsOAuth" />
-                                                        </MultiBinding>
-                                                    </Button.IsVisible>
                                                     <lucide:PackIconLucide Kind="Plus" Width="14" Height="14"
                                                                            Foreground="{DynamicResource FgMutedBrush}" />
                                                 </Button>
 
-                                                <!-- OAuth: Disconnect (when connected, not connecting) -->
-                                                <Button Classes="app"
-                                                        Content="Disconnect"
+                                                <!-- OAuth: disconnect icon (only when connected) -->
+                                                <Button Classes="icon-btn"
+                                                        ToolTip.Tip="Disconnect all accounts"
+                                                        IsVisible="{Binding Connected}"
+                                                        IsEnabled="{Binding IsConnecting, Converter={StaticResource InvertBool}}"
                                                         Click="OnOAuthDisconnect"
-                                                        Tag="{Binding}"
-                                                        FontSize="12" Padding="10,3">
-                                                    <Button.IsVisible>
-                                                        <MultiBinding Converter="{x:Static cv:MultiBoolAndConverter.Instance}">
-                                                            <Binding Path="Connected" />
-                                                            <Binding Path="IsConnecting" Converter="{StaticResource InvertBool}" />
-                                                            <Binding Path="IsOAuth" />
-                                                        </MultiBinding>
-                                                    </Button.IsVisible>
-                                                </Button>
-
-                                                <!-- OAuth: Connect (when not connected, not connecting) -->
-                                                <Button Classes="app"
-                                                        Content="Connect"
-                                                        Click="OnOAuthConnect"
-                                                        Tag="{Binding}"
-                                                        FontSize="12" Padding="10,3">
-                                                    <Button.IsVisible>
-                                                        <MultiBinding Converter="{x:Static cv:MultiBoolAndConverter.Instance}">
-                                                            <Binding Path="Connected" Converter="{StaticResource InvertBool}" />
-                                                            <Binding Path="IsConnecting" Converter="{StaticResource InvertBool}" />
-                                                            <Binding Path="IsOAuth" />
-                                                        </MultiBinding>
-                                                    </Button.IsVisible>
+                                                        Tag="{Binding}">
+                                                    <lucide:PackIconLucide Kind="LogOut" Width="14" Height="14"
+                                                                           Foreground="{DynamicResource FgMutedBrush}" />
                                                 </Button>
 
                                                 <!-- Custom provider: Add Account -->
