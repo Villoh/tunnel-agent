@@ -161,6 +161,12 @@ public partial class ProviderViewModel : ViewModelBase
     /// <summary>Raised when the user toggles the provider on/off.</summary>
     public event System.EventHandler<bool>? IsEnabledChanged;
 
+    /// <summary>Raised when the expand chevron is toggled.</summary>
+    public event System.EventHandler<bool>? IsExpandedChanged;
+
+    partial void OnIsExpandedChanged(bool value) =>
+        IsExpandedChanged?.Invoke(this, value);
+
     /// <summary>Raised when the user requests adding a new account.</summary>
     public event System.EventHandler? AddAccountRequested;
 

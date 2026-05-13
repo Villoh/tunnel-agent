@@ -40,6 +40,7 @@ public sealed class ProviderCatalogService : IDisposable
     private readonly OAuthTokenDetector _oauthDetector;
     private readonly AuthFileWatcher _watcher;
     private readonly OAuthService _oauth;
+    private readonly QuotaFetchService _quota;
 
     public List<ProviderViewModel> Providers { get; } = [];
 
@@ -53,6 +54,7 @@ public sealed class ProviderCatalogService : IDisposable
         _oauthDetector = new OAuthTokenDetector(IPlatformInfo.Current.AuthDirectory);
         _watcher       = new AuthFileWatcher(IPlatformInfo.Current.AuthDirectory);
         _oauth         = new OAuthService(config);
+        _quota         = new QuotaFetchService(IPlatformInfo.Current.AuthDirectory);
 
         _watcher.Changed += OnAuthDirChanged;
     }
@@ -244,6 +246,13 @@ public sealed class ProviderCatalogService : IDisposable
     {
         vm.IsEnabledChanged += async (_, enabled) =>
             await SetProviderEnabledAsync(vm.Id, enabled);
+
+        // Fetch quota when the user expands a connected OAuth provider
+        vm.IsExpandedChanged += async (_, isExpanded) =>
+        {
+            if (isExpanded && vm.IsOAuth && vm.Accounts.Count > 0)
+                await _quota.FetchAndApplyAsync(vm);
+        };
     }
 
     private void OnAuthDirChanged(object? sender, EventArgs e)
