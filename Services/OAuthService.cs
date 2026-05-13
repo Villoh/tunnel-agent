@@ -64,11 +64,17 @@ public sealed class OAuthService : IDisposable
         if (!File.Exists(configPath))
             await _config.WriteConfigAsync();
 
-        // Start branded callback page server
-        var callbackPort   = OAuthCallbackServer.FindFreePort(54200);
-        var callbackServer = new OAuthCallbackServer(callbackPort);
-        var providerDisplayName = ProviderDisplayName(providerId);
-        callbackServer.Start(providerDisplayName);
+        // Start branded callback page server on the port the binary uses by default.
+        // Each provider has a fixed callback port — we intercept it to serve our page.
+        // NOTE: do NOT pass -oauth-callback-port; the binaries ignore it or conflict.
+        var callbackPort    = DefaultCallbackPort(providerId);
+        var displayName     = ProviderDisplayName(providerId);
+        OAuthCallbackServer? callbackServer = null;
+        if (callbackPort > 0 && OAuthCallbackServer.IsPortAvailable(callbackPort))
+        {
+            callbackServer = new OAuthCallbackServer(callbackPort);
+            callbackServer.Start(displayName);
+        }
 
         var psi = new ProcessStartInfo(binaryPath)
         {
@@ -81,8 +87,6 @@ public sealed class OAuthService : IDisposable
         psi.ArgumentList.Add("--config");
         psi.ArgumentList.Add(configPath);
         psi.ArgumentList.Add($"-{flag}");
-        psi.ArgumentList.Add("-oauth-callback-port");
-        psi.ArgumentList.Add(callbackPort.ToString());
 
         var process = new Process { StartInfo = psi, EnableRaisingEvents = true };
 
@@ -99,8 +103,9 @@ public sealed class OAuthService : IDisposable
         {
             lock (_lock) { if (_authProcess == process) _authProcess = null; }
             // Dispose callback server 30s after process exits (allow page to be seen)
-            _ = Task.Delay(TimeSpan.FromSeconds(30))
-                    .ContinueWith(_ => callbackServer.Dispose());
+            if (callbackServer is not null)
+                _ = Task.Delay(TimeSpan.FromSeconds(30))
+                        .ContinueWith(_ => callbackServer.Dispose());
         };
 
         try
@@ -171,6 +176,19 @@ public sealed class OAuthService : IDisposable
     public void Dispose() => CancelPreviousAuth();
 
     // ── helpers ───────────────────────────────────────────────────────────────
+
+    /// <summary>Known fixed callback ports per provider (0 = skip callback server).</summary>
+    private static int DefaultCallbackPort(string providerId) => providerId switch
+    {
+        "claude"         => 3000,
+        "codex"          => 3000,
+        "gemini-cli"     => 4242,
+        "kimi"           => 3000,
+        "github-copilot" => 0,    // device code flow, no HTTP redirect
+        "antigravity"    => 3000,
+        "qwen"           => 3000,
+        _                => 0,
+    };
 
     private static string ProviderDisplayName(string providerId) => providerId switch
     {

@@ -278,18 +278,23 @@ public sealed class OAuthCallbackServer : IDisposable
 
     // ── Port finder ───────────────────────────────────────────────────────────
 
+    public static bool IsPortAvailable(int port)
+    {
+        try
+        {
+            var l = new System.Net.Sockets.TcpListener(IPAddress.Loopback, port);
+            l.Start();
+            l.Stop();
+            return true;
+        }
+        catch { return false; }
+    }
+
     public static int FindFreePort(int preferredStart = 54200)
     {
         for (var port = preferredStart; port < preferredStart + 100; port++)
         {
-            try
-            {
-                var l = new System.Net.Sockets.TcpListener(IPAddress.Loopback, port);
-                l.Start();
-                l.Stop();
-                return port;
-            }
-            catch { }
+            if (IsPortAvailable(port)) return port;
         }
         return preferredStart;
     }
