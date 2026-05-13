@@ -90,7 +90,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public ObservableCollection<ProviderViewModel> Providers { get; } = new();
     public ObservableCollection<AgentViewModel> Agents { get; } = new();
-    public ObservableCollection<AvailableModelGroupViewModel> AvailableModelGroups { get; } = new();
+    public ObservableCollection<AvailableModelGroupViewModel> AvailableModelGroups { get; }
     public ObservableCollection<ActivityLogViewModel> ActivityLogs { get; } = new();
 
     public string EndpointUrl => $"http://127.0.0.1:{Port}";
@@ -109,6 +109,10 @@ public partial class MainWindowViewModel : ViewModelBase
         _engine   = engine  ?? new EngineService(settings);
         var engineConfig = new EngineConfigService(settings);
         _catalog  = catalog ?? new ProviderCatalogService(settings, engineConfig);
+
+        AvailableModelGroups = new ObservableCollection<AvailableModelGroupViewModel>();
+        AvailableModelGroups.CollectionChanged += (_, _) =>
+            OnPropertyChanged(nameof(TotalAvailableModelCount));
 
         _modelFetch = new TunnelAgent.Services.ModelFetchService(settings);
 
