@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data.Converters;
@@ -108,6 +109,14 @@ public sealed class InvertBoolConverter : IValueConverter
         value is bool b ? !b : value;
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
         value is bool b ? !b : value;
+}
+
+/// <summary>MultiBinding AND: returns true only when ALL bound bool values are true.</summary>
+public sealed class MultiBoolAndConverter : IMultiValueConverter
+{
+    public static readonly MultiBoolAndConverter Instance = new();
+    public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture) =>
+        values.All(v => v is true);
 }
 
 // Converter used in ConfigurationView to show/hide the download progress bar.
