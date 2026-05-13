@@ -22,7 +22,7 @@ public partial class QuotaBarViewModel : ViewModelBase
     /// <summary>Right-side label, e.g. "22% used".</summary>
     public string UsedLabel => $"{Used * 100:0}% used";
 
-    partial void OnUsedChanged(double _) => OnPropertyChanged(nameof(UsedLabel));
+    partial void OnUsedChanged(double value) => OnPropertyChanged(nameof(UsedLabel));
 }
 
 // ── Account slot ─────────────────────────────────────────────────────────────
@@ -131,14 +131,14 @@ public partial class ProviderViewModel : ViewModelBase
         OnPropertyChanged(nameof(ConnectedSubText));
     }
 
-    partial void OnConnectedChanged(bool _)
+    partial void OnConnectedChanged(bool value)
     {
         OnPropertyChanged(nameof(StatusColor));
         OnPropertyChanged(nameof(ConnectedSubText));
         OnPropertyChanged(nameof(HasAccounts));
     }
 
-    partial void OnAccountChanged(string _)
+    partial void OnAccountChanged(string value)
     {
         OnPropertyChanged(nameof(ConnectedSubText));
     }

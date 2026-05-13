@@ -269,36 +269,47 @@
         <Setter Property="TextAlignment" Value="Center" />
     </Style>
 
-    <!-- Enable/disable toggle pill — pill track + white thumb overlay -->
+    <!-- Enable/disable toggle pill with sliding white thumb via ControlTemplate -->
     <Style Selector="ToggleButton.enable-toggle">
-        <Setter Property="Background" Value="#3A3A3A" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="CornerRadius" Value="999" />
         <Setter Property="Width" Value="36" />
         <Setter Property="Height" Value="20" />
-        <Setter Property="Padding" Value="0" />
         <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="HorizontalContentAlignment" Value="Left" />
-        <Setter Property="Content">
-            <Setter.Value>
-                <Border Width="14" Height="14" CornerRadius="999"
-                        Background="White" Margin="3,0,0,0" />
-            </Setter.Value>
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border x:Name="Track"
+                        Width="36" Height="20"
+                        CornerRadius="10"
+                        Background="#3A3A3A">
+                    <Border.Transitions>
+                        <Transitions>
+                            <BrushTransition Property="Background" Duration="0:0:0.15" />
+                        </Transitions>
+                    </Border.Transitions>
+                    <Canvas Width="36" Height="20">
+                        <Border x:Name="Thumb"
+                                Width="14" Height="14"
+                                CornerRadius="7"
+                                Background="White"
+                                Canvas.Left="3"
+                                Canvas.Top="3">
+                            <Border.Transitions>
+                                <Transitions>
+                                    <DoubleTransition Property="Canvas.Left" Duration="0:0:0.15" Easing="CubicEaseInOut" />
+                                </Transitions>
+                            </Border.Transitions>
+                        </Border>
+                    </Canvas>
+                </Border>
+            </ControlTemplate>
         </Setter>
     </Style>
-    <Style Selector="ToggleButton.enable-toggle:checked">
+    <Style Selector="ToggleButton.enable-toggle:checked /template/ Border#Track">
         <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
-        <Setter Property="HorizontalContentAlignment" Value="Right" />
-        <Setter Property="Content">
-            <Setter.Value>
-                <Border Width="14" Height="14" CornerRadius="999"
-                        Background="White" Margin="0,0,3,0" />
-            </Setter.Value>
-        </Setter>
     </Style>
-    <Style Selector="ToggleButton.enable-toggle /template/ ContentPresenter">
-        <Setter Property="Background" Value="Transparent" />
+    <Style Selector="ToggleButton.enable-toggle:checked /template/ Border#Thumb">
+        <Setter Property="Canvas.Left" Value="19" />
     </Style>
 
     <!-- Quota bar track -->
