@@ -158,7 +158,7 @@
 
                                                 <!-- OAuth: + (connect / add account) -->
                                                 <Button Classes="icon-btn"
-                                                        ToolTip.Tip="{Binding Connected, Converter={StaticResource InvertBool}, ConverterParameter=tip}"
+                                                        ToolTip.Tip="Add account"
                                                         IsVisible="{Binding IsOAuth}"
                                                         IsEnabled="{Binding IsConnecting, Converter={StaticResource InvertBool}}"
                                                         Click="OnOAuthConnect"
