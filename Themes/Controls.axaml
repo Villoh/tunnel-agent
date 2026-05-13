@@ -334,8 +334,14 @@
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Cursor" Value="Hand" />
     </Style>
+    <Style Selector="Button.provider-row /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
     <Style Selector="Button.provider-row:pointerover /template/ ContentPresenter">
         <Setter Property="Background" Value="#08FFFFFF" />
+    </Style>
+    <Style Selector="Button.provider-row:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="#10FFFFFF" />
     </Style>
 
     <!-- Spinning refresh icon -->
