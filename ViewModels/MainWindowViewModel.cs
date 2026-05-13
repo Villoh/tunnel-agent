@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using IconPacks.Avalonia.SimpleIcons;
 using TunnelAgent.Services;
 
 namespace TunnelAgent.ViewModels;
@@ -14,6 +13,7 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly EngineService _engine;
     private readonly SettingsService _settings;
+    private readonly ProviderCatalogService _catalog;
 
     [ObservableProperty] private SectionKey _selectedSection = SectionKey.Providers;
     [ObservableProperty] private bool _isSidebarCollapsed;
@@ -29,6 +29,15 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _showUpdateToast;
     [ObservableProperty] private bool _showUpdateSuccess;
     [ObservableProperty] private string _engineStatusText = "Stopped";
+
+    // Add-account dialog state
+    [ObservableProperty] private bool _showAddAccountDialog;
+    [ObservableProperty] private ProviderViewModel? _addAccountTarget;
+
+    // OAuth status feedback
+    [ObservableProperty] private bool _showOAuthStatus;
+    [ObservableProperty] private bool _oAuthStatusIsError;
+    [ObservableProperty] private string _oAuthStatusMessage = "";
 
     // Settings-backed properties
     public int Port
@@ -65,13 +74,12 @@ public partial class MainWindowViewModel : ViewModelBase
         set { _settings.Current.AutoUpdate = value; _settings.Save(); OnPropertyChanged(); UpdateBadgeState(); }
     }
 
-    // Kept for sidebar status dot (maps EngineState → ServerState colors)
     public ServerState ServerState => EngineState switch
     {
-        EngineState.Running   => ServerState.Running,
-        EngineState.Starting  => ServerState.Starting,
-        EngineState.Error     => ServerState.Error,
-        _                     => ServerState.Stopped
+        EngineState.Running  => ServerState.Running,
+        EngineState.Starting => ServerState.Starting,
+        EngineState.Error    => ServerState.Error,
+        _                    => ServerState.Stopped
     };
 
     public string AppVersion { get; } = TunnelAgent.AppVersion.Current;
@@ -84,21 +92,25 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public string EndpointUrl => $"http://127.0.0.1:{Port}";
 
-    public int ConnectedProviderCount   => Providers.Count(p => p.Connected);
+    public int ConnectedProviderCount   => Providers.Count(p => p.Connected || p.ActiveAccountCount > 0);
     public int EnabledAgentCount        => Agents.Count(a => a.Installed && a.Enabled);
     public int ActivityLogCount         => ActivityLogs.Count;
     public int TotalAvailableModelCount => AvailableModelGroups.Sum(g => g.ModelCount);
 
-    public MainWindowViewModel() : this(new SettingsService(), null!) { }
+    // Design-time constructor
+    public MainWindowViewModel() : this(new SettingsService(), null!, null!) { }
 
-    public MainWindowViewModel(SettingsService settings, EngineService engine)
+    public MainWindowViewModel(SettingsService settings, EngineService engine, ProviderCatalogService catalog)
     {
         _settings = settings;
-        _engine = engine ?? new EngineService(settings);
+        _engine   = engine  ?? new EngineService(settings);
+        var engineConfig = new EngineConfigService(settings);
+        _catalog  = catalog ?? new ProviderCatalogService(settings, engineConfig);
 
-        _engine.StateChanged += OnEngineStateChanged;
+        _engine.StateChanged  += OnEngineStateChanged;
+        _catalog.ProvidersRefreshed += OnProvidersRefreshed;
 
-        SeedDemoData();
+        SeedDemoAgents();
     }
 
     private bool _updateToastShown;
@@ -109,16 +121,15 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             var wasAvailable = UpdateAvailable;
 
-            EngineState = _engine.State;
+            EngineState      = _engine.State;
             InstalledVersion = _engine.InstalledVersion;
-            LatestVersion = _engine.LatestVersion;
+            LatestVersion    = _engine.LatestVersion;
             DownloadProgress = _engine.DownloadProgress;
-            UpdateAvailable = _engine.UpdateAvailable;
+            UpdateAvailable  = _engine.UpdateAvailable;
             EngineStatusText = BuildEngineStatusText();
             UpdateBadgeState();
             OnPropertyChanged(nameof(ServerState));
 
-            // Show toast the first time an update becomes available this session
             if (UpdateAvailable && !wasAvailable && !_updateToastShown)
             {
                 _updateToastShown = true;
@@ -136,6 +147,14 @@ public partial class MainWindowViewModel : ViewModelBase
         });
     }
 
+    private void OnProvidersRefreshed(object? sender, EventArgs e)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            OnPropertyChanged(nameof(ConnectedProviderCount));
+        });
+    }
+
     private string BuildEngineStatusText() => _engine.State switch
     {
         EngineState.Downloading  => $"Downloading {_engine.DownloadProgress:0}%",
@@ -147,14 +166,11 @@ public partial class MainWindowViewModel : ViewModelBase
         _                        => "Stopped"
     };
 
-    private void UpdateBadgeState()
-    {
+    private void UpdateBadgeState() =>
         ConfigHasBadge = _engine.UpdateAvailable && !AutoUpdate;
-    }
 
     private async Task ApplyPortChangeAsync()
     {
-        // Rewrite config with the new port. If the server is running, restart it.
         var wasRunning = _engine.IsRunning;
         if (wasRunning) await _engine.StopAsync();
         await _engine.WriteConfigAsync();
@@ -164,9 +180,73 @@ public partial class MainWindowViewModel : ViewModelBase
     public async Task InitializeAsync()
     {
         await _settings.LoadAsync();
+        await _catalog.InitializeAsync();
+
+        // Populate Providers collection from catalog
+        Providers.Clear();
+        foreach (var vm in _catalog.Providers)
+        {
+            vm.AddAccountRequested += OnAddAccountRequested;
+            Providers.Add(vm);
+        }
+        OnPropertyChanged(nameof(ConnectedProviderCount));
+
         await _engine.InitializeAsync();
-        // Toast/badge/auto-update are handled reactively in OnEngineStateChanged
     }
+
+    // ── OAuth connect / disconnect ──────────────────────────────────────────
+
+    /// <summary>
+    /// Starts the OAuth login flow for the given provider.
+    /// Returns a user-facing message to display.
+    /// </summary>
+    public async Task<(bool Success, string Message)> ConnectOAuthAsync(string providerId)
+    {
+        var provider = Providers.FirstOrDefault(p => p.Id == providerId);
+        if (provider is not null) provider.IsConnecting = true;
+        try
+        {
+            return await _catalog.ConnectOAuthAsync(providerId);
+        }
+        finally
+        {
+            if (provider is not null) provider.IsConnecting = false;
+        }
+    }
+
+    public void DisconnectOAuth(string providerId) =>
+        _catalog.DisconnectOAuth(providerId);
+
+    // ── Add-account flow ─────────────────────────────────────────────────────
+
+    private void OnAddAccountRequested(object? sender, EventArgs e)
+    {
+        if (sender is ProviderViewModel vm)
+        {
+            AddAccountTarget    = vm;
+            ShowAddAccountDialog = true;
+        }
+    }
+
+    /// <summary>Called by the AddAccount dialog on confirm.</summary>
+    public async Task ConfirmAddAccountAsync(
+        string providerId, string baseUrl, string apiKey, string? label)
+    {
+        ShowAddAccountDialog = false;
+        await _catalog.AddAccountAsync(providerId, baseUrl, apiKey, label);
+        OnPropertyChanged(nameof(ConnectedProviderCount));
+    }
+
+    [RelayCommand] private void DismissAddAccountDialog() => ShowAddAccountDialog = false;
+
+    [RelayCommand]
+    public async Task RemoveAccountAsync(ProviderAccountViewModel account)
+    {
+        await _catalog.RemoveAccountAsync(account.ProviderId, account.ApiKey);
+        OnPropertyChanged(nameof(ConnectedProviderCount));
+    }
+
+    // ── Engine commands ───────────────────────────────────────────────────────
 
     [RelayCommand] private void SelectProviders()     => SelectedSection = SectionKey.Providers;
     [RelayCommand] private void SelectAgents()        => SelectedSection = SectionKey.Agents;
@@ -187,7 +267,7 @@ public partial class MainWindowViewModel : ViewModelBase
         try { await _engine.DownloadAndInstallAsync(); }
         catch { return; }
 
-        ConfigHasBadge = false;
+        ConfigHasBadge    = false;
         _updateToastShown = false;
 
         ShowUpdateSuccess = true;
@@ -212,52 +292,38 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand] private void StopServer() => _ = _engine.StopAsync();
 
     [RelayCommand]
-    private void ToggleProvider(ProviderViewModel p)
-    {
-        p.Connected = !p.Connected;
-        OnPropertyChanged(nameof(ConnectedProviderCount));
-    }
-
-    [RelayCommand]
     private void ToggleAgent(AgentViewModel a)
     {
         a.Enabled = !a.Enabled;
         OnPropertyChanged(nameof(EnabledAgentCount));
     }
 
-    private void SeedDemoData()
+    // ── Demo data (agents + activity only — providers come from catalog) ──────
+
+    private void SeedDemoAgents()
     {
-        var claude = new ProviderViewModel("claude", "Claude Code", PackIconSimpleIconsKind.Claude, "#D97757", "Anthropic models via OAuth.")
-        { Connected = true, Account = "alex@studio.dev", Model = "sonnet-4.5" };
-        foreach (var v in new double[] { .4,.6,.3,.8,.5,.9,.7,.6,.85,.5,.7 }) claude.Spark.Add(v);
-
-        var codex = new ProviderViewModel("codex", "OpenAI Codex", PackIconSimpleIconsKind.OpenAi, "#23262E", "OpenAI Codex via ChatGPT plan.")
-        { Connected = true, Account = "alex.openai", Model = "gpt-5-codex" };
-        foreach (var v in new double[] { .2,.5,.4,.3,.6,.4,.7,.5,.4,.65,.5 }) codex.Spark.Add(v);
-
-        Providers.Add(claude); Providers.Add(codex);
-
-        Agents.Add(new AgentViewModel("claude-code", "Claude Code", "claude",      "Terminal", true) { Enabled = true,  RouteProviderId = "claude" });
-        Agents.Add(new AgentViewModel("codex",       "Codex CLI",   "codex",       "Code",     true) { Enabled = true,  RouteProviderId = "codex"  });
-        Agents.Add(new AgentViewModel("cursor",      "Cursor Agent","cursor-agent","Sparkles", true) { Enabled = false, RouteProviderId = "claude" });
-        Agents.Add(new AgentViewModel("aider",       "Aider",       "aider",       "Terminal", false, "Install via pip to route through Tunnel."));
+        Agents.Add(new AgentViewModel("claude-code", "Claude Code", "claude",       "Terminal", true)  { Enabled = true,  RouteProviderId = "claude" });
+        Agents.Add(new AgentViewModel("codex",       "Codex CLI",   "codex",        "Code",     true)  { Enabled = true,  RouteProviderId = "codex"  });
+        Agents.Add(new AgentViewModel("cursor",      "Cursor Agent","cursor-agent", "Sparkles", true)  { Enabled = false, RouteProviderId = "claude" });
+        Agents.Add(new AgentViewModel("aider",       "Aider",       "aider",        "Terminal", false,
+            "Install via pip to route through Tunnel."));
 
         var anthropicModels = new AvailableModelGroupViewModel("Anthropic", "claude", true);
-        anthropicModels.Models.Add(new AvailableModelViewModel("claude-opus-4-1-20250805", "OAuth", "200K context", "Claude Code"));
-        anthropicModels.Models.Add(new AvailableModelViewModel("claude-opus-4-5-20251101", "OAuth", "200K context", "Claude Code"));
-        anthropicModels.Models.Add(new AvailableModelViewModel("claude-sonnet-4-5", "OAuth", "200K context", "Claude Code"));
-        anthropicModels.Models.Add(new AvailableModelViewModel("claude-haiku-4-5", "OAuth", "200K context", "Claude Code"));
+        anthropicModels.Models.Add(new AvailableModelViewModel("claude-opus-4-1-20250805",  "OAuth", "200K context", "Claude Code"));
+        anthropicModels.Models.Add(new AvailableModelViewModel("claude-opus-4-5-20251101",  "OAuth", "200K context", "Claude Code"));
+        anthropicModels.Models.Add(new AvailableModelViewModel("claude-sonnet-4-5",         "OAuth", "200K context", "Claude Code"));
+        anthropicModels.Models.Add(new AvailableModelViewModel("claude-haiku-4-5",          "OAuth", "200K context", "Claude Code"));
 
         var openAiModels = new AvailableModelGroupViewModel("OpenAI", "codex");
         openAiModels.Models.Add(new AvailableModelViewModel("gpt-5-codex", "ChatGPT", "272K context", "OpenAI Codex"));
-        openAiModels.Models.Add(new AvailableModelViewModel("gpt-5", "ChatGPT", "400K context", "OpenAI Codex"));
-        openAiModels.Models.Add(new AvailableModelViewModel("gpt-4.1", "ChatGPT", "1M context", "OpenAI Codex"));
+        openAiModels.Models.Add(new AvailableModelViewModel("gpt-5",       "ChatGPT", "400K context", "OpenAI Codex"));
+        openAiModels.Models.Add(new AvailableModelViewModel("gpt-4.1",     "ChatGPT", "1M context",   "OpenAI Codex"));
 
         AvailableModelGroups.Add(anthropicModels);
         AvailableModelGroups.Add(openAiModels);
 
-        ActivityLogs.Add(new ActivityLogViewModel("POST", "/v1/messages", "Claude Code", "Claude", "claude-sonnet-4.5", "200", "1.2s", "12s ago"));
-        ActivityLogs.Add(new ActivityLogViewModel("POST", "/v1/responses", "Codex CLI", "OpenAI", "gpt-5-codex", "200", "842ms", "48s ago"));
-        ActivityLogs.Add(new ActivityLogViewModel("GET", "/v1/models", "Cursor Agent", "Claude", "-", "200", "31ms", "2m ago"));
+        ActivityLogs.Add(new ActivityLogViewModel("POST", "/v1/messages",  "Claude Code", "Claude", "claude-sonnet-4.5", "200", "1.2s",  "12s ago"));
+        ActivityLogs.Add(new ActivityLogViewModel("POST", "/v1/responses", "Codex CLI",   "OpenAI", "gpt-5-codex",       "200", "842ms", "48s ago"));
+        ActivityLogs.Add(new ActivityLogViewModel("GET",  "/v1/models",    "Cursor Agent","Claude", "-",                 "200", "31ms",  "2m ago"));
     }
 }

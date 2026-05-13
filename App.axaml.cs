@@ -18,9 +18,11 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            var settings = new SettingsService();
-            var engine = new EngineService(settings);
-            var vm = new MainWindowViewModel(settings, engine);
+            var settings      = new SettingsService();
+            var engine        = new EngineService(settings);
+            var engineConfig  = new EngineConfigService(settings);
+            var catalog       = new ProviderCatalogService(settings, engineConfig);
+            var vm            = new MainWindowViewModel(settings, engine, catalog);
 
             desktop.MainWindow = new MainWindow { DataContext = vm };
 

@@ -82,6 +82,34 @@ public sealed class SidebarWidthConverter : IValueConverter
     public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
 }
 
+/// <summary>Returns 1.0 for true, 0.4 for false — used to dim disabled provider logos.</summary>
+public sealed class BoolToOpacityConverter : IValueConverter
+{
+    public static readonly BoolToOpacityConverter Instance = new();
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is true ? 1.0 : 0.4;
+    public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
+}
+
+/// <summary>Returns true when a string is non-null and non-empty.</summary>
+public sealed class StringNotEmptyConverter : IValueConverter
+{
+    public static readonly StringNotEmptyConverter Instance = new();
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is string s && !string.IsNullOrEmpty(s);
+    public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
+}
+
+/// <summary>Inverts a bool value. Usable as a markup extension via InvertBoolConverter.</summary>
+public sealed class InvertBoolConverter : IValueConverter
+{
+    public static readonly InvertBoolConverter Instance = new();
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is bool b ? !b : value;
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is bool b ? !b : value;
+}
+
 // Converter used in ConfigurationView to show/hide the download progress bar.
 // ConverterParameter="IsDownloading" returns true when state is Downloading or Installing.
 public sealed class EngineStateToTextConverter : IValueConverter
