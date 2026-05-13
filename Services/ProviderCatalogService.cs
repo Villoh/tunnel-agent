@@ -116,6 +116,9 @@ public sealed class ProviderCatalogService : IDisposable
     public Task<(bool Success, string Message)> ConnectOAuthAsync(string providerId) =>
         _oauth.ConnectAsync(providerId);
 
+    public Task RefreshAccountQuotaAsync(ProviderViewModel provider, ProviderAccountViewModel account) =>
+        _quota.FetchAccountPublicAsync(provider.Id, account);
+
     /// <summary>
     /// Disconnects an OAuth provider by deleting its token files from the auth-dir.
     /// </summary>

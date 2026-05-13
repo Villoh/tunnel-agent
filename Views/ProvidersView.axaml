@@ -165,6 +165,22 @@
                                                         Content="Connecting…"
                                                         FontSize="12" Padding="10,3" />
 
+                                                <!-- OAuth: + Add account (when connected, not connecting) -->
+                                                <Button Classes="icon-btn"
+                                                        ToolTip.Tip="Add another account"
+                                                        Click="OnOAuthConnect"
+                                                        Tag="{Binding}">
+                                                    <Button.IsVisible>
+                                                        <MultiBinding Converter="{x:Static cv:MultiBoolAndConverter.Instance}">
+                                                            <Binding Path="Connected" />
+                                                            <Binding Path="IsConnecting" Converter="{StaticResource InvertBool}" />
+                                                            <Binding Path="IsOAuth" />
+                                                        </MultiBinding>
+                                                    </Button.IsVisible>
+                                                    <lucide:PackIconLucide Kind="Plus" Width="14" Height="14"
+                                                                           Foreground="{DynamicResource FgMutedBrush}" />
+                                                </Button>
+
                                                 <!-- OAuth: Disconnect (when connected, not connecting) -->
                                                 <Button Classes="app"
                                                         Content="Disconnect"
@@ -230,7 +246,7 @@
                                                     <StackPanel Spacing="10">
 
                                                         <!-- Account header: email + plan badge + actions -->
-                                                        <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                                                        <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
 
                                                             <!-- Email / label -->
                                                             <StackPanel Grid.Column="0"
@@ -264,12 +280,23 @@
                                                             <ToggleButton Grid.Column="2"
                                                                           Classes="enable-toggle"
                                                                           IsChecked="{Binding IsDisabled, Mode=TwoWay, Converter={StaticResource InvertBool}}"
-                                                                          ToolTip.Tip="Enable / disable this key"
-                                                                          Margin="8,0,6,0"
+                                                                          ToolTip.Tip="Enable / disable this account"
+                                                                          Margin="8,0,4,0"
                                                                           VerticalAlignment="Center" />
 
-                                                            <!-- Remove button -->
+                                                            <!-- Refresh quota button -->
                                                             <Button Grid.Column="3"
+                                                                    Classes="icon-btn"
+                                                                    ToolTip.Tip="Refresh quota"
+                                                                    Click="OnRefreshQuota"
+                                                                    Tag="{Binding}"
+                                                                    VerticalAlignment="Center">
+                                                                <lucide:PackIconLucide Kind="RefreshCw" Width="13" Height="13"
+                                                                                       Foreground="{DynamicResource FgMutedBrush}" />
+                                                            </Button>
+
+                                                            <!-- Remove button -->
+                                                            <Button Grid.Column="4"
                                                                     Classes="icon-btn"
                                                                     ToolTip.Tip="Remove account"
                                                                     Command="{Binding #Root.DataContext.RemoveAccountCommand}"
