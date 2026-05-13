@@ -127,12 +127,7 @@
                                                             VerticalAlignment="Center">
                                                         <TextBlock Text="disabled" Foreground="#CC7A2B" FontSize="10" />
                                                     </Border>
-                                                    <Border Classes="chip"
-                                                            Background="#22AAAAFF"
-                                                            IsVisible="{Binding IsConnecting}"
-                                                            VerticalAlignment="Center">
-                                                        <TextBlock Text="connecting…" Foreground="#8888FF" FontSize="10" />
-                                                    </Border>
+
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal" Spacing="2"
                                                             IsVisible="{Binding IsEnabled}">
@@ -285,7 +280,7 @@
                                                                       IsVisible="{Binding HasQuota}">
                                                             <ItemsControl.ItemTemplate>
                                                                 <DataTemplate x:DataType="vm:QuotaBarViewModel">
-                                                                    <StackPanel Spacing="4" Margin="0,2,0,0">
+                                                                    <StackPanel Spacing="4" Margin="0,6,0,0">
                                                                         <!-- Title + percentage -->
                                                                         <Grid ColumnDefinitions="*,Auto">
                                                                             <TextBlock Grid.Column="0"
