@@ -68,6 +68,29 @@ public sealed class OAuthTokenDetector
         return result;
     }
 
+    /// <summary>Patches the disabled field on the token file matching the given email.</summary>
+    public void SetDisabled(string providerId, string email, bool disabled)
+    {
+        if (!KnownProviders.TryGetValue(providerId, out var prefix)) return;
+        if (!Directory.Exists(_directory)) return;
+
+        foreach (var file in Directory.GetFiles(_directory, $"{prefix}-{email}*.json"))
+        {
+            if (Path.GetFileName(file).StartsWith("openai-compat-", StringComparison.OrdinalIgnoreCase))
+                continue;
+            try
+            {
+                var text = File.ReadAllText(file);
+                var doc  = System.Text.Json.Nodes.JsonNode.Parse(text)?.AsObject();
+                if (doc is null) continue;
+                doc["disabled"] = disabled;
+                File.WriteAllText(file, doc.ToJsonString(
+                    new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+            }
+            catch { }
+        }
+    }
+
     /// <summary>Returns IDs of providers that have at least one active account.</summary>
     public HashSet<string> GetConnectedProviderIds()
     {
