@@ -341,11 +341,28 @@
                                        Text="{Binding TotalAvailableModelCount, StringFormat='{}{0} total'}"
                                        Classes="status"
                                        Foreground="{DynamicResource FgMutedBrush}"
-                                       VerticalAlignment="Center" />
+                                       VerticalAlignment="Center"
+                                       IsVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}}" />
                         </Grid>
                         <Border Classes="row-divider" />
 
-                        <ItemsControl ItemsSource="{Binding AvailableModelGroups}">
+                        <!-- Empty state: server not running -->
+                        <StackPanel Margin="16,24,16,24"
+                                    HorizontalAlignment="Center"
+                                    Spacing="8"
+                                    IsVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}, ConverterParameter=Invert}">
+                            <lucide:PackIconLucide Kind="ServerOff" Width="28" Height="28"
+                                                   Foreground="{DynamicResource FgFaintBrush}"
+                                                   HorizontalAlignment="Center" />
+                            <TextBlock Text="Start the server to see available models"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource FgMutedBrush}"
+                                       HorizontalAlignment="Center" />
+                        </StackPanel>
+
+                        <!-- Model groups (only when server is running) -->
+                        <ItemsControl ItemsSource="{Binding AvailableModelGroups}"
+                                      IsVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:AvailableModelGroupViewModel">
                                     <StackPanel>
@@ -358,7 +375,7 @@
                                                 </Border>
                                                 <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
                                                     <TextBlock Classes="row-label" Text="{Binding ProviderName}" />
-                                                    <TextBlock Classes="row-desc" Text="Connected service" />
+                                                    <TextBlock Classes="row-desc" Text="{Binding ModelCount, StringFormat='{}{0} models'}" />
                                                 </StackPanel>
                                                 <Border Grid.Column="2" Classes="chip" Background="#14000000" VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding ModelCount, StringFormat='{}{0} models'}"
@@ -387,7 +404,8 @@
                                                                        FontSize="12" FontWeight="SemiBold"
                                                                        TextTrimming="CharacterEllipsis"
                                                                        Foreground="{DynamicResource FgBrush}" />
-                                                            <TextBlock Classes="row-desc" Text="{Binding Context}" />
+                                                            <TextBlock Classes="row-desc" Text="{Binding Context}"
+                                                                       IsVisible="{Binding Context, Converter={StaticResource StringNotEmpty}}" />
                                                         </StackPanel>
                                                         <Border Grid.Column="1" Classes="chip" Background="#14000000"
                                                                 Margin="10,0,8,0" VerticalAlignment="Center">
