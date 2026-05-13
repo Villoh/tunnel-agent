@@ -42,9 +42,19 @@ public partial class ProviderAccountViewModel : ViewModelBase
     [ObservableProperty] private string _planBadge = "";
 
     /// <summary>Quota progress bars; typically 0-2 entries.</summary>
-    public ObservableCollection<QuotaBarViewModel> QuotaBars { get; } = new();
+    public ObservableCollection<QuotaBarViewModel> QuotaBars { get; }
 
     public bool HasQuota => QuotaBars.Count > 0;
+
+    public ProviderAccountViewModel(string providerId, string apiKey, string label, bool isDisabled)
+    {
+        ProviderId  = providerId;
+        ApiKey      = apiKey;
+        _label      = label;
+        _isDisabled = isDisabled;
+        QuotaBars   = new ObservableCollection<QuotaBarViewModel>();
+        QuotaBars.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasQuota));
+    }
 
     public string MaskedKey => string.IsNullOrEmpty(ApiKey) ? "" :
         ApiKey.Length > 12 ? $"{ApiKey[..8]}...{ApiKey[^4..]}" : ApiKey;
@@ -58,13 +68,6 @@ public partial class ProviderAccountViewModel : ViewModelBase
         !string.IsNullOrEmpty(Label) ? Label :
         MaskedKey;
 
-    public ProviderAccountViewModel(string providerId, string apiKey, string label, bool isDisabled)
-    {
-        ProviderId  = providerId;
-        ApiKey      = apiKey;
-        _label      = label;
-        _isDisabled = isDisabled;
-    }
 }
 
 // ── Provider row ─────────────────────────────────────────────────────────────
