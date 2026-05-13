@@ -269,22 +269,62 @@
         <Setter Property="TextAlignment" Value="Center" />
     </Style>
 
-    <!-- Enable/disable toggle pill (for providers and account rows) -->
+    <!-- Enable/disable toggle pill — pill track + white thumb overlay -->
     <Style Selector="ToggleButton.enable-toggle">
-        <Setter Property="Background" Value="#22AAAAAA" />
+        <Setter Property="Background" Value="#3A3A3A" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="CornerRadius" Value="999" />
-        <Setter Property="Width" Value="32" />
-        <Setter Property="Height" Value="18" />
+        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="20" />
         <Setter Property="Padding" Value="0" />
         <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="Content" Value="" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="Content">
+            <Setter.Value>
+                <Border Width="14" Height="14" CornerRadius="999"
+                        Background="White" Margin="3,0,0,0" />
+            </Setter.Value>
+        </Setter>
     </Style>
     <Style Selector="ToggleButton.enable-toggle:checked">
         <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="HorizontalContentAlignment" Value="Right" />
+        <Setter Property="Content">
+            <Setter.Value>
+                <Border Width="14" Height="14" CornerRadius="999"
+                        Background="White" Margin="0,0,3,0" />
+            </Setter.Value>
+        </Setter>
     </Style>
     <Style Selector="ToggleButton.enable-toggle /template/ ContentPresenter">
         <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <!-- Quota bar track -->
+    <Style Selector="Border.quota-track">
+        <Setter Property="Height" Value="4" />
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="Background" Value="#22FFFFFF" />
+    </Style>
+    <Style Selector="Border.quota-fill">
+        <Setter Property="Height" Value="4" />
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="Background" Value="#3CB371" />
+    </Style>
+
+    <!-- Provider row expand button (full-width, no chrome) -->
+    <Style Selector="Button.provider-row">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="16,12" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.provider-row:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#08FFFFFF" />
     </Style>
 
     <!-- Small icon-only button (e.g. trash) -->
