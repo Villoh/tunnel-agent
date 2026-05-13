@@ -1,0 +1,122 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Text.Json.Nodes;
+using System.Threading;
+using System.Threading.Tasks;
+using Avalonia.Threading;
+using TunnelAgent.ViewModels;
+
+namespace TunnelAgent.Services;
+
+/// <summary>
+/// Fetches the model list from the running proxy's /v1/models endpoint
+/// and populates AvailableModelGroups on the ViewModel.
+/// </summary>
+public sealed class ModelFetchService
+{
+    private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(8) };
+
+    private readonly SettingsService _settings;
+
+    public ModelFetchService(SettingsService settings) => _settings = settings;
+
+    /// <summary>
+    /// Fetch /v1/models from the running proxy and update AvailableModelGroups.
+    /// Call when engine transitions to Running.
+    /// </summary>
+    public async Task FetchAndApplyAsync(
+        System.Collections.ObjectModel.ObservableCollection<AvailableModelGroupViewModel> groups,
+        CancellationToken ct = default)
+    {
+        var port = _settings.Current.Port;
+        var url  = $"http://127.0.0.1:{port}/v1/models";
+
+        try
+        {
+            using var resp = await Http.GetAsync(url, ct);
+            if (!resp.IsSuccessStatusCode) return;
+
+            var body = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
+            var data = body?["data"]?.AsArray();
+            if (data is null) return;
+
+            // Group by owned_by
+            var byOwner = new Dictionary<string, List<(string id, string ownedBy)>>(StringComparer.OrdinalIgnoreCase);
+            foreach (var item in data)
+            {
+                var id      = item?["id"]?.GetValue<string>()       ?? "";
+                var ownedBy = item?["owned_by"]?.GetValue<string>() ?? "unknown";
+                if (string.IsNullOrEmpty(id)) continue;
+
+                if (!byOwner.TryGetValue(ownedBy, out var list))
+                    byOwner[ownedBy] = list = new List<(string, string)>();
+                list.Add((id, ownedBy));
+            }
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                groups.Clear();
+
+                foreach (var (owner, models) in byOwner.OrderBy(k => k.Key))
+                {
+                    var displayName = OwnerDisplayName(owner);
+                    var group       = new AvailableModelGroupViewModel(displayName, owner);
+
+                    foreach (var (id, _) in models.OrderBy(m => m.id))
+                    {
+                        var context  = ContextFromModelId(id);
+                        var authKind = AuthKindFromOwner(owner);
+                        group.Models.Add(new AvailableModelViewModel(id, authKind, context, displayName));
+                    }
+
+                    if (group.Models.Count > 0)
+                        groups.Add(group);
+                }
+            });
+        }
+        catch (OperationCanceledException) { }
+        catch { /* server not reachable — leave groups as-is */ }
+    }
+
+    // ── helpers ───────────────────────────────────────────────────────────────
+
+    private static string OwnerDisplayName(string ownedBy) => ownedBy.ToLowerInvariant() switch
+    {
+        "anthropic"      => "Anthropic",
+        "openai"         => "OpenAI",
+        "google"         => "Google",
+        "github-copilot" => "GitHub Copilot",
+        "moonshot"       => "Kimi",
+        "alibaba"        => "Qwen",
+        _                => Titlecase(ownedBy),
+    };
+
+    private static string AuthKindFromOwner(string ownedBy) => ownedBy.ToLowerInvariant() switch
+    {
+        "anthropic"      => "OAuth",
+        "openai"         => "OAuth",
+        "google"         => "OAuth",
+        "github-copilot" => "OAuth",
+        _                => "API Key",
+    };
+
+    private static string ContextFromModelId(string id)
+    {
+        var lower = id.ToLowerInvariant();
+        if (lower.Contains("opus"))   return "200K context";
+        if (lower.Contains("sonnet")) return "200K context";
+        if (lower.Contains("haiku"))  return "200K context";
+        if (lower.Contains("gpt-5"))  return "400K context";
+        if (lower.Contains("gpt-4"))  return "128K context";
+        if (lower.Contains("gemini-2.5-pro"))   return "1M context";
+        if (lower.Contains("gemini-2.5-flash")) return "1M context";
+        if (lower.Contains("gemini-2"))         return "1M context";
+        return "";
+    }
+
+    private static string Titlecase(string s) =>
+        string.IsNullOrEmpty(s) ? s :
+        char.ToUpperInvariant(s[0]) + s[1..].Replace("-", " ");
+}

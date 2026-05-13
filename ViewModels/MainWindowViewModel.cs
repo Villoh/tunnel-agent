@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -14,6 +15,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly EngineService _engine;
     private readonly SettingsService _settings;
     private readonly ProviderCatalogService _catalog;
+    private readonly TunnelAgent.Services.ModelFetchService _modelFetch;
+    private CancellationTokenSource? _modelFetchCts;
 
     [ObservableProperty] private SectionKey _selectedSection = SectionKey.Providers;
     [ObservableProperty] private bool _isSidebarCollapsed;
@@ -107,6 +110,8 @@ public partial class MainWindowViewModel : ViewModelBase
         var engineConfig = new EngineConfigService(settings);
         _catalog  = catalog ?? new ProviderCatalogService(settings, engineConfig);
 
+        _modelFetch = new TunnelAgent.Services.ModelFetchService(settings);
+
         _engine.StateChanged  += OnEngineStateChanged;
         _catalog.ProvidersRefreshed += OnProvidersRefreshed;
 
@@ -120,6 +125,19 @@ public partial class MainWindowViewModel : ViewModelBase
         Dispatcher.UIThread.Post(() =>
         {
             var wasAvailable = UpdateAvailable;
+
+            // Refresh model list when server starts/stops
+            if (_engine.State == EngineState.Running)
+            {
+                _modelFetchCts?.Cancel();
+                _modelFetchCts = new CancellationTokenSource();
+                _ = _modelFetch.FetchAndApplyAsync(AvailableModelGroups, _modelFetchCts.Token);
+            }
+            else if (_engine.State == EngineState.Stopped || _engine.State == EngineState.Error)
+            {
+                _modelFetchCts?.Cancel();
+                AvailableModelGroups.Clear();
+            }
 
             EngineState      = _engine.State;
             InstalledVersion = _engine.InstalledVersion;
@@ -319,20 +337,6 @@ public partial class MainWindowViewModel : ViewModelBase
         Agents.Add(new AgentViewModel("cursor",      "Cursor Agent","cursor-agent", "Sparkles", true)  { Enabled = false, RouteProviderId = "claude" });
         Agents.Add(new AgentViewModel("aider",       "Aider",       "aider",        "Terminal", false,
             "Install via pip to route through Tunnel."));
-
-        var anthropicModels = new AvailableModelGroupViewModel("Anthropic", "claude", true);
-        anthropicModels.Models.Add(new AvailableModelViewModel("claude-opus-4-1-20250805",  "OAuth", "200K context", "Claude Code"));
-        anthropicModels.Models.Add(new AvailableModelViewModel("claude-opus-4-5-20251101",  "OAuth", "200K context", "Claude Code"));
-        anthropicModels.Models.Add(new AvailableModelViewModel("claude-sonnet-4-5",         "OAuth", "200K context", "Claude Code"));
-        anthropicModels.Models.Add(new AvailableModelViewModel("claude-haiku-4-5",          "OAuth", "200K context", "Claude Code"));
-
-        var openAiModels = new AvailableModelGroupViewModel("OpenAI", "codex");
-        openAiModels.Models.Add(new AvailableModelViewModel("gpt-5-codex", "ChatGPT", "272K context", "OpenAI Codex"));
-        openAiModels.Models.Add(new AvailableModelViewModel("gpt-5",       "ChatGPT", "400K context", "OpenAI Codex"));
-        openAiModels.Models.Add(new AvailableModelViewModel("gpt-4.1",     "ChatGPT", "1M context",   "OpenAI Codex"));
-
-        AvailableModelGroups.Add(anthropicModels);
-        AvailableModelGroups.Add(openAiModels);
 
         ActivityLogs.Add(new ActivityLogViewModel("POST", "/v1/messages",  "Claude Code", "Claude", "claude-sonnet-4.5", "200", "1.2s",  "12s ago"));
         ActivityLogs.Add(new ActivityLogViewModel("POST", "/v1/responses", "Codex CLI",   "OpenAI", "gpt-5-codex",       "200", "842ms", "48s ago"));
