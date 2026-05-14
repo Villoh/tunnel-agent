@@ -5,7 +5,7 @@
 <h1 align="center">Tunnel Agent</h1>
 
 <p align="center">
-  <b>Use your Claude Code, Copilot, or Codex subscription in any coding agent — Factory Droid, Cursor, and more. Tunnel Agent handles OAuth authentication and routes requests through CLIProxyAPIPlus, no API keys needed.<br><br>One click to connect. Works with whatever you already have.
+  Use your Claude Code, Copilot, or Codex subscription in any coding agent — Factory Droid, Cursor, and more. Tunnel Agent handles OAuth authentication and routes requests through CLIProxyAPIPlus, no API keys needed.<br><br>One click to connect. Works with whatever you already have.
 </p>
 
 <p align="center">
