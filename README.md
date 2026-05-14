@@ -5,7 +5,7 @@
 <h1 align="center">Tunnel Agent</h1>
 
 <p align="center">
-  <b>Route your local CLI agent traffic through supported AI providers — from a single Windows desktop app.<br>Exposes an OpenAI-compatible endpoint so any agent can connect without touching config files.</b>
+  <b>Use your Claude Code, Copilot, or Codex subscription in any coding agent — Factory Droid, Cursor, and more. Tunnel Agent handles OAuth authentication and routes requests through CLIProxyAPIPlus, no API keys needed.<br><br>One click to connect. Works with whatever you already have.
 </p>
 
 <p align="center">
@@ -22,8 +22,6 @@
   <img alt=".NET" src="https://img.shields.io/badge/.NET-10-0A84FF?style=for-the-badge&labelColor=ffffff&logoColor=000000&logo=dotnet">
   <img alt="Version" src="https://img.shields.io/github/v/tag/Villoh/tunnel-agent?label=Version&style=for-the-badge&color=0A84FF&labelColor=ffffff">
 </p>
-
-> **Early development** — provider wiring and credential storage are scaffolded, not yet connected to real services.
 
 ---
 
