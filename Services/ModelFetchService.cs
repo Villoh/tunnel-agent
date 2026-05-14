@@ -62,13 +62,13 @@ public sealed class ModelFetchService
                 foreach (var (owner, models) in byOwner.OrderBy(k => k.Key))
                 {
                     var displayName = OwnerDisplayName(owner);
-                    var group       = new AvailableModelGroupViewModel(displayName, owner);
+                    var icon        = ProviderIconRegistry.Get(owner);
+                    var group       = new AvailableModelGroupViewModel(displayName, owner, icon.IconKind, icon.LogoColor, icon.CustomIconData);
 
                     foreach (var (id, _) in models.OrderBy(m => m.id))
                     {
-                        var context  = ContextFromModelId(id);
                         var authKind = AuthKindFromOwner(owner);
-                        group.Models.Add(new AvailableModelViewModel(id, authKind, context, displayName));
+                        group.Models.Add(new AvailableModelViewModel(id, authKind, context: "", displayName));
                     }
 
                     if (group.Models.Count > 0)
@@ -101,20 +101,6 @@ public sealed class ModelFetchService
         "github-copilot" => "OAuth",
         _                => "API Key",
     };
-
-    private static string ContextFromModelId(string id)
-    {
-        var lower = id.ToLowerInvariant();
-        if (lower.Contains("opus"))   return "200K context";
-        if (lower.Contains("sonnet")) return "200K context";
-        if (lower.Contains("haiku"))  return "200K context";
-        if (lower.Contains("gpt-5"))  return "400K context";
-        if (lower.Contains("gpt-4"))  return "128K context";
-        if (lower.Contains("gemini-2.5-pro"))   return "1M context";
-        if (lower.Contains("gemini-2.5-flash")) return "1M context";
-        if (lower.Contains("gemini-2"))         return "1M context";
-        return "";
-    }
 
     private static string Titlecase(string s) =>
         string.IsNullOrEmpty(s) ? s :

@@ -19,18 +19,16 @@ public sealed class ProviderCatalogService : IDisposable
 
     private static readonly ProviderMeta[] BuiltinOAuthProviders =
     [
-        new("claude",         "Claude Code",    PackIconSimpleIconsKind.Claude,       "#D97757", "Anthropic models via OAuth."),
-        new("codex",          "OpenAI Codex",   PackIconSimpleIconsKind.OpenAi,       "#23262E", "OpenAI Codex via ChatGPT plan."),
-        new("gemini-cli",     "Gemini CLI",     PackIconSimpleIconsKind.GoogleGemini, "#4285F4", "Google Gemini via OAuth."),
-        new("kimi",           "Kimi",           PackIconSimpleIconsKind.OpenAi,       "#1A73E8", "Moonshot AI via OAuth."),
-        new("github-copilot", "GitHub Copilot", PackIconSimpleIconsKind.GitHub,       "#24292E", "GitHub Copilot via OAuth."),
-        new("antigravity",    "Antigravity",    PackIconSimpleIconsKind.OpenAi,       "#7C3AED", "Antigravity AI via OAuth."),
-        new("qwen",           "Qwen",           PackIconSimpleIconsKind.AlibabaCloud, "#FF6A00", "Alibaba Qwen via OAuth."),
+        new("claude",         "Claude Code",    "Anthropic models via OAuth."),
+        new("codex",          "OpenAI Codex",   "OpenAI Codex via ChatGPT plan."),
+        new("gemini-cli",     "Gemini CLI",     "Google Gemini via OAuth."),
+        new("kimi",           "Kimi",           "Moonshot AI via OAuth."),
+        new("github-copilot", "GitHub Copilot", "GitHub Copilot via OAuth."),
+        new("antigravity",    "Antigravity",    "Antigravity AI via OAuth."),
+        new("qwen",           "Qwen",           "Alibaba Qwen via OAuth."),
     ];
 
-    private readonly record struct ProviderMeta(
-        string Id, string Name,
-        PackIconSimpleIconsKind Icon, string Color, string Description);
+    private readonly record struct ProviderMeta(string Id, string Name, string Description);
 
     // ── Dependencies ─────────────────────────────────────────────────────────
 
@@ -195,7 +193,8 @@ public sealed class ProviderCatalogService : IDisposable
             // Only respect saved enabled=true if there are actually accounts
             var enabled  = hasAccts && (ps?.Enabled ?? true);
 
-            var vm = new ProviderViewModel(meta.Id, meta.Name, meta.Icon, meta.Color, meta.Description, isOAuth: true)
+            var icon = ProviderIconRegistry.Get(meta.Id);
+            var vm = new ProviderViewModel(meta.Id, meta.Name, icon.IconKind, icon.LogoColor, meta.Description, isOAuth: true, customIconData: icon.CustomIconData)
             {
                 IsEnabled = enabled,
                 Connected = hasAccts,
@@ -292,8 +291,8 @@ public sealed class ProviderCatalogService : IDisposable
                 var accounts  = oauthAccounts.TryGetValue(vm.Id, out var accs) ? accs : [];
                 var hasAccts  = accounts.Any(a => !a.IsDisabled);
                 vm.Connected  = hasAccts;
-                // Auto-disable toggle when last account is removed
-                if (!hasAccts) vm.IsEnabled = false;
+                // Auto-disable toggle only when all accounts are actually removed, not just disabled
+                if (accounts.Count == 0) vm.IsEnabled = false;
                 SyncOAuthAccounts(vm, accounts);
             }
 
@@ -321,10 +320,11 @@ public sealed class ProviderCatalogService : IDisposable
         {
             var acct = new ProviderAccountViewModel(r.ProviderId, apiKey: "", label: r.Email, r.IsDisabled)
             {
-                Email     = r.Email,
-                PlanBadge = r.Plan,
+                Email             = r.Email,
+                PlanBadge         = r.Plan,
+                IsProviderEnabled = vm.IsEnabled,
             };
-            WireAccountDisable(acct);
+            WireAccountDisable(acct, vm);
             vm.Accounts.Add(acct);
         }
 
@@ -353,8 +353,11 @@ public sealed class ProviderCatalogService : IDisposable
         // Add new
         foreach (var r in records.Where(r => !vm.Accounts.Any(a => a.ApiKey == r.ApiKey)))
         {
-            var acct = new ProviderAccountViewModel(r.ProviderId, r.ApiKey, r.Label, r.IsDisabled);
-            WireAccountDisable(acct);
+            var acct = new ProviderAccountViewModel(r.ProviderId, r.ApiKey, r.Label, r.IsDisabled)
+            {
+                IsProviderEnabled = vm.IsEnabled,
+            };
+            WireAccountDisable(acct, vm);
             vm.Accounts.Add(acct);
         }
 
@@ -368,14 +371,26 @@ public sealed class ProviderCatalogService : IDisposable
         vm.RefreshAccountCount();
     }
 
-    private void WireAccountDisable(ProviderAccountViewModel acct)
+    private void WireAccountDisable(ProviderAccountViewModel acct, ProviderViewModel provider)
     {
-        acct.IsDisabledChanged += (_, disabled) =>
+        acct.IsDisabledChanged += async (_, disabled) =>
         {
             if (acct.IsCustomKey)
                 _store.SetDisabled(acct.ProviderId, acct.ApiKey, disabled);
             else
                 _oauthDetector.SetDisabled(acct.ProviderId, acct.Email, disabled);
+
+            if (disabled)
+            {
+                acct.QuotaBars.Clear();
+            }
+            else
+            {
+                await _quota.FetchAccountPublicAsync(provider.Id, acct);
+            }
+
+            provider.RefreshAccountCount();
+            await _config.WriteConfigAsync();
         };
     }
 

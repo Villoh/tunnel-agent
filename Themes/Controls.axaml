@@ -2,6 +2,23 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:lucide="using:IconPacks.Avalonia.Lucide">
 
+    <!-- Global cursor: Hand on all interactive controls -->
+    <Style Selector="Button">
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="ToggleButton">
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="CheckBox">
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="RadioButton">
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="ListBoxItem">
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
     <!-- Borderless-window resize hit targets -->
     <Style Selector="Border.resize-handle">
         <Setter Property="Background" Value="Transparent" />
@@ -154,6 +171,24 @@
     </Style>
 
     <!-- In-card expandable model group header -->
+    <Style Selector="ToggleButton.provider-row">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Padding" Value="16,12" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="ToggleButton.provider-row:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#0F000000" />
+    </Style>
+    <Style Selector="ToggleButton.provider-row:checked /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="ToggleButton.provider-row:disabled /template/ ContentPresenter">
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+
     <Style Selector="ToggleButton.model-group">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
@@ -162,6 +197,7 @@
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="Padding" Value="14,12,14,8" />
         <Setter Property="Margin" Value="0" />
+        <Setter Property="Cursor" Value="Hand" />
     </Style>
     <Style Selector="ToggleButton.model-group:pointerover /template/ ContentPresenter">
         <Setter Property="Background" Value="#0F000000" />
@@ -237,17 +273,26 @@
     </Style>
 
     <!-- Endpoint pill -->
-    <Style Selector="Button.endpoint">
+    <Style Selector="Border.endpoint">
         <Setter Property="Background" Value="#0D000000" />
         <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="6" />
-        <Setter Property="Padding" Value="9,3,6,3" />
-        <Setter Property="FontFamily" Value="Cascadia Mono,Consolas,monospace" />
-        <Setter Property="FontSize" Value="11.5" />
-        <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
+        <Setter Property="Padding" Value="9,4,9,4" />
         <Setter Property="MaxWidth" Value="220" />
-        <Setter Property="HorizontalContentAlignment" Value="Left" />
+    </Style>
+
+    <!-- Copy endpoint button -->
+    <Style Selector="Button.copy-endpoint /template/ ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource FgMutedBrush}" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Foreground" Duration="0:0:0.15" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Button.copy-endpoint.copied /template/ ContentPresenter">
+        <Setter Property="Foreground" Value="#3CB371" />
     </Style>
 
     <!-- Provider logo -->
@@ -311,6 +356,10 @@
     <Style Selector="ToggleButton.enable-toggle:checked /template/ Border#Thumb">
         <Setter Property="Canvas.Left" Value="19" />
     </Style>
+    <Style Selector="ToggleButton.enable-toggle:disabled">
+        <Setter Property="Opacity" Value="0.35" />
+    </Style>
+
 
     <!-- Quota bar track -->
     <Style Selector="Border.quota-track">
@@ -380,6 +429,26 @@
                 </KeyFrame>
             </Animation>
         </Style.Animations>
+    </Style>
+
+    <!-- Power toggle button for per-account enable/disable -->
+    <Style Selector="Button.power-toggle /template/ ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Foreground" Duration="0:0:0.2" />
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Button.power-toggle.account-disabled /template/ ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource FgMutedBrush}" />
+    </Style>
+    <Style Selector="Button.power-toggle:pressed /template/ ContentPresenter">
+        <Setter Property="RenderTransform" Value="scale(0.82)" />
+    </Style>
+    <Style Selector="Button.power-toggle:disabled /template/ ContentPresenter">
+        <Setter Property="Opacity" Value="0.35" />
     </Style>
 
     <!-- Small icon-only button (e.g. trash) -->

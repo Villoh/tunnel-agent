@@ -30,6 +30,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _updateAvailable;
     [ObservableProperty] private bool _configHasBadge;
     [ObservableProperty] private bool _showUpdateToast;
+    [ObservableProperty] private bool _endpointCopied;
     [ObservableProperty] private bool _showUpdateSuccess;
     [ObservableProperty] private string _engineStatusText = "Stopped";
 

@@ -50,6 +50,7 @@ public partial class ProviderAccountViewModel : ViewModelBase
     public bool HasQuota => QuotaBars.Count > 0;
 
     [ObservableProperty] private bool _isRefreshing;
+    [ObservableProperty] private bool _isProviderEnabled = true;
 
     public ProviderAccountViewModel(string providerId, string apiKey, string label, bool isDisabled)
     {
@@ -81,7 +82,9 @@ public partial class ProviderViewModel : ViewModelBase
 {
     public string Id          { get; }
     public string Name        { get; }
-    public PackIconSimpleIconsKind IconKind { get; }
+    public PackIconSimpleIconsKind IconKind   { get; }
+    public string? CustomIconData { get; }
+    public bool HasCustomIcon => CustomIconData is not null;
     public string LogoColor   { get; }
     public string Description { get; }
 
@@ -114,14 +117,14 @@ public partial class ProviderViewModel : ViewModelBase
 
     // ── Derived display helpers ───────────────────────────────────────────────
 
-    /// <summary>Bottom sub-line when connected: "N connected accounts · Round-robin w/ auto-failover".</summary>
+    /// <summary>Bottom sub-line when connected: "N connected account(s)".</summary>
     public string ConnectedSubText
     {
         get
         {
             var n = ActiveAccountCount > 0 ? ActiveAccountCount : (Connected ? 1 : 0);
             if (n == 0) return Description;
-            return $"{n} connected account{(n == 1 ? "" : "s")} · Round-robin w/ auto-failover";
+            return $"{n} connected account{(n == 1 ? "" : "s")}";
         }
     }
 
@@ -139,6 +142,8 @@ public partial class ProviderViewModel : ViewModelBase
         IsEnabledChanged?.Invoke(this, value);
         OnPropertyChanged(nameof(StatusColor));
         OnPropertyChanged(nameof(ConnectedSubText));
+        foreach (var a in Accounts)
+            a.IsProviderEnabled = value;
     }
 
     partial void OnConnectedChanged(bool value)
@@ -156,14 +161,16 @@ public partial class ProviderViewModel : ViewModelBase
     public ProviderViewModel(
         string id, string name,
         PackIconSimpleIconsKind iconKind, string logoColor,
-        string description, bool isOAuth = false)
+        string description, bool isOAuth = false,
+        string? customIconData = null)
     {
-        Id          = id;
-        Name        = name;
-        IconKind    = iconKind;
-        LogoColor   = logoColor;
-        Description = description;
-        IsOAuth     = isOAuth;
+        Id             = id;
+        Name           = name;
+        IconKind       = iconKind;
+        LogoColor      = logoColor;
+        Description    = description;
+        IsOAuth        = isOAuth;
+        CustomIconData = customIconData;
     }
 
     /// <summary>Raised when the user toggles the provider on/off.</summary>
@@ -172,8 +179,11 @@ public partial class ProviderViewModel : ViewModelBase
     /// <summary>Raised when the expand chevron is toggled.</summary>
     public event System.EventHandler<bool>? IsExpandedChanged;
 
-    partial void OnIsExpandedChanged(bool value) =>
+    partial void OnIsExpandedChanged(bool value)
+    {
+        if (value && !HasAccounts) { IsExpanded = false; return; }
         IsExpandedChanged?.Invoke(this, value);
+    }
 
     /// <summary>Raised when the user requests adding a new account.</summary>
     public event System.EventHandler? AddAccountRequested;
@@ -182,7 +192,7 @@ public partial class ProviderViewModel : ViewModelBase
     private void RequestAddAccount() => AddAccountRequested?.Invoke(this, System.EventArgs.Empty);
 
     [RelayCommand]
-    private void ToggleExpand() => IsExpanded = !IsExpanded;
+    private void ToggleExpand() { if (HasAccounts) IsExpanded = !IsExpanded; }
 
     public void RefreshAccountCount()
     {

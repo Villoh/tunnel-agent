@@ -32,15 +32,24 @@
                         <TextBlock Classes="page-sub" Text="Local OpenAI-compatible endpoint for your CLI agents." />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
-                        <Button Classes="endpoint" ToolTip.Tip="Copy endpoint" Click="OnCopyEndpoint">
-                            <StackPanel Orientation="Horizontal" Spacing="7">
-                                <TextBlock Text="{Binding EndpointUrl}"
-                                           TextTrimming="CharacterEllipsis"
-                                           VerticalAlignment="Center" />
+                        <Border Classes="endpoint" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding EndpointUrl}"
+                                       FontFamily="Cascadia Mono,Consolas,monospace"
+                                       FontSize="11.5"
+                                       Foreground="{DynamicResource FgBrush}"
+                                       TextTrimming="CharacterEllipsis"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <Button Classes="icon-btn copy-endpoint"
+                                Classes.copied="{Binding EndpointCopied}"
+                                ToolTip.Tip="Copy endpoint"
+                                Click="OnCopyEndpoint">
+                            <Panel>
                                 <lucide:PackIconLucide Kind="Copy" Width="13" Height="13"
-                                                       Foreground="{DynamicResource FgMutedBrush}"
-                                                       VerticalAlignment="Center" />
-                            </StackPanel>
+                                                       IsVisible="{Binding !EndpointCopied}" />
+                                <lucide:PackIconLucide Kind="Check" Width="13" Height="13"
+                                                       IsVisible="{Binding EndpointCopied}" />
+                            </Panel>
                         </Button>
                         <Button Classes="app primary"
                                 Content="Start"
@@ -86,37 +95,45 @@
                                 <StackPanel>
 
                                     <!-- Main provider row -->
-                                    <Border Padding="16,12">
-                                    <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+                                    <ToggleButton Classes="provider-row"
+                                                  IsChecked="{Binding IsExpanded, Mode=TwoWay}">
+                                        <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
 
-                                        <!-- Toggle pill: disabled when no accounts (nothing to route to) -->
-                                        <ToggleButton Grid.Column="0"
-                                                      Classes="enable-toggle"
-                                                      IsChecked="{Binding IsEnabled, Mode=TwoWay}"
-                                                      IsEnabled="{Binding HasAccounts}"
-                                                      VerticalAlignment="Center"
-                                                      Margin="0,0,12,0" />
+                                            <!-- Enable pill -->
+                                            <ToggleButton Grid.Column="0"
+                                                          Classes="enable-toggle"
+                                                          IsChecked="{Binding IsEnabled, Mode=TwoWay}"
+                                                          IsEnabled="{Binding HasAccounts}"
+                                                          VerticalAlignment="Center"
+                                                          Margin="0,0,12,0" />
 
-                                        <!-- Provider icon -->
-                                        <Border Grid.Column="1"
-                                                Classes="provider-logo"
-                                                Width="28" Height="28"
-                                                Background="{Binding LogoColor, Converter={StaticResource HexBrush}}"
-                                                Opacity="{Binding IsEnabled, Converter={StaticResource BoolToOpacity}}"
-                                                Margin="0,0,10,0">
-                                            <si:PackIconSimpleIcons Kind="{Binding IconKind}"
-                                                                    Foreground="White"
-                                                                    Width="14" Height="14"
-                                                                    HorizontalAlignment="Center"
-                                                                    VerticalAlignment="Center" />
-                                        </Border>
+                                            <!-- Provider icon -->
+                                            <Border Grid.Column="1"
+                                                    Classes="provider-logo"
+                                                    Width="28" Height="28"
+                                                    Background="{Binding LogoColor, Converter={StaticResource HexBrush}}"
+                                                    Opacity="{Binding IsEnabled, Converter={StaticResource BoolToOpacity}}"
+                                                    Margin="0,0,10,0">
+                                                <Panel>
+                                                    <si:PackIconSimpleIcons Kind="{Binding IconKind}"
+                                                                            Foreground="White"
+                                                                            Width="14" Height="14"
+                                                                            HorizontalAlignment="Center"
+                                                                            VerticalAlignment="Center"
+                                                                            IsVisible="{Binding !HasCustomIcon}" />
+                                                    <Viewbox Width="14" Height="14"
+                                                             HorizontalAlignment="Center"
+                                                             VerticalAlignment="Center"
+                                                             IsVisible="{Binding HasCustomIcon}">
+                                                        <Path Data="{Binding CustomIconData}"
+                                                              Fill="White"
+                                                              Stretch="Uniform" />
+                                                    </Viewbox>
+                                                </Panel>
+                                            </Border>
 
-                                        <!-- Name + sub-status (clickable area for expand) -->
-                                        <Button Grid.Column="2"
-                                                Classes="provider-row-name"
-                                                Command="{Binding ToggleExpandCommand}"
-                                                IsEnabled="{Binding HasAccounts}">
-                                            <StackPanel VerticalAlignment="Center" Spacing="1">
+                                            <!-- Name + sub-status -->
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="1">
                                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                                     <TextBlock Classes="row-label"
                                                                Text="{Binding Name}"
@@ -127,20 +144,12 @@
                                                             VerticalAlignment="Center">
                                                         <TextBlock Text="disabled" Foreground="#CC7A2B" FontSize="10" />
                                                     </Border>
-
                                                 </StackPanel>
-                                                <StackPanel Orientation="Horizontal" Spacing="2"
-                                                            IsVisible="{Binding IsEnabled}">
-                                                    <TextBlock Text="{Binding ConnectedSubText}"
-                                                               FontSize="11.5"
-                                                               Foreground="{Binding StatusColor, Converter={StaticResource HexBrush}}" />
-                                                    <TextBlock Text="›"
-                                                               FontSize="11.5"
-                                                               Foreground="{DynamicResource FgFaintBrush}"
-                                                               IsVisible="{Binding HasAccounts}" />
-                                                </StackPanel>
+                                                <TextBlock Text="{Binding ConnectedSubText}"
+                                                           FontSize="11.5"
+                                                           IsVisible="{Binding IsEnabled}"
+                                                           Foreground="{Binding StatusColor, Converter={StaticResource HexBrush}}" />
                                             </StackPanel>
-                                        </Button>
 
                                             <!-- Action buttons -->
                                             <StackPanel Grid.Column="3"
@@ -167,14 +176,14 @@
                                                                            Foreground="{DynamicResource FgMutedBrush}" />
                                                 </Button>
 
-                                                <!-- OAuth: disconnect icon (only when connected) -->
+                                                <!-- OAuth: remove all accounts icon (only when connected) -->
                                                 <Button Classes="icon-btn"
-                                                        ToolTip.Tip="Disconnect all accounts"
+                                                        ToolTip.Tip="Remove all accounts"
                                                         IsVisible="{Binding Connected}"
                                                         IsEnabled="{Binding IsConnecting, Converter={StaticResource InvertBool}}"
                                                         Click="OnOAuthDisconnect"
                                                         Tag="{Binding}">
-                                                    <lucide:PackIconLucide Kind="LogOut" Width="14" Height="14"
+                                                    <lucide:PackIconLucide Kind="Trash2" Width="14" Height="14"
                                                                            Foreground="{DynamicResource FgMutedBrush}" />
                                                 </Button>
 
@@ -187,8 +196,7 @@
                                             </StackPanel>
 
                                             <!-- Expand chevron -->
-                                            <Grid Grid.Column="4" Width="20" VerticalAlignment="Center"
-                                                  IsVisible="{Binding HasAccounts}">
+                                            <Panel Grid.Column="4" Width="20" VerticalAlignment="Center">
                                                 <lucide:PackIconLucide Kind="ChevronRight"
                                                                         Width="14" Height="14"
                                                                         Foreground="{DynamicResource FgFaintBrush}"
@@ -197,9 +205,9 @@
                                                                         Width="14" Height="14"
                                                                         Foreground="{DynamicResource FgFaintBrush}"
                                                                         IsVisible="{Binding IsExpanded}" />
-                                            </Grid>
-                                    </Grid>
-                                    </Border>
+                                            </Panel>
+                                        </Grid>
+                                    </ToggleButton>
 
                                     <!-- ── Expanded accounts panel ──────────────────────── -->
                                     <ItemsControl ItemsSource="{Binding Accounts}"
@@ -244,12 +252,16 @@
                                                             </StackPanel>
 
                                                             <!-- Enable toggle -->
-                                                            <ToggleButton Grid.Column="2"
-                                                                          Classes="enable-toggle"
-                                                                          IsChecked="{Binding IsDisabled, Mode=TwoWay, Converter={StaticResource InvertBool}}"
-                                                                          ToolTip.Tip="Enable / disable this account"
-                                                                          Margin="8,0,4,0"
-                                                                          VerticalAlignment="Center" />
+                                                            <Button Grid.Column="2"
+                                                                    Classes="icon-btn power-toggle"
+                                                                    Classes.account-disabled="{Binding IsDisabled}"
+                                                                    IsEnabled="{Binding IsProviderEnabled}"
+                                                                    ToolTip.Tip="Enable / disable this account"
+                                                                    Click="OnToggleAccount"
+                                                                    Tag="{Binding}"
+                                                                    VerticalAlignment="Center">
+                                                                <lucide:PackIconLucide Kind="Power" Width="13" Height="13" />
+                                                            </Button>
 
                                                             <!-- Refresh quota button -->
                                                             <Button Grid.Column="3"
@@ -270,7 +282,7 @@
                                                                     Command="{Binding #Root.DataContext.RemoveAccountCommand}"
                                                                     CommandParameter="{Binding}"
                                                                     VerticalAlignment="Center">
-                                                                <lucide:PackIconLucide Kind="LogOut" Width="13" Height="13"
+                                                                <lucide:PackIconLucide Kind="Trash2" Width="13" Height="13"
                                                                                        Foreground="{DynamicResource FgMutedBrush}" />
                                                             </Button>
                                                         </Grid>
@@ -368,10 +380,24 @@
                                     <StackPanel>
                                         <ToggleButton Classes="model-group" IsChecked="{Binding IsExpanded, Mode=TwoWay}">
                                             <Grid ColumnDefinitions="30,*,Auto,24">
-                                                <Border Grid.Column="0" Classes="provider-logo" Background="#14000000">
-                                                    <lucide:PackIconLucide Kind="Boxes" Width="15" Height="15"
-                                                                           Foreground="{DynamicResource FgMutedBrush}"
-                                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                <Border Grid.Column="0" Classes="provider-logo"
+                                                        Background="{Binding LogoColor, Converter={StaticResource HexBrush}}">
+                                                    <Panel>
+                                                        <si:PackIconSimpleIcons Kind="{Binding IconKind}"
+                                                                                Foreground="White"
+                                                                                Width="14" Height="14"
+                                                                                HorizontalAlignment="Center"
+                                                                                VerticalAlignment="Center"
+                                                                                IsVisible="{Binding !HasCustomIcon}" />
+                                                        <Viewbox Width="14" Height="14"
+                                                                 HorizontalAlignment="Center"
+                                                                 VerticalAlignment="Center"
+                                                                 IsVisible="{Binding HasCustomIcon}">
+                                                            <Path Data="{Binding CustomIconData}"
+                                                                  Fill="White"
+                                                                  Stretch="Uniform" />
+                                                        </Viewbox>
+                                                    </Panel>
                                                 </Border>
                                                 <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
                                                     <TextBlock Classes="row-label" Text="{Binding ProviderName}" />

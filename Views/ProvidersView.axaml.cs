@@ -13,8 +13,11 @@ public partial class ProvidersView : UserControl
     {
         if (DataContext is not MainWindowViewModel vm) return;
         var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
-        if (clipboard is not null)
-            await clipboard.SetTextAsync(vm.EndpointUrl);
+        if (clipboard is null) return;
+        await clipboard.SetTextAsync(vm.EndpointUrl);
+        vm.EndpointCopied = true;
+        await Task.Delay(2000);
+        vm.EndpointCopied = false;
     }
 
     private async void OnOAuthConnect(object? sender, RoutedEventArgs e)
@@ -66,6 +69,12 @@ public partial class ProvidersView : UserControl
     {
         if (DataContext is MainWindowViewModel vm)
             vm.ShowOAuthStatus = false;
+    }
+
+    private void OnToggleAccount(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: ProviderAccountViewModel account })
+            account.IsDisabled = !account.IsDisabled;
     }
 
     private async void OnRefreshQuota(object? sender, RoutedEventArgs e)
