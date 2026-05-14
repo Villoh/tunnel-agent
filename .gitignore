@@ -21,6 +21,7 @@ Thumbs.db
 # Agent/local automation artifacts
 .agents/
 .claude/
+.pi/
 skills-lock.json
 autoresearch.jsonl
 autoresearch.ideas.md
