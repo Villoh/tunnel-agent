@@ -22,9 +22,17 @@ public partial class App : Application
             var engine        = new EngineService(settings);
             var engineConfig  = new EngineConfigService(settings);
             var catalog       = new ProviderCatalogService(settings, engineConfig);
-            var vm            = new MainWindowViewModel(settings, engine, catalog);
+            var launchAtLogin = new LaunchAtLoginService();
+            var folderOpen    = new FolderOpenService();
+            var vm            = new MainWindowViewModel(settings, engine, catalog, launchAtLogin, folderOpen);
 
-            desktop.MainWindow = new MainWindow { DataContext = vm };
+            var mainWindow = new MainWindow { DataContext = vm };
+            desktop.MainWindow = mainWindow;
+            var tray = new TrayService(desktop, mainWindow, vm);
+            desktop.Exit += (_, _) => tray.Dispose();
+
+            if (Array.Exists(desktop.Args ?? [], arg => string.Equals(arg, "--start-in-tray", StringComparison.OrdinalIgnoreCase)))
+                Dispatcher.UIThread.Post(mainWindow.Hide, DispatcherPriority.Background);
 
             // Run async startup after the window is shown
             Dispatcher.UIThread.Post(async () =>

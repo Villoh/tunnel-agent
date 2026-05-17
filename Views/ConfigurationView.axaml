@@ -23,7 +23,9 @@
                         <TextBlock Classes="row-label" Text="Launch at login"/>
                         <TextBlock Classes="row-desc" Text="Start automatically and stay in the system tray."/>
                     </StackPanel>
-                    <ToggleSwitch Grid.Column="1" Classes="app" IsChecked="{Binding LaunchAtLogin}" />
+                    <ToggleSwitch Grid.Column="1" Classes="app"
+                                  IsChecked="{Binding LaunchAtLogin}"
+                                  IsEnabled="{Binding IsLaunchAtLoginSupported}" />
                 </Grid>
                 <Border Classes="row-divider"/>
                 <Grid Margin="14,11" ColumnDefinitions="*,Auto">

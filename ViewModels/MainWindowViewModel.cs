@@ -17,6 +17,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly EngineService _engine;
     private readonly SettingsService _settings;
     private readonly ProviderCatalogService _catalog;
+    private readonly ILaunchAtLoginService _launchAtLogin;
+    private readonly IFolderOpenService _folderOpen;
     private readonly TunnelAgent.Services.ModelFetchService _modelFetch;
 
     private CancellationTokenSource? _modelFetchCts;
@@ -80,8 +82,17 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool LaunchAtLogin
     {
         get => _settings.Current.LaunchAtLogin;
-        set { _settings.Current.LaunchAtLogin = value; _settings.Save(); OnPropertyChanged(); }
+        set
+        {
+            if (_settings.Current.LaunchAtLogin == value) return;
+            _settings.Current.LaunchAtLogin = value;
+            _settings.Save();
+            OnPropertyChanged();
+            _ = ApplyLaunchAtLoginFromUserAsync(value);
+        }
     }
+
+    public bool IsLaunchAtLoginSupported => _launchAtLogin.IsSupported;
     public string LogLevel
     {
         get => _settings.Current.LogLevel;
@@ -142,14 +153,21 @@ public partial class MainWindowViewModel : ViewModelBase
     public int TotalAvailableModelCount => AvailableModelGroups.Sum(g => g.ModelCount);
 
     // Design-time constructor
-    public MainWindowViewModel() : this(new SettingsService(), null!, null!) { }
+    public MainWindowViewModel() : this(new SettingsService(), null!, null!, null!, null!) { }
 
-    public MainWindowViewModel(SettingsService settings, EngineService engine, ProviderCatalogService catalog)
+    public MainWindowViewModel(
+        SettingsService settings,
+        EngineService engine,
+        ProviderCatalogService catalog,
+        ILaunchAtLoginService? launchAtLogin = null,
+        IFolderOpenService? folderOpen = null)
     {
         _settings = settings;
         _engine   = engine  ?? new EngineService(settings);
         var engineConfig = new EngineConfigService(settings);
         _catalog  = catalog ?? new ProviderCatalogService(settings, engineConfig);
+        _launchAtLogin = launchAtLogin ?? new LaunchAtLoginService();
+        _folderOpen = folderOpen ?? new FolderOpenService();
 
         AvailableModelGroups = new ObservableCollection<AvailableModelGroupViewModel>();
         AvailableModelGroups.CollectionChanged += (_, _) =>
@@ -282,6 +300,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(EditablePort));
         OnPropertyChanged(nameof(EndpointUrl));
         OnPropertyChanged(nameof(LaunchAtLogin));
+        OnPropertyChanged(nameof(IsLaunchAtLoginSupported));
         OnPropertyChanged(nameof(LogLevel));
         OnPropertyChanged(nameof(AutoCheckForUpdates));
         OnPropertyChanged(nameof(AutoUpdate));
@@ -296,9 +315,51 @@ public partial class MainWindowViewModel : ViewModelBase
         if (wasRunning) await _engine.StartAsync();
     }
 
+    private async Task<bool> TryApplyLaunchAtLoginAsync(bool enabled)
+    {
+        try
+        {
+            await _launchAtLogin.SetEnabledAsync(enabled);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            OAuthStatusIsError = true;
+            OAuthStatusMessage = $"Could not update launch at login: {ex.Message}";
+            ShowOAuthStatus = true;
+            return false;
+        }
+    }
+
+    private async Task ApplyLaunchAtLoginFromUserAsync(bool enabled)
+    {
+        if (await TryApplyLaunchAtLoginAsync(enabled)) return;
+
+        _settings.Current.LaunchAtLogin = !enabled;
+        _settings.Save();
+        OnPropertyChanged(nameof(LaunchAtLogin));
+    }
+
+    private async Task ReconcileLaunchAtLoginAsync()
+    {
+        if (!_launchAtLogin.IsSupported) return;
+
+        var desired = _settings.Current.LaunchAtLogin;
+        bool actual;
+        try { actual = await _launchAtLogin.GetEnabledAsync(); }
+        catch { actual = desired; }
+
+        if (actual == desired) return;
+        if (await TryApplyLaunchAtLoginAsync(desired)) return;
+
+        _settings.Current.LaunchAtLogin = actual;
+        _settings.Save();
+    }
+
     public async Task InitializeAsync()
     {
         await _settings.LoadAsync();
+        await ReconcileLaunchAtLoginAsync();
         RefreshSettingsBindings();
         await _catalog.InitializeAsync();
 
@@ -410,25 +471,11 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand] private void ResetPort() => Port = 8317;
 
     [RelayCommand]
-    private void OpenAuthFolder()
+    public void OpenAuthFolder()
     {
-        var directory = IPlatformInfo.Current.AuthDirectory;
-        Directory.CreateDirectory(directory);
-
         try
         {
-            if (OperatingSystem.IsWindows())
-            {
-                Process.Start(new ProcessStartInfo("explorer.exe", $"\"{directory}\"") { UseShellExecute = true });
-            }
-            else if (OperatingSystem.IsMacOS())
-            {
-                Process.Start("open", directory);
-            }
-            else
-            {
-                Process.Start("xdg-open", directory);
-            }
+            _folderOpen.OpenFolder(IPlatformInfo.Current.AuthDirectory);
         }
         catch (Exception ex)
         {
@@ -489,20 +536,20 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task RestartEngine()
+    public async Task RestartEngineAsync()
     {
         await _engine.StopAsync();
         await _engine.StartAsync();
     }
 
     [RelayCommand]
-    private async Task StartServer()
+    public async Task StartServerAsync()
     {
         if (_engine.State == EngineState.Stopped)
             await _engine.StartAsync();
     }
 
-    [RelayCommand] private void StopServer() => _ = _engine.StopAsync();
+    [RelayCommand] public async Task StopServerAsync() => await _engine.StopAsync();
 
     [RelayCommand]
     private void ToggleAgent(AgentViewModel a)

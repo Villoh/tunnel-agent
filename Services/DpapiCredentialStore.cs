@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -16,6 +17,7 @@ public interface ICredentialStore
 /// Windows-only DPAPI-backed credential store (per-user scope).
 /// Files live under %AppData%\TunnelAgent\credentials\{providerId}.dat
 /// </summary>
+[SupportedOSPlatform("windows")]
 public sealed class DpapiCredentialStore : ICredentialStore
 {
     private readonly string _root = Path.Combine(
