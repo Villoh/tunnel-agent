@@ -356,6 +356,12 @@
     <Style Selector="ToggleButton.enable-toggle:checked /template/ Border#Thumb">
         <Setter Property="Canvas.Left" Value="19" />
     </Style>
+    <Style Selector="ToggleButton.enable-toggle:pointerover /template/ Border#Track">
+        <Setter Property="Background" Value="#555555" />
+    </Style>
+    <Style Selector="ToggleButton.enable-toggle:checked:pointerover /template/ Border#Track">
+        <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}" />
+    </Style>
     <Style Selector="ToggleButton.enable-toggle:disabled">
         <Setter Property="Opacity" Value="0.35" />
     </Style>

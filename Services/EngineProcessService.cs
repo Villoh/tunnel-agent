@@ -91,14 +91,13 @@ public sealed class EngineProcessService
 
     private static async Task<bool> WaitForHealthAsync(int port, CancellationToken ct)
     {
-        var url = $"http://127.0.0.1:{port}/v0/management/config.yaml";
+        var url = $"http://127.0.0.1:{port}/v1/models";
         for (var i = 0; i < 25; i++)
         {
             try
             {
                 await Task.Delay(200, ct);
                 var response = await HealthClient.GetAsync(url, ct);
-                // Any response (even 401/403) means the server is up
                 if ((int)response.StatusCode < 500)
                     return true;
             }

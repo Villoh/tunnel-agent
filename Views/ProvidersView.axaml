@@ -14,7 +14,8 @@
         <cv:HexToBrushConverter         x:Key="HexBrush" />
         <cv:BoolToOpacityConverter      x:Key="BoolToOpacity" />
         <cv:StringNotEmptyConverter     x:Key="StringNotEmpty" />
-        <cv:InvertBoolConverter         x:Key="InvertBool" />
+        <cv:InvertBoolConverter                    x:Key="InvertBool" />
+        <cv:BoolToEnableDisableTextConverter        x:Key="BoolToEnableDisableText" />
     </UserControl.Resources>
 
     <Panel>
@@ -105,7 +106,8 @@
                                                           IsChecked="{Binding IsEnabled, Mode=TwoWay}"
                                                           IsEnabled="{Binding HasAccounts}"
                                                           VerticalAlignment="Center"
-                                                          Margin="0,0,12,0" />
+                                                          Margin="0,0,12,0"
+                                                          ToolTip.Tip="{Binding IsEnabled, Converter={StaticResource BoolToEnableDisableText}}" />
 
                                             <!-- Provider icon -->
                                             <Border Grid.Column="1"

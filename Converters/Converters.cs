@@ -83,6 +83,15 @@ public sealed class SidebarWidthConverter : IValueConverter
     public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
 }
 
+/// <summary>Returns "Disable" for true, "Enable" for false — used for provider toggle tooltips.</summary>
+public sealed class BoolToEnableDisableTextConverter : IValueConverter
+{
+    public static readonly BoolToEnableDisableTextConverter Instance = new();
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is true ? "Disable" : "Enable";
+    public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
+}
+
 /// <summary>Returns 1.0 for true, 0.4 for false — used to dim disabled provider logos.</summary>
 public sealed class BoolToOpacityConverter : IValueConverter
 {

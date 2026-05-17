@@ -188,10 +188,11 @@ public sealed class ProviderCatalogService : IDisposable
         foreach (var meta in BuiltinOAuthProviders)
         {
             var ps       = _settings.Current.Providers.FirstOrDefault(p => p.Id == meta.Id);
-            var accounts = oauthAccounts.TryGetValue(meta.Id, out var accs) ? accs : [];
-            var hasAccts = accounts.Any(a => !a.IsDisabled);
-            // Only respect saved enabled=true if there are actually accounts
-            var enabled  = hasAccts && (ps?.Enabled ?? true);
+            var accounts        = oauthAccounts.TryGetValue(meta.Id, out var accs) ? accs : [];
+            var hasAccts        = accounts.Count > 0;
+            var hasActiveAccts  = accounts.Any(a => !a.IsDisabled);
+            // Only respect saved enabled=true if there are actually active accounts
+            var enabled  = hasActiveAccts && (ps?.Enabled ?? true);
 
             var icon = ProviderIconRegistry.Get(meta.Id);
             var vm = new ProviderViewModel(meta.Id, meta.Name, icon.IconKind, icon.LogoColor, meta.Description, isOAuth: true, customIconData: icon.CustomIconData)
@@ -289,10 +290,10 @@ public sealed class ProviderCatalogService : IDisposable
             foreach (var vm in Providers.Where(p => p.IsOAuth))
             {
                 var accounts  = oauthAccounts.TryGetValue(vm.Id, out var accs) ? accs : [];
-                var hasAccts  = accounts.Any(a => !a.IsDisabled);
+                var hasAccts  = accounts.Count > 0;
                 vm.Connected  = hasAccts;
                 // Auto-disable toggle only when all accounts are actually removed, not just disabled
-                if (accounts.Count == 0) vm.IsEnabled = false;
+                if (!hasAccts) vm.IsEnabled = false;
                 SyncOAuthAccounts(vm, accounts);
             }
 
