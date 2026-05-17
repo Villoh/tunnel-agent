@@ -9,12 +9,17 @@ namespace TunnelAgent.Services;
 
 public sealed class SettingsService
 {
-    private static readonly string SettingsPath = Path.Combine(
+    private static readonly string DefaultSettingsPath = Path.Combine(
         IPlatformInfo.Current.SettingsDirectory, "settings.json");
 
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
+    private readonly string _settingsPath;
     private CancellationTokenSource? _debounceCts;
+
+    public SettingsService() : this(DefaultSettingsPath) { }
+
+    public SettingsService(string settingsPath) => _settingsPath = settingsPath;
 
     public AppSettings Current { get; private set; } = new();
 
@@ -22,14 +27,14 @@ public sealed class SettingsService
     {
         try
         {
-            if (!File.Exists(SettingsPath))
+            if (!File.Exists(_settingsPath))
             {
                 Current = new AppSettings();
                 await SaveImmediateAsync();
                 return;
             }
 
-            var json = await File.ReadAllTextAsync(SettingsPath);
+            var json = await File.ReadAllTextAsync(_settingsPath);
             Current = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
         }
         catch
@@ -60,11 +65,11 @@ public sealed class SettingsService
         });
     }
 
-    private async Task SaveImmediateAsync()
+    public async Task SaveImmediateAsync()
     {
-        var dir = Path.GetDirectoryName(SettingsPath)!;
+        var dir = Path.GetDirectoryName(_settingsPath)!;
         Directory.CreateDirectory(dir);
         var json = JsonSerializer.Serialize(Current, JsonOptions);
-        await File.WriteAllTextAsync(SettingsPath, json);
+        await File.WriteAllTextAsync(_settingsPath, json);
     }
 }

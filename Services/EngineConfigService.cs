@@ -17,14 +17,23 @@ public sealed class EngineConfigService
 
     private readonly SettingsService _settings;
     private readonly CustomProviderCredentialStore _credentialStore;
+    private readonly string _authDir;
 
-    public string ConfigPath { get; } = Path.Combine(
-        IPlatformInfo.Current.SettingsDirectory, "proxy-config.yaml");
+    public string ConfigPath { get; }
 
     public EngineConfigService(SettingsService settings)
+        : this(settings, null, null, null) { }
+
+    public EngineConfigService(
+        SettingsService settings,
+        string? configPath,
+        string? authDir,
+        CustomProviderCredentialStore? credentialStore = null)
     {
         _settings        = settings;
-        _credentialStore = new CustomProviderCredentialStore(Platform.AuthDirectory);
+        _authDir         = authDir ?? Platform.AuthDirectory;
+        _credentialStore = credentialStore ?? new CustomProviderCredentialStore(_authDir);
+        ConfigPath       = configPath ?? Path.Combine(Platform.SettingsDirectory, "proxy-config.yaml");
     }
 
     /// <summary>
@@ -33,7 +42,7 @@ public sealed class EngineConfigService
     public async Task WriteConfigAsync()
     {
         var s       = _settings.Current;
-        var authDir = Platform.AuthDirectory.Replace('\\', '/');
+        var authDir = _authDir.Replace('\\', '/');
         var yaml    = BuildYaml(s, authDir);
 
         Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath)!);

@@ -46,14 +46,17 @@ public sealed class ProviderCatalogService : IDisposable
     public event EventHandler? ProvidersRefreshed;
 
     public ProviderCatalogService(SettingsService settings, EngineConfigService config)
+        : this(settings, config, IPlatformInfo.Current.AuthDirectory) { }
+
+    public ProviderCatalogService(SettingsService settings, EngineConfigService config, string authDir)
     {
         _settings      = settings;
         _config        = config;
-        _store         = new CustomProviderCredentialStore(IPlatformInfo.Current.AuthDirectory);
-        _oauthDetector = new OAuthTokenDetector(IPlatformInfo.Current.AuthDirectory);
-        _watcher       = new AuthFileWatcher(IPlatformInfo.Current.AuthDirectory);
+        _store         = new CustomProviderCredentialStore(authDir);
+        _oauthDetector = new OAuthTokenDetector(authDir);
+        _watcher       = new AuthFileWatcher(authDir);
         _oauth         = new OAuthService(config);
-        _quota         = new QuotaFetchService(IPlatformInfo.Current.AuthDirectory);
+        _quota         = new QuotaFetchService(authDir);
 
         _watcher.Changed += OnAuthDirChanged;
     }

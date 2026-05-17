@@ -31,4 +31,10 @@
     <AvaloniaResource Include="Assets/**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="TunnelAgent.Tests/**;obj/**;bin/**;artifacts/**" />
+    <EmbeddedResource Remove="TunnelAgent.Tests/**;obj/**;bin/**;artifacts/**" />
+    <None Remove="TunnelAgent.Tests/**;obj/**;bin/**;artifacts/**" />
+  </ItemGroup>
+
 </Project>
