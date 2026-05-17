@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-05-17
+
+### Added
+
+- Launch at login now works across Windows, macOS, and Linux.
+- System tray controls let users show or hide the window, manage CLIProxyAPI, open configuration, open the auth folder, and quit the app.
+
+### Changed
+
+- The desktop app now targets cross-platform .NET instead of a Windows-only target framework.
+- Closing the main window hides the app to the tray; quitting from the tray exits the app and stops the server.
+
+## [0.2.2] - 2026-05-17
+
+### Added
+
+- Configuration now includes richer CLIProxyAPI release selection and install controls.
+
+### Changed
+
+- Provider state and server startup behavior are more reliable during initialization.
+- Removed the unused Activity section from the desktop navigation.
+
+## [0.2.1] - 2026-05-14
+
+### Added
+
+- Provider management now supports connected accounts, enable/disable state, OAuth and custom providers, live quota bars, and available models from the running proxy.
+- Provider rows were redesigned with clearer connection status, account panels, refresh actions, and provider icons.
+- OAuth callback pages now show branded success and error states.
+
+### Fixed
+
+- Provider account detection, quota display, refresh animations, add-account tooltips, and account enable/disable persistence now behave correctly.
+- CLIProxyAPI owns the OAuth callback port directly, avoiding unsupported callback interception in the desktop app.
+
 ## [0.2.0] - 2026-05-14
 
 ### Added
@@ -123,6 +159,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.2.3...HEAD
+[0.2.3]: https://github.com/Villoh/tunnel-agent/compare/v0.2.2...v0.2.3
+[0.2.2]: https://github.com/Villoh/tunnel-agent/compare/v0.2.1...v0.2.2
+[0.2.1]: https://github.com/Villoh/tunnel-agent/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Villoh/tunnel-agent/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Villoh/tunnel-agent/releases/tag/v0.1.0
