@@ -45,7 +45,8 @@
                                                IsVisible="{Binding !Installed}" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <ToggleSwitch Classes="app" IsChecked="{Binding Enabled}"
+                                    <ToggleButton Classes="enable-toggle"
+                                                  IsChecked="{Binding Enabled, Mode=TwoWay}"
                                                   IsVisible="{Binding Installed}" />
                                     <Button Classes="app" Content="Install"
                                             IsVisible="{Binding !Installed}" />
