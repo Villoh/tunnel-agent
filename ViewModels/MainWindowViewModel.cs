@@ -1,5 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -44,6 +46,11 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _oAuthStatusIsError;
     [ObservableProperty] private string _oAuthStatusMessage = "";
 
+    // Engine release selection
+    [ObservableProperty] private bool _isLoadingEngineReleases;
+    [ObservableProperty] private EngineReleaseViewModel? _selectedEngineRelease;
+    private bool _engineReleaseSelectionReady;
+
     // Settings-backed properties
     public int Port
     {
@@ -54,10 +61,22 @@ public partial class MainWindowViewModel : ViewModelBase
             _settings.Current.Port = value;
             _settings.Save();
             OnPropertyChanged();
+            OnPropertyChanged(nameof(EditablePort));
             OnPropertyChanged(nameof(EndpointUrl));
             _ = ApplyPortChangeAsync();
         }
     }
+
+    public decimal? EditablePort
+    {
+        get => Port;
+        set
+        {
+            if (value is null) return;
+            Port = decimal.ToInt32(value.Value);
+        }
+    }
+
     public bool LaunchAtLogin
     {
         get => _settings.Current.LaunchAtLogin;
@@ -92,8 +111,31 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public ObservableCollection<ProviderViewModel> Providers { get; } = new();
     public ObservableCollection<AgentViewModel> Agents { get; } = new();
+    public ObservableCollection<EngineReleaseViewModel> EngineReleases { get; } = new();
     public ObservableCollection<AvailableModelGroupViewModel> AvailableModelGroups { get; }
     public string EndpointUrl => $"http://127.0.0.1:{Port}";
+    public string InstalledEngineHashLabel => _engine.InstalledArchiveSha256 is not null
+        ? "Installed package SHA256"
+        : "Local binary SHA256";
+    public string InstalledEngineHashShort => ShortHash(_engine.InstalledArchiveSha256 ?? _engine.InstalledBinarySha256);
+    public string InstalledEngineHashFull => _engine.InstalledArchiveSha256 ?? _engine.InstalledBinarySha256 ?? "Not available";
+    public string LatestEngineHashShort => ShortHash(_engine.LatestAssetSha256);
+    public string LatestEngineHashFull => _engine.LatestAssetSha256 ?? "Not available";
+    public bool HasEngineIntegrityError => _engine.IntegrityError is not null;
+    public string EngineIntegrityStatus => _engine.IntegrityError is not null
+        ? "Checksum failed"
+        : _engine.LatestAssetSha256 is null ? "Checksum pending" : "SHA256 ready";
+    public string EngineIntegrityMessage => _engine.IntegrityError ?? "";
+    public string LatestEngineAssetName => _engine.LatestAssetName ?? "Not available";
+    public bool CanSelectEngineRelease => !IsLoadingEngineReleases &&
+        EngineState is not EngineState.Downloading and not EngineState.Installing;
+    public bool CanInstallSelectedEngine => SelectedEngineRelease is not null &&
+        CanSelectEngineRelease &&
+        !VersionsEqual(SelectedEngineRelease.TagName, InstalledVersion);
+    public string SelectedEngineVersionDescription => SelectedEngineRelease is null
+        ? "Choose a CLIProxyAPI release to install."
+        : CanInstallSelectedEngine ? "Install selected release with SHA256 verification." : "Selected release is already installed.";
+    public string AuthFilesDescription => "OAuth tokens and custom provider keys are stored in the app auth folder.";
 
     public int ConnectedProviderCount   => Providers.Count(p => p.Connected || p.ActiveAccountCount > 0);
     public int EnabledAgentCount        => Agents.Count(a => a.Installed && a.Enabled);
@@ -149,8 +191,20 @@ public partial class MainWindowViewModel : ViewModelBase
             EngineStatusText = BuildEngineStatusText();
             UpdateBadgeState();
             OnPropertyChanged(nameof(ServerState));
+            OnPropertyChanged(nameof(InstalledEngineHashLabel));
+            OnPropertyChanged(nameof(InstalledEngineHashShort));
+            OnPropertyChanged(nameof(InstalledEngineHashFull));
+            OnPropertyChanged(nameof(LatestEngineHashShort));
+            OnPropertyChanged(nameof(LatestEngineHashFull));
+            OnPropertyChanged(nameof(HasEngineIntegrityError));
+            OnPropertyChanged(nameof(EngineIntegrityStatus));
+            OnPropertyChanged(nameof(EngineIntegrityMessage));
+            OnPropertyChanged(nameof(LatestEngineAssetName));
+            OnPropertyChanged(nameof(CanSelectEngineRelease));
+            OnPropertyChanged(nameof(CanInstallSelectedEngine));
+            OnPropertyChanged(nameof(SelectedEngineVersionDescription));
 
-            if (UpdateAvailable && !wasAvailable && !_updateToastShown)
+            if (UpdateAvailable && !wasAvailable && !_updateToastShown && string.IsNullOrWhiteSpace(_settings.Current.PreferredEngineVersion))
             {
                 _updateToastShown = true;
                 if (AutoUpdate)
@@ -175,6 +229,39 @@ public partial class MainWindowViewModel : ViewModelBase
         });
     }
 
+    partial void OnIsLoadingEngineReleasesChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanSelectEngineRelease));
+        OnPropertyChanged(nameof(CanInstallSelectedEngine));
+        OnPropertyChanged(nameof(SelectedEngineVersionDescription));
+    }
+
+    partial void OnSelectedEngineReleaseChanged(EngineReleaseViewModel? value)
+    {
+        OnPropertyChanged(nameof(CanInstallSelectedEngine));
+        OnPropertyChanged(nameof(SelectedEngineVersionDescription));
+        if (value is null || IsLoadingEngineReleases) return;
+        _ = PrepareSelectedEngineReleaseAsync(value.TagName);
+        if (!_engineReleaseSelectionReady) return;
+
+        var latestTag = _engine.LatestVersion ?? EngineReleases.FirstOrDefault(r => !r.IsPrerelease)?.TagName;
+        _settings.Current.PreferredEngineVersion = VersionsEqual(value.TagName, latestTag) ? "" : value.TagName;
+        _settings.Save();
+    }
+
+    private async Task PrepareSelectedEngineReleaseAsync(string version)
+    {
+        try { await _engine.PrepareVersionAsync(version); }
+        catch { }
+    }
+
+    private static string ShortHash(string? hash) =>
+        string.IsNullOrWhiteSpace(hash) ? "Not available" : hash[..Math.Min(12, hash.Length)];
+
+    private static bool VersionsEqual(string? left, string? right) =>
+        left is not null && right is not null &&
+        string.Equals(left.TrimStart('v'), right.TrimStart('v'), StringComparison.OrdinalIgnoreCase);
+
     private string BuildEngineStatusText() => _engine.State switch
     {
         EngineState.Downloading  => $"Downloading {_engine.DownloadProgress:0}%",
@@ -189,6 +276,18 @@ public partial class MainWindowViewModel : ViewModelBase
     private void UpdateBadgeState() =>
         ConfigHasBadge = _engine.UpdateAvailable && !AutoUpdate;
 
+    private void RefreshSettingsBindings()
+    {
+        OnPropertyChanged(nameof(Port));
+        OnPropertyChanged(nameof(EditablePort));
+        OnPropertyChanged(nameof(EndpointUrl));
+        OnPropertyChanged(nameof(LaunchAtLogin));
+        OnPropertyChanged(nameof(LogLevel));
+        OnPropertyChanged(nameof(AutoCheckForUpdates));
+        OnPropertyChanged(nameof(AutoUpdate));
+        UpdateBadgeState();
+    }
+
     private async Task ApplyPortChangeAsync()
     {
         var wasRunning = _engine.IsRunning;
@@ -200,6 +299,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public async Task InitializeAsync()
     {
         await _settings.LoadAsync();
+        RefreshSettingsBindings();
         await _catalog.InitializeAsync();
 
         // Populate Providers collection from catalog
@@ -212,6 +312,33 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(ConnectedProviderCount));
 
         await _engine.InitializeAsync();
+        await LoadEngineReleasesAsync();
+    }
+
+    private async Task LoadEngineReleasesAsync()
+    {
+        IsLoadingEngineReleases = true;
+        try
+        {
+            var releases = await _engine.ListReleasesAsync();
+            EngineReleases.Clear();
+            foreach (var release in releases)
+                EngineReleases.Add(new EngineReleaseViewModel(release));
+
+            var preferred = _settings.Current.PreferredEngineVersion;
+            var selected = EngineReleases.FirstOrDefault(r => VersionsEqual(r.TagName, preferred))
+                ?? EngineReleases.FirstOrDefault(r => VersionsEqual(r.TagName, _engine.LatestVersion))
+                ?? EngineReleases.FirstOrDefault();
+
+            IsLoadingEngineReleases = false;
+            if (selected is not null)
+                SelectedEngineRelease = selected;
+            _engineReleaseSelectionReady = true;
+        }
+        catch
+        {
+            IsLoadingEngineReleases = false;
+        }
     }
 
     // ── OAuth connect / disconnect ──────────────────────────────────────────
@@ -280,6 +407,47 @@ public partial class MainWindowViewModel : ViewModelBase
 
     // ── Engine commands ───────────────────────────────────────────────────────
 
+    [RelayCommand] private void ResetPort() => Port = 8317;
+
+    [RelayCommand]
+    private void OpenAuthFolder()
+    {
+        var directory = IPlatformInfo.Current.AuthDirectory;
+        Directory.CreateDirectory(directory);
+
+        try
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                Process.Start(new ProcessStartInfo("explorer.exe", $"\"{directory}\"") { UseShellExecute = true });
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                Process.Start("open", directory);
+            }
+            else
+            {
+                Process.Start("xdg-open", directory);
+            }
+        }
+        catch (Exception ex)
+        {
+            OAuthStatusIsError = true;
+            OAuthStatusMessage = $"Could not open auth folder: {ex.Message}";
+            ShowOAuthStatus = true;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ResetAllCredentialsAsync()
+    {
+        await _catalog.ResetAllCredentialsAsync();
+        OAuthStatusIsError = false;
+        OAuthStatusMessage = "All credentials were removed.";
+        ShowOAuthStatus = true;
+        OnPropertyChanged(nameof(ConnectedProviderCount));
+    }
+
     [RelayCommand] private void SelectProviders()     => SelectedSection = SectionKey.Providers;
     [RelayCommand] private void SelectAgents()        => SelectedSection = SectionKey.Agents;
     [RelayCommand] private void SelectConfiguration() => SelectedSection = SectionKey.Configuration;
@@ -288,14 +456,28 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand] private void DismissToast()        => ShowUpdateToast = false;
 
     [RelayCommand]
+    private async Task RefreshEngineReleases() => await LoadEngineReleasesAsync();
+
+    [RelayCommand]
     private async Task UpdateEngine()
     {
         if (!_engine.UpdateAvailable) return;
+        await InstallEngineVersionAsync(null);
+    }
 
+    [RelayCommand]
+    private async Task InstallSelectedEngine()
+    {
+        if (SelectedEngineRelease is null || !CanInstallSelectedEngine) return;
+        await InstallEngineVersionAsync(SelectedEngineRelease.TagName);
+    }
+
+    private async Task InstallEngineVersionAsync(string? version)
+    {
         SelectedSection = SectionKey.Configuration;
         ShowUpdateToast = false;
 
-        try { await _engine.DownloadAndInstallAsync(); }
+        try { await _engine.DownloadAndInstallAsync(version); }
         catch { return; }
 
         ConfigHasBadge    = false;

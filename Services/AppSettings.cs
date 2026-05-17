@@ -37,6 +37,7 @@ public sealed class AppSettings
     public string LogLevel { get; set; } = "info";
     public bool AutoCheckForUpdates { get; set; } = true;
     public bool AutoUpdate { get; set; } = false;
+    public string PreferredEngineVersion { get; set; } = "";
 
     /// <summary>
     /// Persisted provider list. OAuth providers appear here once first seen/enabled;

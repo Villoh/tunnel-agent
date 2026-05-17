@@ -55,7 +55,7 @@
                         <TextBlock Classes="row-label" Text="CLIProxyAPI"/>
                         <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,2,0,0">
                             <TextBlock Classes="row-desc"
-                                       Text="{Binding InstalledVersion, StringFormat='Installed: {0}', FallbackValue='Not installed'}" />
+                                       Text="{Binding InstalledVersion, StringFormat='Installed: {0}', TargetNullValue='Installed: Not installed', FallbackValue='Installed: Not installed'}" />
                             <TextBlock Classes="row-desc" Text="→"
                                        IsVisible="{Binding UpdateAvailable}" />
                             <TextBlock Classes="row-desc" Foreground="{DynamicResource AccentBrush}"
@@ -68,6 +68,36 @@
                             IsVisible="{Binding UpdateAvailable}" />
                 </Grid>
 
+                <Border Classes="row-divider"/>
+
+                <!-- Version selector -->
+                <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                    <StackPanel>
+                        <TextBlock Classes="row-label" Text="Engine version"/>
+                        <TextBlock Classes="row-desc" Text="{Binding SelectedEngineVersionDescription}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <ComboBox ItemsSource="{Binding EngineReleases}"
+                                  SelectedItem="{Binding SelectedEngineRelease}"
+                                  IsEnabled="{Binding CanSelectEngineRelease}"
+                                  Width="150"
+                                  MinWidth="150"
+                                  Height="26"
+                                  MinHeight="0"
+                                  Padding="8,0"
+                                  VerticalAlignment="Center"
+                                  VerticalContentAlignment="Center" />
+                        <Button Classes="app" Content="Reload"
+                                Command="{Binding RefreshEngineReleasesCommand}"
+                                IsEnabled="{Binding CanSelectEngineRelease}"
+                                VerticalAlignment="Center" />
+                        <Button Classes="app primary" Content="Install"
+                                Command="{Binding InstallSelectedEngineCommand}"
+                                IsEnabled="{Binding CanInstallSelectedEngine}"
+                                VerticalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+
                 <!-- Download progress (only visible while downloading/installing) -->
                 <StackPanel Margin="14,0,14,11"
                             IsVisible="{Binding EngineState, Converter={StaticResource EngineStateToText}, ConverterParameter=IsDownloading}">
@@ -78,6 +108,39 @@
                     <TextBlock Classes="row-desc" Margin="0,4,0,0"
                                Text="{Binding EngineStatusText}" />
                 </StackPanel>
+
+                <Border Classes="row-divider"/>
+
+                <!-- Package integrity -->
+                <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                    <StackPanel>
+                        <TextBlock Classes="row-label" Text="Package integrity"/>
+                        <TextBlock Classes="row-desc" Text="Downloads are verified before install."/>
+                        <TextBlock Classes="row-desc"
+                                   ToolTip.Tip="{Binding InstalledEngineHashFull}">
+                            <Run Text="{Binding InstalledEngineHashLabel}" />
+                            <Run Text=": " />
+                            <Run Text="{Binding InstalledEngineHashShort}" />
+                        </TextBlock>
+                        <TextBlock Classes="row-desc"
+                                   ToolTip.Tip="{Binding LatestEngineHashFull}">
+                            <Run Text="Remote package SHA256: " />
+                            <Run Text="{Binding LatestEngineHashShort}" />
+                        </TextBlock>
+                        <TextBlock Classes="row-desc"
+                                   Foreground="{DynamicResource ErrBrush}"
+                                   Text="{Binding EngineIntegrityMessage}"
+                                   IsVisible="{Binding HasEngineIntegrityError}" />
+                    </StackPanel>
+                    <Border Grid.Column="1"
+                            Classes="chip"
+                            Background="{DynamicResource AccentSoftBrush}"
+                            VerticalAlignment="Center"
+                            ToolTip.Tip="{Binding LatestEngineAssetName}">
+                        <TextBlock Text="{Binding EngineIntegrityStatus}"
+                                   Foreground="{DynamicResource AccentBrush}" />
+                    </Border>
+                </Grid>
 
                 <Border Classes="row-divider"/>
 
@@ -111,10 +174,17 @@
                         <TextBlock Classes="row-label" Text="Listen port"/>
                         <TextBlock Classes="row-desc" Text="Localhost only. Restart required to apply."/>
                     </StackPanel>
-                    <NumericUpDown Grid.Column="1" Value="{Binding Port}" Minimum="1024" Maximum="65535"
-                                   FormatString="0" Increment="1"
-                                   Width="160" MinWidth="160"
-                                   HorizontalContentAlignment="Center" />
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                        <Button Classes="app" Content="Reset"
+                                Command="{Binding ResetPortCommand}" />
+                        <TextBox Classes="app"
+                                 Text="{Binding EditablePort, Mode=TwoWay}"
+                                 Width="70" MinWidth="70"
+                                 Height="24" MinHeight="0"
+                                 Padding="8,0" MaxLength="5"
+                                 VerticalContentAlignment="Center"
+                                 HorizontalContentAlignment="Center" />
+                    </StackPanel>
                 </Grid>
             </StackPanel>
         </Border>
@@ -125,10 +195,10 @@
                 <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                     <StackPanel>
                         <TextBlock Classes="row-label" Text="Auth files location"/>
-                        <TextBlock Classes="row-desc" Text="%AppData%\TunnelAgent\credentials"
-                                   FontFamily="Cascadia Mono,Consolas,monospace"/>
+                        <TextBlock Classes="row-desc" Text="{Binding AuthFilesDescription}"/>
                     </StackPanel>
-                    <Button Grid.Column="1" Classes="app" Content="Open Folder" />
+                    <Button Grid.Column="1" Classes="app" Content="Open Folder"
+                            Command="{Binding OpenAuthFolderCommand}" />
                 </Grid>
 
                 <Border Classes="row-divider"/>
@@ -137,7 +207,8 @@
                         <TextBlock Classes="row-label" Text="Reset all credentials"/>
                         <TextBlock Classes="row-desc" Text="Removes saved tokens for every provider."/>
                     </StackPanel>
-                    <Button Grid.Column="1" Classes="app danger" Content="Reset…" />
+                    <Button Grid.Column="1" Classes="app danger" Content="Reset…"
+                            Command="{Binding ResetAllCredentialsCommand}" />
                 </Grid>
             </StackPanel>
         </Border>

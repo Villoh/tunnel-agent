@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,16 +17,22 @@ public sealed class EngineService
     private readonly EngineConfigService _config;
     private readonly EngineProcessService _process;
     private readonly SettingsService _settings;
+    private readonly SemaphoreSlim _updateLock = new(1, 1);
 
     // Unified observable state exposed to the ViewModel
     public EngineState State { get; private set; } = EngineState.NotInstalled;
-    public string? InstalledVersion => _download.InstalledVersion;
-    public string? LatestVersion    => _download.LatestVersion;
-    public bool UpdateAvailable     => _download.UpdateAvailable;
-    public double DownloadProgress  => _download.DownloadProgress;
+    public string? InstalledVersion       => _download.InstalledVersion;
+    public string? LatestVersion          => _download.LatestVersion;
+    public string? InstalledBinarySha256  => _download.InstalledBinarySha256;
+    public string? InstalledArchiveSha256 => _download.InstalledArchiveSha256;
+    public string? LatestAssetName        => _download.LatestAssetName;
+    public string? LatestAssetSha256      => _download.LatestAssetSha256;
+    public string? IntegrityError         => _download.IntegrityError;
+    public bool UpdateAvailable           => _download.UpdateAvailable;
+    public double DownloadProgress        => _download.DownloadProgress;
     public bool IsRunning           => _process.IsRunning;
     public int Port                 => _process.Port;
-    public string? LastError        => _process.LastError;
+    public string? LastError        => _download.IntegrityError ?? _process.LastError;
 
     public event EventHandler? StateChanged;
 
@@ -95,13 +102,28 @@ public sealed class EngineService
 
     public Task CheckForUpdateAsync() => _download.CheckForUpdateAsync();
 
-    public async Task DownloadAndInstallAsync()
+    public Task<IReadOnlyList<EngineReleaseInfo>> ListReleasesAsync(int limit = 30) =>
+        _download.ListReleasesAsync(limit);
+
+    public Task PrepareVersionAsync(string version) => _download.PrepareVersionAsync(version);
+
+    public Task DownloadAndInstallAsync() => DownloadAndInstallAsync(null);
+
+    public async Task DownloadAndInstallAsync(string? version)
     {
-        var wasRunning = IsRunning;
-        if (wasRunning) await StopAsync();
+        await _updateLock.WaitAsync();
+        try
+        {
+            var wasRunning = IsRunning;
+            if (wasRunning) await StopAsync();
 
-        await _download.DownloadAndInstallAsync();
+            await _download.DownloadAndInstallAsync(version);
 
-        if (wasRunning) await StartAsync();
+            if (wasRunning) await StartAsync();
+        }
+        finally
+        {
+            _updateLock.Release();
+        }
     }
 }

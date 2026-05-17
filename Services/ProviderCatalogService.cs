@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
@@ -152,6 +153,29 @@ public sealed class ProviderCatalogService : IDisposable
             try { System.IO.File.Delete(file); } catch { }
         }
 
+        _watcher.NotifyNow();
+    }
+
+    /// <summary>Deletes all OAuth and custom credential files from the auth directory.</summary>
+    public async Task ResetAllCredentialsAsync()
+    {
+        _oauth.CancelPreviousAuth();
+
+        foreach (var ps in _settings.Current.Providers)
+            ps.Accounts.Clear();
+
+        _settings.Save();
+
+        var authDir = IPlatformInfo.Current.AuthDirectory;
+        if (Directory.Exists(authDir))
+        {
+            foreach (var file in Directory.GetFiles(authDir, "*.json"))
+            {
+                try { File.Delete(file); } catch { /* best-effort */ }
+            }
+        }
+
+        await _config.WriteConfigAsync();
         _watcher.NotifyNow();
     }
 
