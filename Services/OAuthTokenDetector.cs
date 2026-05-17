@@ -26,7 +26,7 @@ public sealed class OAuthAccount
 /// </summary>
 public sealed class OAuthTokenDetector
 {
-    // Maps provider-id → filename prefix used by CLIProxyAPIPlus
+    // Maps provider-id → filename prefix used by CLIProxyAPI
     public static readonly IReadOnlyDictionary<string, string> KnownProviders =
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

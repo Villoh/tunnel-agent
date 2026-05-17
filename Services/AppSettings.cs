@@ -13,7 +13,7 @@ public sealed class ProviderAccountSettings
 /// <summary>Persisted state for one provider entry (OAuth or custom).</summary>
 public sealed class ProviderSettings
 {
-    /// <summary>Stable identifier matching CLIProxyAPIPlus keys (e.g. "claude", "gemini-cli").</summary>
+    /// <summary>Stable identifier matching CLIProxyAPI keys (e.g. "claude", "gemini-cli").</summary>
     public string Id { get; set; } = "";
 
     /// <summary>False = excluded from config.yaml (oauth-excluded-models / omitted from openai-compatibility).</summary>

@@ -5,7 +5,7 @@
 <h1 align="center">Tunnel Agent</h1>
 
 <p align="center">
-  Use your Claude Code, Copilot, or Codex subscription in any coding agent — Factory Droid, Cursor, and more. Tunnel Agent handles OAuth authentication and routes requests through CLIProxyAPIPlus, no API keys needed.<br><br>One click to connect. Works with whatever you already have.
+  Use your OAuth subscriptions or API keys in any coding agent, Factory Droid, Cursor, and more. Tunnel Agent handles provider authentication and routes requests through CLIProxyAPI.<br><br>One click to connect. Works with whatever you already have.
 </p>
 
 <p align="center">
@@ -29,13 +29,11 @@
 
 - 🖥️ **Native Windows Experience** — Clean Avalonia UI that respects your system theme (light/dark)
 - 🚀 **One-Click Server Management** — Start and stop the proxy endpoint from the sidebar
-- 🔐 **Credential Storage** — Windows DPAPI-backed secure credential handling
-- 👥 **Provider Management** — Connect Claude Code and OpenAI Codex; more providers planned
+- 🔐 **Credential Storage** — Secure handling for OAuth tokens and custom provider API keys
+- 👥 **Provider Management** — Connect Claude Code, OpenAI Codex, Gemini CLI, Kimi, GitHub Copilot, Antigravity, Qwen, and custom OpenAI-compatible providers
 - 🎚️ **Model Visibility** — Browse available models grouped by connected provider
 - 📊 **Live Status** — Animated running indicator with real-time connection state
-- 📋 **Activity Log** — Track recent requests and events
-- ⚙️ **Configuration** — Control startup behaviour, network port, and credential actions
-- 🪟 **Tiling WM Friendly** — Compatible with GlazeWM and other tiling window managers
+- ⚙️ **Configuration** — Control startup behaviour, network port, updates, log level, and credential actions
 
 ## Build from Source
 
@@ -56,7 +54,7 @@
 
 ## Credits
 
-Tunnel Agent is inspired by [VibeProxy](https://github.com/automazeio/vibeproxy), a native macOS menu bar app that routes CLI agent traffic through AI provider subscriptions. Tunnel Agent is built on top of [CLIProxyAPIPlus](https://github.com/router-for-me/CLIProxyAPIPlus), an excellent unified proxy server for AI services with support for third-party providers. Special thanks to both projects for the concept and the foundation that made this possible.
+Tunnel Agent is inspired by [VibeProxy](https://github.com/automazeio/vibeproxy), a native macOS menu bar app that routes CLI agent traffic through AI provider subscriptions. Tunnel Agent is built on top of [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI), an excellent unified proxy server for AI services with support for third-party providers. Special thanks to both projects for the concept and the foundation that made this possible.
 
 ## Contributing
 

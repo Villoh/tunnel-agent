@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace TunnelAgent.Services;
 
 /// <summary>
-/// Launches the CLIProxyAPIPlus binary in OAuth login mode for a given provider.
+/// Launches the CLIProxyAPI binary in OAuth login mode for a given provider.
 /// The binary opens the browser, completes the OAuth flow, and writes a token file
 /// to the auth-dir. The AuthFileWatcher detects the new file and updates Connected state.
 /// </summary>
@@ -55,7 +55,7 @@ public sealed class OAuthService : IDisposable
 
         var binaryPath = EngineDownloadService.BinaryPath;
         if (!File.Exists(binaryPath))
-            return (false, "CLIProxyAPIPlus binary is not installed yet. Start the server first.");
+            return (false, "CLIProxyAPI binary is not installed yet. Start the server first.");
 
         // Kill any previously running auth process for this session
         CancelPreviousAuth();

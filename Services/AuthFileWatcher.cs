@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace TunnelAgent.Services;
 
 /// <summary>
-/// Monitors the CLIProxyAPIPlus auth directory (~/.cli-proxy-api/) for file changes
+/// Monitors the CLIProxyAPI auth directory (~/.cli-proxy-api/) for file changes
 /// and fires <see cref="Changed"/> after a short debounce.
 /// Used to detect when OAuth tokens are written/removed by the proxy binary,
 /// and when custom-provider credentials are added/deleted from the UI.

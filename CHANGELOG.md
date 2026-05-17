@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ProviderCatalogService` — orchestrates the full provider lifecycle: auth-dir sync, add/remove accounts, enable/disable, config.yaml rewrite
 - `OAuthTokenDetector` — reads `~/.cli-proxy-api/{prefix}-{email}*.json` files to detect connected OAuth providers and parse account metadata (email, plan badge)
 - `AuthFileWatcher` — `FileSystemWatcher` with 400 ms debounce over `~/.cli-proxy-api/` to react to new/removed token files in real time
-- `CustomProviderCredentialStore` — reads/writes `openai-compat-{id}-{uuid}.json` credential files, compatible with CLIProxyAPIPlus format
+- `CustomProviderCredentialStore` — reads/writes `openai-compat-{id}-{uuid}.json` credential files, compatible with CLIProxyAPI format
 - `OAuthService` — launches `cli-proxy-api -<provider>-login` to trigger OAuth browser flow; handles Gemini stdin newline, Codex keepalive, Copilot device-code extraction
 - `QuotaFetchService` — fetches live quota from provider APIs using the `access_token` in local token files:
   - **Claude**: `api.anthropic.com/api/oauth/usage` → `five_hour` + `seven_day` utilization %

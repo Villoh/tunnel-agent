@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace TunnelAgent.Services;
 
 /// <summary>
-/// Generates and writes config.yaml for CLIProxyAPIPlus.
+/// Generates and writes config.yaml for CLIProxyAPI.
 /// Supports OAuth provider exclusions and multi-account OpenAI-compat providers.
 /// </summary>
 public sealed class EngineConfigService
