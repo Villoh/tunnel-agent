@@ -83,6 +83,20 @@ public sealed class SidebarWidthConverter : IValueConverter
     public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
 }
 
+/// <summary>Converts RoutingStrategy enum to a user-friendly display string.</summary>
+public sealed class RoutingStrategyToStringConverter : IValueConverter
+{
+    public static readonly RoutingStrategyToStringConverter Instance = new();
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is RoutingStrategy s ? s switch
+        {
+            RoutingStrategy.RoundRobin => "Round Robin (even distribution)",
+            RoutingStrategy.FillFirst => "Fill First (use first account until limit)",
+            _ => s.ToString()
+        } : "";
+    public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
+}
+
 /// <summary>Returns "Disable" for true, "Enable" for false — used for provider toggle tooltips.</summary>
 public sealed class BoolToEnableDisableTextConverter : IValueConverter
 {

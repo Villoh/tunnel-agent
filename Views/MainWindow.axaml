@@ -87,9 +87,12 @@
                                     <StackPanel Grid.Column="0" Spacing="2">
                                         <TextBlock Text="{Binding AppVersion, StringFormat='v{0} · MIT'}" FontSize="11"
                                                    Foreground="{DynamicResource FgFaintBrush}" />
-                                        <TextBlock Text="Report an issue" FontSize="11"
-                                                   Foreground="{DynamicResource AccentBrush}"
-                                                   Cursor="Hand" />
+                                        <Button Classes="link" Command="{Binding OpenIssueUrlCommand}"
+                                                HorizontalAlignment="Left">
+                                            <TextBlock Text="Report an issue" FontSize="11"
+                                                       Foreground="{DynamicResource AccentBrush}"
+                                                       Cursor="Hand" />
+                                        </Button>
                                     </StackPanel>
                                     <Button Grid.Column="1" Classes="icon" HorizontalAlignment="Right"
                                             ToolTip.Tip="Toggle light / dark mode"
@@ -162,8 +165,8 @@
                                 </Grid>
                             </Button>
 
-                            <Button Classes="side" Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Agents}"
-                                    Command="{Binding SelectAgentsCommand}">
+                            <Button Classes="side" IsEnabled="False" Opacity="0.4"
+                                    ToolTip.Tip="Coming soon">
                                 <Grid ColumnDefinitions="20,*,Auto">
                                     <lucide:PackIconLucide Grid.Column="0" Kind="Bot" Width="15" Height="15"
                                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -171,7 +174,7 @@
                                                IsVisible="{Binding !IsSidebarCollapsed}"/>
                                     <Border Grid.Column="2" CornerRadius="999" Background="#14000000" Padding="6,1"
                                             IsVisible="{Binding !IsSidebarCollapsed}">
-                                        <TextBlock Text="{Binding EnabledAgentCount}" FontSize="11" />
+                                        <TextBlock Text="Soon" FontSize="10" />
                                     </Border>
                                 </Grid>
                             </Button>
@@ -216,7 +219,8 @@
                         <ContentControl.Content>
                             <Grid>
                                 <v:ProvidersView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Providers}" />
-                                <v:AgentsView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Agents}" />
+                                <!-- Agents disabled until implemented -->
+                                <!-- <v:AgentsView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Agents}" /> -->
                                 <v:ConfigurationView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Configuration}" />
                             </Grid>
                         </ContentControl.Content>

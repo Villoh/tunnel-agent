@@ -55,12 +55,20 @@ public sealed class EngineConfigService
     {
         var sb = new StringBuilder();
 
+        var routingStrategy = s.RoutingStrategy switch
+        {
+            ViewModels.RoutingStrategy.FillFirst => "fill-first",
+            _ => "round-robin"
+        };
+
         sb.Append($"""
             host: "127.0.0.1"
             port: {s.Port}
             auth-dir: "{authDir}"
             api-keys: []
             debug: {(s.LogLevel == "debug" ? "true" : "false")}
+            routing:
+              strategy: "{routingStrategy}"
             remote-management:
               disable-control-panel: true
 

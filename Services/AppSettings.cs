@@ -40,6 +40,12 @@ public sealed class AppSettings
     public string PreferredEngineVersion { get; set; } = "";
 
     /// <summary>
+    /// How requests are distributed across multiple API keys for a provider.
+    /// RoundRobin = even distribution (default); FillFirst = use first account until limit.
+    /// </summary>
+    public ViewModels.RoutingStrategy RoutingStrategy { get; set; } = ViewModels.RoutingStrategy.RoundRobin;
+
+    /// <summary>
     /// Persisted provider list. OAuth providers appear here once first seen/enabled;
     /// custom providers are added when the user adds an account.
     /// </summary>

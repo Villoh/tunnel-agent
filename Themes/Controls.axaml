@@ -141,6 +141,16 @@
         <Setter Property="Opacity" Value="0.85" />
     </Style>
 
+    <!-- Invisible link button (looks like hyperlink text) -->
+    <Style Selector="Button.link">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="Button.link:pointerover /template/ ContentPresenter">
+        <Setter Property="Opacity" Value="0.75" />
+    </Style>
+
     <!-- Sidebar item -->
     <Style Selector="Button.side">
         <Setter Property="Background" Value="Transparent" />

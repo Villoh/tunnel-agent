@@ -6,6 +6,7 @@
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Resources>
         <cv:EngineStateToTextConverter x:Key="EngineStateToText" />
+        <cv:RoutingStrategyToStringConverter x:Key="RoutingStrategyToString" />
     </UserControl.Resources>
 
     <StackPanel Spacing="0">
@@ -84,6 +85,7 @@
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                         <ComboBox ItemsSource="{Binding EngineReleases}"
                                   SelectedItem="{Binding SelectedEngineRelease}"
+                                  Cursor="Hand"
                                   IsEnabled="{Binding CanSelectEngineRelease}"
                                   Width="150"
                                   MinWidth="150"
@@ -170,7 +172,8 @@
                     </StackPanel>
                     <ToggleButton Grid.Column="1"
                                   Classes="enable-toggle"
-                                  IsChecked="{Binding AutoUpdate, Mode=TwoWay}" />
+                                  IsChecked="{Binding AutoUpdate, Mode=TwoWay}"
+                                  IsEnabled="{Binding IsAutoUpdateEnabled}" />
                 </Grid>
             </StackPanel>
         </Border>
@@ -178,6 +181,28 @@
         <TextBlock Classes="section-label" Text="NETWORK"/>
         <Border Classes="card">
             <StackPanel>
+                <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                    <StackPanel>
+                        <TextBlock Classes="row-label" Text="Routing strategy"/>
+                        <TextBlock Classes="row-desc" Text="How requests are distributed across multiple accounts or keys."/>
+                    </StackPanel>
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding RoutingStrategies}"
+                              Cursor="Hand"
+                              SelectedItem="{Binding RoutingStrategy, Mode=TwoWay}"
+                              Width="250" MinWidth="250"
+                              Height="26" MinHeight="0"
+                              Padding="8,0"
+                              VerticalAlignment="Center"
+                              VerticalContentAlignment="Center">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ., Converter={StaticResource RoutingStrategyToString}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </Grid>
+                <Border Classes="row-divider"/>
                 <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                     <StackPanel>
                         <TextBlock Classes="row-label" Text="Listen port"/>

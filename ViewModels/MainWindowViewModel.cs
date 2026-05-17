@@ -101,13 +101,33 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool AutoCheckForUpdates
     {
         get => _settings.Current.AutoCheckForUpdates;
-        set { _settings.Current.AutoCheckForUpdates = value; _settings.Save(); OnPropertyChanged(); }
+        set
+        {
+            if (_settings.Current.AutoCheckForUpdates == value) return;
+            _settings.Current.AutoCheckForUpdates = value;
+            _settings.Save();
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsAutoUpdateEnabled));
+        }
     }
+
+    /// <summary>Auto-update requires auto-check to be enabled.</summary>
+    public bool IsAutoUpdateEnabled => AutoCheckForUpdates;
+
     public bool AutoUpdate
     {
         get => _settings.Current.AutoUpdate;
         set { _settings.Current.AutoUpdate = value; _settings.Save(); OnPropertyChanged(); UpdateBadgeState(); }
     }
+
+    public RoutingStrategy RoutingStrategy
+    {
+        get => _settings.Current.RoutingStrategy;
+        set { _settings.Current.RoutingStrategy = value; _settings.Save(); OnPropertyChanged(); }
+    }
+
+    public static RoutingStrategy[] RoutingStrategies { get; } =
+        { RoutingStrategy.RoundRobin, RoutingStrategy.FillFirst };
 
     public ServerState ServerState => EngineState switch
     {
@@ -303,7 +323,9 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsLaunchAtLoginSupported));
         OnPropertyChanged(nameof(LogLevel));
         OnPropertyChanged(nameof(AutoCheckForUpdates));
+        OnPropertyChanged(nameof(IsAutoUpdateEnabled));
         OnPropertyChanged(nameof(AutoUpdate));
+        OnPropertyChanged(nameof(RoutingStrategy));
         UpdateBadgeState();
     }
 
@@ -496,11 +518,27 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand] private void SelectProviders()     => SelectedSection = SectionKey.Providers;
-    [RelayCommand] private void SelectAgents()        => SelectedSection = SectionKey.Agents;
+    // [RelayCommand] private void SelectAgents()        => SelectedSection = SectionKey.Agents;  // disabled until implemented
     [RelayCommand] private void SelectConfiguration() => SelectedSection = SectionKey.Configuration;
     [RelayCommand] private void ToggleSidebar()       => IsSidebarCollapsed = !IsSidebarCollapsed;
     [RelayCommand] private void ToggleTheme()         => IsDark = !IsDark;
     [RelayCommand] private void DismissToast()        => ShowUpdateToast = false;
+
+    private const string IssueUrl = "https://github.com/Villoh/tunnel-agent/issues";
+
+    [RelayCommand]
+    private void OpenIssueUrl()
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = IssueUrl,
+                UseShellExecute = true
+            });
+        }
+        catch { /* swallow — best effort */ }
+    }
 
     [RelayCommand]
     private async Task RefreshEngineReleases() => await LoadEngineReleasesAsync();

@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-05-18
+
+### Added
+
+- Routing strategy option in Configuration: Round Robin (even distribution) or Fill First (use first account until limit). Applies to both API keys and OAuth accounts.
+- "Report an issue" link in sidebar footer opens the GitHub issues page.
+- Test suite with 75 passing tests covering converters, engine config, OAuth token detection, provider catalog, auth file watcher, settings, credentials, view models, and service smoke tests.
+
+### Changed
+
+- Auto-update toggle is now disabled when auto-check for updates is off, preventing an inconsistent configuration.
+- ComboBox controls show a hand cursor on hover to indicate they are selectable.
+- Agents section is disabled in the UI until fully implemented.
+
 ## [0.2.3] - 2026-05-17
 
 ### Added
