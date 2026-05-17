@@ -16,6 +16,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly SettingsService _settings;
     private readonly ProviderCatalogService _catalog;
     private readonly TunnelAgent.Services.ModelFetchService _modelFetch;
+
     private CancellationTokenSource? _modelFetchCts;
 
     [ObservableProperty] private SectionKey _selectedSection = SectionKey.Providers;
@@ -92,13 +93,10 @@ public partial class MainWindowViewModel : ViewModelBase
     public ObservableCollection<ProviderViewModel> Providers { get; } = new();
     public ObservableCollection<AgentViewModel> Agents { get; } = new();
     public ObservableCollection<AvailableModelGroupViewModel> AvailableModelGroups { get; }
-    public ObservableCollection<ActivityLogViewModel> ActivityLogs { get; } = new();
-
     public string EndpointUrl => $"http://127.0.0.1:{Port}";
 
     public int ConnectedProviderCount   => Providers.Count(p => p.Connected || p.ActiveAccountCount > 0);
     public int EnabledAgentCount        => Agents.Count(a => a.Installed && a.Enabled);
-    public int ActivityLogCount         => ActivityLogs.Count;
     public int TotalAvailableModelCount => AvailableModelGroups.Sum(g => g.ModelCount);
 
     // Design-time constructor
@@ -116,7 +114,6 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(TotalAvailableModelCount));
 
         _modelFetch = new TunnelAgent.Services.ModelFetchService(settings);
-
         _engine.StateChanged  += OnEngineStateChanged;
         _catalog.ProvidersRefreshed += OnProvidersRefreshed;
 
@@ -285,7 +282,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [RelayCommand] private void SelectProviders()     => SelectedSection = SectionKey.Providers;
     [RelayCommand] private void SelectAgents()        => SelectedSection = SectionKey.Agents;
-    [RelayCommand] private void SelectActivity()      => SelectedSection = SectionKey.Activity;
     [RelayCommand] private void SelectConfiguration() => SelectedSection = SectionKey.Configuration;
     [RelayCommand] private void ToggleSidebar()       => IsSidebarCollapsed = !IsSidebarCollapsed;
     [RelayCommand] private void ToggleTheme()         => IsDark = !IsDark;
@@ -333,7 +329,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(EnabledAgentCount));
     }
 
-    // ── Demo data (agents + activity only — providers come from catalog) ──────
+    // ── Agents seed + activity refresh ────────────────────────────────────────
 
     private void SeedDemoAgents()
     {
@@ -342,9 +338,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Agents.Add(new AgentViewModel("cursor",      "Cursor Agent","cursor-agent", "Sparkles", true)  { Enabled = false, RouteProviderId = "claude" });
         Agents.Add(new AgentViewModel("aider",       "Aider",       "aider",        "Terminal", false,
             "Install via pip to route through Tunnel."));
-
-        ActivityLogs.Add(new ActivityLogViewModel("POST", "/v1/messages",  "Claude Code", "Claude", "claude-sonnet-4.5", "200", "1.2s",  "12s ago"));
-        ActivityLogs.Add(new ActivityLogViewModel("POST", "/v1/responses", "Codex CLI",   "OpenAI", "gpt-5-codex",       "200", "842ms", "48s ago"));
-        ActivityLogs.Add(new ActivityLogViewModel("GET",  "/v1/models",    "Cursor Agent","Claude", "-",                 "200", "31ms",  "2m ago"));
     }
+
+
 }

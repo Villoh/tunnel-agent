@@ -176,20 +176,6 @@
                                 </Grid>
                             </Button>
 
-                            <Button Classes="side" Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Activity}"
-                                    Command="{Binding SelectActivityCommand}">
-                                <Grid ColumnDefinitions="20,*,Auto">
-                                    <lucide:PackIconLucide Grid.Column="0" Kind="Logs" Width="15" Height="15"
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Grid.Column="1" Text="Activity" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
-                                               IsVisible="{Binding !IsSidebarCollapsed}"/>
-                                    <Border Grid.Column="2" CornerRadius="999" Background="#14000000" Padding="6,1"
-                                            IsVisible="{Binding !IsSidebarCollapsed}">
-                                        <TextBlock Text="{Binding ActivityLogCount}" FontSize="11" />
-                                    </Border>
-                                </Grid>
-                            </Button>
-
                             <Button Classes="side" Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Configuration}"
                                     Command="{Binding SelectConfigurationCommand}">
                                 <Grid ColumnDefinitions="20,*,Auto">
@@ -231,7 +217,6 @@
                             <Grid>
                                 <v:ProvidersView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Providers}" />
                                 <v:AgentsView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Agents}" />
-                                <v:ActivityView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Activity}" />
                                 <v:ConfigurationView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Configuration}" />
                             </Grid>
                         </ContentControl.Content>

@@ -99,7 +99,6 @@ public partial class MainWindow : Window
         {
             "Providers"     => SectionKey.Providers,
             "Agents"        => SectionKey.Agents,
-            "Activity"      => SectionKey.Activity,
             "Configuration" => SectionKey.Configuration,
             _ => vm.SelectedSection
         };
