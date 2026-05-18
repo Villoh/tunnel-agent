@@ -48,6 +48,12 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _oAuthStatusIsError;
     [ObservableProperty] private string _oAuthStatusMessage = "";
 
+    // Configuration feedback and confirmations
+    [ObservableProperty] private bool _showConfigurationStatus;
+    [ObservableProperty] private bool _configurationStatusIsError;
+    [ObservableProperty] private string _configurationStatusMessage = "";
+    [ObservableProperty] private bool _showResetCredentialsDialog;
+
     // Engine release selection
     [ObservableProperty] private bool _isLoadingEngineReleases;
     [ObservableProperty] private EngineReleaseViewModel? _selectedEngineRelease;
@@ -518,21 +524,31 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            OAuthStatusIsError = true;
-            OAuthStatusMessage = $"Could not open auth folder: {ex.Message}";
-            ShowOAuthStatus = true;
+            ConfigurationStatusIsError = true;
+            ConfigurationStatusMessage = $"Could not open auth folder: {ex.Message}";
+            ShowConfigurationStatus = true;
         }
     }
 
     [RelayCommand]
-    private async Task ResetAllCredentialsAsync()
+    private void ResetAllCredentials() => ShowResetCredentialsDialog = true;
+
+    [RelayCommand]
+    private void DismissResetCredentialsDialog() => ShowResetCredentialsDialog = false;
+
+    [RelayCommand]
+    private async Task ConfirmResetCredentialsAsync()
     {
+        ShowResetCredentialsDialog = false;
         await _catalog.ResetAllCredentialsAsync();
-        OAuthStatusIsError = false;
-        OAuthStatusMessage = "TunnelAgent-managed credentials were backed up and removed.";
-        ShowOAuthStatus = true;
+        ConfigurationStatusIsError = false;
+        ConfigurationStatusMessage = "TunnelAgent-managed credentials were backed up and removed.";
+        ShowConfigurationStatus = true;
         OnPropertyChanged(nameof(ConnectedProviderCount));
     }
+
+    [RelayCommand]
+    private void DismissConfigurationStatus() => ShowConfigurationStatus = false;
 
     [RelayCommand] private void SelectProviders()     => SelectedSection = SectionKey.Providers;
     // [RelayCommand] private void SelectAgents()        => SelectedSection = SectionKey.Agents;  // disabled until implemented
