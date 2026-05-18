@@ -35,6 +35,13 @@ public sealed class SettingsService
             }
 
             var json = await File.ReadAllTextAsync(_settingsPath);
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                Current = new AppSettings();
+                await SaveImmediateAsync();
+                return;
+            }
+
             Current = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
         }
         catch

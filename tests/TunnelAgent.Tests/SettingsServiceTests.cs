@@ -20,6 +20,22 @@ public sealed class SettingsServiceTests
     }
 
     [Fact]
+    public async Task LoadAsync_WhenFileEmpty_WritesDefaultsFile()
+    {
+        using var temp = new TestTempDirectory();
+        var path = temp.File("settings.json");
+        await File.WriteAllTextAsync(path, "");
+        var service = new SettingsService(path);
+
+        await service.LoadAsync();
+
+        Assert.Equal(8317, service.Current.Port);
+        var json = await File.ReadAllTextAsync(path);
+        Assert.Contains("\"Port\": 8317", json);
+        Assert.Contains("\"LogLevel\": \"info\"", json);
+    }
+
+    [Fact]
     public async Task LoadAsync_WhenFileExists_LoadsPersistedSettings()
     {
         using var temp = new TestTempDirectory();
