@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.5] - 2026-05-18
+
+### Added
+
+- Check for update button in Configuration → Engine row, visible when no update is pending. Disables while checking.
+- Theme selector in Configuration → General: System, Light, or Dark. Persisted across restarts. Sidebar toggle still cycles between Light and Dark in session.
+- Confirmation dialog before resetting credentials, rendered as a window-level overlay so it floats correctly over the full app.
+- Default settings are written to `settings.json` when the file is empty or missing fields, so new installs and manual edits always produce a complete settings file.
+- 230+ passing unit tests.
+
+### Changed
+
+- Repository restructured into `src/TunnelAgent.Avalonia`, `src/TunnelAgent.Core`, `src/TunnelAgent.Infrastructure`, `src/TunnelAgent.Abstractions`, and `tests/TunnelAgent.Tests`. `TunnelAgent.slnx` at root.
+- `IsDark` removed from `AppSettings`; theme preference is now `ThemeMode = system|light|dark`.
+- `LogLevel` removed from `AppSettings`; CLIProxyAPI always starts with `debug: false`.
+- Credential reset now backs up managed token files to `.tunnelagent-backup/{timestamp}/` before deleting them, and only deletes TunnelAgent-managed files (OAuth prefixes and `openai-compat-*.json`). Unrelated JSON in the auth folder is preserved.
+- Status messages from credential operations (reset, open folder) appear in the Configuration view, not the Providers view.
+- Reset credentials confirmation and status feedback are shown in the correct UI context.
+
+### Fixed
+
+- Loading an empty `settings.json` now correctly writes and applies default values.
+- OAuth `ConnectAsync` test for a known provider no longer launches the real CLIProxyAPI binary during unit test runs.
+- `LaunchAtLoginService` no longer references the `Program` type from the Avalonia project when running from Infrastructure.
+
+### Security
+
+- Pinned `Tmds.DBus.Protocol` to `0.21.3` to resolve CVE-2026-39959 (high severity).
+
 ## [0.2.4] - 2026-05-18
 
 ### Added
