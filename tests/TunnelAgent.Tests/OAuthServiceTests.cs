@@ -22,23 +22,12 @@ public sealed class OAuthServiceTests
     }
 
     [Fact]
-    public async Task ConnectAsync_KnownProvider_BinaryNotInTestDir_ReturnsFailure()
+    public void ConnectAsync_KnownProvider_IsNotExercisedInUnitTests()
     {
-        // The binary path uses IPlatformInfo.Current.LocalDataDirectory
-        // which is a machine-wide directory. We test that unusual provider ID
-        // returns appropriate failure.
-        using var temp = new TestTempDirectory();
-        var settings = new SettingsService(temp.File("settings.json"));
-        await settings.LoadAsync();
-        var config = new EngineConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
-        using var service = new OAuthService(config);
-
-        var result = await service.ConnectAsync("claude");
-
-        // Either binary not installed (returns failure) or binary installed (returns success/browser)
-        // Both are valid outcomes in test environment
-        if (!result.Success)
-            Assert.Contains("binary is not installed", result.Message);
+        // ConnectAsync for a known provider starts the real CLIProxyAPI binary when it is installed,
+        // which can launch a browser. Keep unit tests side-effect free and cover unsupported-provider
+        // behavior plus provider recognition instead.
+        Assert.True(OAuthService.IsOAuthProvider("claude"));
     }
 
     [Fact]
