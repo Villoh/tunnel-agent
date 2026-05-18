@@ -95,9 +95,15 @@
                                                IsVisible="{Binding UpdateAvailable}" />
                                 </StackPanel>
                             </StackPanel>
-                            <Button Grid.Column="1" Classes="app primary" Content="Update now"
-                                    Command="{Binding UpdateEngineCommand}"
-                                    IsVisible="{Binding UpdateAvailable}" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Button Classes="app" Content="Check"
+                                        Command="{Binding CheckForUpdateCommand}"
+                                        IsEnabled="{Binding !IsCheckingForUpdate}"
+                                        IsVisible="{Binding !UpdateAvailable}" />
+                                <Button Classes="app primary" Content="Update now"
+                                        Command="{Binding UpdateEngineCommand}"
+                                        IsVisible="{Binding UpdateAvailable}" />
+                            </StackPanel>
                         </Grid>
 
                         <Border Classes="row-divider"/>

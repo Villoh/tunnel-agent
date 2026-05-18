@@ -33,6 +33,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private string? _latestVersion;
     [ObservableProperty] private double _downloadProgress;
     [ObservableProperty] private bool _updateAvailable;
+    [ObservableProperty] private bool _isCheckingForUpdate;
     [ObservableProperty] private bool _configHasBadge;
     [ObservableProperty] private bool _showUpdateToast;
     [ObservableProperty] private bool _endpointCopied;
@@ -571,6 +572,16 @@ public partial class MainWindowViewModel : ViewModelBase
             });
         }
         catch { /* swallow — best effort */ }
+    }
+
+    [RelayCommand]
+    private async Task CheckForUpdate()
+    {
+        if (IsCheckingForUpdate) return;
+        IsCheckingForUpdate = true;
+        try { await _engine.CheckForUpdateAsync(); }
+        catch { }
+        finally { IsCheckingForUpdate = false; }
     }
 
     [RelayCommand]
