@@ -30,11 +30,24 @@ public sealed class ProviderCatalogServiceEdgeTests
         // Should have our custom provider
         Assert.Contains(catalog.Providers, p => p.Id == "local-ai");
 
+        Directory.CreateDirectory(authDir);
+        var unmanagedFile = Path.Combine(authDir, "unmanaged.json");
+        var oauthFile = Path.Combine(authDir, "claude-user@example.com-pro.json");
+        var customFile = Path.Combine(authDir, "openai-compat-local-ai-test.json");
+        await File.WriteAllTextAsync(unmanagedFile, "{}");
+        await File.WriteAllTextAsync(oauthFile, "{\"access_token\":\"token\"}");
+        await File.WriteAllTextAsync(customFile, "{\"type\":\"openai-compat\",\"provider\":\"local-ai\",\"api_key\":\"sk-key\"}");
+
         await catalog.ResetAllCredentialsAsync();
 
-        // After reset, custom provider accounts should be cleared
+        // After reset, custom provider accounts should be cleared. Managed auth files are backed up and removed,
+        // but unrelated JSON in the auth folder must be preserved.
         Assert.Empty(settings.Current.Providers.Where(p => p.Id == "local-ai")
             .SelectMany(p => p.Accounts));
+        Assert.True(File.Exists(unmanagedFile));
+        Assert.False(File.Exists(oauthFile));
+        Assert.False(File.Exists(customFile));
+        Assert.True(Directory.Exists(Path.Combine(authDir, ".tunnelagent-backup")));
     }
 
     [Fact]
@@ -63,11 +76,18 @@ public sealed class ProviderCatalogServiceEdgeTests
         using var catalog = new ProviderCatalogService(settings, config, authDir);
         await catalog.InitializeAsync();
 
-        // Disconnect claude (which has OAuth support)
+        Directory.CreateDirectory(authDir);
+        var claudeFile = Path.Combine(authDir, "claude-user@example.com-pro.json");
+        var unrelatedFile = Path.Combine(authDir, "notes.json");
+        await File.WriteAllTextAsync(claudeFile, "{\"access_token\":\"token\"}");
+        await File.WriteAllTextAsync(unrelatedFile, "{}");
+
         catalog.DisconnectOAuth("claude");
 
-        // Should not throw, provider should exist
         Assert.Contains(catalog.Providers, p => p.Id == "claude");
+        Assert.False(File.Exists(claudeFile));
+        Assert.True(File.Exists(unrelatedFile));
+        Assert.True(Directory.Exists(Path.Combine(authDir, ".tunnelagent-backup")));
     }
 
     [Fact]

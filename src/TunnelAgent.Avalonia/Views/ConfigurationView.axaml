@@ -244,7 +244,7 @@
                 <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                     <StackPanel>
                         <TextBlock Classes="row-label" Text="Reset all credentials"/>
-                        <TextBlock Classes="row-desc" Text="Removes saved tokens for every provider."/>
+                        <TextBlock Classes="row-desc" Text="Backs up and removes TunnelAgent-managed provider tokens."/>
                     </StackPanel>
                     <Button Grid.Column="1" Classes="app danger" Content="Reset…"
                             Command="{Binding ResetAllCredentialsCommand}" />

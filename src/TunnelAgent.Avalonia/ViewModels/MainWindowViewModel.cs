@@ -529,7 +529,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         await _catalog.ResetAllCredentialsAsync();
         OAuthStatusIsError = false;
-        OAuthStatusMessage = "All credentials were removed.";
+        OAuthStatusMessage = "TunnelAgent-managed credentials were backed up and removed.";
         ShowOAuthStatus = true;
         OnPropertyChanged(nameof(ConnectedProviderCount));
     }

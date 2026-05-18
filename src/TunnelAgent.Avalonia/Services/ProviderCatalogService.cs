@@ -40,6 +40,7 @@ public sealed class ProviderCatalogService : IDisposable
     private readonly AuthFileWatcher _watcher;
     private readonly OAuthService _oauth;
     private readonly QuotaFetchService _quota;
+    private readonly string _authDir;
 
     public List<ProviderViewModel> Providers { get; } = [];
 
@@ -52,6 +53,7 @@ public sealed class ProviderCatalogService : IDisposable
     {
         _settings      = settings;
         _config        = config;
+        _authDir       = authDir;
         _store         = new CustomProviderCredentialStore(authDir);
         _oauthDetector = new OAuthTokenDetector(authDir);
         _watcher       = new AuthFileWatcher(authDir);
@@ -129,15 +131,8 @@ public sealed class ProviderCatalogService : IDisposable
         _oauth.CancelPreviousAuth();
 
         if (!OAuthTokenDetector.KnownProviders.TryGetValue(providerId, out var prefix)) return;
-        if (!System.IO.Directory.Exists(IPlatformInfo.Current.AuthDirectory)) return;
-
-        foreach (var file in System.IO.Directory.GetFiles(IPlatformInfo.Current.AuthDirectory, $"{prefix}-*.json"))
-        {
-            // Skip custom-provider credential files
-            if (System.IO.Path.GetFileName(file).StartsWith("openai-compat-", StringComparison.OrdinalIgnoreCase))
-                continue;
-            try { System.IO.File.Delete(file); } catch { /* best-effort */ }
-        }
+        foreach (var file in EnumerateOAuthCredentialFiles(_authDir, prefix))
+            BackupAndDeleteCredentialFile(file, "disconnect-oauth");
 
         _watcher.NotifyNow();
     }
@@ -146,15 +141,8 @@ public sealed class ProviderCatalogService : IDisposable
     public void RemoveOAuthAccount(string providerId, string email)
     {
         if (!OAuthTokenDetector.KnownProviders.TryGetValue(providerId, out var prefix)) return;
-        if (!System.IO.Directory.Exists(IPlatformInfo.Current.AuthDirectory)) return;
-
-        foreach (var file in System.IO.Directory.GetFiles(
-            IPlatformInfo.Current.AuthDirectory, $"{prefix}-{email}*.json"))
-        {
-            if (System.IO.Path.GetFileName(file).StartsWith("openai-compat-", StringComparison.OrdinalIgnoreCase))
-                continue;
-            try { System.IO.File.Delete(file); } catch { }
-        }
+        foreach (var file in EnumerateOAuthCredentialFiles(_authDir, prefix, email))
+            BackupAndDeleteCredentialFile(file, "remove-oauth-account");
 
         _watcher.NotifyNow();
     }
@@ -169,17 +157,59 @@ public sealed class ProviderCatalogService : IDisposable
 
         _settings.Save();
 
-        var authDir = IPlatformInfo.Current.AuthDirectory;
-        if (Directory.Exists(authDir))
-        {
-            foreach (var file in Directory.GetFiles(authDir, "*.json"))
-            {
-                try { File.Delete(file); } catch { /* best-effort */ }
-            }
-        }
+        foreach (var file in EnumerateManagedCredentialFiles(_authDir))
+            BackupAndDeleteCredentialFile(file, "reset-all-credentials");
 
         await _config.WriteConfigAsync();
         _watcher.NotifyNow();
+    }
+
+
+    private static IEnumerable<string> EnumerateManagedCredentialFiles(string authDir)
+    {
+        if (!Directory.Exists(authDir)) yield break;
+
+        foreach (var file in Directory.GetFiles(authDir, "openai-compat-*.json"))
+            yield return file;
+
+        foreach (var prefix in OAuthTokenDetector.KnownProviders.Values.Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            foreach (var file in EnumerateOAuthCredentialFiles(authDir, prefix))
+                yield return file;
+        }
+    }
+
+    private static IEnumerable<string> EnumerateOAuthCredentialFiles(string authDir, string prefix, string? email = null)
+    {
+        if (!Directory.Exists(authDir)) yield break;
+
+        var pattern = email is null ? $"{prefix}-*.json" : $"{prefix}-{email}*.json";
+        foreach (var file in Directory.GetFiles(authDir, pattern))
+        {
+            if (Path.GetFileName(file).StartsWith("openai-compat-", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            yield return file;
+        }
+    }
+
+    private static void BackupAndDeleteCredentialFile(string file, string reason)
+    {
+        try
+        {
+            var backupDir = Path.Combine(Path.GetDirectoryName(file)!, ".tunnelagent-backup",
+                DateTime.UtcNow.ToString("yyyyMMddHHmmss"));
+            Directory.CreateDirectory(backupDir);
+
+            var backupPath = Path.Combine(backupDir, Path.GetFileName(file));
+            File.Copy(file, backupPath, overwrite: true);
+            File.Delete(file);
+            System.Diagnostics.Debug.WriteLine($"[ProviderCatalogService] Deleted auth file ({reason}): {file}; backup: {backupPath}");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ProviderCatalogService] Failed to delete auth file ({reason}): {file}; {ex.Message}");
+        }
     }
 
     /// <summary>Toggle enabled/disabled for a provider and rewrite config.yaml.</summary>
