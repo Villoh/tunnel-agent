@@ -4,11 +4,6 @@ using System.IO;
 
 namespace TunnelAgent.Services;
 
-public interface IFolderOpenService
-{
-    void OpenFolder(string directory);
-}
-
 public sealed class FolderOpenService : IFolderOpenService
 {
     public void OpenFolder(string directory)

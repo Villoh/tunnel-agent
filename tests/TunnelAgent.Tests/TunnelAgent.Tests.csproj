@@ -21,7 +21,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\TunnelAgent\TunnelAgent.csproj" />
+    <ProjectReference Include="..\..\src\TunnelAgent.Abstractions\TunnelAgent.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\TunnelAgent.Core\TunnelAgent.Core.csproj" />
+    <ProjectReference Include="..\..\src\TunnelAgent.Infrastructure\TunnelAgent.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\TunnelAgent.Avalonia\TunnelAgent.Avalonia.csproj" />
   </ItemGroup>
 
   <ItemGroup>

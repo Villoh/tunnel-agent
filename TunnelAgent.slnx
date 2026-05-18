@@ -1,6 +1,9 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/TunnelAgent/TunnelAgent.csproj" />
+    <Project Path="src/TunnelAgent.Abstractions/TunnelAgent.Abstractions.csproj" />
+    <Project Path="src/TunnelAgent.Core/TunnelAgent.Core.csproj" />
+    <Project Path="src/TunnelAgent.Infrastructure/TunnelAgent.Infrastructure.csproj" />
+    <Project Path="src/TunnelAgent.Avalonia/TunnelAgent.Avalonia.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/TunnelAgent.Tests/TunnelAgent.Tests.csproj" />

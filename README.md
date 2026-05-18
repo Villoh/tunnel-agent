@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/TunnelAgent/Assets/logo.png" width="128" height="128" alt="Tunnel Agent Icon">
+  <img src="src/TunnelAgent.Avalonia/Assets/logo.png" width="128" height="128" alt="Tunnel Agent Icon">
 </p>
 
 <h1 align="center">Tunnel Agent</h1>
@@ -47,7 +47,7 @@
 2. Restore dependencies and run:
    ```pwsh
    dotnet restore
-   dotnet run --project src/TunnelAgent/TunnelAgent.csproj
+   dotnet run --project src/TunnelAgent.Avalonia/TunnelAgent.Avalonia.csproj
    ```
 
 > If the app is already running, stop it before rebuilding — Windows locks `TunnelAgent.exe` while it is open.

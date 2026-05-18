@@ -9,13 +9,6 @@ using Microsoft.Win32;
 
 namespace TunnelAgent.Services;
 
-public interface ILaunchAtLoginService
-{
-    bool IsSupported { get; }
-    Task<bool> GetEnabledAsync();
-    Task SetEnabledAsync(bool enabled);
-}
-
 public sealed class LaunchAtLoginService : ILaunchAtLoginService
 {
     private const string AppName = "TunnelAgent";
@@ -122,7 +115,7 @@ public sealed class LaunchAtLoginService : ILaunchAtLoginService
         path = Process.GetCurrentProcess().MainModule?.FileName;
         if (!string.IsNullOrWhiteSpace(path) && File.Exists(path)) return path;
 
-        path = typeof(Program).Assembly.Location;
+        path = typeof(LaunchAtLoginService).Assembly.Location;
         if (!string.IsNullOrWhiteSpace(path) && File.Exists(path)) return path;
 
         throw new InvalidOperationException("Could not resolve current executable path.");

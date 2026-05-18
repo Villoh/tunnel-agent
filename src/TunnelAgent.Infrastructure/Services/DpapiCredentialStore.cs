@@ -6,13 +6,6 @@ using System.Text;
 
 namespace TunnelAgent.Services;
 
-public interface ICredentialStore
-{
-    void Save(string providerId, string secret);
-    string? Load(string providerId);
-    void Remove(string providerId);
-}
-
 /// <summary>
 /// Windows-only DPAPI-backed credential store (per-user scope).
 /// Files live under %AppData%\TunnelAgent\credentials\{providerId}.dat

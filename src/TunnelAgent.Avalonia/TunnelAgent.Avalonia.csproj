@@ -24,12 +24,17 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
     <PackageReference Include="IconPacks.Avalonia.SimpleIcons" Version="2.0.0" />
     <PackageReference Include="IconPacks.Avalonia.Lucide" Version="2.0.0" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
     <PackageReference Include="Tmds.DBus.Protocol" Version="0.21.3" />
   </ItemGroup>
 
   <ItemGroup>
     <AvaloniaResource Include="Assets/**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TunnelAgent.Abstractions\TunnelAgent.Abstractions.csproj" />
+    <ProjectReference Include="..\TunnelAgent.Core\TunnelAgent.Core.csproj" />
+    <ProjectReference Include="..\TunnelAgent.Infrastructure\TunnelAgent.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
