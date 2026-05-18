@@ -229,6 +229,31 @@
             </Grid>
         </Grid>
 
+        <!-- Reset credentials confirmation dialog -->
+        <Border IsVisible="{Binding ShowResetCredentialsDialog}"
+                Background="#88000000"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                ZIndex="50">
+            <Border Classes="card"
+                    MaxWidth="440"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Padding="24">
+                <StackPanel Spacing="14">
+                    <TextBlock Classes="row-label" FontSize="15" Text="Reset all credentials?" />
+                    <TextBlock Classes="row-desc" TextWrapping="Wrap"
+                               Text="This backs up and removes TunnelAgent-managed OAuth tokens and custom provider keys. Other JSON files in the auth folder are preserved." />
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
+                        <Button Classes="app" Content="Cancel"
+                                Command="{Binding DismissResetCredentialsDialogCommand}" />
+                        <Button Classes="app danger" Content="Reset credentials"
+                                Command="{Binding ConfirmResetCredentialsCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+
         <!-- Update toast overlay -->
         <Border IsVisible="{Binding ShowUpdateToast}"
                 Background="{DynamicResource CardBgBrush}"
