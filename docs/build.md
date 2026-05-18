@@ -5,13 +5,13 @@
 Normal day-to-day run:
 
 ```pwsh
-dotnet run
+dotnet run --project src/TunnelAgent/TunnelAgent.csproj
 ```
 
 Build without running (catches compile errors):
 
 ```pwsh
-dotnet build
+dotnet build TunnelAgent.slnx
 ```
 
 ---
@@ -24,7 +24,7 @@ Requires **.NET 10 runtime** installed on the user's machine.
 Produces **one `.exe`** (~106MB) — all managed DLLs and native libs bundled inside.
 
 ```pwsh
-dotnet publish -c Release -r win-x64 --self-contained false `
+dotnet publish src/TunnelAgent/TunnelAgent.csproj -c Release -r win-x64 --self-contained false `
   -p:PublishSingleFile=true `
   -p:IncludeNativeLibrariesForSelfExtract=true `
   -p:EnableCompressionInSingleFile=true
@@ -32,7 +32,7 @@ dotnet publish -c Release -r win-x64 --self-contained false `
 
 | | |
 |---|---|
-| Output | `bin/Release/net10.0-windows/win-x64/publish/TunnelAgent.exe` |
+| Output | `src/TunnelAgent/bin/Release/net10.0-windows/win-x64/publish/TunnelAgent.exe` |
 | Size | ~51 MB |
 | Files | 1 (+ `.pdb` debug symbols, can be dropped) |
 | Requires | .NET 10 Runtime on target machine |
@@ -45,7 +45,7 @@ Bundles the entire .NET 10 runtime inside the exe. No prerequisites for the user
 Uses trimming to remove unused framework code — watch for runtime crashes if reflection-heavy code paths are hit.
 
 ```pwsh
-dotnet publish -c Release -r win-x64 --self-contained true `
+dotnet publish src/TunnelAgent/TunnelAgent.csproj -c Release -r win-x64 --self-contained true `
   -p:PublishSingleFile=true `
   -p:PublishTrimmed=true `
   -p:PublishReadyToRun=true `
@@ -54,7 +54,7 @@ dotnet publish -c Release -r win-x64 --self-contained true `
 
 | | |
 |---|---|
-| Output | `bin/Release/net10.0-windows/win-x64/publish/TunnelAgent.exe` |
+| Output | `src/TunnelAgent/bin/Release/net10.0-windows/win-x64/publish/TunnelAgent.exe` |
 | Size | ~60-70 MB (trimmed) |
 | Files | 1 (+ `.pdb`) |
 | Requires | Nothing |
@@ -68,12 +68,12 @@ dotnet publish -c Release -r win-x64 --self-contained true `
 No trimming, no single file. All DLLs explicit. Largest but most reliable.
 
 ```pwsh
-dotnet publish -c Release -r win-x64 --self-contained true
+dotnet publish src/TunnelAgent/TunnelAgent.csproj -c Release -r win-x64 --self-contained true
 ```
 
 | | |
 |---|---|
-| Output | `bin/Release/net10.0-windows/win-x64/publish/` folder |
+| Output | `src/TunnelAgent/bin/Release/net10.0-windows/win-x64/publish/` folder |
 | Size | ~135 MB total |
 | Files | ~30 files |
 | Requires | Nothing |
@@ -157,7 +157,7 @@ Every argument explained:
 ## Current release command
 
 ```pwsh
-dotnet publish -c Release -r win-x64 --self-contained false `
+dotnet publish src/TunnelAgent/TunnelAgent.csproj -c Release -r win-x64 --self-contained false `
   -p:PublishSingleFile=true `
   -p:IncludeNativeLibrariesForSelfExtract=true `
   -p:EnableCompressionInSingleFile=true `

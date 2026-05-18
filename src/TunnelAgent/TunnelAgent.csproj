@@ -32,9 +32,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="TunnelAgent.Tests/**;obj/**;bin/**;artifacts/**" />
-    <EmbeddedResource Remove="TunnelAgent.Tests/**;obj/**;bin/**;artifacts/**" />
-    <None Remove="TunnelAgent.Tests/**;obj/**;bin/**;artifacts/**" />
+    <Compile Remove="obj/**;bin/**;artifacts/**" />
+    <EmbeddedResource Remove="obj/**;bin/**;artifacts/**" />
+    <None Remove="obj/**;bin/**;artifacts/**" />
   </ItemGroup>
 
 </Project>
