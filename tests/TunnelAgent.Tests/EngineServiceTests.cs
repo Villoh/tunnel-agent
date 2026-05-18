@@ -58,7 +58,6 @@ public sealed class EngineServiceTests
         var settings = new SettingsService(temp.File("settings.json"));
         await settings.LoadAsync();
         settings.Current.Port = 9999;
-        settings.Current.LogLevel = "debug";
 
         var engine = new EngineService(settings);
         await engine.WriteConfigAsync();

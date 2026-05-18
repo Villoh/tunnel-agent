@@ -24,8 +24,8 @@ public partial class MainWindow : Window
 
     private void OnOpened(object? sender, EventArgs e)
     {
-        if (DataContext is MainWindowViewModel vm && Application.Current is { } app)
-            vm.IsDark = app.ActualThemeVariant == ThemeVariant.Dark;
+        if (DataContext is MainWindowViewModel vm)
+            ApplyThemeMode(vm);
 
         ApplyNativeBorderColor();
         Dispatcher.UIThread.Post(ApplyNativeBorderColor, DispatcherPriority.Background);
@@ -36,12 +36,32 @@ public partial class MainWindow : Window
         if (DataContext is MainWindowViewModel vm)
             vm.PropertyChanged += (_, args) =>
             {
-                if (args.PropertyName == nameof(MainWindowViewModel.IsDark) && Application.Current is { } app)
+                if (args.PropertyName == nameof(MainWindowViewModel.ThemeMode))
                 {
-                    app.RequestedThemeVariant = vm.IsDark ? ThemeVariant.Dark : ThemeVariant.Light;
+                    ApplyThemeMode(vm);
                     Dispatcher.UIThread.Post(ApplyNativeBorderColor, DispatcherPriority.Background);
                 }
             };
+    }
+
+
+    private static void ApplyThemeMode(MainWindowViewModel vm)
+    {
+        if (Application.Current is not { } app) return;
+
+        app.RequestedThemeVariant = vm.ThemeMode switch
+        {
+            "light" => ThemeVariant.Light,
+            "dark" => ThemeVariant.Dark,
+            _ => ThemeVariant.Default
+        };
+
+        vm.IsDark = vm.ThemeMode switch
+        {
+            "light" => false,
+            "dark" => true,
+            _ => app.ActualThemeVariant == ThemeVariant.Dark
+        };
     }
 
     private void OnTitlebarPressed(object? sender, PointerPressedEventArgs e)

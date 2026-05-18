@@ -93,11 +93,29 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     public bool IsLaunchAtLoginSupported => _launchAtLogin.IsSupported;
-    public string LogLevel
+
+    public string ThemeMode
     {
-        get => _settings.Current.LogLevel;
-        set { _settings.Current.LogLevel = value; _settings.Save(); OnPropertyChanged(); }
+        get => _settings.Current.ThemeMode;
+        set
+        {
+            var normalized = NormalizeThemeMode(value);
+            if (_settings.Current.ThemeMode == normalized) return;
+            _settings.Current.ThemeMode = normalized;
+            _settings.Save();
+            OnPropertyChanged();
+        }
     }
+
+    public static string[] ThemeModes { get; } = { "system", "light", "dark" };
+
+    private static string NormalizeThemeMode(string? value) => value?.ToLowerInvariant() switch
+    {
+        "light" => "light",
+        "dark" => "dark",
+        _ => "system"
+    };
+
     public bool AutoCheckForUpdates
     {
         get => _settings.Current.AutoCheckForUpdates;
@@ -138,7 +156,6 @@ public partial class MainWindowViewModel : ViewModelBase
     };
 
     public string AppVersion { get; } = TunnelAgent.AppVersion.Current;
-    public string[] LogLevels { get; } = { "error", "warn", "info", "debug" };
 
     public ObservableCollection<ProviderViewModel> Providers { get; } = new();
     public ObservableCollection<AgentViewModel> Agents { get; } = new();
@@ -321,7 +338,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(EndpointUrl));
         OnPropertyChanged(nameof(LaunchAtLogin));
         OnPropertyChanged(nameof(IsLaunchAtLoginSupported));
-        OnPropertyChanged(nameof(LogLevel));
+        OnPropertyChanged(nameof(ThemeMode));
         OnPropertyChanged(nameof(AutoCheckForUpdates));
         OnPropertyChanged(nameof(IsAutoUpdateEnabled));
         OnPropertyChanged(nameof(AutoUpdate));
@@ -521,7 +538,7 @@ public partial class MainWindowViewModel : ViewModelBase
     // [RelayCommand] private void SelectAgents()        => SelectedSection = SectionKey.Agents;  // disabled until implemented
     [RelayCommand] private void SelectConfiguration() => SelectedSection = SectionKey.Configuration;
     [RelayCommand] private void ToggleSidebar()       => IsSidebarCollapsed = !IsSidebarCollapsed;
-    [RelayCommand] private void ToggleTheme()         => IsDark = !IsDark;
+    [RelayCommand] private void ToggleTheme()         => ThemeMode = IsDark ? "light" : "dark";
     [RelayCommand] private void DismissToast()        => ShowUpdateToast = false;
 
     private const string IssueUrl = "https://github.com/Villoh/tunnel-agent/issues";

@@ -77,18 +77,6 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
-    public void LogLevels_StaticArray_HasFourEntries()
-    {
-        var levels = new MainWindowViewModel().LogLevels;
-
-        Assert.Equal(4, levels.Length);
-        Assert.Contains("error", levels);
-        Assert.Contains("warn", levels);
-        Assert.Contains("info", levels);
-        Assert.Contains("debug", levels);
-    }
-
-    [Fact]
     public void AppVersion_MatchesProjectVersion()
     {
         var vm = new MainWindowViewModel();

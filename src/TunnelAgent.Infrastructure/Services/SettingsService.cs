@@ -43,10 +43,37 @@ public sealed class SettingsService
             }
 
             Current = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
+            if (IsMissingDefaultFields(json))
+                await SaveImmediateAsync();
         }
         catch
         {
             Current = new AppSettings();
+        }
+    }
+
+    private static bool IsMissingDefaultFields(string json)
+    {
+        try
+        {
+            using var current = JsonDocument.Parse(json);
+            if (current.RootElement.ValueKind != JsonValueKind.Object)
+                return true;
+
+            var defaultsJson = JsonSerializer.Serialize(new AppSettings(), JsonOptions);
+            using var defaults = JsonDocument.Parse(defaultsJson);
+
+            foreach (var property in defaults.RootElement.EnumerateObject())
+            {
+                if (!current.RootElement.TryGetProperty(property.Name, out _))
+                    return true;
+            }
+
+            return false;
+        }
+        catch (JsonException)
+        {
+            return true;
         }
     }
 

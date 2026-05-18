@@ -33,8 +33,7 @@ public sealed class AppSettings
 {
     public int Port { get; set; } = 8317;
     public bool LaunchAtLogin { get; set; } = true;
-    public bool IsDark { get; set; }
-    public string LogLevel { get; set; } = "info";
+    public string ThemeMode { get; set; } = "system";
     public bool AutoCheckForUpdates { get; set; } = true;
     public bool AutoUpdate { get; set; } = false;
     public string PreferredEngineVersion { get; set; } = "";

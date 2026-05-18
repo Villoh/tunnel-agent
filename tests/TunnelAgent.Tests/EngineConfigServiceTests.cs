@@ -12,7 +12,6 @@ public sealed class EngineConfigServiceTests
         var settings = new SettingsService(temp.File("settings.json"));
         await settings.LoadAsync();
         settings.Current.Port = 9999;
-        settings.Current.LogLevel = "debug";
         var authDir = temp.File("auth");
         var config = new EngineConfigService(settings, temp.File("proxy-config.yaml"), authDir);
 
@@ -22,7 +21,7 @@ public sealed class EngineConfigServiceTests
         Assert.Contains("host: \"127.0.0.1\"", yaml);
         Assert.Contains("port: 9999", yaml);
         Assert.Contains($"auth-dir: \"{authDir.Replace('\\', '/')}\"", yaml);
-        Assert.Contains("debug: true", yaml);
+        Assert.Contains("debug: false", yaml);
     }
 
     [Fact]

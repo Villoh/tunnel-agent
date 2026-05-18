@@ -32,7 +32,7 @@ public sealed class SettingsServiceTests
         Assert.Equal(8317, service.Current.Port);
         var json = await File.ReadAllTextAsync(path);
         Assert.Contains("\"Port\": 8317", json);
-        Assert.Contains("\"LogLevel\": \"info\"", json);
+        Assert.Contains("\"ThemeMode\": \"system\"", json);
     }
 
     [Fact]
@@ -43,8 +43,7 @@ public sealed class SettingsServiceTests
         await File.WriteAllTextAsync(path, JsonSerializer.Serialize(new AppSettings
         {
             Port = 9001,
-            LaunchAtLogin = false,
-            LogLevel = "debug"
+            LaunchAtLogin = false
         }));
         var service = new SettingsService(path);
 
@@ -52,7 +51,6 @@ public sealed class SettingsServiceTests
 
         Assert.Equal(9001, service.Current.Port);
         Assert.False(service.Current.LaunchAtLogin);
-        Assert.Equal("debug", service.Current.LogLevel);
     }
 
     [Fact]
@@ -66,7 +64,6 @@ public sealed class SettingsServiceTests
         await service.LoadAsync();
 
         Assert.Equal(8317, service.Current.Port);
-        Assert.Equal("info", service.Current.LogLevel);
     }
 
     [Fact]

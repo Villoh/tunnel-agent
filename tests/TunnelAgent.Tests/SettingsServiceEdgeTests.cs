@@ -22,13 +22,10 @@ public sealed class SettingsServiceEdgeTests
             DisplayName = "Custom",
             Accounts = [new ProviderAccountSettings { ApiKey = "key-1", Label = "Main" }]
         });
-        service.Current.LogLevel = "warn";
-
         await service.SaveImmediateAsync();
 
         var reloaded = new SettingsService(path);
         await reloaded.LoadAsync();
-        Assert.Equal("warn", reloaded.Current.LogLevel);
         Assert.Single(reloaded.Current.Providers);
         Assert.Equal("custom-provider", reloaded.Current.Providers[0].Id);
         Assert.Equal("key-1", reloaded.Current.Providers[0].Accounts[0].ApiKey);
@@ -47,7 +44,11 @@ public sealed class SettingsServiceEdgeTests
 
         Assert.Equal(5555, service.Current.Port);
         Assert.True(service.Current.LaunchAtLogin); // default
-        Assert.Equal("info", service.Current.LogLevel); // default
+        Assert.Equal("system", service.Current.ThemeMode); // default
+        var persisted = await File.ReadAllTextAsync(path);
+        Assert.Contains("\"Port\": 5555", persisted);
+        Assert.Contains("\"LaunchAtLogin\": true", persisted);
+        Assert.Contains("\"ThemeMode\": \"system\"", persisted);
     }
 
     [Fact]

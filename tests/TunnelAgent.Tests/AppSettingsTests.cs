@@ -15,8 +15,7 @@ public sealed class AppSettingsTests
 
         Assert.Equal(8317, settings.Port);
         Assert.True(settings.LaunchAtLogin);
-        Assert.False(settings.IsDark);
-        Assert.Equal("info", settings.LogLevel);
+        Assert.Equal("system", settings.ThemeMode);
         Assert.True(settings.AutoCheckForUpdates);
         Assert.False(settings.AutoUpdate);
         Assert.Equal("", settings.PreferredEngineVersion);
@@ -30,8 +29,7 @@ public sealed class AppSettingsTests
         {
             Port = 9001,
             LaunchAtLogin = false,
-            IsDark = true,
-            LogLevel = "debug",
+            ThemeMode = "dark",
             AutoCheckForUpdates = false,
             AutoUpdate = true,
             PreferredEngineVersion = "v1.2.3",
@@ -44,8 +42,7 @@ public sealed class AppSettingsTests
         Assert.NotNull(deserialized);
         Assert.Equal(9001, deserialized.Port);
         Assert.False(deserialized.LaunchAtLogin);
-        Assert.True(deserialized.IsDark);
-        Assert.Equal("debug", deserialized.LogLevel);
+        Assert.Equal("dark", deserialized.ThemeMode);
         Assert.False(deserialized.AutoCheckForUpdates);
         Assert.True(deserialized.AutoUpdate);
         Assert.Equal("v1.2.3", deserialized.PreferredEngineVersion);

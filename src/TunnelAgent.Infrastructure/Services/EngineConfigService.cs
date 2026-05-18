@@ -66,7 +66,7 @@ public sealed class EngineConfigService
             port: {s.Port}
             auth-dir: "{authDir}"
             api-keys: []
-            debug: {(s.LogLevel == "debug" ? "true" : "false")}
+            debug: false
             routing:
               strategy: "{routingStrategy}"
             remote-management:

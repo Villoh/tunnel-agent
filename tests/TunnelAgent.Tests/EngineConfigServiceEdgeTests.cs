@@ -38,20 +38,18 @@ public sealed class EngineConfigServiceEdgeTests
     }
 
     [Fact]
-    public async Task WriteConfigAsync_SetsCorrectDefaultLogLevel()
+    public async Task WriteConfigAsync_DisablesDebugLoggingByDefault()
     {
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
         await settings.LoadAsync();
         settings.Current.Port = 9999;
-        settings.Current.LogLevel = "info";
         var config = new EngineConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
 
         await config.WriteConfigAsync();
 
         var yaml = await File.ReadAllTextAsync(config.ConfigPath);
-        // info level = not debug
-        Assert.DoesNotContain("debug: true", yaml);
+        Assert.Contains("debug: false", yaml);
         Assert.Contains("port: 9999", yaml);
     }
 
