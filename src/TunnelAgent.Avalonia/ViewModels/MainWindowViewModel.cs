@@ -36,6 +36,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _isCheckingForUpdate;
     [ObservableProperty] private bool _configHasBadge;
     [ObservableProperty] private bool _showUpdateToast;
+    [ObservableProperty] private bool _showNoUpdateToast;
     [ObservableProperty] private bool _endpointCopied;
     [ObservableProperty] private bool _showUpdateSuccess;
     [ObservableProperty] private string _engineStatusText = "Stopped";
@@ -579,7 +580,16 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (IsCheckingForUpdate) return;
         IsCheckingForUpdate = true;
-        try { await _engine.CheckForUpdateAsync(); }
+        try
+        {
+            await _engine.CheckForUpdateAsync();
+            if (!_engine.UpdateAvailable)
+            {
+                ShowNoUpdateToast = true;
+                _ = Task.Delay(4000).ContinueWith(_ =>
+                    Dispatcher.UIThread.Post(() => ShowNoUpdateToast = false));
+            }
+        }
         catch { }
         finally { IsCheckingForUpdate = false; }
     }

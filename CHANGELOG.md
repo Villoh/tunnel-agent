@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- "No updates available" toast in Configuration after clicking Check when already on the latest version. Dismisses automatically after 4 seconds or manually via the X button.
+
 ## [0.2.5] - 2026-05-18
 
 ### Added
