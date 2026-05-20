@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
+using TunnelAgent.Core.Engine;
 namespace TunnelAgent.Services;
 
 public sealed class SettingsService
@@ -30,6 +31,7 @@ public sealed class SettingsService
             if (!File.Exists(_settingsPath))
             {
                 Current = new AppSettings();
+                EnsureEngineDefaults(Current);
                 await SaveImmediateAsync();
                 return;
             }
@@ -38,18 +40,49 @@ public sealed class SettingsService
             if (string.IsNullOrWhiteSpace(json))
             {
                 Current = new AppSettings();
+                EnsureEngineDefaults(Current);
                 await SaveImmediateAsync();
                 return;
             }
 
             Current = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
-            if (IsMissingDefaultFields(json))
+            var changed = EnsureEngineDefaults(Current);
+            if (IsMissingDefaultFields(json) || changed)
                 await SaveImmediateAsync();
         }
         catch
         {
             Current = new AppSettings();
         }
+    }
+
+    private static bool EnsureEngineDefaults(AppSettings settings)
+    {
+        var changed = false;
+
+        var cliDefaultPort = settings.Port == 0 ? EngineCatalog.CliProxyApi.DefaultPort : settings.Port;
+        var cli = settings.GetOrAddEngine(EngineCatalog.CliProxyApi.Id, cliDefaultPort);
+        if (cli.Port != settings.Port && settings.Port != 0)
+        {
+            cli.Port = settings.Port;
+            changed = true;
+        }
+        if (cli.PreferredVersion != settings.PreferredEngineVersion)
+        {
+            cli.PreferredVersion = settings.PreferredEngineVersion;
+            changed = true;
+        }
+
+        var perplexity = settings.GetOrAddEngine(
+            EngineCatalog.PerplexityWebUiScraper.Id,
+            EngineCatalog.PerplexityWebUiScraper.DefaultPort);
+        if (perplexity.Port == 0)
+        {
+            perplexity.Port = EngineCatalog.PerplexityWebUiScraper.DefaultPort;
+            changed = true;
+        }
+
+        return changed;
     }
 
     private static bool IsMissingDefaultFields(string json)

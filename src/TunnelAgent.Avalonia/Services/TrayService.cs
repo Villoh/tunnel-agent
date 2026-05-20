@@ -9,6 +9,7 @@ using Avalonia.Threading;
 using TunnelAgent.ViewModels;
 using TunnelAgent.Views;
 
+using TunnelAgent.Core.Engine;
 namespace TunnelAgent.Services;
 
 public sealed class TrayService : IDisposable

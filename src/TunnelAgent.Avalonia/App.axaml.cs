@@ -8,6 +8,8 @@ using TunnelAgent.Services;
 using TunnelAgent.ViewModels;
 using TunnelAgent.Views;
 
+using TunnelAgent.Core.Engine;
+using TunnelAgent.Infrastructure.Engine.CliProxy;
 namespace TunnelAgent;
 
 public partial class App : Application
@@ -20,7 +22,7 @@ public partial class App : Application
         {
             var settings      = new SettingsService();
             var engine        = new EngineService(settings);
-            var engineConfig  = new EngineConfigService(settings);
+            var engineConfig  = new ConfigService(settings);
             var catalog       = new ProviderCatalogService(settings, engineConfig);
             var launchAtLogin = new LaunchAtLoginService();
             var folderOpen    = new FolderOpenService();

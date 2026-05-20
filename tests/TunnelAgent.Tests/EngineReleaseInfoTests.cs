@@ -1,6 +1,7 @@
 using TunnelAgent.Services;
 using Xunit;
 
+using TunnelAgent.Core.Engine;
 namespace TunnelAgent.Tests;
 
 public sealed class EngineReleaseInfoTests

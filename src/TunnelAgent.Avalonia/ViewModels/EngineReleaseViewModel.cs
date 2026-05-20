@@ -1,6 +1,7 @@
 using System;
 using TunnelAgent.Services;
 
+using TunnelAgent.Core.Engine;
 namespace TunnelAgent.ViewModels;
 
 public sealed class EngineReleaseViewModel

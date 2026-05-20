@@ -2,6 +2,8 @@ using TunnelAgent.Services;
 using TunnelAgent.ViewModels;
 using Xunit;
 
+using TunnelAgent.Core.Engine;
+using TunnelAgent.Infrastructure.Engine.CliProxy;
 namespace TunnelAgent.Tests;
 
 public sealed class MainWindowViewModelTests

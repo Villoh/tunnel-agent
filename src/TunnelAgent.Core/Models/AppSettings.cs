@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TunnelAgent.Services;
 
@@ -29,6 +30,23 @@ public sealed class ProviderSettings
     public List<ProviderAccountSettings> Accounts { get; set; } = [];
 }
 
+public sealed class EngineRuntimeSettings
+{
+    public string EngineId { get; set; } = "";
+    public int Port { get; set; }
+    public bool AutoStart { get; set; }
+    public string PreferredVersion { get; set; } = "";
+}
+
+public sealed class PerplexityAccountSettings
+{
+    public string Id { get; set; } = "";
+    public string Label { get; set; } = "";
+    public string SessionToken { get; set; } = "";
+    public bool Disabled { get; set; }
+    public bool IsDefault { get; set; }
+}
+
 public sealed class AppSettings
 {
     public int Port { get; set; } = 8317;
@@ -37,6 +55,8 @@ public sealed class AppSettings
     public bool AutoCheckForUpdates { get; set; } = true;
     public bool AutoUpdate { get; set; } = false;
     public string PreferredEngineVersion { get; set; } = "";
+    public List<EngineRuntimeSettings> Engines { get; set; } = [];
+    public List<PerplexityAccountSettings> PerplexityAccounts { get; set; } = [];
 
     /// <summary>
     /// How requests are distributed across multiple API keys for a provider.
@@ -49,4 +69,22 @@ public sealed class AppSettings
     /// custom providers are added when the user adds an account.
     /// </summary>
     public List<ProviderSettings> Providers { get; set; } = [];
+
+    public EngineRuntimeSettings GetOrAddEngine(string engineId, int defaultPort)
+    {
+        var engine = Engines.FirstOrDefault(e => e.EngineId == engineId);
+        if (engine is not null)
+            return engine;
+
+        engine = new EngineRuntimeSettings
+        {
+            EngineId = engineId,
+            Port = defaultPort,
+            PreferredVersion = engineId == "cliproxyapi" ? PreferredEngineVersion : ""
+        };
+
+        Engines.Add(engine);
+        return engine;
+    }
 }
+

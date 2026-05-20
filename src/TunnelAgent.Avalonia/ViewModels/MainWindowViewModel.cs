@@ -10,6 +10,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TunnelAgent.Services;
 
+using TunnelAgent.Core.Engine;
+using TunnelAgent.Infrastructure.Engine.CliProxy;
 namespace TunnelAgent.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
@@ -209,7 +211,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _settings = settings;
         _engine   = engine  ?? new EngineService(settings);
-        var engineConfig = new EngineConfigService(settings);
+        var engineConfig = new ConfigService(settings);
         _catalog  = catalog ?? new ProviderCatalogService(settings, engineConfig);
         _launchAtLogin = launchAtLogin ?? new LaunchAtLoginService();
         _folderOpen = folderOpen ?? new FolderOpenService();

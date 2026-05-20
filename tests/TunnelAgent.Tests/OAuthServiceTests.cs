@@ -1,6 +1,7 @@
 using TunnelAgent.Services;
 using Xunit;
 
+using TunnelAgent.Infrastructure.Engine.CliProxy;
 namespace TunnelAgent.Tests;
 
 public sealed class OAuthServiceTests
@@ -36,7 +37,7 @@ public sealed class OAuthServiceTests
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
         await settings.LoadAsync();
-        var config = new EngineConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
         using var service = new OAuthService(config);
 
         var (success, message) = await service.ConnectAsync("local-ai");
@@ -51,7 +52,7 @@ public sealed class OAuthServiceTests
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
         settings.LoadAsync().GetAwaiter().GetResult();
-        var config = new EngineConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
         var service = new OAuthService(config);
 
         service.Dispose();
@@ -64,7 +65,7 @@ public sealed class OAuthServiceTests
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
         settings.LoadAsync().GetAwaiter().GetResult();
-        var config = new EngineConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
         var service = new OAuthService(config);
 
         service.CancelPreviousAuth(); // should not throw

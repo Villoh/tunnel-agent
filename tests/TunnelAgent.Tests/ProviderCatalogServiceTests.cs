@@ -1,6 +1,7 @@
 using TunnelAgent.Services;
 using Xunit;
 
+using TunnelAgent.Infrastructure.Engine.CliProxy;
 namespace TunnelAgent.Tests;
 
 public sealed class ProviderCatalogServiceTests
@@ -12,7 +13,7 @@ public sealed class ProviderCatalogServiceTests
         var authDir = temp.File("auth");
         var settings = new SettingsService(temp.File("settings.json"));
         await settings.LoadAsync();
-        var config = new EngineConfigService(settings, temp.File("proxy-config.yaml"), authDir);
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir);
         using var catalog = new ProviderCatalogService(settings, config, authDir);
 
         await catalog.InitializeAsync();
@@ -37,7 +38,7 @@ public sealed class ProviderCatalogServiceTests
             DisplayName = "Local AI"
         });
         new CustomProviderCredentialStore(authDir).Save("local-ai", "test-key", "Primary");
-        var config = new EngineConfigService(settings, temp.File("proxy-config.yaml"), authDir);
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir);
         using var catalog = new ProviderCatalogService(settings, config, authDir);
 
         await catalog.InitializeAsync();
@@ -56,7 +57,7 @@ public sealed class ProviderCatalogServiceTests
         var authDir = temp.File("auth");
         var settings = new SettingsService(temp.File("settings.json"));
         await settings.LoadAsync();
-        var config = new EngineConfigService(settings, temp.File("proxy-config.yaml"), authDir);
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir);
         using var catalog = new ProviderCatalogService(settings, config, authDir);
 
         await catalog.SetProviderEnabledAsync("codex", false);

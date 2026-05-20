@@ -7,8 +7,10 @@ using Avalonia.Controls;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 using Avalonia.Styling;
+using TunnelAgent.Services;
 using TunnelAgent.ViewModels;
 
+using TunnelAgent.Core.Engine;
 namespace TunnelAgent.Converters;
 
 public sealed class ServerStateToTextConverter : IValueConverter
@@ -149,10 +151,10 @@ public sealed class EngineStateToTextConverter : IValueConverter
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (parameter is string p && p == "IsDownloading")
-            return value is TunnelAgent.ViewModels.EngineState s &&
-                   (s == TunnelAgent.ViewModels.EngineState.Downloading ||
-                    s == TunnelAgent.ViewModels.EngineState.Installing);
-        return value is TunnelAgent.ViewModels.EngineState state ? state.ToString() : "";
+            return value is EngineState s &&
+                   (s == EngineState.Downloading ||
+                    s == EngineState.Installing);
+        return value is EngineState state ? state.ToString() : "";
     }
     public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
 }

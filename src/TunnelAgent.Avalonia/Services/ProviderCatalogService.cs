@@ -7,6 +7,7 @@ using Avalonia.Threading;
 using IconPacks.Avalonia.SimpleIcons;
 using TunnelAgent.ViewModels;
 
+using TunnelAgent.Infrastructure.Engine.CliProxy;
 namespace TunnelAgent.Services;
 
 /// <summary>
@@ -34,7 +35,7 @@ public sealed class ProviderCatalogService : IDisposable
     // ── Dependencies ─────────────────────────────────────────────────────────
 
     private readonly SettingsService _settings;
-    private readonly EngineConfigService _config;
+    private readonly ConfigService _config;
     private readonly CustomProviderCredentialStore _store;
     private readonly OAuthTokenDetector _oauthDetector;
     private readonly AuthFileWatcher _watcher;
@@ -46,10 +47,10 @@ public sealed class ProviderCatalogService : IDisposable
 
     public event EventHandler? ProvidersRefreshed;
 
-    public ProviderCatalogService(SettingsService settings, EngineConfigService config)
+    public ProviderCatalogService(SettingsService settings, ConfigService config)
         : this(settings, config, IPlatformInfo.Current.AuthDirectory) { }
 
-    public ProviderCatalogService(SettingsService settings, EngineConfigService config, string authDir)
+    public ProviderCatalogService(SettingsService settings, ConfigService config, string authDir)
     {
         _settings      = settings;
         _config        = config;

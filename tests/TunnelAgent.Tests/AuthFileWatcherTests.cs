@@ -1,6 +1,7 @@
 using TunnelAgent.Services;
 using Xunit;
 
+using TunnelAgent.Infrastructure.Engine.CliProxy;
 namespace TunnelAgent.Tests;
 
 public sealed class AuthFileWatcherTests

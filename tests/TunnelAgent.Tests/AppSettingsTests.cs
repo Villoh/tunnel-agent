@@ -20,6 +20,8 @@ public sealed class AppSettingsTests
         Assert.False(settings.AutoUpdate);
         Assert.Equal("", settings.PreferredEngineVersion);
         Assert.Empty(settings.Providers);
+        Assert.Empty(settings.Engines);
+        Assert.Empty(settings.PerplexityAccounts);
     }
 
     [Fact]
@@ -34,6 +36,15 @@ public sealed class AppSettingsTests
             AutoUpdate = true,
             PreferredEngineVersion = "v1.2.3",
             RoutingStrategy = ViewModels.RoutingStrategy.FillFirst,
+            Engines =
+            [
+                new EngineRuntimeSettings { EngineId = "cliproxyapi", Port = 9001, PreferredVersion = "v1.2.3" },
+                new EngineRuntimeSettings { EngineId = "perplexity-webui-scraper", Port = 9101, AutoStart = true }
+            ],
+            PerplexityAccounts =
+            [
+                new PerplexityAccountSettings { Id = "acct-1", Label = "Primary", SessionToken = "token-1", IsDefault = true }
+            ]
         };
 
         var json = JsonSerializer.Serialize(original, JsonOptions);
@@ -47,6 +58,10 @@ public sealed class AppSettingsTests
         Assert.True(deserialized.AutoUpdate);
         Assert.Equal("v1.2.3", deserialized.PreferredEngineVersion);
         Assert.Equal(ViewModels.RoutingStrategy.FillFirst, deserialized.RoutingStrategy);
+        Assert.Equal(2, deserialized.Engines.Count);
+        Assert.Equal("perplexity-webui-scraper", deserialized.Engines[1].EngineId);
+        Assert.Single(deserialized.PerplexityAccounts);
+        Assert.Equal("Primary", deserialized.PerplexityAccounts[0].Label);
     }
 
     [Fact]
@@ -123,5 +138,17 @@ public sealed class AppSettingsTests
         Assert.Equal("", provider.BaseUrl);
         Assert.Equal("", provider.DisplayName);
         Assert.Empty(provider.Accounts);
+    }
+
+    [Fact]
+    public void GetOrAddEngine_ReturnsExistingOrCreatesDefault()
+    {
+        var settings = new AppSettings();
+
+        var created = settings.GetOrAddEngine("perplexity-webui-scraper", 8327);
+        var existing = settings.GetOrAddEngine("perplexity-webui-scraper", 9999);
+
+        Assert.Same(created, existing);
+        Assert.Equal(8327, created.Port);
     }
 }

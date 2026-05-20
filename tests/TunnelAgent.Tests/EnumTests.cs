@@ -2,6 +2,7 @@ using TunnelAgent.Services;
 using TunnelAgent.ViewModels;
 using Xunit;
 
+using TunnelAgent.Core.Engine;
 namespace TunnelAgent.Tests;
 
 public sealed class EnumTests

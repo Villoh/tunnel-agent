@@ -1,6 +1,7 @@
 using TunnelAgent.Services;
 using Xunit;
 
+using TunnelAgent.Infrastructure.Engine.CliProxy;
 namespace TunnelAgent.Tests;
 
 public sealed class ProviderCatalogServiceEdgeTests
@@ -23,7 +24,7 @@ public sealed class ProviderCatalogServiceEdgeTests
             Accounts = [new ProviderAccountSettings { ApiKey = "sk-key", Label = "Primary" }]
         });
 
-        var config = new EngineConfigService(settings, temp.File("proxy-config.yaml"), authDir);
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir);
         using var catalog = new ProviderCatalogService(settings, config, authDir);
         await catalog.InitializeAsync();
 
@@ -57,7 +58,7 @@ public sealed class ProviderCatalogServiceEdgeTests
         var authDir = temp.File("auth");
         var settings = new SettingsService(temp.File("settings.json"));
         settings.LoadAsync().GetAwaiter().GetResult();
-        var config = new EngineConfigService(settings, temp.File("proxy-config.yaml"), authDir);
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir);
         using var catalog = new ProviderCatalogService(settings, config, authDir);
         catalog.InitializeAsync().GetAwaiter().GetResult();
 
@@ -72,7 +73,7 @@ public sealed class ProviderCatalogServiceEdgeTests
         var authDir = temp.File("auth");
         var settings = new SettingsService(temp.File("settings.json"));
         await settings.LoadAsync();
-        var config = new EngineConfigService(settings, temp.File("proxy-config.yaml"), authDir);
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir);
         using var catalog = new ProviderCatalogService(settings, config, authDir);
         await catalog.InitializeAsync();
 
@@ -97,7 +98,7 @@ public sealed class ProviderCatalogServiceEdgeTests
         var authDir = temp.File("auth");
         var settings = new SettingsService(temp.File("settings.json"));
         await settings.LoadAsync();
-        var config = new EngineConfigService(settings, temp.File("proxy-config.yaml"), authDir);
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir);
         using var catalog = new ProviderCatalogService(settings, config, authDir);
         await catalog.InitializeAsync();
 

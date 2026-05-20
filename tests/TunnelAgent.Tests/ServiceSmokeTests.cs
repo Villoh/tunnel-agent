@@ -4,6 +4,8 @@ using TunnelAgent.Services;
 using TunnelAgent.ViewModels;
 using Xunit;
 
+using TunnelAgent.Core.Engine;
+using TunnelAgent.Infrastructure.Engine.CliProxy;
 namespace TunnelAgent.Tests;
 
 public sealed class ServiceSmokeTests
@@ -36,7 +38,7 @@ public sealed class ServiceSmokeTests
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
         await settings.LoadAsync();
-        var config = new EngineConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
         using var service = new OAuthService(config);
 
         var result = await service.ConnectAsync("local-ai");
@@ -46,9 +48,9 @@ public sealed class ServiceSmokeTests
     }
 
     [Fact]
-    public async Task EngineProcessService_StopAsync_SetsStoppedAndRaisesStateChanged()
+    public async Task ProcessService_StopAsync_SetsStoppedAndRaisesStateChanged()
     {
-        var service = new EngineProcessService();
+        var service = new ProcessService();
         var raised = false;
         service.StateChanged += (_, _) => raised = true;
 
@@ -92,9 +94,9 @@ public sealed class ServiceSmokeTests
     }
 
     [Fact]
-    public void EngineDownloadService_NewInstance_StartsNotInstalledOrStopped()
+    public void DownloadService_NewInstance_StartsNotInstalledOrStopped()
     {
-        var service = new EngineDownloadService();
+        var service = new DownloadService();
 
         Assert.Contains(service.State, new[] { EngineState.NotInstalled, EngineState.Stopped });
     }

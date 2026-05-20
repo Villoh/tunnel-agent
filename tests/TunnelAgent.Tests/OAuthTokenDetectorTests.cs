@@ -2,6 +2,7 @@ using System.Text.Json.Nodes;
 using TunnelAgent.Services;
 using Xunit;
 
+using TunnelAgent.Infrastructure.Engine.CliProxy;
 namespace TunnelAgent.Tests;
 
 public sealed class OAuthTokenDetectorTests
