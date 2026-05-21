@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Perplexity engine controls in the system tray alongside CLIProxyAPI, including status, start, stop, and restart actions.
+
+### Changed
+
+- README now documents the multi-engine architecture, first-class Perplexity support, and engine-specific account storage.
+- Providers view server action now uses compact play/stop icon buttons instead of text buttons.
+- Copy-endpoint and engine action buttons now use subtler hover/press transitions.
+
+### Fixed
+
+- Returning from Perplexity Configuration to Providers now re-syncs the focused engine with the selected Providers tab.
+- Manual install of a pinned engine version no longer immediately auto-installs again because of update detection.
+- Explicit "Update now" now installs the latest release instead of reusing the pinned combo-box version.
+- Available models fetched from the Perplexity engine no longer show OpenAI branding when Perplexity is the active source.
+- Engine action hover artifacts/border seams in the Providers endpoint controls.
+
 ## [0.3.0] - 2026-05-21
 
 ### Added

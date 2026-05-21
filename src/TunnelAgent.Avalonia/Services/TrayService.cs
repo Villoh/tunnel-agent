@@ -19,10 +19,14 @@ public sealed class TrayService : IDisposable
     private readonly MainWindowViewModel _viewModel;
     private readonly TrayIcon _trayIcon;
     private readonly NativeMenuItem _showHideItem;
-    private readonly NativeMenuItem _startItem;
-    private readonly NativeMenuItem _stopItem;
-    private readonly NativeMenuItem _restartItem;
-    private readonly NativeMenuItem _statusItem;
+    private readonly NativeMenuItem _cliProxyStartItem;
+    private readonly NativeMenuItem _cliProxyStopItem;
+    private readonly NativeMenuItem _cliProxyRestartItem;
+    private readonly NativeMenuItem _cliProxyStatusItem;
+    private readonly NativeMenuItem _perplexityStartItem;
+    private readonly NativeMenuItem _perplexityStopItem;
+    private readonly NativeMenuItem _perplexityRestartItem;
+    private readonly NativeMenuItem _perplexityStatusItem;
     private bool _isQuitting;
 
     public TrayService(
@@ -35,20 +39,38 @@ public sealed class TrayService : IDisposable
         _viewModel = viewModel;
 
         _showHideItem = CreateItem("Hide Window", (_, _) => ToggleWindow());
-        _statusItem = CreateItem("Server: Stopped", null);
-        _startItem = CreateItem("Start Server", async (_, _) => await _viewModel.StartServerAsync());
-        _stopItem = CreateItem("Stop Server", async (_, _) => await _viewModel.StopServerAsync());
-        _restartItem = CreateItem("Restart Server", async (_, _) => await _viewModel.RestartEngineAsync());
+
+        _cliProxyStatusItem = CreateItem("Server: Stopped", null);
+        _cliProxyStartItem = CreateItem("Start Server", async (_, _) => await RunForEngineAsync(EngineCatalog.CliProxyApi.Id, () => _viewModel.StartServerAsync()));
+        _cliProxyStopItem = CreateItem("Stop Server", async (_, _) => await RunForEngineAsync(EngineCatalog.CliProxyApi.Id, () => _viewModel.StopServerAsync()));
+        _cliProxyRestartItem = CreateItem("Restart Server", async (_, _) => await RunForEngineAsync(EngineCatalog.CliProxyApi.Id, () => _viewModel.RestartEngineAsync()));
+
+        _perplexityStatusItem = CreateItem("Server: Stopped", null);
+        _perplexityStartItem = CreateItem("Start Server", async (_, _) => await RunForEngineAsync(EngineCatalog.PerplexityWebUiScraper.Id, () => _viewModel.StartServerAsync()));
+        _perplexityStopItem = CreateItem("Stop Server", async (_, _) => await RunForEngineAsync(EngineCatalog.PerplexityWebUiScraper.Id, () => _viewModel.StopServerAsync()));
+        _perplexityRestartItem = CreateItem("Restart Server", async (_, _) => await RunForEngineAsync(EngineCatalog.PerplexityWebUiScraper.Id, () => _viewModel.RestartEngineAsync()));
 
         var cliProxyMenu = new NativeMenu
         {
             Items =
             {
-                _statusItem,
+                _cliProxyStatusItem,
                 new NativeMenuItemSeparator(),
-                _startItem,
-                _stopItem,
-                _restartItem
+                _cliProxyStartItem,
+                _cliProxyStopItem,
+                _cliProxyRestartItem
+            }
+        };
+
+        var perplexityMenu = new NativeMenu
+        {
+            Items =
+            {
+                _perplexityStatusItem,
+                new NativeMenuItemSeparator(),
+                _perplexityStartItem,
+                _perplexityStopItem,
+                _perplexityRestartItem
             }
         };
 
@@ -59,9 +81,11 @@ public sealed class TrayService : IDisposable
                 _showHideItem,
                 new NativeMenuItemSeparator(),
                 new NativeMenuItem { Header = "CLIProxyAPI", Menu = cliProxyMenu },
+                new NativeMenuItem { Header = "Perplexity", Menu = perplexityMenu },
                 new NativeMenuItemSeparator(),
                 CreateItem("Configuration…", (_, _) => ShowConfiguration()),
                 CreateItem("Open Auth Folder", (_, _) => _viewModel.OpenAuthFolder()),
+                CreateItem("Open Settings Folder", (_, _) => _viewModel.OpenSettingsFolder()),
                 new NativeMenuItemSeparator(),
                 CreateItem("Quit Tunnel Agent", async (_, _) => await QuitAsync())
             }
@@ -91,7 +115,8 @@ public sealed class TrayService : IDisposable
         if (_isQuitting) return;
 
         _isQuitting = true;
-        await _viewModel.StopServerAsync();
+        await RunForEngineAsync(EngineCatalog.CliProxyApi.Id, () => _viewModel.StopServerAsync());
+        await RunForEngineAsync(EngineCatalog.PerplexityWebUiScraper.Id, () => _viewModel.StopServerAsync());
         _desktop.Shutdown();
     }
 
@@ -122,7 +147,8 @@ public sealed class TrayService : IDisposable
         if (_isQuitting) return;
 
         _isQuitting = true;
-        _viewModel.StopServerAsync().GetAwaiter().GetResult();
+        RunForEngineAsync(EngineCatalog.CliProxyApi.Id, () => _viewModel.StopServerAsync()).GetAwaiter().GetResult();
+        RunForEngineAsync(EngineCatalog.PerplexityWebUiScraper.Id, () => _viewModel.StopServerAsync()).GetAwaiter().GetResult();
     }
 
     private void OnWindowPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
@@ -133,7 +159,8 @@ public sealed class TrayService : IDisposable
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(MainWindowViewModel.EngineState) or nameof(MainWindowViewModel.ServerState))
+        if (e.PropertyName is nameof(MainWindowViewModel.EngineState) or nameof(MainWindowViewModel.ServerState)
+            or nameof(MainWindowViewModel.CliProxyServerState) or nameof(MainWindowViewModel.PerplexityServerState))
             RefreshMenu();
     }
 
@@ -158,7 +185,7 @@ public sealed class TrayService : IDisposable
 
     private void ShowConfiguration()
     {
-        _viewModel.SelectedSection = SectionKey.Configuration;
+        _viewModel.SelectedSection = SectionKey.ConfigGeneral;
         ShowWindow();
     }
 
@@ -172,15 +199,40 @@ public sealed class TrayService : IDisposable
 
         var visible = _window.IsVisible && _window.WindowState != WindowState.Minimized;
         _showHideItem.Header = visible ? "Hide Window" : "Show Window";
-        _statusItem.Header = $"Server: {_viewModel.ServerState}";
-        _statusItem.IsEnabled = false;
+        RefreshEngineMenu(_cliProxyStatusItem, _cliProxyStartItem, _cliProxyStopItem, _cliProxyRestartItem, _viewModel.CliProxyServerState, _viewModel.CliProxyStatusText);
+        RefreshEngineMenu(_perplexityStatusItem, _perplexityStartItem, _perplexityStopItem, _perplexityRestartItem, _viewModel.PerplexityServerState, _viewModel.PerplexityStatusText);
+    }
 
-        var state = _viewModel.EngineState;
-        var isBusy = state is EngineState.Starting or EngineState.Downloading or EngineState.Installing;
-        var isRunning = state == EngineState.Running;
-        _startItem.IsEnabled = !isBusy && !isRunning;
-        _stopItem.IsEnabled = isRunning;
-        _restartItem.IsEnabled = !isBusy && isRunning;
+    private async Task RunForEngineAsync(string engineId, Func<Task> action)
+    {
+        var previousActive = _viewModel.ActiveEngineId;
+        try
+        {
+            _viewModel.ActiveEngineId = engineId;
+            await action();
+        }
+        finally
+        {
+            _viewModel.ActiveEngineId = previousActive;
+        }
+    }
+
+    private static void RefreshEngineMenu(
+        NativeMenuItem statusItem,
+        NativeMenuItem startItem,
+        NativeMenuItem stopItem,
+        NativeMenuItem restartItem,
+        ServerState serverState,
+        string statusText)
+    {
+        statusItem.Header = statusText;
+        statusItem.IsEnabled = false;
+
+        var isBusy = serverState == ServerState.Starting;
+        var isRunning = serverState == ServerState.Running;
+        startItem.IsEnabled = !isBusy && !isRunning;
+        stopItem.IsEnabled = isRunning;
+        restartItem.IsEnabled = !isBusy && isRunning;
     }
 
     public void Dispose()

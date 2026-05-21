@@ -28,6 +28,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private CancellationTokenSource? _modelFetchCts;
     private bool _engineReleaseSelectionReady;
+    private string? _suppressAutoUpdateForEngineId;
 
     [ObservableProperty] private SectionKey _selectedSection = SectionKey.Providers;
     [ObservableProperty] private bool _isSidebarCollapsed;
@@ -409,15 +410,22 @@ public partial class MainWindowViewModel : ViewModelBase
                 RefreshFocusedEngineState();
                 if (UpdateAvailable && !wasAvailable && !_engineUpdateToastShown.GetValueOrDefault(ActiveEngineId))
                 {
-                    _engineUpdateToastShown[ActiveEngineId] = true;
-                    if (AutoUpdate)
+                    if (string.Equals(_suppressAutoUpdateForEngineId, ActiveEngineId, StringComparison.OrdinalIgnoreCase))
                     {
-                        _ = ActiveEngine.DownloadAndInstallAsync();
+                        _suppressAutoUpdateForEngineId = null;
                     }
                     else
                     {
-                        ShowUpdateToast = true;
-                        _ = Task.Delay(8000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowUpdateToast = false));
+                        _engineUpdateToastShown[ActiveEngineId] = true;
+                        if (AutoUpdate)
+                        {
+                            _ = ActiveEngine.DownloadAndInstallAsync();
+                        }
+                        else
+                        {
+                            ShowUpdateToast = true;
+                            _ = Task.Delay(8000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowUpdateToast = false));
+                        }
                     }
                 }
             }
@@ -724,7 +732,12 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand] private void DismissConfigurationStatus() => ShowConfigurationStatus = false;
-    [RelayCommand] private void SelectProviders() => SelectedSection = SectionKey.Providers;
+    [RelayCommand]
+    private void SelectProviders()
+    {
+        SelectedSection = SectionKey.Providers;
+        ActiveEngineId = ProvidersEngineId;
+    }
     [RelayCommand] private void SelectConfiguration() => SelectedSection = SectionKey.ConfigGeneral;
     [RelayCommand] private void SelectConfigGeneral() => SelectedSection = SectionKey.ConfigGeneral;
     [RelayCommand] private void SelectConfigCliProxy() => SelectedSection = SectionKey.ConfigCliProxy;
@@ -798,7 +811,10 @@ public partial class MainWindowViewModel : ViewModelBase
             ? SectionKey.ConfigPerplexity
             : SectionKey.ConfigCliProxy;
         ShowUpdateToast = false;
-        try { await ActiveEngine.DownloadAndInstallAsync(version); }
+        var requestedVersion = string.IsNullOrWhiteSpace(version) ? ActiveEngine.LatestVersion : version;
+        if (!string.IsNullOrWhiteSpace(requestedVersion) && !VersionsEqual(requestedVersion, ActiveEngine.LatestVersion))
+            _suppressAutoUpdateForEngineId = ActiveEngineId;
+        try { await ActiveEngine.DownloadAndInstallAsync(requestedVersion); }
         catch { return; }
         ConfigHasBadge = false;
         _engineUpdateToastShown[ActiveEngineId] = false;

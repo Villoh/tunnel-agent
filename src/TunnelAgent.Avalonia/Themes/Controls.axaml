@@ -130,20 +130,14 @@
         <Setter Property="Opacity" Value="1" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="RenderTransformOrigin" Value="50%,50%" />
-        <Setter Property="RenderTransform" Value="scale(1)" />
         <Setter Property="Transitions">
             <Transitions>
                 <DoubleTransition Property="Opacity" Duration="0:0:0.16" />
-                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.16" Easing="CubicEaseInOut" />
             </Transitions>
         </Setter>
     </Style>
-    <Style Selector="Button.engine-action:pointerover">
-        <Setter Property="RenderTransform" Value="scale(1.06)" />
-    </Style>
     <Style Selector="Button.engine-action:pressed">
-        <Setter Property="RenderTransform" Value="scale(0.94)" />
+        <Setter Property="Opacity" Value="0.72" />
     </Style>
     <Style Selector="Button.engine-action.start">
         <Setter Property="Background" Value="Transparent" />
@@ -338,8 +332,15 @@
         <Setter Property="Transitions">
             <Transitions>
                 <BrushTransition Property="Foreground" Duration="0:0:0.15" />
+                <DoubleTransition Property="Opacity" Duration="0:0:0.15" />
             </Transitions>
         </Setter>
+    </Style>
+    <Style Selector="Button.copy-endpoint:pointerover /template/ ContentPresenter">
+        <Setter Property="Opacity" Value="0.78" />
+    </Style>
+    <Style Selector="Button.copy-endpoint:pressed /template/ ContentPresenter">
+        <Setter Property="Opacity" Value="0.58" />
     </Style>
     <Style Selector="Button.copy-endpoint.copied /template/ ContentPresenter">
         <Setter Property="Foreground" Value="#3CB371" />
