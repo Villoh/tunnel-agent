@@ -50,6 +50,12 @@ public interface IPlatformInfo
     /// </summary>
     string AuthDirectory { get; }
 
+    /// <summary>
+    /// Directory for Perplexity WebUI session account files.
+    /// Each account is stored as a separate JSON file: {id}.json
+    /// </summary>
+    string PerplexityAccountsDirectory => Path.Combine(SettingsDirectory, "perplexity-accounts");
+
     /// <summary>Any post-install steps needed after the binary is placed (e.g. chmod +x).</summary>
     Task PostInstallAsync(string binaryPath);
 

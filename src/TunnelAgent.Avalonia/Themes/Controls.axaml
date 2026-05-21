@@ -120,6 +120,46 @@
         <Setter Property="Background" Value="#1A000000" />
     </Style>
 
+    <Style Selector="Button.engine-action">
+        <Setter Property="Width" Value="26" />
+        <Setter Property="Height" Value="26" />
+        <Setter Property="CornerRadius" Value="7" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Opacity" Value="1" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+        <Setter Property="RenderTransform" Value="scale(1)" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <DoubleTransition Property="Opacity" Duration="0:0:0.16" />
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.16" Easing="CubicEaseInOut" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Button.engine-action:pointerover">
+        <Setter Property="RenderTransform" Value="scale(1.06)" />
+    </Style>
+    <Style Selector="Button.engine-action:pressed">
+        <Setter Property="RenderTransform" Value="scale(0.94)" />
+    </Style>
+    <Style Selector="Button.engine-action.start">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="#58B97B" />
+    </Style>
+    <Style Selector="Button.engine-action.start:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.engine-action.stop">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="#D46A6A" />
+    </Style>
+    <Style Selector="Button.engine-action.stop:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
     <!-- Custom titlebar traffic-light buttons -->
     <Style Selector="Button.traffic">
         <Setter Property="Width" Value="16" />
@@ -479,5 +519,38 @@
     </Style>
     <Style Selector="Button.icon-btn:pointerover /template/ ContentPresenter">
         <Setter Property="Background" Value="#14000000" />
+    </Style>
+
+    <!-- Horizontal pill tab bar -->
+    <Style Selector="Border.tab-bar">
+        <Setter Property="Background" Value="{DynamicResource CardBgBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="4" />
+    </Style>
+    <Style Selector="Button.tab-item">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="12,5" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{DynamicResource FgMutedBrush}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.tab-item /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.tab-item:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#0AFFFFFF" />
+    </Style>
+    <Style Selector="Button.tab-item.active /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="Button.tab-item.active">
+        <Setter Property="Foreground" Value="White" />
     </Style>
 </Styles>

@@ -54,6 +54,14 @@ public sealed class DownloadService
     private static readonly HttpClient Http;
     private static readonly HttpClient HttpNoRedirect;
 
+    // In-memory cache for releases list — avoids GitHub rate-limiting
+    private static string? _cachedReleasesJson;
+    private static DateTime _cacheExpiry = DateTime.MinValue;
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(60);
+    private static readonly SemaphoreSlim _cacheLock = new(1, 1);
+
+    public static void InvalidateCache() { _cachedReleasesJson = null; _cacheExpiry = DateTime.MinValue; }
+
     static DownloadService()
     {
         var version = AppVersion.Current;
@@ -129,14 +137,38 @@ public sealed class DownloadService
         SetState(EngineState.Stopped);
     }
 
+    private static async Task<JsonDocument> FetchReleasesDocumentAsync()
+    {
+        await _cacheLock.WaitAsync();
+        try
+        {
+            if (_cachedReleasesJson is not null && DateTime.UtcNow < _cacheExpiry)
+                return JsonDocument.Parse(_cachedReleasesJson);
+
+            var url = "https://api.github.com/repos/router-for-me/CLIProxyAPI/releases?per_page=30";
+            using var response = await Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+
+            if ((int)response.StatusCode is 403 or 429)
+            {
+                Debug.WriteLine($"[CLIProxy.DownloadService] GitHub rate limited ({response.StatusCode})");
+                return JsonDocument.Parse(_cachedReleasesJson ?? "[]");
+            }
+
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
+            _cachedReleasesJson = json;
+            _cacheExpiry = DateTime.UtcNow.Add(CacheTtl);
+            return JsonDocument.Parse(json);
+        }
+        finally
+        {
+            _cacheLock.Release();
+        }
+    }
+
     public async Task<IReadOnlyList<EngineReleaseInfo>> ListReleasesAsync(int limit = 30)
     {
-        var url = $"https://api.github.com/repos/router-for-me/CLIProxyAPI/releases?per_page={Math.Clamp(limit, 1, 100)}";
-        using var response = await Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-        response.EnsureSuccessStatusCode();
-
-        await using var stream = await response.Content.ReadAsStreamAsync();
-        using var document = await JsonDocument.ParseAsync(stream);
+        using var document = await FetchReleasesDocumentAsync();
 
         var releases = new List<EngineReleaseInfo>();
         foreach (var release in document.RootElement.EnumerateArray())

@@ -23,6 +23,7 @@ public static class ProviderIconRegistry
         {
             "claude"                        => new(PackIconSimpleIconsKind.Claude,       "#D97757"),
             "anthropic"                     => new(PackIconSimpleIconsKind.Anthropic,    "#D97757"),
+            "perplexity"                     => new(PackIconSimpleIconsKind.Perplexity,   "#1FB8CD"),
             "codex"  or "openai"            => new(PackIconSimpleIconsKind.OpenAi,       "#23262E"),
             "gemini-cli" or "google"        => new(PackIconSimpleIconsKind.GoogleGemini, "#4285F4"),
             "github-copilot"                => new(PackIconSimpleIconsKind.GitHub,       "#24292E"),

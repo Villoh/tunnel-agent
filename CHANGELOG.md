@@ -7,9 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-05-21
+
 ### Added
 
-- "No updates available" toast in Configuration after clicking Check when already on the latest version. Dismisses automatically after 4 seconds or manually via the X button.
+- First-class Perplexity engine support alongside CLIProxyAPI, including engine switching from Providers and Configuration.
+- Perplexity account management UI with add, remove, default-account selection, and reset confirmation.
+- Full-window overlays for account dialogs and confirmation flows so dimming covers the whole app.
+- Sliding top tab bars with animated focus indicator for Providers and Configuration.
+- GitHub release metadata caching with manual invalidation on refresh/update checks to avoid rate limiting.
+- Automatic install-on-startup support for the Perplexity engine when it is missing.
+- Sidebar dual-engine status overview for CLIProxyAPI and Perplexity.
+
+### Changed
+
+- Providers page now supports both CLIProxyAPI and Perplexity with focused engine state, per-engine endpoint/start-stop controls, and engine-specific model loading.
+- Configuration page reorganized into top tabs: General, CLIProxyAPI, and Perplexity.
+- Perplexity security/configuration actions now point to the app settings folder, not the CLIProxy auth folder.
+- Perplexity accounts are now stored as separate JSON files under the Tunnel Agent settings directory instead of `settings.json` or `.cli-proxy-api`.
+- App startup now defaults Providers focus to CLIProxyAPI while keeping engine selection logic consistent across pages.
+- Sidebar branding updated: smaller Tunnel Agent lockup in sidebar, version removed from titlebar.
+
+### Fixed
+
+- Available models now query the active engine endpoint/port instead of always using CLIProxyAPI.
+- Restored provider-group expansion UI for available models after the multi-engine refactor.
+- Perplexity startup health polling no longer crashes the app on `HttpClient` timeout retries.
+- Perplexity process startup now surfaces early stderr/crash details instead of only showing a generic timeout.
+- Provider account quota bars are rendered again in the expanded account cards.
+- Window-root dialogs now dim the full app instead of only the content pane.
+- Sidebar status rendering/alignment issues after layout refactor.
+- Migration added from legacy `settings.json` Perplexity accounts into file-based account storage.
 
 ## [0.2.5] - 2026-05-18
 
@@ -206,7 +234,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.2.3...HEAD
+[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/Villoh/tunnel-agent/compare/v0.2.5...v0.3.0
+[0.2.5]: https://github.com/Villoh/tunnel-agent/compare/v0.2.4...v0.2.5
+[0.2.4]: https://github.com/Villoh/tunnel-agent/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/Villoh/tunnel-agent/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/Villoh/tunnel-agent/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/Villoh/tunnel-agent/compare/v0.2.0...v0.2.1

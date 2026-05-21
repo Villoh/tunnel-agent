@@ -36,12 +36,11 @@ public sealed class EngineRegistryAndPerplexityTests
     }
 
     [Fact]
-    public async Task AccountService_AddSetDefaultRemove_Works()
+    public void AccountService_AddSetDefaultRemove_Works()
     {
         using var temp = new TestTempDirectory();
-        var settings = new SettingsService(temp.File("settings.json"));
-        await settings.LoadAsync();
-        var service = new TunnelAgent.Infrastructure.Engine.Perplexity.AccountService(settings);
+        var accountsDir = System.IO.Path.Combine(temp.Path, "perplexity-accounts");
+        var service = new TunnelAgent.Infrastructure.Engine.Perplexity.AccountService(accountsDir);
 
         var first = service.Add("Primary", "token-1");
         var second = service.Add("Backup", "token-2");

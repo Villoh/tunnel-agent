@@ -24,13 +24,14 @@ public sealed class ModelFetchService
 
     /// <summary>
     /// Fetch /v1/models from the running proxy and update AvailableModelGroups.
-    /// Call when engine transitions to Running.
+    /// Call when engine transitions to Running. Pass the active engine's port.
     /// </summary>
     public async Task FetchAndApplyAsync(
         System.Collections.ObjectModel.ObservableCollection<AvailableModelGroupViewModel> groups,
+        int port,
+        string? engineId = null,
         CancellationToken ct = default)
     {
-        var port = _settings.Current.Port;
         var url  = $"http://127.0.0.1:{port}/v1/models";
 
         try
@@ -61,13 +62,17 @@ public sealed class ModelFetchService
 
                 foreach (var (owner, models) in byOwner.OrderBy(k => k.Key))
                 {
-                    var displayName = OwnerDisplayName(owner);
-                    var icon        = ProviderIconRegistry.Get(owner);
-                    var group       = new AvailableModelGroupViewModel(displayName, owner, icon.IconKind, icon.LogoColor, icon.CustomIconData);
+                    var effectiveOwner = engineId == TunnelAgent.Core.Engine.EngineCatalog.PerplexityWebUiScraper.Id &&
+                                         string.Equals(owner, "openai", StringComparison.OrdinalIgnoreCase)
+                        ? "perplexity"
+                        : owner;
+                    var displayName = OwnerDisplayName(effectiveOwner);
+                    var icon        = ProviderIconRegistry.Get(effectiveOwner);
+                    var group       = new AvailableModelGroupViewModel(displayName, effectiveOwner, icon.IconKind, icon.LogoColor, icon.CustomIconData);
 
                     foreach (var (id, _) in models.OrderBy(m => m.id))
                     {
-                        var authKind = AuthKindFromOwner(owner);
+                        var authKind = AuthKindFromOwner(effectiveOwner);
                         group.Models.Add(new AvailableModelViewModel(id, authKind, context: "", displayName));
                     }
 

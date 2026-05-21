@@ -1,28 +1,61 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-
+using System.Text.Json;
+using System.Threading.Tasks;
 using TunnelAgent.Services;
 
 namespace TunnelAgent.Infrastructure.Engine.Perplexity;
 
-/// <summary>Internal persistence API for Perplexity bearer accounts.</summary>
+/// <summary>
+/// File-based persistence for Perplexity WebUI session accounts.
+/// Each account is stored as {id}.json inside the Perplexity accounts directory.
+/// </summary>
 public sealed class AccountService
 {
-    private readonly SettingsService _settings;
+    private readonly string _dir;
+    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
-    public AccountService(SettingsService settings) => _settings = settings;
+    public AccountService() : this(IPlatformInfo.Current.PerplexityAccountsDirectory) { }
 
-    public IReadOnlyList<PerplexityAccountSettings> List() =>
-        _settings.Current.PerplexityAccounts
+    public AccountService(string directory) => _dir = directory;
+
+    private void EnsureDir() => Directory.CreateDirectory(_dir);
+
+    private string FilePath(string id) => Path.Combine(_dir, $"{id}.json");
+
+    public IReadOnlyList<PerplexityAccountSettings> List()
+    {
+        if (!Directory.Exists(_dir))
+            return [];
+
+        var accounts = new List<PerplexityAccountSettings>();
+        foreach (var file in Directory.GetFiles(_dir, "*.json"))
+        {
+            try
+            {
+                var json = File.ReadAllText(file);
+                var account = JsonSerializer.Deserialize<PerplexityAccountSettings>(json, JsonOptions);
+                if (account is not null && !string.IsNullOrWhiteSpace(account.Id))
+                    accounts.Add(account);
+            }
+            catch { /* skip corrupt files */ }
+        }
+
+        return accounts
             .OrderByDescending(a => a.IsDefault)
             .ThenBy(a => a.Label, StringComparer.OrdinalIgnoreCase)
             .ToList();
+    }
 
     public PerplexityAccountSettings Add(string label, string sessionToken, bool makeDefault = false)
     {
+        EnsureDir();
+
+        var existing = List();
         var normalizedLabel = string.IsNullOrWhiteSpace(label)
-            ? $"Perplexity {_settings.Current.PerplexityAccounts.Count + 1}"
+            ? $"Perplexity {existing.Count + 1}"
             : label.Trim();
 
         var account = new PerplexityAccountSettings
@@ -30,49 +63,120 @@ public sealed class AccountService
             Id = Guid.NewGuid().ToString("N"),
             Label = normalizedLabel,
             SessionToken = sessionToken.Trim(),
-            IsDefault = makeDefault || _settings.Current.PerplexityAccounts.Count == 0
+            IsDefault = makeDefault || existing.Count == 0,
         };
 
         if (account.IsDefault)
-            ClearDefault();
+            ClearDefault(existing);
 
-        _settings.Current.PerplexityAccounts.Add(account);
-        _settings.Save();
+        Save(account);
         return account;
     }
 
     public bool Remove(string accountId)
     {
-        var account = _settings.Current.PerplexityAccounts.FirstOrDefault(a => a.Id == accountId);
-        if (account is null) return false;
+        var path = FilePath(accountId);
+        if (!File.Exists(path)) return false;
 
-        var wasDefault = account.IsDefault;
-        _settings.Current.PerplexityAccounts.Remove(account);
-        if (wasDefault && _settings.Current.PerplexityAccounts.Count > 0)
-            _settings.Current.PerplexityAccounts[0].IsDefault = true;
+        var wasDefault = false;
+        try
+        {
+            var json = File.ReadAllText(path);
+            var account = JsonSerializer.Deserialize<PerplexityAccountSettings>(json, JsonOptions);
+            wasDefault = account?.IsDefault ?? false;
+        }
+        catch { }
 
-        _settings.Save();
+        // Backup then delete
+        try
+        {
+            var backupDir = Path.Combine(_dir, ".backup", DateTime.UtcNow.ToString("yyyyMMddHHmmss"));
+            Directory.CreateDirectory(backupDir);
+            File.Copy(path, Path.Combine(backupDir, Path.GetFileName(path)), overwrite: true);
+            File.Delete(path);
+        }
+        catch { return false; }
+
+        // If it was default, promote the next account
+        if (wasDefault)
+        {
+            var remaining = List();
+            if (remaining.Count > 0)
+            {
+                remaining[0].IsDefault = true;
+                Save(remaining[0]);
+            }
+        }
+
         return true;
     }
 
     public bool SetDefault(string accountId)
     {
-        var account = _settings.Current.PerplexityAccounts.FirstOrDefault(a => a.Id == accountId);
-        if (account is null) return false;
+        var existing = List();
+        var target = existing.FirstOrDefault(a => a.Id == accountId);
+        if (target is null) return false;
 
-        ClearDefault();
-        account.IsDefault = true;
-        _settings.Save();
+        ClearDefault(existing);
+        target.IsDefault = true;
+        Save(target);
         return true;
     }
 
-    public PerplexityAccountSettings? GetDefault() =>
-        _settings.Current.PerplexityAccounts.FirstOrDefault(a => a.IsDefault && !a.Disabled)
-        ?? _settings.Current.PerplexityAccounts.FirstOrDefault(a => !a.Disabled);
-
-    private void ClearDefault()
+    public PerplexityAccountSettings? GetDefault()
     {
-        foreach (var account in _settings.Current.PerplexityAccounts)
-            account.IsDefault = false;
+        var all = List();
+        return all.FirstOrDefault(a => a.IsDefault && !a.Disabled)
+            ?? all.FirstOrDefault(a => !a.Disabled);
+    }
+
+    public void RemoveAll()
+    {
+        if (!Directory.Exists(_dir)) return;
+        foreach (var file in Directory.GetFiles(_dir, "*.json"))
+        {
+            try
+            {
+                var backupDir = Path.Combine(_dir, ".backup", DateTime.UtcNow.ToString("yyyyMMddHHmmss"));
+                Directory.CreateDirectory(backupDir);
+                File.Copy(file, Path.Combine(backupDir, Path.GetFileName(file)), overwrite: true);
+                File.Delete(file);
+            }
+            catch { }
+        }
+    }
+
+    private void Save(PerplexityAccountSettings account)
+    {
+        EnsureDir();
+        var json = JsonSerializer.Serialize(account, JsonOptions);
+        File.WriteAllText(FilePath(account.Id), json);
+    }
+
+    private void ClearDefault(IEnumerable<PerplexityAccountSettings> accounts)
+    {
+        foreach (var a in accounts.Where(a => a.IsDefault))
+        {
+            a.IsDefault = false;
+            Save(a);
+        }
+    }
+
+    /// <summary>
+    /// Migrates existing accounts from AppSettings into individual files.
+    /// Called once on startup to migrate legacy data.
+    /// </summary>
+    public void MigrateFromSettings(System.Collections.Generic.List<PerplexityAccountSettings> legacyAccounts)
+    {
+        if (legacyAccounts.Count == 0) return;
+
+        EnsureDir();
+        var existing = List().Select(a => a.Id).ToHashSet();
+
+        foreach (var account in legacyAccounts)
+        {
+            if (string.IsNullOrWhiteSpace(account.Id) || existing.Contains(account.Id)) continue;
+            Save(account);
+        }
     }
 }

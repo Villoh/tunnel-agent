@@ -22,6 +22,7 @@
         <cv:ServerStateRunningConverter x:Key="StateIsRunning" />
         <cv:SectionEqualsConverter      x:Key="SectionEq" />
         <cv:SidebarWidthConverter       x:Key="SidebarWidth" />
+        <cv:InvertBoolConverter         x:Key="InvertBool" />
     </Window.Resources>
 
     <Border Background="{DynamicResource WinBgBrush}"
@@ -42,17 +43,6 @@
                 <Border Grid.ColumnSpan="3" VerticalAlignment="Bottom" Height="1"
                         Background="{DynamicResource WinBorderBrush}" Opacity="0.8" />
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="7"
-                            HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Image Source="/Assets/logo-20.png" Width="18" Height="18"
-                           VerticalAlignment="Center" RenderOptions.BitmapInterpolationMode="HighQuality"/>
-                    <TextBlock Text="Tunnel Agent"
-                               FontSize="13" FontWeight="SemiBold"
-                               Foreground="{DynamicResource FgBrush}" />
-                    <TextBlock Text="{Binding AppVersion, StringFormat='v{0}'}" FontSize="11"
-                               Foreground="{DynamicResource FgFaintBrush}"
-                               VerticalAlignment="Center" />
-                </StackPanel>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8"
                             HorizontalAlignment="Right" VerticalAlignment="Center"
@@ -75,10 +65,114 @@
                         Background="{DynamicResource SideBgBrush}"
                         BorderBrush="{DynamicResource SideBorderBrush}"
                         BorderThickness="0,0,1,0">
-                    <DockPanel LastChildFill="True">
+                    <Grid RowDefinitions="Auto,*,Auto,Auto">
+                        <StackPanel Grid.Row="0" Margin="8,10,8,0" Spacing="2">
+                            <Grid Margin="0,0,0,16" ColumnDefinitions="*,Auto">
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" Margin="6,0,0,0"
+                                            VerticalAlignment="Center"
+                                            IsVisible="{Binding !IsSidebarCollapsed}">
+                                    <Image Source="/Assets/logo-20.png" Width="16" Height="16"
+                                           VerticalAlignment="Center" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+                                    <TextBlock FontSize="13" Foreground="{DynamicResource FgBrush}" VerticalAlignment="Center">
+                                        <Run Text="Tunnel" FontWeight="Bold" />
+                                        <Run Text="Agent" />
+                                    </TextBlock>
+                                </StackPanel>
+                                <Button Grid.Column="1" Classes="icon" Width="24" Height="24"
+                                        HorizontalAlignment="Right" VerticalAlignment="Center"
+                                        IsVisible="{Binding !IsSidebarCollapsed}"
+                                        ToolTip.Tip="Collapse sidebar"
+                                        Command="{Binding ToggleSidebarCommand}">
+                                    <lucide:PackIconLucide Kind="PanelLeftClose" Width="15" Height="15"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource FgMutedBrush}" />
+                                </Button>
+                                <Button Grid.ColumnSpan="2" Classes="icon" Width="24" Height="24"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center"
+                                        IsVisible="{Binding IsSidebarCollapsed}"
+                                        ToolTip.Tip="Expand sidebar"
+                                        Command="{Binding ToggleSidebarCommand}">
+                                    <lucide:PackIconLucide Kind="PanelLeftOpen" Width="15" Height="15"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource FgMutedBrush}" />
+                                </Button>
+                            </Grid>
 
-                        <!-- Footer -->
-                        <Border DockPanel.Dock="Bottom"
+                            <Button Classes="side" Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Providers}"
+                                    Command="{Binding SelectProvidersCommand}">
+                                <Grid ColumnDefinitions="20,*,Auto">
+                                    <lucide:PackIconLucide Grid.Column="0" Kind="Server" Width="15" Height="15"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="Providers" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
+                                               IsVisible="{Binding !IsSidebarCollapsed}"/>
+                                    <Border Grid.Column="2" CornerRadius="999" Background="#14000000" Padding="6,1"
+                                            IsVisible="{Binding !IsSidebarCollapsed}">
+                                        <TextBlock Text="{Binding ConnectedProviderCount}" FontSize="11" />
+                                    </Border>
+                                </Grid>
+                            </Button>
+
+                            <Button Classes="side" IsEnabled="False" Opacity="0.4"
+                                    ToolTip.Tip="Coming soon">
+                                <Grid ColumnDefinitions="20,*,Auto">
+                                    <lucide:PackIconLucide Grid.Column="0" Kind="Bot" Width="15" Height="15"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="Agents" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
+                                               IsVisible="{Binding !IsSidebarCollapsed}"/>
+                                    <Border Grid.Column="2" CornerRadius="999" Background="#14000000" Padding="6,1"
+                                            IsVisible="{Binding !IsSidebarCollapsed}">
+                                        <TextBlock Text="Soon" FontSize="10" />
+                                    </Border>
+                                </Grid>
+                            </Button>
+
+                            <Button Classes="side" Classes.selected="{Binding IsConfigSection}"
+                                    Command="{Binding SelectConfigurationCommand}">
+                                <Grid ColumnDefinitions="20,*,Auto">
+                                    <lucide:PackIconLucide Grid.Column="0" Kind="Settings" Width="15" Height="15"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="Configuration" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
+                                               IsVisible="{Binding !IsSidebarCollapsed}"/>
+                                    <Ellipse Grid.Column="2" Width="7" Height="7"
+                                             Fill="{DynamicResource AccentBrush}"
+                                             Margin="4,0,0,0"
+                                             IsVisible="{Binding ConfigHasBadge}" />
+                                </Grid>
+                            </Button>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="2" Margin="8,0,8,10" Spacing="6">
+                            <TextBlock Classes="section-label" Text="STATUS" Margin="10,0,10,0"
+                                       IsVisible="{Binding !IsSidebarCollapsed}"/>
+
+                            <Grid Margin="10,0" ColumnDefinitions="Auto,*">
+                                <Grid Grid.Column="0" Classes="status-indicator">
+                                    <Ellipse Classes="status-pulse"
+                                             Fill="{Binding CliProxyServerState, Converter={StaticResource StateToBrush}}"
+                                             IsVisible="{Binding CliProxyServerState, Converter={StaticResource StateIsRunning}}" />
+                                    <Ellipse Classes="status-dot"
+                                             Fill="{Binding CliProxyServerState, Converter={StaticResource StateToBrush}}" />
+                                </Grid>
+                                <TextBlock Grid.Column="1" Text="CLIProxyAPI" Margin="8,0,0,0" FontSize="12" Foreground="{DynamicResource FgBrush}"
+                                           VerticalAlignment="Center"
+                                           IsVisible="{Binding !IsSidebarCollapsed}" />
+                            </Grid>
+
+                            <Grid Margin="10,0" ColumnDefinitions="Auto,*">
+                                <Grid Grid.Column="0" Classes="status-indicator">
+                                    <Ellipse Classes="status-pulse"
+                                             Fill="{Binding PerplexityServerState, Converter={StaticResource StateToBrush}}"
+                                             IsVisible="{Binding PerplexityServerState, Converter={StaticResource StateIsRunning}}" />
+                                    <Ellipse Classes="status-dot"
+                                             Fill="{Binding PerplexityServerState, Converter={StaticResource StateToBrush}}" />
+                                </Grid>
+                                <TextBlock Grid.Column="1" Text="Perplexity" Margin="8,0,0,0" FontSize="12" Foreground="{DynamicResource FgBrush}"
+                                           VerticalAlignment="Center"
+                                           IsVisible="{Binding !IsSidebarCollapsed}" />
+                            </Grid>
+                        </StackPanel>
+
+                        <Border Grid.Row="3"
                                 BorderBrush="{DynamicResource SideBorderBrush}"
                                 BorderThickness="0,1,0,0"
                                 Padding="8">
@@ -126,90 +220,7 @@
                                 </Button>
                             </Grid>
                         </Border>
-
-                        <StackPanel Margin="8,10" Spacing="2">
-                            <Grid Margin="0,0,0,4">
-                                <!-- Expanded: collapse button aligned right -->
-                                <Button Classes="icon" Width="24" Height="24"
-                                        HorizontalAlignment="Right" VerticalAlignment="Center"
-                                        IsVisible="{Binding !IsSidebarCollapsed}"
-                                        ToolTip.Tip="Collapse sidebar"
-                                        Command="{Binding ToggleSidebarCommand}">
-                                    <lucide:PackIconLucide Kind="PanelLeftClose" Width="15" Height="15"
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource FgMutedBrush}" />
-                                </Button>
-                                <!-- Collapsed: expand button centered -->
-                                <Button Classes="icon" Width="24" Height="24"
-                                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                                        IsVisible="{Binding IsSidebarCollapsed}"
-                                        ToolTip.Tip="Expand sidebar"
-                                        Command="{Binding ToggleSidebarCommand}">
-                                    <lucide:PackIconLucide Kind="PanelLeftOpen" Width="15" Height="15"
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource FgMutedBrush}" />
-                                </Button>
-                            </Grid>
-
-                            <Button Classes="side" Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Providers}"
-                                    Command="{Binding SelectProvidersCommand}">
-                                <Grid ColumnDefinitions="20,*,Auto">
-                                    <lucide:PackIconLucide Grid.Column="0" Kind="Server" Width="15" Height="15"
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Grid.Column="1" Text="Providers" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
-                                               IsVisible="{Binding !IsSidebarCollapsed}"/>
-                                    <Border Grid.Column="2" CornerRadius="999" Background="#14000000" Padding="6,1"
-                                            IsVisible="{Binding !IsSidebarCollapsed}">
-                                        <TextBlock Text="{Binding ConnectedProviderCount}" FontSize="11" />
-                                    </Border>
-                                </Grid>
-                            </Button>
-
-                            <Button Classes="side" IsEnabled="False" Opacity="0.4"
-                                    ToolTip.Tip="Coming soon">
-                                <Grid ColumnDefinitions="20,*,Auto">
-                                    <lucide:PackIconLucide Grid.Column="0" Kind="Bot" Width="15" Height="15"
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Grid.Column="1" Text="Agents" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
-                                               IsVisible="{Binding !IsSidebarCollapsed}"/>
-                                    <Border Grid.Column="2" CornerRadius="999" Background="#14000000" Padding="6,1"
-                                            IsVisible="{Binding !IsSidebarCollapsed}">
-                                        <TextBlock Text="Soon" FontSize="10" />
-                                    </Border>
-                                </Grid>
-                            </Button>
-
-                            <Button Classes="side" Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Configuration}"
-                                    Command="{Binding SelectConfigurationCommand}">
-                                <Grid ColumnDefinitions="20,*,Auto">
-                                    <lucide:PackIconLucide Grid.Column="0" Kind="Settings" Width="15" Height="15"
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <TextBlock Grid.Column="1" Text="Configuration" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
-                                               IsVisible="{Binding !IsSidebarCollapsed}"/>
-                                    <!-- Update badge dot -->
-                                    <Ellipse Grid.Column="2" Width="7" Height="7"
-                                             Fill="{DynamicResource AccentBrush}"
-                                             Margin="4,0,0,0"
-                                             IsVisible="{Binding ConfigHasBadge}" />
-                                </Grid>
-                            </Button>
-
-                            <TextBlock Classes="section-label" Text="STATUS" Margin="10,12,10,4"
-                                       IsVisible="{Binding !IsSidebarCollapsed}"/>
-                            <StackPanel Orientation="Horizontal" Spacing="8" Margin="10,2">
-                                <Grid Classes="status-indicator">
-                                    <Ellipse Classes="status-pulse"
-                                             Fill="{Binding ServerState, Converter={StaticResource StateToBrush}}"
-                                             IsVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}}" />
-                                    <Ellipse Classes="status-dot"
-                                             Fill="{Binding ServerState, Converter={StaticResource StateToBrush}}" />
-                                </Grid>
-                                <TextBlock Text="{Binding ServerState, Converter={StaticResource StateToText}}"
-                                           Classes="status" Foreground="{Binding ServerState, Converter={StaticResource StateToBrush}}"
-                                           IsVisible="{Binding !IsSidebarCollapsed}" />
-                            </StackPanel>
-                        </StackPanel>
-                    </DockPanel>
+                    </Grid>
                 </Border>
 
                 <!-- Content area -->
@@ -221,7 +232,7 @@
                                 <v:ProvidersView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Providers}" />
                                 <!-- Agents disabled until implemented -->
                                 <!-- <v:AgentsView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Agents}" /> -->
-                                <v:ConfigurationView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Configuration}" />
+                                <v:ConfigurationView IsVisible="{Binding IsConfigSection}" />
                             </Grid>
                         </ContentControl.Content>
                     </ContentControl>
@@ -249,6 +260,72 @@
                                 Command="{Binding DismissResetCredentialsDialogCommand}" />
                         <Button Classes="app danger" Content="Reset credentials"
                                 Command="{Binding ConfirmResetCredentialsCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- Add CLIProxy account dialog -->
+        <Border IsVisible="{Binding ShowAddAccountDialog}" Background="#88000000"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50">
+            <Border Classes="card" MaxWidth="420" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24">
+                <StackPanel Spacing="14">
+                    <TextBlock Classes="row-label" FontSize="15" Text="{Binding AddAccountTarget.Name, StringFormat='Add account — {0}'}" />
+                    <StackPanel Spacing="4" IsVisible="{Binding AddAccountTarget.IsOAuth, Converter={StaticResource InvertBool}, FallbackValue=False}">
+                        <TextBlock Classes="row-desc" Text="Base URL" />
+                        <TextBox x:Name="BaseUrlBox" Classes="app" Watermark="https://api.example.com/v1" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="row-desc" Text="API Key" />
+                        <TextBox x:Name="ApiKeyBox" Classes="app" PasswordChar="●" Watermark="sk-..." />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="row-desc" Text="Label (optional)" />
+                        <TextBox x:Name="LabelBox" Classes="app" Watermark="My account" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
+                        <Button Classes="app" Content="Cancel" Command="{Binding DismissAddAccountDialogCommand}" />
+                        <Button Classes="app primary" Content="Add Account" Click="OnConfirmAddAccount" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- Add Perplexity account dialog -->
+        <Border IsVisible="{Binding ShowPerplexityAccountDialog}" Background="#88000000"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50">
+            <Border Classes="card" MaxWidth="420" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24">
+                <StackPanel Spacing="14">
+                    <TextBlock Classes="row-label" FontSize="15" Text="Add Perplexity account" />
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="row-desc" Text="Session token" />
+                        <TextBox x:Name="PerplexitySessionTokenBox" Classes="app" PasswordChar="●" Watermark="pplx-session-token" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="row-desc" Text="Label (optional)" />
+                        <TextBox x:Name="PerplexityLabelBox" Classes="app" Watermark="Primary" />
+                    </StackPanel>
+                    <TextBlock Classes="row-desc" TextWrapping="Wrap"
+                               Text="Paste your Perplexity WebUI session token. Not validated before save." />
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
+                        <Button Classes="app" Content="Cancel" Command="{Binding DismissPerplexityAccountDialogCommand}" />
+                        <Button Classes="app primary" Content="Save Account" Click="OnConfirmPerplexityAccount" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- Reset Perplexity accounts confirmation dialog -->
+        <Border IsVisible="{Binding ShowResetPerplexityDialog}" Background="#88000000"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50">
+            <Border Classes="card" MaxWidth="440" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24">
+                <StackPanel Spacing="14">
+                    <TextBlock Classes="row-label" FontSize="15" Text="Reset Perplexity accounts?" />
+                    <TextBlock Classes="row-desc" TextWrapping="Wrap"
+                               Text="This backs up and removes all saved Perplexity WebUI session token files." />
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
+                        <Button Classes="app" Content="Cancel" Command="{Binding DismissResetPerplexityDialogCommand}" />
+                        <Button Classes="app danger" Content="Reset accounts" Command="{Binding ConfirmResetPerplexityAccountsCommand}" />
                     </StackPanel>
                 </StackPanel>
             </Border>

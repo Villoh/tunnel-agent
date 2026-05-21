@@ -48,8 +48,17 @@ public sealed class EngineService : IManagedEngine
     public async Task InitializeAsync()
     {
         await _download.InitializeAsync();
+
         if (!DownloadService.IsBinaryInstalled())
+        {
             await _download.CheckForUpdateAsync();
+            try { await _download.DownloadAndInstallAsync(); }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Perplexity.EngineService] Download failed: {ex.Message}");
+                return;
+            }
+        }
         else if (_settings.Current.AutoCheckForUpdates)
             _ = _download.CheckForUpdateAsync();
     }
@@ -71,7 +80,7 @@ public sealed class EngineService : IManagedEngine
 
     public Task PrepareVersionAsync(string version) => _download.PrepareVersionAsync(version);
 
-    public Task DownloadAndInstallAsync() => DownloadAndInstallAsync(null);
+    public Task DownloadAndInstallAsync() => DownloadAndInstallAsync(GetPreferredVersionOrNull());
 
     public async Task DownloadAndInstallAsync(string? version)
     {
@@ -81,7 +90,7 @@ public sealed class EngineService : IManagedEngine
             var wasRunning = IsRunning;
             if (wasRunning) await StopAsync();
 
-            await _download.DownloadAndInstallAsync(version);
+            await _download.DownloadAndInstallAsync(string.IsNullOrWhiteSpace(version) ? GetPreferredVersionOrNull() : version);
 
             if (wasRunning) await StartAsync();
         }
@@ -89,6 +98,12 @@ public sealed class EngineService : IManagedEngine
         {
             _updateLock.Release();
         }
+    }
+
+    private string? GetPreferredVersionOrNull()
+    {
+        var preferred = GetRuntimeSettings().PreferredVersion;
+        return string.IsNullOrWhiteSpace(preferred) ? null : preferred;
     }
 
     private void OnSubStateChanged(object? sender, EventArgs e)

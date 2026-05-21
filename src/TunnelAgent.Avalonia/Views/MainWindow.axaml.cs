@@ -123,4 +123,34 @@ public partial class MainWindow : Window
             _ => vm.SelectedSection
         };
     }
+
+    private async void OnConfirmAddAccount(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        if (vm.AddAccountTarget is not { } target) return;
+
+        var baseUrl = BaseUrlBox.Text?.Trim() ?? "";
+        var apiKey = ApiKeyBox.Text?.Trim() ?? "";
+        var label = LabelBox.Text?.Trim();
+        if (string.IsNullOrEmpty(apiKey)) return;
+
+        var effectiveBaseUrl = string.IsNullOrEmpty(baseUrl) ? target.Description : baseUrl;
+        ApiKeyBox.Text = "";
+        BaseUrlBox.Text = "";
+        LabelBox.Text = "";
+
+        await vm.ConfirmAddAccountAsync(target.Id, effectiveBaseUrl, apiKey, string.IsNullOrEmpty(label) ? null : label);
+    }
+
+    private async void OnConfirmPerplexityAccount(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        var sessionToken = PerplexitySessionTokenBox.Text?.Trim() ?? "";
+        var label = PerplexityLabelBox.Text?.Trim();
+        if (string.IsNullOrEmpty(sessionToken)) return;
+
+        PerplexitySessionTokenBox.Text = "";
+        PerplexityLabelBox.Text = "";
+        await vm.ConfirmAddPerplexityAccountAsync(string.IsNullOrEmpty(label) ? null : label, sessionToken);
+    }
 }

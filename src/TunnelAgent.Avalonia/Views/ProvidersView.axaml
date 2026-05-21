@@ -4,6 +4,7 @@
              xmlns:cv="using:TunnelAgent.Converters"
              xmlns:si="using:IconPacks.Avalonia.SimpleIcons"
              xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+             xmlns:ctrl="using:TunnelAgent.Controls"
              x:Class="TunnelAgent.Views.ProvidersView"
              x:Name="Root"
              x:DataType="vm:MainWindowViewModel">
@@ -14,15 +15,23 @@
         <cv:HexToBrushConverter         x:Key="HexBrush" />
         <cv:BoolToOpacityConverter      x:Key="BoolToOpacity" />
         <cv:StringNotEmptyConverter     x:Key="StringNotEmpty" />
-        <cv:InvertBoolConverter                    x:Key="InvertBool" />
-        <cv:BoolToEnableDisableTextConverter        x:Key="BoolToEnableDisableText" />
+        <cv:InvertBoolConverter         x:Key="InvertBool" />
+        <cv:BoolToEnableDisableTextConverter x:Key="BoolToEnableDisableText" />
     </UserControl.Resources>
 
     <Panel>
         <ScrollViewer>
             <StackPanel Spacing="0" Margin="0,0,0,24">
 
-                <!-- ── Header ────────────────────────────────────────────── -->
+                <!-- ── Engine tab bar ─────────────────────────────────── -->
+                <ctrl:SlidingTabBar Margin="0,0,0,16"
+                                    SelectedIndex="{Binding ProvidersTabIndex}">
+                    <ctrl:SlidingTabBar.Tabs>
+                        <ctrl:SlidingTab Header="CLIProxyAPI" Command="{Binding FocusCliProxyCommand}" />
+                        <ctrl:SlidingTab Header="Perplexity"  Command="{Binding FocusPerplexityCommand}" />
+                    </ctrl:SlidingTabBar.Tabs>
+                </ctrl:SlidingTabBar>
+
                 <Grid Margin="0,0,0,14">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -30,7 +39,7 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel>
                         <TextBlock Classes="page-title" Text="Services" />
-                        <TextBlock Classes="page-sub" Text="Local OpenAI-compatible endpoint for your CLI agents." />
+                        <TextBlock Classes="page-sub" Text="{Binding ActiveEngineDescription}" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
                         <Border Classes="endpoint" VerticalAlignment="Center">
@@ -46,24 +55,27 @@
                                 ToolTip.Tip="Copy endpoint"
                                 Click="OnCopyEndpoint">
                             <Panel>
-                                <lucide:PackIconLucide Kind="Copy" Width="13" Height="13"
-                                                       IsVisible="{Binding !EndpointCopied}" />
-                                <lucide:PackIconLucide Kind="Check" Width="13" Height="13"
-                                                       IsVisible="{Binding EndpointCopied}" />
+                                <lucide:PackIconLucide Kind="Copy" Width="13" Height="13" IsVisible="{Binding !EndpointCopied}" />
+                                <lucide:PackIconLucide Kind="Check" Width="13" Height="13" IsVisible="{Binding EndpointCopied}" />
                             </Panel>
                         </Button>
-                        <Button Classes="app primary"
-                                Content="Start"
-                                Command="{Binding StartServerCommand}"
-                                IsVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}, ConverterParameter=Invert}" />
-                        <Button Classes="app"
-                                Content="Stop"
-                                Command="{Binding StopServerCommand}"
-                                IsVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}}" />
+                        <Panel Width="26" Height="26">
+                            <Button Classes="icon-btn engine-action start"
+                                    ToolTip.Tip="Start server"
+                                    Command="{Binding StartServerCommand}"
+                                    IsVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}, ConverterParameter=Invert}">
+                                <lucide:PackIconLucide Kind="Play" Width="12" Height="12" Margin="1,0,0,0" />
+                            </Button>
+                            <Button Classes="icon-btn engine-action stop"
+                                    ToolTip.Tip="Stop server"
+                                    Command="{Binding StopServerCommand}"
+                                    IsVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}}">
+                                <lucide:PackIconLucide Kind="Square" Width="10" Height="10" />
+                            </Button>
+                        </Panel>
                     </StackPanel>
                 </Grid>
 
-                <!-- ── Server status pill ────────────────────────────────── -->
                 <Border Classes="card" Margin="0,0,0,6">
                     <Grid Margin="16,12" ColumnDefinitions="22,*,Auto">
                         <Grid Classes="status-indicator">
@@ -74,9 +86,9 @@
                                      Fill="{Binding ServerState, Converter={StaticResource StateToBrush}}" />
                         </Grid>
                         <StackPanel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Classes="row-label" Text="Server status" />
+                            <TextBlock Classes="row-label" Text="{Binding ActiveEngineName}" />
                             <TextBlock Classes="row-desc">
-                                <Run Text="Localhost proxy on port " />
+                                <Run Text="Listening on port " />
                                 <Run Text="{Binding Port}" />
                             </TextBlock>
                         </StackPanel>
@@ -88,256 +100,201 @@
                     </Grid>
                 </Border>
 
-                <!-- ── Provider list ─────────────────────────────────────── -->
-                <Border Classes="card">
-                    <ItemsControl ItemsSource="{Binding Providers}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="vm:ProviderViewModel">
-                                <StackPanel>
+                <Border Classes="card" IsVisible="{Binding IsPerplexityEngineSelected}" Margin="0,0,0,12">
+                    <StackPanel Margin="16,14" Spacing="12">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel>
+                                <TextBlock Classes="row-label" Text="Perplexity session accounts" />
+                                <TextBlock Classes="row-desc" Text="Saved WebUI session tokens used by Perplexity WebUI Scraper." />
+                            </StackPanel>
+                            <Button Grid.Column="1" Classes="icon-btn"
+                                    ToolTip.Tip="Add account"
+                                    Command="{Binding ShowAddPerplexityAccountCommand}">
+                                <lucide:PackIconLucide Kind="Plus" Width="14" Height="14"
+                                                       Foreground="{DynamicResource FgMutedBrush}" />
+                            </Button>
+                        </Grid>
 
-                                    <!-- Main provider row -->
-                                    <ToggleButton Classes="provider-row"
-                                                  IsChecked="{Binding IsExpanded, Mode=TwoWay}">
-                                        <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+                        <Border Background="#08FFFFFF" CornerRadius="8" Padding="14,16"
+                                IsVisible="{Binding HasPerplexityAccounts, Converter={StaticResource InvertBool}}">
+                            <StackPanel Spacing="6">
+                                <TextBlock Classes="row-label" Text="No accounts yet" />
+                                <TextBlock Classes="row-desc" Text="{Binding PerplexityEmptyStateText}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
 
-                                            <!-- Enable pill -->
-                                            <ToggleButton Grid.Column="0"
-                                                          Classes="enable-toggle"
-                                                          IsChecked="{Binding IsEnabled, Mode=TwoWay}"
-                                                          IsEnabled="{Binding HasAccounts}"
-                                                          VerticalAlignment="Center"
-                                                          Margin="0,0,12,0"
-                                                          ToolTip.Tip="{Binding IsEnabled, Converter={StaticResource BoolToEnableDisableText}}" />
-
-                                            <!-- Provider icon -->
-                                            <Border Grid.Column="1"
-                                                    Classes="provider-logo"
-                                                    Width="28" Height="28"
-                                                    Background="{Binding LogoColor, Converter={StaticResource HexBrush}}"
-                                                    Opacity="{Binding IsEnabled, Converter={StaticResource BoolToOpacity}}"
-                                                    Margin="0,0,10,0">
-                                                <Panel>
-                                                    <si:PackIconSimpleIcons Kind="{Binding IconKind}"
-                                                                            Foreground="White"
-                                                                            Width="14" Height="14"
-                                                                            HorizontalAlignment="Center"
-                                                                            VerticalAlignment="Center"
-                                                                            IsVisible="{Binding !HasCustomIcon}" />
-                                                    <Viewbox Width="14" Height="14"
-                                                             HorizontalAlignment="Center"
-                                                             VerticalAlignment="Center"
-                                                             IsVisible="{Binding HasCustomIcon}">
-                                                        <Path Data="{Binding CustomIconData}"
-                                                              Fill="White"
-                                                              Stretch="Uniform" />
-                                                    </Viewbox>
-                                                </Panel>
-                                            </Border>
-
-                                            <!-- Name + sub-status -->
-                                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="1">
-                                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                                    <TextBlock Classes="row-label"
-                                                               Text="{Binding Name}"
-                                                               VerticalAlignment="Center" />
-                                                    <Border Classes="chip"
-                                                            Background="#22FF7A00"
-                                                            IsVisible="{Binding IsEnabled, Converter={StaticResource InvertBool}}"
-                                                            VerticalAlignment="Center">
-                                                        <TextBlock Text="disabled" Foreground="#CC7A2B" FontSize="10" />
+                        <ItemsControl ItemsSource="{Binding PerplexityAccounts}" IsVisible="{Binding HasPerplexityAccounts}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:PerplexityAccountViewModel">
+                                    <Border Background="#08FFFFFF" CornerRadius="8" Padding="14,12" Margin="0,0,0,8">
+                                        <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto">
+                                            <StackPanel Grid.Column="0" Grid.RowSpan="2" Spacing="4">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <TextBlock Classes="row-label" Text="{Binding Label}" />
+                                                    <Border Classes="chip" Background="{DynamicResource AccentSoftBrush}" IsVisible="{Binding IsDefault}">
+                                                        <TextBlock Text="default" Foreground="{DynamicResource AccentBrush}" />
                                                     </Border>
                                                 </StackPanel>
-                                                <TextBlock Text="{Binding ConnectedSubText}"
-                                                           FontSize="11.5"
-                                                           IsVisible="{Binding IsEnabled}"
-                                                           Foreground="{Binding StatusColor, Converter={StaticResource HexBrush}}" />
+                                                <TextBlock Classes="row-desc"
+                                                           Text="{Binding MaskedSessionToken}"
+                                                           FontFamily="Cascadia Mono,Consolas,monospace" />
                                             </StackPanel>
-
-                                            <!-- Action buttons -->
-                                            <StackPanel Grid.Column="3"
-                                                        Orientation="Horizontal"
-                                                        Spacing="2"
-                                                        VerticalAlignment="Center"
-                                                        Margin="8,0">
-
-                                                <!-- OAuth: connecting spinner chip -->
-                                                <Border Classes="chip" Background="#22AAAAFF"
-                                                        IsVisible="{Binding IsConnecting}"
-                                                        VerticalAlignment="Center" Margin="0,0,4,0">
-                                                    <TextBlock Text="connecting…" Foreground="#8888FF" FontSize="10" />
-                                                </Border>
-
-                                                <!-- OAuth: + (connect / add account) -->
-                                                <Button Classes="icon-btn"
-                                                        ToolTip.Tip="Add account"
-                                                        IsVisible="{Binding IsOAuth}"
-                                                        IsEnabled="{Binding IsConnecting, Converter={StaticResource InvertBool}}"
-                                                        Click="OnOAuthConnect"
-                                                        Tag="{Binding}">
-                                                    <lucide:PackIconLucide Kind="Plus" Width="14" Height="14"
-                                                                           Foreground="{DynamicResource FgMutedBrush}" />
-                                                </Button>
-
-                                                <!-- OAuth: remove all accounts icon (only when connected) -->
-                                                <Button Classes="icon-btn"
-                                                        ToolTip.Tip="Remove all accounts"
-                                                        IsVisible="{Binding Connected}"
-                                                        IsEnabled="{Binding IsConnecting, Converter={StaticResource InvertBool}}"
-                                                        Click="OnOAuthDisconnect"
-                                                        Tag="{Binding}">
-                                                    <lucide:PackIconLucide Kind="Trash2" Width="14" Height="14"
-                                                                           Foreground="{DynamicResource FgMutedBrush}" />
-                                                </Button>
-
-                                                <!-- Custom provider: Add Account -->
-                                                <Button Classes="app"
-                                                        Content="Add Account"
-                                                        IsVisible="{Binding IsOAuth, Converter={StaticResource InvertBool}}"
-                                                        Command="{Binding RequestAddAccountCommand}"
-                                                        FontSize="12" Padding="10,3" />
-                                            </StackPanel>
-
-                                            <!-- Expand chevron -->
-                                            <Panel Grid.Column="4" Width="20" VerticalAlignment="Center">
-                                                <lucide:PackIconLucide Kind="ChevronRight"
-                                                                        Width="14" Height="14"
-                                                                        Foreground="{DynamicResource FgFaintBrush}"
-                                                                        IsVisible="{Binding IsExpanded, Converter={StaticResource InvertBool}}" />
-                                                <lucide:PackIconLucide Kind="ChevronDown"
-                                                                        Width="14" Height="14"
-                                                                        Foreground="{DynamicResource FgFaintBrush}"
-                                                                        IsVisible="{Binding IsExpanded}" />
-                                            </Panel>
+                                            <Button Grid.Column="1" Classes="app" Content="Make default"
+                                                    Margin="8,0,8,0"
+                                                    IsVisible="{Binding IsDefault, Converter={StaticResource InvertBool}}"
+                                                    Command="{Binding #Root.DataContext.SetDefaultPerplexityAccountCommand}"
+                                                    CommandParameter="{Binding}" />
+                                            <Button Grid.Column="2" Classes="icon-btn"
+                                                    Command="{Binding #Root.DataContext.RemovePerplexityAccountCommand}"
+                                                    CommandParameter="{Binding}">
+                                                <lucide:PackIconLucide Kind="Trash2" Width="13" Height="13"
+                                                                       Foreground="{DynamicResource FgMutedBrush}" />
+                                            </Button>
                                         </Grid>
-                                    </ToggleButton>
-
-                                    <!-- ── Expanded accounts panel ──────────────────────── -->
-                                    <ItemsControl ItemsSource="{Binding Accounts}"
-                                                  IsVisible="{Binding IsExpanded}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="vm:ProviderAccountViewModel">
-                                                <Border Background="#08FFFFFF"
-                                                        Margin="16,8,16,10"
-                                                        CornerRadius="8"
-                                                        Padding="14,12,14,14">
-                                                    <StackPanel Spacing="10">
-
-                                                        <!-- Account header: email + plan badge + actions -->
-                                                        <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
-
-                                                            <!-- Email / label -->
-                                                            <StackPanel Grid.Column="0"
-                                                                        Orientation="Horizontal"
-                                                                        Spacing="8"
-                                                                        VerticalAlignment="Center">
-                                                                <TextBlock Text="{Binding DisplayName}"
-                                                                           FontSize="13"
-                                                                           FontWeight="SemiBold"
-                                                                           Foreground="{DynamicResource FgBrush}" />
-                                                                <!-- Plan badge e.g. PLUS -->
-                                                                <Border Classes="chip"
-                                                                        Background="{DynamicResource AccentSoftBrush}"
-                                                                        IsVisible="{Binding PlanBadge, Converter={StaticResource StringNotEmpty}}">
-                                                                    <TextBlock Text="{Binding PlanBadge}"
-                                                                               Foreground="{DynamicResource AccentBrush}"
-                                                                               FontWeight="Bold" />
-                                                                </Border>
-                                                                <!-- Masked key chip (for custom API-key providers) -->
-                                                                <Border Classes="chip"
-                                                                        Background="#14000000"
-                                                                        IsVisible="{Binding IsCustomKey}">
-                                                                    <TextBlock Text="{Binding MaskedKey}"
-                                                                               Foreground="{DynamicResource FgMutedBrush}"
-                                                                               FontFamily="Cascadia Mono,Consolas,monospace"
-                                                                               FontSize="10" />
-                                                                </Border>
-                                                            </StackPanel>
-
-                                                            <!-- Enable toggle -->
-                                                            <Button Grid.Column="2"
-                                                                    Classes="icon-btn power-toggle"
-                                                                    Classes.account-disabled="{Binding IsDisabled}"
-                                                                    IsEnabled="{Binding IsProviderEnabled}"
-                                                                    ToolTip.Tip="Enable / disable this account"
-                                                                    Click="OnToggleAccount"
-                                                                    Tag="{Binding}"
-                                                                    VerticalAlignment="Center">
-                                                                <lucide:PackIconLucide Kind="Power" Width="13" Height="13" />
-                                                            </Button>
-
-                                                            <!-- Refresh quota button -->
-                                                            <Button Grid.Column="3"
-                                                                    Classes="icon-btn"
-                                                                    ToolTip.Tip="Refresh quota"
-                                                                    Click="OnRefreshQuota"
-                                                                    Tag="{Binding}"
-                                                                    VerticalAlignment="Center">
-                                                                <lucide:PackIconLucide Kind="RefreshCw" Width="13" Height="13"
-                                                                                       Foreground="{DynamicResource FgMutedBrush}"
-                                                                                       Classes.spin="{Binding IsRefreshing}" />
-                                                            </Button>
-
-                                                            <!-- Remove button -->
-                                                            <Button Grid.Column="4"
-                                                                    Classes="icon-btn"
-                                                                    ToolTip.Tip="Remove account"
-                                                                    Command="{Binding #Root.DataContext.RemoveAccountCommand}"
-                                                                    CommandParameter="{Binding}"
-                                                                    VerticalAlignment="Center">
-                                                                <lucide:PackIconLucide Kind="Trash2" Width="13" Height="13"
-                                                                                       Foreground="{DynamicResource FgMutedBrush}" />
-                                                            </Button>
-                                                        </Grid>
-
-                                                        <!-- Quota bars -->
-                                                        <ItemsControl ItemsSource="{Binding QuotaBars}"
-                                                                      IsVisible="{Binding HasQuota}">
-                                                            <ItemsControl.ItemTemplate>
-                                                                <DataTemplate x:DataType="vm:QuotaBarViewModel">
-                                                                    <StackPanel Spacing="4" Margin="0,6,0,0">
-                                                                        <!-- Title + percentage -->
-                                                                        <Grid ColumnDefinitions="*,Auto">
-                                                                            <TextBlock Grid.Column="0"
-                                                                                       Text="{Binding Title}"
-                                                                                       FontSize="11.5"
-                                                                                       Foreground="{DynamicResource FgMutedBrush}" />
-                                                                            <TextBlock Grid.Column="1"
-                                                                                       Text="{Binding UsedLabel}"
-                                                                                       FontSize="11.5"
-                                                                                       FontWeight="Medium"
-                                                                                       Foreground="#3CB371" />
-                                                                        </Grid>
-                                                                        <!-- Progress track -->
-                                                                        <ProgressBar Minimum="0" Maximum="1"
-                                                                                     Value="{Binding Used}"
-                                                                                     Height="4"
-                                                                                     CornerRadius="2"
-                                                                                     Background="#22FFFFFF"
-                                                                                     Foreground="#3CB371" />
-                                                                        <!-- Reset countdown -->
-                                                                        <TextBlock Text="{Binding ResetIn}"
-                                                                                   FontSize="10.5"
-                                                                                   Foreground="{DynamicResource FgFaintBrush}"
-                                                                                   IsVisible="{Binding ResetIn, Converter={StaticResource StringNotEmpty}}" />
-                                                                    </StackPanel>
-                                                                </DataTemplate>
-                                                            </ItemsControl.ItemTemplate>
-                                                        </ItemsControl>
-
-                                                    </StackPanel>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-
-                                    <Border Classes="row-divider" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
                 </Border>
 
-                <!-- ── Available models ──────────────────────────────────── -->
+                <StackPanel IsVisible="{Binding IsCliProxyEngineSelected}">
+                    <Border Classes="card">
+                        <ItemsControl ItemsSource="{Binding Providers}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ProviderViewModel">
+                                    <StackPanel>
+                                        <ToggleButton Classes="provider-row" IsChecked="{Binding IsExpanded, Mode=TwoWay}">
+                                            <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+                                                <ToggleButton Grid.Column="0"
+                                                              Classes="enable-toggle"
+                                                              IsChecked="{Binding IsEnabled, Mode=TwoWay}"
+                                                              IsEnabled="{Binding HasAccounts}"
+                                                              VerticalAlignment="Center"
+                                                              Margin="0,0,12,0"
+                                                              ToolTip.Tip="{Binding IsEnabled, Converter={StaticResource BoolToEnableDisableText}}" />
+                                                <Border Grid.Column="1" Classes="provider-logo" Width="28" Height="28"
+                                                        Background="{Binding LogoColor, Converter={StaticResource HexBrush}}"
+                                                        Opacity="{Binding IsEnabled, Converter={StaticResource BoolToOpacity}}"
+                                                        Margin="0,0,10,0">
+                                                    <Panel>
+                                                        <si:PackIconSimpleIcons Kind="{Binding IconKind}" Foreground="White" Width="14" Height="14"
+                                                                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                                IsVisible="{Binding !HasCustomIcon}" />
+                                                        <Viewbox Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                 IsVisible="{Binding HasCustomIcon}">
+                                                            <Path Data="{Binding CustomIconData}" Fill="White" Stretch="Uniform" />
+                                                        </Viewbox>
+                                                    </Panel>
+                                                </Border>
+                                                <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="1">
+                                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                                        <TextBlock Classes="row-label" Text="{Binding Name}" VerticalAlignment="Center" />
+                                                        <Border Classes="chip" Background="#22FF7A00"
+                                                                IsVisible="{Binding IsEnabled, Converter={StaticResource InvertBool}}"
+                                                                VerticalAlignment="Center">
+                                                            <TextBlock Text="disabled" Foreground="#CC7A2B" FontSize="10" />
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <TextBlock Text="{Binding ConnectedSubText}" FontSize="11.5"
+                                                               IsVisible="{Binding IsEnabled}"
+                                                               Foreground="{Binding StatusColor, Converter={StaticResource HexBrush}}" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center" Margin="8,0">
+                                                    <Border Classes="chip" Background="#22AAAAFF" IsVisible="{Binding IsConnecting}" VerticalAlignment="Center" Margin="0,0,4,0">
+                                                        <TextBlock Text="connecting…" Foreground="#8888FF" FontSize="10" />
+                                                    </Border>
+                                                    <Button Classes="icon-btn" ToolTip.Tip="Add account" IsVisible="{Binding IsOAuth}"
+                                                            IsEnabled="{Binding IsConnecting, Converter={StaticResource InvertBool}}"
+                                                            Click="OnOAuthConnect" Tag="{Binding}">
+                                                        <lucide:PackIconLucide Kind="Plus" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                                                    </Button>
+                                                    <Button Classes="icon-btn" ToolTip.Tip="Remove all accounts" IsVisible="{Binding Connected}"
+                                                            IsEnabled="{Binding IsConnecting, Converter={StaticResource InvertBool}}"
+                                                            Click="OnOAuthDisconnect" Tag="{Binding}">
+                                                        <lucide:PackIconLucide Kind="Trash2" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                                                    </Button>
+                                                    <Button Classes="app" Content="Add Account"
+                                                            IsVisible="{Binding IsOAuth, Converter={StaticResource InvertBool}}"
+                                                            Command="{Binding RequestAddAccountCommand}"
+                                                            FontSize="12" Padding="10,3" />
+                                                </StackPanel>
+                                                <Panel Grid.Column="4" Width="20" VerticalAlignment="Center">
+                                                    <lucide:PackIconLucide Kind="ChevronRight" Width="14" Height="14"
+                                                                            Foreground="{DynamicResource FgFaintBrush}"
+                                                                            IsVisible="{Binding IsExpanded, Converter={StaticResource InvertBool}}" />
+                                                    <lucide:PackIconLucide Kind="ChevronDown" Width="14" Height="14"
+                                                                            Foreground="{DynamicResource FgFaintBrush}"
+                                                                            IsVisible="{Binding IsExpanded}" />
+                                                </Panel>
+                                            </Grid>
+                                        </ToggleButton>
+
+                                        <ItemsControl ItemsSource="{Binding Accounts}" IsVisible="{Binding IsExpanded}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:ProviderAccountViewModel">
+                                                    <Border Background="#08FFFFFF" Margin="16,8,16,10" CornerRadius="8" Padding="14,12,14,14">
+                                                        <StackPanel Spacing="10">
+                                                            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
+                                                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                                                    <TextBlock Text="{Binding DisplayName}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource FgBrush}" />
+                                                                    <Border Classes="chip" Background="{DynamicResource AccentSoftBrush}"
+                                                                            IsVisible="{Binding PlanBadge, Converter={StaticResource StringNotEmpty}}">
+                                                                        <TextBlock Text="{Binding PlanBadge}" Foreground="{DynamicResource AccentBrush}" FontWeight="Bold" />
+                                                                    </Border>
+                                                                    <Border Classes="chip" Background="#14000000" IsVisible="{Binding IsCustomKey}">
+                                                                        <TextBlock Text="{Binding MaskedKey}" Foreground="{DynamicResource FgMutedBrush}"
+                                                                                   FontFamily="Cascadia Mono,Consolas,monospace" FontSize="10" />
+                                                                    </Border>
+                                                                </StackPanel>
+                                                                <Button Grid.Column="2" Classes="icon-btn power-toggle" Classes.account-disabled="{Binding IsDisabled}"
+                                                                        IsEnabled="{Binding IsProviderEnabled}" ToolTip.Tip="Enable / disable this account"
+                                                                        Click="OnToggleAccount" Tag="{Binding}" VerticalAlignment="Center">
+                                                                    <lucide:PackIconLucide Kind="Power" Width="13" Height="13" />
+                                                                </Button>
+                                                                <Button Grid.Column="3" Classes="icon-btn" ToolTip.Tip="Refresh quota"
+                                                                        Click="OnRefreshQuota" Tag="{Binding}" VerticalAlignment="Center">
+                                                                    <lucide:PackIconLucide Kind="RefreshCw" Width="13" Height="13"
+                                                                                           Foreground="{DynamicResource FgMutedBrush}"
+                                                                                           Classes.spin="{Binding IsRefreshing}" />
+                                                                </Button>
+                                                                <Button Grid.Column="4" Classes="icon-btn" ToolTip.Tip="Remove account"
+                                                                        Command="{Binding #Root.DataContext.RemoveAccountCommand}"
+                                                                        CommandParameter="{Binding}" VerticalAlignment="Center">
+                                                                    <lucide:PackIconLucide Kind="Trash2" Width="13" Height="13" Foreground="{DynamicResource FgMutedBrush}" />
+                                                                </Button>
+                                                            </Grid>
+
+                                                            <ItemsControl ItemsSource="{Binding QuotaBars}" IsVisible="{Binding HasQuota}">
+                                                                <ItemsControl.ItemTemplate>
+                                                                    <DataTemplate x:DataType="vm:QuotaBarViewModel">
+                                                                        <StackPanel Spacing="4">
+                                                                            <Grid ColumnDefinitions="*,Auto">
+                                                                                <TextBlock Grid.Column="0" Text="{Binding Title}" FontSize="11.5" Foreground="{DynamicResource FgBrush}" />
+                                                                                <TextBlock Grid.Column="1" Text="{Binding UsedLabel}" FontSize="11" Foreground="{DynamicResource FgMutedBrush}" />
+                                                                            </Grid>
+                                                                            <ProgressBar Minimum="0" Maximum="1" Value="{Binding Used}" Height="8" />
+                                                                            <TextBlock Text="{Binding ResetIn}" FontSize="10.5" Foreground="{DynamicResource FgFaintBrush}"
+                                                                                       IsVisible="{Binding ResetIn, Converter={StaticResource StringNotEmpty}}" />
+                                                                        </StackPanel>
+                                                                    </DataTemplate>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+
+                                        <Border Classes="row-divider" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+
+                </StackPanel>
+
                 <TextBlock Classes="section-label" Text="AVAILABLE MODELS" />
                 <Border Classes="card">
                     <StackPanel>
@@ -349,7 +306,7 @@
                             </Border>
                             <StackPanel Grid.Column="1" Margin="10,0,0,0">
                                 <TextBlock Classes="row-label" Text="Available models" />
-                                <TextBlock Classes="row-desc" Text="Models exposed by connected providers." />
+                                <TextBlock Classes="row-desc" Text="Models exposed by running engine." />
                             </StackPanel>
                             <TextBlock Grid.Column="2"
                                        Text="{Binding TotalAvailableModelCount, StringFormat='{}{0} total'}"
@@ -360,21 +317,19 @@
                         </Grid>
                         <Border Classes="row-divider" />
 
-                        <!-- Empty state: server not running -->
-                        <StackPanel Margin="16,24,16,24"
-                                    HorizontalAlignment="Center"
-                                    Spacing="8"
+                        <!-- Empty state -->
+                        <StackPanel Margin="16,24,16,24" HorizontalAlignment="Center" Spacing="8"
                                     IsVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}, ConverterParameter=Invert}">
                             <lucide:PackIconLucide Kind="ServerOff" Width="28" Height="28"
                                                    Foreground="{DynamicResource FgFaintBrush}"
                                                    HorizontalAlignment="Center" />
-                            <TextBlock Text="Start the server to see available models"
+                            <TextBlock Text="Start the engine to see available models"
                                        FontSize="12"
                                        Foreground="{DynamicResource FgMutedBrush}"
                                        HorizontalAlignment="Center" />
                         </StackPanel>
 
-                        <!-- Model groups (only when server is running) -->
+                        <!-- Model groups -->
                         <ItemsControl ItemsSource="{Binding AvailableModelGroups}"
                                       IsVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}}">
                             <ItemsControl.ItemTemplate>
@@ -385,19 +340,13 @@
                                                 <Border Grid.Column="0" Classes="provider-logo"
                                                         Background="{Binding LogoColor, Converter={StaticResource HexBrush}}">
                                                     <Panel>
-                                                        <si:PackIconSimpleIcons Kind="{Binding IconKind}"
-                                                                                Foreground="White"
+                                                        <si:PackIconSimpleIcons Kind="{Binding IconKind}" Foreground="White"
                                                                                 Width="14" Height="14"
-                                                                                HorizontalAlignment="Center"
-                                                                                VerticalAlignment="Center"
+                                                                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                                                                 IsVisible="{Binding !HasCustomIcon}" />
-                                                        <Viewbox Width="14" Height="14"
-                                                                 HorizontalAlignment="Center"
-                                                                 VerticalAlignment="Center"
+                                                        <Viewbox Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center"
                                                                  IsVisible="{Binding HasCustomIcon}">
-                                                            <Path Data="{Binding CustomIconData}"
-                                                                  Fill="White"
-                                                                  Stretch="Uniform" />
+                                                            <Path Data="{Binding CustomIconData}" Fill="White" Stretch="Uniform" />
                                                         </Viewbox>
                                                     </Panel>
                                                 </Border>
@@ -406,8 +355,7 @@
                                                     <TextBlock Classes="row-desc" Text="{Binding ModelCount, StringFormat='{}{0} models'}" />
                                                 </StackPanel>
                                                 <Border Grid.Column="2" Classes="chip" Background="#14000000" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding ModelCount, StringFormat='{}{0} models'}"
-                                                               Foreground="{DynamicResource FgMutedBrush}" />
+                                                    <TextBlock Text="{Binding ModelCount, StringFormat='{}{0} models'}" Foreground="{DynamicResource FgMutedBrush}" />
                                                 </Border>
                                                 <Grid Grid.Column="3" Width="18" Height="18" Margin="6,0,0,0" VerticalAlignment="Center">
                                                     <lucide:PackIconLucide Kind="ChevronRight" Width="14" Height="14"
@@ -421,7 +369,6 @@
                                                 </Grid>
                                             </Grid>
                                         </ToggleButton>
-
                                         <ItemsControl ItemsSource="{Binding Models}" IsVisible="{Binding IsExpanded}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate x:DataType="vm:AvailableModelViewModel">
@@ -448,81 +395,28 @@
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
-
                                         <Border Classes="row-divider" />
                                     </StackPanel>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+
                     </StackPanel>
                 </Border>
-
             </StackPanel>
         </ScrollViewer>
 
-        <!-- ── OAuth status toast ─────────────────────────────────────────── -->
-        <Border IsVisible="{Binding ShowOAuthStatus}"
-                Classes="card"
-                MaxWidth="400"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Margin="0,12,12,0"
-                Padding="14,10"
-                ZIndex="10">
+        <Border IsVisible="{Binding ShowOAuthStatus}" Classes="card" MaxWidth="400"
+                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,12,12,0" Padding="14,10" ZIndex="10">
             <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Grid.Column="0"
-                           Text="{Binding OAuthStatusMessage}"
-                           TextWrapping="Wrap"
-                           FontSize="12"
-                           Foreground="{DynamicResource FgBrush}"
-                           MaxWidth="330" />
-                <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0" VerticalAlignment="Top"
-                        Click="OnDismissOAuthStatus">
-                    <lucide:PackIconLucide Kind="X" Width="12" Height="12"
-                                          Foreground="{DynamicResource FgMutedBrush}" />
+                <TextBlock Grid.Column="0" Text="{Binding OAuthStatusMessage}" TextWrapping="Wrap"
+                           FontSize="12" Foreground="{DynamicResource FgBrush}" MaxWidth="330" />
+                <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0" VerticalAlignment="Top" Click="OnDismissOAuthStatus">
+                    <lucide:PackIconLucide Kind="X" Width="12" Height="12" Foreground="{DynamicResource FgMutedBrush}" />
                 </Button>
             </Grid>
         </Border>
 
-        <!-- ── Add Account dialog overlay ────────────────────────────────── -->
-        <Border IsVisible="{Binding ShowAddAccountDialog}"
-                Background="#88000000"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                ZIndex="20">
-            <Border Classes="card"
-                    MaxWidth="420"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Padding="24">
-                <StackPanel Spacing="14">
-                    <TextBlock Classes="row-label" FontSize="15"
-                               Text="{Binding AddAccountTarget.Name, StringFormat='Add account — {0}'}" />
 
-                    <StackPanel Spacing="4"
-                                IsVisible="{Binding AddAccountTarget.IsOAuth, Converter={StaticResource InvertBool}, FallbackValue=False}">
-                        <TextBlock Classes="row-desc" Text="Base URL" />
-                        <TextBox x:Name="BaseUrlBox" Classes="app" Watermark="https://api.example.com/v1" />
-                    </StackPanel>
-
-                    <StackPanel Spacing="4">
-                        <TextBlock Classes="row-desc" Text="API Key" />
-                        <TextBox x:Name="ApiKeyBox" Classes="app" PasswordChar="●" Watermark="sk-..." />
-                    </StackPanel>
-
-                    <StackPanel Spacing="4">
-                        <TextBlock Classes="row-desc" Text="Label (optional)" />
-                        <TextBox x:Name="LabelBox" Classes="app" Watermark="My account" />
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
-                        <Button Classes="app" Content="Cancel"
-                                Command="{Binding DismissAddAccountDialogCommand}" />
-                        <Button Classes="app primary" Content="Add Account"
-                                Click="OnConfirmAddAccount" />
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-        </Border>
     </Panel>
 </UserControl>

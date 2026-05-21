@@ -49,6 +49,7 @@ public sealed class PerplexityAccountSettings
 
 public sealed class AppSettings
 {
+    public string ActiveEngineId { get; set; } = "cliproxyapi";
     public int Port { get; set; } = 8317;
     public bool LaunchAtLogin { get; set; } = true;
     public string ThemeMode { get; set; } = "system";

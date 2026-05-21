@@ -102,8 +102,8 @@ public sealed class ProcessService
                 if ((int)response.StatusCode < 500)
                     return true;
             }
-            catch (OperationCanceledException) { throw; }
-            catch { /* not up yet */ }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
+            catch { /* not up yet or http timeout — retry */ }
         }
         return false;
     }

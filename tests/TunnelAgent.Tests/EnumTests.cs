@@ -22,10 +22,12 @@ public sealed class EnumTests
     public void SectionKey_HasAllExpectedValues()
     {
         var values = Enum.GetValues<SectionKey>();
-        Assert.Equal(3, values.Length);
         Assert.Contains(SectionKey.Providers, values);
         Assert.Contains(SectionKey.Agents, values);
         Assert.Contains(SectionKey.Configuration, values);
+        Assert.Contains(SectionKey.ConfigGeneral, values);
+        Assert.Contains(SectionKey.ConfigCliProxy, values);
+        Assert.Contains(SectionKey.ConfigPerplexity, values);
     }
 
     [Fact]

@@ -3,7 +3,7 @@ using TunnelAgent.ViewModels;
 using Xunit;
 
 using TunnelAgent.Core.Engine;
-using TunnelAgent.Infrastructure.Engine.CliProxy;
+using TunnelAgent.Infrastructure.Engine;
 namespace TunnelAgent.Tests;
 
 public sealed class MainWindowViewModelTests
@@ -49,8 +49,8 @@ public sealed class MainWindowViewModelTests
 
         // EngineService initializes to NotInstalled or Stopped. ServerState mapping
         // is: Running→Running, Starting→Starting, Error→Error, _→Stopped
-        var engine = new EngineService(settings);
-        var vm = new MainWindowViewModel(settings, engine, null!, null!, null!);
+        var registry = new EngineRegistryService(settings);
+        var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
 
         // Initial state should be in {Stopped, NotInstalled}
         Assert.Equal(ServerState.Stopped, vm.ServerState);
@@ -62,8 +62,8 @@ public sealed class MainWindowViewModelTests
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
         settings.LoadAsync().GetAwaiter().GetResult();
-        var engine = new EngineService(settings);
-        var vm = new MainWindowViewModel(settings, engine, null!, null!, null!);
+        var registry = new EngineRegistryService(settings);
+        var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
 
         Assert.Equal(RoutingStrategy.RoundRobin, vm.RoutingStrategy);
     }
@@ -102,8 +102,8 @@ public sealed class MainWindowViewModelTests
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
         settings.LoadAsync().GetAwaiter().GetResult();
-        var engine = new EngineService(settings);
-        var vm = new MainWindowViewModel(settings, engine, null!, null!, null!);
+        var registry = new EngineRegistryService(settings);
+        var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
 
         // IsLaunchAtLoginSupported just returns _launchAtLogin.IsSupported
         // which depends on the platform. It should be a boolean.

@@ -7,9 +7,9 @@ using Avalonia.Threading;
 using TunnelAgent.Services;
 using TunnelAgent.ViewModels;
 using TunnelAgent.Views;
-
-using TunnelAgent.Core.Engine;
+using TunnelAgent.Infrastructure.Engine;
 using TunnelAgent.Infrastructure.Engine.CliProxy;
+
 namespace TunnelAgent;
 
 public partial class App : Application
@@ -20,13 +20,14 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            var settings      = new SettingsService();
-            var engine        = new EngineService(settings);
-            var engineConfig  = new ConfigService(settings);
-            var catalog       = new ProviderCatalogService(settings, engineConfig);
+            var settings = new SettingsService();
+            var engineRegistry = new EngineRegistryService(settings);
+            var engineConfig = new ConfigService(settings);
+            var catalog = new ProviderCatalogService(settings, engineConfig);
+            var perplexityAccounts = new PerplexityAccountCatalogService();
             var launchAtLogin = new LaunchAtLoginService();
-            var folderOpen    = new FolderOpenService();
-            var vm            = new MainWindowViewModel(settings, engine, catalog, launchAtLogin, folderOpen);
+            var folderOpen = new FolderOpenService();
+            var vm = new MainWindowViewModel(settings, engineRegistry, catalog, perplexityAccounts, launchAtLogin, folderOpen);
 
             var mainWindow = new MainWindow { DataContext = vm };
             desktop.MainWindow = mainWindow;
@@ -36,11 +37,10 @@ public partial class App : Application
             if (Array.Exists(desktop.Args ?? [], arg => string.Equals(arg, "--start-in-tray", StringComparison.OrdinalIgnoreCase)))
                 Dispatcher.UIThread.Post(mainWindow.Hide, DispatcherPriority.Background);
 
-            // Run async startup after the window is shown
             Dispatcher.UIThread.Post(async () =>
             {
                 try { await vm.InitializeAsync(); }
-                catch { /* startup errors surface via EngineState.Error in UI */ }
+                catch { }
             }, DispatcherPriority.Background);
         }
 

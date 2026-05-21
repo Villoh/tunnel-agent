@@ -3,305 +3,412 @@
              xmlns:vm="using:TunnelAgent.ViewModels"
              xmlns:cv="using:TunnelAgent.Converters"
              xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+             xmlns:ctrl="using:TunnelAgent.Controls"
              x:Class="TunnelAgent.Views.ConfigurationView"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Resources>
         <cv:EngineStateToTextConverter x:Key="EngineStateToText" />
         <cv:RoutingStrategyToStringConverter x:Key="RoutingStrategyToString" />
+        <cv:SectionEqualsConverter x:Key="SectionEq" />
     </UserControl.Resources>
 
     <Panel>
         <ScrollViewer>
             <StackPanel Spacing="0">
-                <StackPanel Margin="0,0,0,14">
-                    <TextBlock Classes="page-title" Text="Configuration" />
-                    <TextBlock Classes="page-sub" Text="App, network, and security preferences." />
-                </StackPanel>
 
-                <Border IsVisible="{Binding ShowConfigurationStatus}"
-                        Classes="card"
-                        Padding="14,10"
-                        Margin="0,0,0,12">
+                <!-- ── Tab bar ──────────────────────────────────────────── -->
+                <ctrl:SlidingTabBar Margin="0,0,0,16"
+                                    SelectedIndex="{Binding ConfigTabIndex}">
+                    <ctrl:SlidingTabBar.Tabs>
+                        <ctrl:SlidingTab Header="General"    Command="{Binding SelectConfigGeneralCommand}" />
+                        <ctrl:SlidingTab Header="CLIProxyAPI" Command="{Binding SelectConfigCliProxyCommand}" />
+                        <ctrl:SlidingTab Header="Perplexity" Command="{Binding SelectConfigPerplexityCommand}" />
+                    </ctrl:SlidingTabBar.Tabs>
+                </ctrl:SlidingTabBar>
+
+                <!-- ── Status banner ──────────────────────────────────── -->
+                <Border IsVisible="{Binding ShowConfigurationStatus}" Classes="card" Padding="14,10" Margin="0,0,0,12">
                     <Grid ColumnDefinitions="*,Auto">
-                        <TextBlock Grid.Column="0"
-                                   Text="{Binding ConfigurationStatusMessage}"
-                                   TextWrapping="Wrap"
-                                   FontSize="12"
-                                   Foreground="{DynamicResource FgBrush}" />
+                        <TextBlock Grid.Column="0" Text="{Binding ConfigurationStatusMessage}"
+                                   TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource FgBrush}" />
                         <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0" VerticalAlignment="Top"
                                 Command="{Binding DismissConfigurationStatusCommand}">
-                            <lucide:PackIconLucide Kind="X" Width="12" Height="12"
-                                                  Foreground="{DynamicResource FgMutedBrush}" />
+                            <lucide:PackIconLucide Kind="X" Width="12" Height="12" Foreground="{DynamicResource FgMutedBrush}" />
                         </Button>
                     </Grid>
                 </Border>
 
-                <!-- GENERAL -->
-                <TextBlock Classes="section-label" Text="GENERAL" Margin="4,0,4,8"/>
-                <Border Classes="card">
-                    <StackPanel>
-                        <Grid Margin="14,11" ColumnDefinitions="*,Auto">
-                            <StackPanel>
-                                <TextBlock Classes="row-label" Text="Launch at login"/>
-                                <TextBlock Classes="row-desc" Text="Start automatically and stay in the system tray."/>
-                            </StackPanel>
-                            <ToggleButton Grid.Column="1"
-                                          Classes="enable-toggle"
-                                          IsChecked="{Binding LaunchAtLogin, Mode=TwoWay}"
-                                          IsEnabled="{Binding IsLaunchAtLoginSupported}" />
-                        </Grid>
-                        <Border Classes="row-divider"/>
-                        <Grid Margin="14,11" ColumnDefinitions="*,Auto">
-                            <StackPanel>
-                                <TextBlock Classes="row-label" Text="Theme"/>
-                                <TextBlock Classes="row-desc" Text="Follow system theme or force light/dark mode."/>
-                            </StackPanel>
-                            <ComboBox Grid.Column="1"
-                                      ItemsSource="{Binding ThemeModes}"
-                                      SelectedItem="{Binding ThemeMode, Mode=TwoWay}"
-                                      Width="110"
-                                      Height="26"
-                                      MinHeight="0"
-                                      Padding="8,0"
-                                      VerticalContentAlignment="Center" />
-                        </Grid>
+                <!-- ══ GENERAL ══════════════════════════════════════════ -->
+                <StackPanel IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=ConfigGeneral}">
+                    <StackPanel Margin="0,0,0,14">
+                        <TextBlock Classes="page-title" Text="General" />
+                        <TextBlock Classes="page-sub" Text="App appearance and startup." />
                     </StackPanel>
-                </Border>
 
-                <!-- ENGINE -->
-                <TextBlock Classes="section-label" Text="ENGINE"/>
-
-                <!-- Update success banner -->
-                <Border IsVisible="{Binding ShowUpdateSuccess}"
-                        Background="{DynamicResource AccentBrush}"
-                        CornerRadius="8" Padding="12,8" Margin="0,0,0,8">
-                    <TextBlock Text="{Binding InstalledVersion, StringFormat='Successfully updated to {0}'}"
-                               Foreground="White" FontSize="12" FontWeight="Medium"/>
-                </Border>
-
-                <Border Classes="card">
-                    <StackPanel>
-                        <!-- Version row -->
-                        <Grid Margin="14,11" ColumnDefinitions="*,Auto">
-                            <StackPanel>
-                                <TextBlock Classes="row-label" Text="CLIProxyAPI"/>
-                                <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,2,0,0">
-                                    <TextBlock Classes="row-desc"
-                                               Text="{Binding InstalledVersion, StringFormat='Installed: {0}', TargetNullValue='Installed: Not installed', FallbackValue='Installed: Not installed'}" />
-                                    <TextBlock Classes="row-desc" Text="→"
-                                               IsVisible="{Binding UpdateAvailable}" />
-                                    <TextBlock Classes="row-desc" Foreground="{DynamicResource AccentBrush}"
-                                               Text="{Binding LatestVersion, StringFormat='{}{0} available'}"
-                                               IsVisible="{Binding UpdateAvailable}" />
+                    <TextBlock Classes="section-label" Text="APP" Margin="4,0,4,8"/>
+                    <Border Classes="card">
+                        <StackPanel>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Launch at login"/>
+                                    <TextBlock Classes="row-desc" Text="Start automatically and stay in the system tray."/>
                                 </StackPanel>
-                            </StackPanel>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                <Button Classes="app" Content="Check"
-                                        Command="{Binding CheckForUpdateCommand}"
-                                        IsEnabled="{Binding !IsCheckingForUpdate}"
-                                        IsVisible="{Binding !UpdateAvailable}" />
-                                <Button Classes="app primary" Content="Update now"
-                                        Command="{Binding UpdateEngineCommand}"
-                                        IsVisible="{Binding UpdateAvailable}" />
-                            </StackPanel>
-                        </Grid>
-
-                        <Border Classes="row-divider"/>
-
-                        <!-- Version selector -->
-                        <Grid Margin="14,11" ColumnDefinitions="*,Auto">
-                            <StackPanel>
-                                <TextBlock Classes="row-label" Text="Engine version"/>
-                                <TextBlock Classes="row-desc" Text="{Binding SelectedEngineVersionDescription}"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                <ComboBox ItemsSource="{Binding EngineReleases}"
-                                          SelectedItem="{Binding SelectedEngineRelease}"
-                                          Cursor="Hand"
-                                          IsEnabled="{Binding CanSelectEngineRelease}"
-                                          Width="150"
-                                          MinWidth="150"
-                                          Height="26"
-                                          MinHeight="0"
-                                          Padding="8,0"
-                                          VerticalAlignment="Center"
-                                          VerticalContentAlignment="Center" />
-                                <Button Classes="app" Content="Reload"
-                                        Command="{Binding RefreshEngineReleasesCommand}"
-                                        IsEnabled="{Binding CanSelectEngineRelease}"
-                                        VerticalAlignment="Center" />
-                                <Button Classes="app primary" Content="Install"
-                                        Command="{Binding InstallSelectedEngineCommand}"
-                                        IsEnabled="{Binding CanInstallSelectedEngine}"
-                                        VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Grid>
-
-                        <!-- Download progress (only visible while downloading/installing) -->
-                        <StackPanel Margin="14,0,14,11"
-                                    IsVisible="{Binding EngineState, Converter={StaticResource EngineStateToText}, ConverterParameter=IsDownloading}">
-                            <ProgressBar Value="{Binding DownloadProgress}" Minimum="0" Maximum="100"
-                                         Height="4" CornerRadius="2"
-                                         Foreground="{DynamicResource AccentBrush}"
-                                         Background="{DynamicResource RowDividerBrush}" />
-                            <TextBlock Classes="row-desc" Margin="0,4,0,0"
-                                       Text="{Binding EngineStatusText}" />
+                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                              IsChecked="{Binding LaunchAtLogin, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsLaunchAtLoginSupported}" />
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Theme"/>
+                                    <TextBlock Classes="row-desc" Text="Follow system theme or force light/dark mode."/>
+                                </StackPanel>
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding ThemeModes}"
+                                          SelectedItem="{Binding ThemeMode, Mode=TwoWay}"
+                                          Width="110" Height="26" MinHeight="0" Padding="8,0" VerticalContentAlignment="Center" />
+                            </Grid>
                         </StackPanel>
+                    </Border>
 
-                        <Border Classes="row-divider"/>
+                </StackPanel>
 
-                        <!-- Package integrity -->
-                        <Grid Margin="14,11" ColumnDefinitions="*,Auto">
-                            <StackPanel>
-                                <TextBlock Classes="row-label" Text="Package integrity"/>
-                                <TextBlock Classes="row-desc" Text="Downloads are verified before install."/>
-                                <TextBlock Classes="row-desc"
-                                           ToolTip.Tip="{Binding InstalledEngineHashFull}">
-                                    <Run Text="{Binding InstalledEngineHashLabel}" />
-                                    <Run Text=": " />
-                                    <Run Text="{Binding InstalledEngineHashShort}" />
-                                </TextBlock>
-                                <TextBlock Classes="row-desc"
-                                           ToolTip.Tip="{Binding LatestEngineHashFull}">
-                                    <Run Text="Remote package SHA256: " />
-                                    <Run Text="{Binding LatestEngineHashShort}" />
-                                </TextBlock>
-                                <TextBlock Classes="row-desc"
-                                           Foreground="{DynamicResource ErrBrush}"
-                                           Text="{Binding EngineIntegrityMessage}"
-                                           IsVisible="{Binding HasEngineIntegrityError}" />
-                            </StackPanel>
-                            <Border Grid.Column="1"
-                                    Classes="chip"
-                                    Background="{DynamicResource AccentSoftBrush}"
-                                    VerticalAlignment="Center"
-                                    ToolTip.Tip="{Binding LatestEngineAssetName}">
-                                <TextBlock Text="{Binding EngineIntegrityStatus}"
-                                           Foreground="{DynamicResource AccentBrush}" />
-                            </Border>
-                        </Grid>
-
-                        <Border Classes="row-divider"/>
-
-                        <!-- Auto-check for updates -->
-                        <Grid Margin="14,11" ColumnDefinitions="*,Auto">
-                            <StackPanel>
-                                <TextBlock Classes="row-label" Text="Auto-check for updates"/>
-                                <TextBlock Classes="row-desc" Text="Check GitHub for a new engine version on startup."/>
-                            </StackPanel>
-                            <ToggleButton Grid.Column="1"
-                                          Classes="enable-toggle"
-                                          IsChecked="{Binding AutoCheckForUpdates, Mode=TwoWay}" />
-                        </Grid>
-
-                        <Border Classes="row-divider"/>
-
-                        <!-- Auto-update -->
-                        <Grid Margin="14,11" ColumnDefinitions="*,Auto">
-                            <StackPanel>
-                                <TextBlock Classes="row-label" Text="Auto-update"/>
-                                <TextBlock Classes="row-desc" Text="Automatically download and install new engine versions."/>
-                            </StackPanel>
-                            <ToggleButton Grid.Column="1"
-                                          Classes="enable-toggle"
-                                          IsChecked="{Binding AutoUpdate, Mode=TwoWay}"
-                                          IsEnabled="{Binding IsAutoUpdateEnabled}" />
-                        </Grid>
+                <!-- ══ CLIPROXY ══════════════════════════════════════════ -->
+                <StackPanel IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=ConfigCliProxy}">
+                    <StackPanel Margin="0,0,0,14">
+                        <TextBlock Classes="page-title" Text="CLIProxyAPI" />
+                        <TextBlock Classes="page-sub" Text="Engine version, network, and update settings." />
                     </StackPanel>
-                </Border>
 
-                <TextBlock Classes="section-label" Text="NETWORK"/>
-                <Border Classes="card">
-                    <StackPanel>
-                        <Grid Margin="14,11" ColumnDefinitions="*,Auto">
-                            <StackPanel>
-                                <TextBlock Classes="row-label" Text="Routing strategy"/>
-                                <TextBlock Classes="row-desc" Text="How requests are distributed across multiple accounts or keys."/>
+                    <!-- Update success banner -->
+                    <Border IsVisible="{Binding ShowUpdateSuccess}" Background="{DynamicResource AccentBrush}"
+                            CornerRadius="8" Padding="12,8" Margin="0,0,0,8">
+                        <TextBlock Text="{Binding InstalledVersion, StringFormat='Successfully updated to {0}'}"
+                                   Foreground="White" FontSize="12" FontWeight="Medium"/>
+                    </Border>
+
+                    <TextBlock Classes="section-label" Text="ENGINE"/>
+                    <Border Classes="card">
+                        <StackPanel>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="CLIProxyAPI"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,2,0,0">
+                                        <TextBlock Classes="row-desc"
+                                                   Text="{Binding CliProxyInstalledVersion, StringFormat='Installed: {0}'}" />
+                                        <TextBlock Classes="row-desc" Text="→" IsVisible="{Binding CliProxyUpdateAvailable}" />
+                                        <TextBlock Classes="row-desc" Foreground="{DynamicResource AccentBrush}"
+                                                   Text="{Binding CliProxyLatestVersion, StringFormat='{}{0} available'}"
+                                                   IsVisible="{Binding CliProxyUpdateAvailable}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Button Classes="app" Content="Check"
+                                            Command="{Binding CheckForUpdateCommand}"
+                                            IsEnabled="{Binding !IsCheckingForUpdate}"
+                                            IsVisible="{Binding !CliProxyUpdateAvailable}" />
+                                    <Button Classes="app primary" Content="Update now"
+                                            Command="{Binding UpdateEngineCommand}"
+                                            IsVisible="{Binding CliProxyUpdateAvailable}" />
+                                </StackPanel>
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Engine version"/>
+                                    <TextBlock Classes="row-desc" Text="{Binding SelectedEngineVersionDescription}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <ComboBox ItemsSource="{Binding EngineReleases}" SelectedItem="{Binding SelectedEngineRelease}"
+                                              Cursor="Hand" IsEnabled="{Binding CanSelectEngineRelease}"
+                                              Width="150" Height="26" MinHeight="0" Padding="8,0"
+                                              VerticalAlignment="Center" VerticalContentAlignment="Center" />
+                                    <Button Classes="app" Content="Reload"
+                                            Command="{Binding RefreshEngineReleasesCommand}"
+                                            IsEnabled="{Binding CanSelectEngineRelease}" VerticalAlignment="Center" />
+                                    <Button Classes="app primary" Content="Install"
+                                            Command="{Binding InstallSelectedEngineCommand}"
+                                            IsEnabled="{Binding CanInstallSelectedEngine}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                            <StackPanel Margin="14,0,14,11"
+                                        IsVisible="{Binding EngineState, Converter={StaticResource EngineStateToText}, ConverterParameter=IsDownloading}">
+                                <ProgressBar Value="{Binding DownloadProgress}" Minimum="0" Maximum="100"
+                                             Height="4" CornerRadius="2"
+                                             Foreground="{DynamicResource AccentBrush}"
+                                             Background="{DynamicResource RowDividerBrush}" />
+                                <TextBlock Classes="row-desc" Margin="0,4,0,0" Text="{Binding EngineStatusText}" />
                             </StackPanel>
-                            <ComboBox Grid.Column="1"
-                                      ItemsSource="{Binding RoutingStrategies}"
-                                      Cursor="Hand"
-                                      SelectedItem="{Binding RoutingStrategy, Mode=TwoWay}"
-                                      Width="250" MinWidth="250"
-                                      Height="26" MinHeight="0"
-                                      Padding="8,0"
-                                      VerticalAlignment="Center"
-                                      VerticalContentAlignment="Center">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding ., Converter={StaticResource RoutingStrategyToString}}" />
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-                        </Grid>
-                        <Border Classes="row-divider"/>
-                        <Grid Margin="14,11" ColumnDefinitions="*,Auto">
-                            <StackPanel>
-                                <TextBlock Classes="row-label" Text="Listen port"/>
-                                <TextBlock Classes="row-desc" Text="Localhost only. Restart required to apply."/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                <Button Classes="app" Content="Reset"
-                                        Command="{Binding ResetPortCommand}" />
-                                <TextBox Classes="app"
-                                         Text="{Binding EditablePort, Mode=TwoWay}"
-                                         Width="70" MinWidth="70"
-                                         Height="24" MinHeight="0"
-                                         Padding="8,0" MaxLength="5"
-                                         VerticalContentAlignment="Center"
-                                         HorizontalContentAlignment="Center" />
-                            </StackPanel>
-                        </Grid>
+                            <Border Classes="row-divider"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Package integrity"/>
+                                    <TextBlock Classes="row-desc" Text="Downloads are verified before install."/>
+                                    <TextBlock Classes="row-desc" ToolTip.Tip="{Binding InstalledEngineHashFull}">
+                                        <Run Text="{Binding InstalledEngineHashLabel}" /><Run Text=": " /><Run Text="{Binding InstalledEngineHashShort}" />
+                                    </TextBlock>
+                                    <TextBlock Classes="row-desc" ToolTip.Tip="{Binding LatestEngineHashFull}">
+                                        <Run Text="Remote package SHA256: " /><Run Text="{Binding LatestEngineHashShort}" />
+                                    </TextBlock>
+                                    <TextBlock Classes="row-desc" Foreground="{DynamicResource ErrBrush}"
+                                               Text="{Binding EngineIntegrityMessage}"
+                                               IsVisible="{Binding HasEngineIntegrityError}" />
+                                </StackPanel>
+                                <Border Grid.Column="1" Classes="chip" Background="{DynamicResource AccentSoftBrush}"
+                                        VerticalAlignment="Center" ToolTip.Tip="{Binding LatestEngineAssetName}">
+                                    <TextBlock Text="{Binding EngineIntegrityStatus}" Foreground="{DynamicResource AccentBrush}" />
+                                </Border>
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Auto-check for updates"/>
+                                    <TextBlock Classes="row-desc" Text="Check GitHub for a new engine version on startup."/>
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                              IsChecked="{Binding AutoCheckForUpdates, Mode=TwoWay}" />
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Auto-update"/>
+                                    <TextBlock Classes="row-desc" Text="Automatically download and install new engine versions."/>
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                              IsChecked="{Binding AutoUpdate, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsAutoUpdateEnabled}" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Classes="section-label" Text="SECURITY"/>
+                    <Border Classes="card">
+                        <StackPanel>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Auth files location"/>
+                                    <TextBlock Classes="row-desc" Text="OAuth tokens and custom provider keys are stored in the app auth folder."/>
+                                </StackPanel>
+                                <Button Grid.Column="1" Classes="app" Content="Open Folder"
+                                        Command="{Binding OpenAuthFolderCommand}" />
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Reset all credentials"/>
+                                    <TextBlock Classes="row-desc" Text="Backs up and removes TunnelAgent-managed OAuth tokens and API keys."/>
+                                </StackPanel>
+                                <Button Grid.Column="1" Classes="app danger" Content="Reset…"
+                                        Command="{Binding ResetAllCredentialsCommand}" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Classes="section-label" Text="NETWORK"/>
+                    <Border Classes="card">
+                        <StackPanel>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Routing strategy"/>
+                                    <TextBlock Classes="row-desc" Text="How requests are distributed across multiple accounts or keys."/>
+                                </StackPanel>
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding RoutingStrategies}" Cursor="Hand"
+                                          SelectedItem="{Binding RoutingStrategy, Mode=TwoWay}"
+                                          Width="250" Height="26" MinHeight="0" Padding="8,0"
+                                          VerticalAlignment="Center" VerticalContentAlignment="Center">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding ., Converter={StaticResource RoutingStrategyToString}}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Listen port"/>
+                                    <TextBlock Classes="row-desc" Text="Localhost only. Restart required to apply."/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                    <Button Classes="app" Content="Reset" Command="{Binding ResetPortCommand}" />
+                                    <TextBox Classes="app" Text="{Binding EditablePort, Mode=TwoWay}"
+                                             Width="70" Height="24" MinHeight="0" Padding="8,0" MaxLength="5"
+                                             VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ══ PERPLEXITY ══════════════════════════════════════════ -->
+                <StackPanel IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=ConfigPerplexity}">
+                    <StackPanel Margin="0,0,0,14">
+                        <TextBlock Classes="page-title" Text="Perplexity" />
+                        <TextBlock Classes="page-sub" Text="Engine version, port, and session settings." />
                     </StackPanel>
-                </Border>
 
-                <TextBlock Classes="section-label" Text="SECURITY"/>
-                <Border Classes="card">
-                    <StackPanel>
-                        <Grid Margin="14,11" ColumnDefinitions="*,Auto">
-                            <StackPanel>
-                                <TextBlock Classes="row-label" Text="Auth files location"/>
-                                <TextBlock Classes="row-desc" Text="{Binding AuthFilesDescription}"/>
-                            </StackPanel>
-                            <Button Grid.Column="1" Classes="app" Content="Open Folder"
-                                    Command="{Binding OpenAuthFolderCommand}" />
-                        </Grid>
+                    <!-- Update success banner -->
+                    <Border IsVisible="{Binding ShowUpdateSuccess}" Background="{DynamicResource AccentBrush}"
+                            CornerRadius="8" Padding="12,8" Margin="0,0,0,8">
+                        <TextBlock Text="{Binding InstalledVersion, StringFormat='Successfully updated to {0}'}"
+                                   Foreground="White" FontSize="12" FontWeight="Medium"/>
+                    </Border>
 
-                        <Border Classes="row-divider"/>
-                        <Grid Margin="14,11" ColumnDefinitions="*,Auto">
-                            <StackPanel>
-                                <TextBlock Classes="row-label" Text="Reset all credentials"/>
-                                <TextBlock Classes="row-desc" Text="Backs up and removes TunnelAgent-managed provider tokens."/>
+                    <TextBlock Classes="section-label" Text="ENGINE"/>
+                    <Border Classes="card">
+                        <StackPanel>
+                            <!-- Version row -->
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Perplexity WebUI Scraper"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,2,0,0">
+                                        <TextBlock Classes="row-desc"
+                                                   Text="{Binding PerplexityInstalledVersion, StringFormat='Installed: {0}'}" />
+                                        <TextBlock Classes="row-desc" Text="→" IsVisible="{Binding PerplexityUpdateAvailable}" />
+                                        <TextBlock Classes="row-desc" Foreground="{DynamicResource AccentBrush}"
+                                                   Text="{Binding PerplexityLatestVersion, StringFormat='{}{0} available'}"
+                                                   IsVisible="{Binding PerplexityUpdateAvailable}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Button Classes="app" Content="Check"
+                                            Command="{Binding CheckForUpdateCommand}"
+                                            IsEnabled="{Binding !IsCheckingForUpdate}"
+                                            IsVisible="{Binding !UpdateAvailable}" />
+                                    <Button Classes="app primary" Content="Update now"
+                                            Command="{Binding UpdateEngineCommand}"
+                                            IsVisible="{Binding UpdateAvailable}" />
+                                </StackPanel>
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <!-- Version selector -->
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Engine version"/>
+                                    <TextBlock Classes="row-desc" Text="{Binding SelectedEngineVersionDescription}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <ComboBox ItemsSource="{Binding EngineReleases}" SelectedItem="{Binding SelectedEngineRelease}"
+                                              Cursor="Hand" IsEnabled="{Binding CanSelectEngineRelease}"
+                                              Width="150" Height="26" MinHeight="0" Padding="8,0"
+                                              VerticalAlignment="Center" VerticalContentAlignment="Center" />
+                                    <Button Classes="app" Content="Reload"
+                                            Command="{Binding RefreshEngineReleasesCommand}"
+                                            IsEnabled="{Binding CanSelectEngineRelease}" VerticalAlignment="Center" />
+                                    <Button Classes="app primary" Content="Install"
+                                            Command="{Binding InstallSelectedEngineCommand}"
+                                            IsEnabled="{Binding CanInstallSelectedEngine}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                            <!-- Download progress -->
+                            <StackPanel Margin="14,0,14,11"
+                                        IsVisible="{Binding EngineState, Converter={StaticResource EngineStateToText}, ConverterParameter=IsDownloading}">
+                                <ProgressBar Value="{Binding DownloadProgress}" Minimum="0" Maximum="100"
+                                             Height="4" CornerRadius="2"
+                                             Foreground="{DynamicResource AccentBrush}"
+                                             Background="{DynamicResource RowDividerBrush}" />
+                                <TextBlock Classes="row-desc" Margin="0,4,0,0" Text="{Binding EngineStatusText}" />
                             </StackPanel>
-                            <Button Grid.Column="1" Classes="app danger" Content="Reset…"
-                                    Command="{Binding ResetAllCredentialsCommand}" />
-                        </Grid>
-                    </StackPanel>
-                </Border>
+                            <Border Classes="row-divider"/>
+                            <!-- Package integrity -->
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Package integrity"/>
+                                    <TextBlock Classes="row-desc" Text="Downloads are verified before install."/>
+                                    <TextBlock Classes="row-desc" ToolTip.Tip="{Binding InstalledEngineHashFull}">
+                                        <Run Text="{Binding InstalledEngineHashLabel}" /><Run Text=": " /><Run Text="{Binding InstalledEngineHashShort}" />
+                                    </TextBlock>
+                                    <TextBlock Classes="row-desc" ToolTip.Tip="{Binding LatestEngineHashFull}">
+                                        <Run Text="Remote package SHA256: " /><Run Text="{Binding LatestEngineHashShort}" />
+                                    </TextBlock>
+                                    <TextBlock Classes="row-desc" Foreground="{DynamicResource ErrBrush}"
+                                               Text="{Binding EngineIntegrityMessage}"
+                                               IsVisible="{Binding HasEngineIntegrityError}" />
+                                </StackPanel>
+                                <Border Grid.Column="1" Classes="chip" Background="{DynamicResource AccentSoftBrush}"
+                                        VerticalAlignment="Center" ToolTip.Tip="{Binding LatestEngineAssetName}">
+                                    <TextBlock Text="{Binding EngineIntegrityStatus}" Foreground="{DynamicResource AccentBrush}" />
+                                </Border>
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <!-- Auto-check -->
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Auto-check for updates"/>
+                                    <TextBlock Classes="row-desc" Text="Check GitHub for a new engine version on startup."/>
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                              IsChecked="{Binding AutoCheckForUpdates, Mode=TwoWay}" />
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <!-- Auto-update -->
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Auto-update"/>
+                                    <TextBlock Classes="row-desc" Text="Automatically download and install new engine versions."/>
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                              IsChecked="{Binding AutoUpdate, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsAutoUpdateEnabled}" />
+                            </Grid>
+
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Classes="section-label" Text="SECURITY"/>
+                    <Border Classes="card">
+                        <StackPanel>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Accounts location"/>
+                                    <TextBlock Classes="row-desc" Text="Session token files are stored in the app settings folder under perplexity-accounts/."/>
+                                </StackPanel>
+                                <Button Grid.Column="1" Classes="app" Content="Open Folder"
+                                        Command="{Binding OpenSettingsFolderCommand}" />
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Reset session accounts"/>
+                                    <TextBlock Classes="row-desc" Text="Removes all saved Perplexity WebUI session tokens."/>
+                                </StackPanel>
+                                <Button Grid.Column="1" Classes="app danger" Content="Reset…"
+                                        Command="{Binding ResetPerplexityAccountsCommand}" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Classes="section-label" Text="NETWORK"/>
+                    <Border Classes="card">
+                        <StackPanel>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Listen port"/>
+                                    <TextBlock Classes="row-desc" Text="Localhost only. Restart required to apply."/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                    <Button Classes="app" Content="Reset" Command="{Binding ResetPortCommand}" />
+                                    <TextBox Classes="app" Text="{Binding EditablePort, Mode=TwoWay}"
+                                             Width="70" Height="24" MinHeight="0" Padding="8,0" MaxLength="5"
+                                             VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
             </StackPanel>
         </ScrollViewer>
 
-        <!-- ── No update toast ──────────────────────────────────────────── -->
-        <Border IsVisible="{Binding ShowNoUpdateToast}"
-                Classes="card"
-                MaxWidth="400"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Margin="0,12,12,0"
-                Padding="14,10"
-                ZIndex="10">
+        <!-- No update toast -->
+        <Border IsVisible="{Binding ShowNoUpdateToast}" Classes="card" MaxWidth="400"
+                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,12,12,0" Padding="14,10" ZIndex="10">
             <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Grid.Column="0"
-                           Text="No updates available. You are on the latest version."
-                           TextWrapping="Wrap"
-                           FontSize="12"
-                           VerticalAlignment="Center"
-                           Foreground="{DynamicResource FgBrush}"
-                           MaxWidth="330" />
+                <TextBlock Grid.Column="0" Text="No updates available. You are on the latest version."
+                           TextWrapping="Wrap" FontSize="12" VerticalAlignment="Center"
+                           Foreground="{DynamicResource FgBrush}" MaxWidth="330" />
                 <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0" VerticalAlignment="Top"
                         Click="OnDismissNoUpdateToast">
-                    <lucide:PackIconLucide Kind="X" Width="12" Height="12"
-                                          Foreground="{DynamicResource FgMutedBrush}" />
+                    <lucide:PackIconLucide Kind="X" Width="12" Height="12" Foreground="{DynamicResource FgMutedBrush}" />
                 </Button>
             </Grid>
         </Border>

@@ -112,7 +112,7 @@ public sealed class EngineService : IManagedEngine
 
     public Task PrepareVersionAsync(string version) => _download.PrepareVersionAsync(version);
 
-    public Task DownloadAndInstallAsync() => DownloadAndInstallAsync(null);
+    public Task DownloadAndInstallAsync() => DownloadAndInstallAsync(GetPreferredVersionOrNull());
 
     public async Task DownloadAndInstallAsync(string? version)
     {
@@ -122,7 +122,7 @@ public sealed class EngineService : IManagedEngine
             var wasRunning = IsRunning;
             if (wasRunning) await StopAsync();
 
-            await _download.DownloadAndInstallAsync(version);
+            await _download.DownloadAndInstallAsync(string.IsNullOrWhiteSpace(version) ? GetPreferredVersionOrNull() : version);
 
             if (wasRunning) await StartAsync();
         }
@@ -130,5 +130,11 @@ public sealed class EngineService : IManagedEngine
         {
             _updateLock.Release();
         }
+    }
+
+    private string? GetPreferredVersionOrNull()
+    {
+        var preferred = _settings.Current.GetOrAddEngine(Definition.Id, Definition.DefaultPort).PreferredVersion;
+        return string.IsNullOrWhiteSpace(preferred) ? null : preferred;
     }
 }

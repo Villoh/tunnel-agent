@@ -5,7 +5,7 @@
 <h1 align="center">Tunnel Agent</h1>
 
 <p align="center">
-  Use your OAuth subscriptions or API keys in any coding agent, Factory Droid, Cursor, and more. Tunnel Agent handles provider authentication and routes requests through CLIProxyAPI.<br><br>One click to connect. Works with whatever you already have.
+  Use your OAuth subscriptions or API keys in any coding agent, Factory Droid, Cursor, and more. Tunnel Agent manages provider authentication, runs CLIProxyAPI and Perplexity locally, and gives you one desktop UI to control both engines.<br><br>One click to connect. Works with whatever you already have.
 </p>
 
 <p align="center">
@@ -27,13 +27,36 @@
 
 ## Features
 
-- 🖥️ **Native Windows Experience** — Clean Avalonia UI that respects your system theme (light/dark)
-- 🚀 **One-Click Server Management** — Start and stop the proxy endpoint from the sidebar
-- 🔐 **Credential Storage** — Secure handling for OAuth tokens and custom provider API keys
+- 🖥️ **Native Windows Experience** — Clean Avalonia UI that respects your system theme and keeps local engine management in one place
+- 🔀 **Multi-Engine Control** — Run and manage both CLIProxyAPI and Perplexity from the same desktop app, with per-engine configuration, endpoint controls, and status
+- 🚀 **One-Click Server Management** — Start and stop each local engine directly from the Providers view
+- 🔐 **Credential Storage** — Secure handling for OAuth tokens, custom provider API keys, and file-based Perplexity session accounts stored under Tunnel Agent settings
 - 👥 **Provider Management** — Connect Claude Code, OpenAI Codex, Gemini CLI, Kimi, GitHub Copilot, Antigravity, Qwen, and custom OpenAI-compatible providers
-- 🎚️ **Model Visibility** — Browse available models grouped by connected provider
-- 📊 **Live Status** — Animated running indicator with real-time connection state
-- ⚙️ **Configuration** — Control startup behaviour, network port, updates, log level, and credential actions
+- 🧠 **Perplexity WebUI Sessions** — Add multiple Perplexity accounts, set a default session, reset accounts safely, and auto-install the Perplexity engine when needed
+- 🎚️ **Model Visibility** — Browse available models grouped by connected provider or engine source, including Perplexity-backed model listings
+- 📊 **Live Status** — See sidebar engine health plus focused engine state, endpoint, and release info
+- ⚙️ **Configuration** — Control startup behaviour, per-engine ports, updates, release selection, routing strategy, and credential actions
+
+## Engine Overview
+
+### CLIProxyAPI
+
+CLIProxyAPI remains the main unified OpenAI-compatible local proxy for OAuth and upstream providers. Tunnel Agent lets you:
+
+- install and update CLIProxyAPI releases
+- switch to a pinned release instead of always following latest
+- manage connected providers and custom OpenAI-compatible accounts
+- inspect provider quotas and available models exposed by the running proxy
+
+### Perplexity
+
+Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper engine. You can:
+
+- install and start Perplexity from the same UI
+- manage Perplexity session token accounts separately from CLIProxy auth files
+- store each Perplexity account as its own JSON file under the Tunnel Agent settings directory
+- view Perplexity endpoint status and available models from the Perplexity server
+- keep Perplexity on a selected release instead of being forced to latest
 
 ## Build from Source
 

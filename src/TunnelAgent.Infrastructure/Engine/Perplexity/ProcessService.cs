@@ -40,7 +40,7 @@ public sealed class ProcessService
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 RedirectStandardOutput = false,
-                RedirectStandardError = false,
+                RedirectStandardError = true,
                 ArgumentList =
                 {
                     "api",
@@ -52,20 +52,37 @@ public sealed class ProcessService
             EnableRaisingEvents = true
         };
 
+        var stderrLines = new System.Text.StringBuilder();
+        _process.ErrorDataReceived += (_, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+                stderrLines.AppendLine(e.Data);
+        };
+
         _process.Exited += (_, _) =>
         {
-            if (State == EngineState.Running)
+            if (State is EngineState.Running or EngineState.Starting)
             {
-                LastError = "Process exited unexpectedly.";
+                var stderr = stderrLines.ToString().Trim();
+                LastError = string.IsNullOrEmpty(stderr)
+                    ? "Process exited unexpectedly."
+                    : stderr.Split('\n')[^1].Trim(); // last stderr line
                 SetState(EngineState.Error);
             }
         };
 
         _process.Start();
+        _process.BeginErrorReadLine();
 
         var healthy = await WaitForHealthAsync(port, ct);
         if (!healthy)
         {
+            // Check if process already exited (crash)
+            if (_process?.HasExited == true)
+            {
+                // Error already set by Exited handler
+                return;
+            }
             LastError = "Engine did not respond in time.";
             SetState(EngineState.Error);
             return;
@@ -95,7 +112,8 @@ public sealed class ProcessService
     private static async Task<bool> WaitForHealthAsync(int port, CancellationToken ct)
     {
         var url = $"http://127.0.0.1:{port}/v1/models";
-        for (var i = 0; i < 25; i++)
+        // Python/uvicorn startup can take several seconds on first run
+        for (var i = 0; i < 60; i++)
         {
             try
             {
@@ -104,8 +122,8 @@ public sealed class ProcessService
                 if ((int)response.StatusCode < 500)
                     return true;
             }
-            catch (OperationCanceledException) { throw; }
-            catch { }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
+            catch { /* not up yet or http timeout — retry */ }
         }
 
         return false;

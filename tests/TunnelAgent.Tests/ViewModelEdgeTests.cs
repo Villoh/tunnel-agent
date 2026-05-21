@@ -3,7 +3,7 @@ using TunnelAgent.Services;
 using TunnelAgent.ViewModels;
 using Xunit;
 
-using TunnelAgent.Infrastructure.Engine.CliProxy;
+using TunnelAgent.Infrastructure.Engine;
 namespace TunnelAgent.Tests;
 
 public sealed class ViewModelEdgeTests
@@ -112,10 +112,10 @@ public sealed class ViewModelEdgeTests
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
         settings.LoadAsync().GetAwaiter().GetResult();
-        var engine = new EngineService(settings);
-        var vm = new MainWindowViewModel(settings, engine, null!, null!, null!);
+        var registry = new EngineRegistryService(settings);
+        var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
 
-        Assert.Equal("Choose a CLIProxyAPI release to install.", vm.SelectedEngineVersionDescription);
+        Assert.Equal("Choose CLIProxyAPI release to install.", vm.SelectedEngineVersionDescription);
     }
 
     [Fact]
@@ -124,8 +124,8 @@ public sealed class ViewModelEdgeTests
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
         settings.LoadAsync().GetAwaiter().GetResult();
-        var engine = new EngineService(settings);
-        var vm = new MainWindowViewModel(settings, engine, null!, null!, null!);
+        var registry = new EngineRegistryService(settings);
+        var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
 
         // IsLoadingEngineReleases is false, engine state is Stopped/NotInstalled
         Assert.True(vm.CanSelectEngineRelease);
@@ -137,8 +137,8 @@ public sealed class ViewModelEdgeTests
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
         settings.LoadAsync().GetAwaiter().GetResult();
-        var engine = new EngineService(settings);
-        var vm = new MainWindowViewModel(settings, engine, null!, null!, null!);
+        var registry = new EngineRegistryService(settings);
+        var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
 
         Assert.False(vm.CanInstallSelectedEngine);
     }
@@ -150,8 +150,8 @@ public sealed class ViewModelEdgeTests
         var settings = new SettingsService(temp.File("settings.json"));
         settings.LoadAsync().GetAwaiter().GetResult();
         settings.Current.AutoCheckForUpdates = true;
-        var engine = new EngineService(settings);
-        var vm = new MainWindowViewModel(settings, engine, null!, null!, null!);
+        var registry = new EngineRegistryService(settings);
+        var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
 
         Assert.True(vm.IsAutoUpdateEnabled);
 

@@ -49,12 +49,21 @@ public sealed class DownloadService
 
     private static readonly HttpClient Http;
 
+    // In-memory cache — avoids GitHub rate-limiting across repeated calls within a session
+    private static string? _cachedReleasesJson;
+    private static DateTime _cacheExpiry = DateTime.MinValue;
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(60);
+    private static readonly SemaphoreSlim _cacheLock = new(1, 1);
+
     static DownloadService()
     {
         var version = AppVersion.Current;
         Http = new HttpClient();
         Http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("TunnelAgent", version));
     }
+
+    /// <summary>Invalidate the cache so the next call fetches fresh data.</summary>
+    public static void InvalidateCache() { _cachedReleasesJson = null; _cacheExpiry = DateTime.MinValue; }
 
     public static bool IsBinaryInstalled() => File.Exists(BinaryPath);
 
@@ -271,12 +280,31 @@ public sealed class DownloadService
 
     private static async Task<JsonDocument> FetchReleasesDocumentAsync(int limit)
     {
-        var url = $"https://api.github.com/repos/{EngineCatalog.PerplexityWebUiScraper.RepositoryOwner}/{EngineCatalog.PerplexityWebUiScraper.RepositoryName}/releases?per_page={Math.Clamp(limit, 1, 100)}";
-        using var response = await Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-        response.EnsureSuccessStatusCode();
+        await _cacheLock.WaitAsync();
+        try
+        {
+            if (_cachedReleasesJson is not null && DateTime.UtcNow < _cacheExpiry)
+                return JsonDocument.Parse(_cachedReleasesJson);
 
-        await using var stream = await response.Content.ReadAsStreamAsync();
-        return await JsonDocument.ParseAsync(stream);
+            var url = $"https://api.github.com/repos/{EngineCatalog.PerplexityWebUiScraper.RepositoryOwner}/{EngineCatalog.PerplexityWebUiScraper.RepositoryName}/releases?per_page=30";
+            using var response = await Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+
+            if ((int)response.StatusCode is 403 or 429)
+            {
+                Debug.WriteLine($"[Perplexity.DownloadService] GitHub rate limited ({response.StatusCode})");
+                return JsonDocument.Parse(_cachedReleasesJson ?? "[]");
+            }
+
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
+            _cachedReleasesJson = json;
+            _cacheExpiry = DateTime.UtcNow.Add(CacheTtl);
+            return JsonDocument.Parse(json);
+        }
+        finally
+        {
+            _cacheLock.Release();
+        }
     }
 
     private static async Task<(string Name, string DownloadUrl, string Sha256)?> FetchReleaseAssetAsync(string version)
