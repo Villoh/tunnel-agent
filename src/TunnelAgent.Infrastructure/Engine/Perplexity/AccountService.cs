@@ -123,6 +123,19 @@ public sealed class AccountService
         return true;
     }
 
+    public bool UpdateLabel(string accountId, string label)
+    {
+        var target = List().FirstOrDefault(a => a.Id == accountId);
+        if (target is null) return false;
+
+        var normalizedLabel = string.IsNullOrWhiteSpace(label) ? "Perplexity" : label.Trim();
+        if (string.Equals(target.Label, normalizedLabel, StringComparison.Ordinal)) return false;
+
+        target.Label = normalizedLabel;
+        Save(target);
+        return true;
+    }
+
     public PerplexityAccountSettings? GetDefault()
     {
         var all = List();

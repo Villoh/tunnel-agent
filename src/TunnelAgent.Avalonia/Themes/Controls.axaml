@@ -105,6 +105,26 @@
         <Setter Property="Foreground" Value="{DynamicResource ErrBrush}" />
     </Style>
 
+    <Style Selector="Border.alert">
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="10" />
+    </Style>
+    <Style Selector="Border.alert.error">
+        <Setter Property="Background" Value="#1AE96B57" />
+        <Setter Property="BorderBrush" Value="#66E96B57" />
+    </Style>
+    <Style Selector="TextBlock.alert-title">
+        <Setter Property="Foreground" Value="{DynamicResource ErrBrush}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.alert-body">
+        <Setter Property="Foreground" Value="{DynamicResource FgMutedBrush}" />
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
     <Style Selector="Button.icon">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />

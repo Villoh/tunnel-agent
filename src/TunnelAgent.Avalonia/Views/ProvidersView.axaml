@@ -127,7 +127,7 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:PerplexityAccountViewModel">
                                     <Border Background="#08FFFFFF" CornerRadius="8" Padding="14,12" Margin="0,0,0,8">
-                                        <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto">
+                                        <Grid ColumnDefinitions="*,Auto,Auto,Auto" RowDefinitions="Auto,Auto">
                                             <StackPanel Grid.Column="0" Grid.RowSpan="2" Spacing="4">
                                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                                     <TextBlock Classes="row-label" Text="{Binding Label}" />
@@ -145,6 +145,14 @@
                                                     Command="{Binding #Root.DataContext.SetDefaultPerplexityAccountCommand}"
                                                     CommandParameter="{Binding}" />
                                             <Button Grid.Column="2" Classes="icon-btn"
+                                                    ToolTip.Tip="Edit label"
+                                                    Command="{Binding #Root.DataContext.EditPerplexityAccountLabelCommand}"
+                                                    CommandParameter="{Binding}">
+                                                <lucide:PackIconLucide Kind="Pencil" Width="13" Height="13"
+                                                                       Foreground="{DynamicResource FgMutedBrush}" />
+                                            </Button>
+                                            <Button Grid.Column="3" Classes="icon-btn"
+                                                    ToolTip.Tip="Remove account"
                                                     Command="{Binding #Root.DataContext.RemovePerplexityAccountCommand}"
                                                     CommandParameter="{Binding}">
                                                 <lucide:PackIconLucide Kind="Trash2" Width="13" Height="13"

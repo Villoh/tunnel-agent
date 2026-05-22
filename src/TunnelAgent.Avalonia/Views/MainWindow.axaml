@@ -23,6 +23,7 @@
         <cv:SectionEqualsConverter      x:Key="SectionEq" />
         <cv:SidebarWidthConverter       x:Key="SidebarWidth" />
         <cv:InvertBoolConverter         x:Key="InvertBool" />
+        <cv:StringNotEmptyConverter     x:Key="StringNotEmpty" />
     </Window.Resources>
 
     <Border Background="{DynamicResource WinBgBrush}"
@@ -294,22 +295,79 @@
         <!-- Add Perplexity account dialog -->
         <Border IsVisible="{Binding ShowPerplexityAccountDialog}" Background="#88000000"
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50">
+            <Border Classes="card" Width="440" MinHeight="150" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24">
+                <Grid>
+                    <StackPanel Spacing="14" IsVisible="{Binding IsPerplexityTokenGenerationMode, Converter={StaticResource InvertBool}}">
+                        <TextBlock Classes="row-label" FontSize="15" Text="Add Perplexity account" />
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="row-desc" Text="Label (optional)" />
+                            <TextBox x:Name="PerplexityLabelBox" Classes="app" Watermark="Primary"
+                                     KeyDown="OnPerplexityAccountInputKeyDown" />
+                        </StackPanel>
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="row-desc" Text="Session token" />
+                            <TextBox x:Name="PerplexitySessionTokenBox" Classes="app" PasswordChar="●" Watermark="pplx-session-token"
+                                     Text="{Binding PerplexitySessionTokenDraft, Mode=TwoWay}"
+                                     KeyDown="OnPerplexityAccountInputKeyDown" />
+                        </StackPanel>
+                        <TextBlock Classes="row-desc" TextWrapping="Wrap"
+                                   Text="Paste your Perplexity WebUI session token, or generate one via email verification." />
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
+                            <Button Classes="app" Content="Generate Token" Click="OnStartPerplexityTokenFlow" />
+                            <Button Classes="app" Content="Cancel" Command="{Binding DismissPerplexityAccountDialogCommand}" />
+                            <Button Classes="app primary" Content="Save Account" Click="OnConfirmPerplexityAccount" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Spacing="14" IsVisible="{Binding IsPerplexityTokenGenerationMode}">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Classes="row-label" FontSize="15" Text="Generate Perplexity token" />
+                            <TextBlock Grid.Column="1" Classes="row-desc" Text="{Binding PerplexityTokenStepLabel}" />
+                        </Grid>
+                        <TextBlock Classes="row-desc" Text="{Binding PerplexityTokenPrompt}" TextWrapping="Wrap"
+                                   IsVisible="{Binding !PerplexityTokenHasError}" />
+                        <TextBlock Classes="row-desc" Text="{Binding PerplexityTokenDetail}" TextWrapping="Wrap"
+                                   IsVisible="{Binding !PerplexityTokenHasError}" />
+                        <Border Classes="alert error" IsVisible="{Binding PerplexityTokenHasError}">
+                            <Grid ColumnDefinitions="Auto,*">
+                                <lucide:PackIconLucide Grid.Column="0" Kind="TriangleAlert" Width="16" Height="16"
+                                                       Foreground="{DynamicResource ErrBrush}" VerticalAlignment="Top" Margin="0,1,8,0" />
+                                <StackPanel Grid.Column="1" Spacing="4">
+                                    <TextBlock Classes="alert-title" Text="Token generation failed" />
+                                    <TextBlock Classes="alert-body" Text="{Binding PerplexityTokenDetail}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <TextBox x:Name="PerplexityTokenFlowInputBox" Classes="app"
+                                 Watermark="{Binding PerplexityTokenInputWatermark}"
+                                 IsEnabled="{Binding IsPerplexityTokenFlowBusy, Converter={StaticResource InvertBool}}"
+                                 KeyDown="OnPerplexityTokenFlowInputKeyDown" />
+                        <ProgressBar IsIndeterminate="True" Height="6"
+                                     IsVisible="{Binding IsPerplexityTokenFlowBusy}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
+                            <Button Classes="app" Content="Back" Command="{Binding CancelPerplexityTokenFlowCommand}" />
+                            <Button Classes="app primary" Content="{Binding PerplexityTokenContinueLabel}" Click="OnSubmitPerplexityTokenFlow" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Border>
+
+        <!-- Edit Perplexity account label dialog -->
+        <Border IsVisible="{Binding ShowEditPerplexityLabelDialog}" Background="#88000000"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50">
             <Border Classes="card" MaxWidth="420" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24">
                 <StackPanel Spacing="14">
-                    <TextBlock Classes="row-label" FontSize="15" Text="Add Perplexity account" />
+                    <TextBlock Classes="row-label" FontSize="15" Text="Edit Perplexity account label" />
                     <StackPanel Spacing="4">
-                        <TextBlock Classes="row-desc" Text="Session token" />
-                        <TextBox x:Name="PerplexitySessionTokenBox" Classes="app" PasswordChar="●" Watermark="pplx-session-token" />
+                        <TextBlock Classes="row-desc" Text="Label" />
+                        <TextBox x:Name="EditPerplexityLabelBox" Classes="app" Watermark="Primary"
+                                 Text="{Binding EditPerplexityLabelDraft, Mode=TwoWay}"
+                                 KeyDown="OnEditPerplexityLabelKeyDown" />
                     </StackPanel>
-                    <StackPanel Spacing="4">
-                        <TextBlock Classes="row-desc" Text="Label (optional)" />
-                        <TextBox x:Name="PerplexityLabelBox" Classes="app" Watermark="Primary" />
-                    </StackPanel>
-                    <TextBlock Classes="row-desc" TextWrapping="Wrap"
-                               Text="Paste your Perplexity WebUI session token. Not validated before save." />
                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
-                        <Button Classes="app" Content="Cancel" Command="{Binding DismissPerplexityAccountDialogCommand}" />
-                        <Button Classes="app primary" Content="Save Account" Click="OnConfirmPerplexityAccount" />
+                        <Button Classes="app" Content="Cancel" Command="{Binding DismissEditPerplexityLabelDialogCommand}" />
+                        <Button Classes="app primary" Content="Save" Command="{Binding ConfirmEditPerplexityLabelCommand}" />
                     </StackPanel>
                 </StackPanel>
             </Border>

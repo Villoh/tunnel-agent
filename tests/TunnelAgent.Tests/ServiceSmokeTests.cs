@@ -73,7 +73,7 @@ public sealed class ServiceSmokeTests
             new("Existing", "existing", PackIconSimpleIconsKind.OpenAi, "#000000")
         };
 
-        await service.FetchAndApplyAsync(groups);
+        await service.FetchAndApplyAsync(groups, 1, null);
 
         var group = Assert.Single(groups);
         Assert.Equal("Existing", group.ProviderName);

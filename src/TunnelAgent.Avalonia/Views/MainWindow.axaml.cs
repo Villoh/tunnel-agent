@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -142,7 +143,10 @@ public partial class MainWindow : Window
         await vm.ConfirmAddAccountAsync(target.Id, effectiveBaseUrl, apiKey, string.IsNullOrEmpty(label) ? null : label);
     }
 
-    private async void OnConfirmPerplexityAccount(object? sender, RoutedEventArgs e)
+    private async void OnConfirmPerplexityAccount(object? sender, RoutedEventArgs e) =>
+        await ConfirmPerplexityAccountFromInputsAsync();
+
+    private async Task ConfirmPerplexityAccountFromInputsAsync()
     {
         if (DataContext is not MainWindowViewModel vm) return;
         var sessionToken = PerplexitySessionTokenBox.Text?.Trim() ?? "";
@@ -152,5 +156,58 @@ public partial class MainWindow : Window
         PerplexitySessionTokenBox.Text = "";
         PerplexityLabelBox.Text = "";
         await vm.ConfirmAddPerplexityAccountAsync(string.IsNullOrEmpty(label) ? null : label, sessionToken);
+    }
+
+    private async void OnPerplexityAccountInputKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter) return;
+        e.Handled = true;
+        await ConfirmPerplexityAccountFromInputsAsync();
+    }
+
+    private async void OnStartPerplexityTokenFlow(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        PerplexityTokenFlowInputBox.Text = "";
+        await vm.StartPerplexityTokenFlowAsync();
+        PerplexityTokenFlowInputBox.Focus();
+    }
+
+    private async void OnSubmitPerplexityTokenFlow(object? sender, RoutedEventArgs e) =>
+        await SubmitPerplexityTokenFlowFromInputAsync();
+
+    private async void OnPerplexityTokenFlowInputKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter) return;
+        e.Handled = true;
+        await SubmitPerplexityTokenFlowFromInputAsync();
+    }
+
+    private async Task SubmitPerplexityTokenFlowFromInputAsync()
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        var input = PerplexityTokenFlowInputBox.Text?.Trim() ?? "";
+        if (string.IsNullOrWhiteSpace(input)) return;
+
+        await vm.SubmitPerplexityTokenFlowAsync(input);
+
+        if (!string.IsNullOrWhiteSpace(vm.PerplexityGeneratedToken))
+        {
+            PerplexitySessionTokenBox.Text = vm.PerplexityGeneratedToken;
+            await vm.CancelPerplexityTokenFlowAsync();
+            return;
+        }
+
+        if (!vm.PerplexityTokenHasError)
+            PerplexityTokenFlowInputBox.Text = "";
+
+        PerplexityTokenFlowInputBox.Focus();
+    }
+
+    private async void OnEditPerplexityLabelKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter || DataContext is not MainWindowViewModel vm) return;
+        e.Handled = true;
+        await vm.ConfirmEditPerplexityLabelAsync();
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
@@ -12,6 +13,7 @@ using TunnelAgent.Services;
 using TunnelAgent.Core.Engine;
 using TunnelAgent.Infrastructure.Engine;
 using TunnelAgent.Infrastructure.Engine.CliProxy;
+using TunnelAgent.Infrastructure.Engine.Perplexity;
 
 namespace TunnelAgent.ViewModels;
 
@@ -24,6 +26,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly ILaunchAtLoginService _launchAtLogin;
     private readonly IFolderOpenService _folderOpen;
     private readonly TunnelAgent.Services.ModelFetchService _modelFetch;
+    private readonly TokenGeneratorService _perplexityTokenGenerator = new();
     private readonly Dictionary<string, bool> _engineUpdateToastShown = new(StringComparer.OrdinalIgnoreCase);
 
     private CancellationTokenSource? _modelFetchCts;
@@ -52,6 +55,20 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _showAddAccountDialog;
     [ObservableProperty] private ProviderViewModel? _addAccountTarget;
     [ObservableProperty] private bool _showPerplexityAccountDialog;
+    [ObservableProperty] private string _perplexitySessionTokenDraft = "";
+    [ObservableProperty] private bool _isPerplexityTokenGenerationMode;
+    [ObservableProperty] private bool _isPerplexityTokenFlowBusy;
+    [ObservableProperty] private TokenFlowStage _perplexityTokenStage = TokenFlowStage.Email;
+    [ObservableProperty] private string _perplexityTokenInputWatermark = "Email, code, or magic link";
+    [ObservableProperty] private string _perplexityTokenContinueLabel = "Continue";
+    [ObservableProperty] private string _perplexityTokenStepLabel = "Step 1 of 3";
+    [ObservableProperty] private string _perplexityTokenPrompt = "";
+    [ObservableProperty] private string _perplexityTokenDetail = "";
+    [ObservableProperty] private bool _perplexityTokenHasError;
+    [ObservableProperty] private string _perplexityGeneratedToken = "";
+    [ObservableProperty] private bool _showEditPerplexityLabelDialog;
+    [ObservableProperty] private PerplexityAccountViewModel? _editPerplexityLabelTarget;
+    [ObservableProperty] private string _editPerplexityLabelDraft = "";
     [ObservableProperty] private bool _showResetPerplexityDialog;
 
     [ObservableProperty] private bool _showOAuthStatus;
@@ -638,11 +655,236 @@ public partial class MainWindowViewModel : ViewModelBase
     public async Task ConfirmAddPerplexityAccountAsync(string? label, string sessionToken)
     {
         ShowPerplexityAccountDialog = false;
+        PerplexitySessionTokenDraft = "";
         await _perplexityAccounts.AddAsync(label, sessionToken);
     }
 
-    [RelayCommand] private void ShowAddPerplexityAccount() => ShowPerplexityAccountDialog = true;
-    [RelayCommand] private void DismissPerplexityAccountDialog() => ShowPerplexityAccountDialog = false;
+    [RelayCommand]
+    private void ShowAddPerplexityAccount()
+    {
+        ShowPerplexityAccountDialog = true;
+        IsPerplexityTokenGenerationMode = false;
+        IsPerplexityTokenFlowBusy = false;
+        PerplexityTokenStage = TokenFlowStage.Email;
+        PerplexityTokenStepLabel = "Step 1 of 3";
+        PerplexityTokenInputWatermark = "Email, code, or magic link";
+        PerplexityTokenContinueLabel = "Continue";
+        PerplexityTokenPrompt = "";
+        PerplexityTokenDetail = "";
+        PerplexityTokenHasError = false;
+        PerplexityGeneratedToken = "";
+        PerplexitySessionTokenDraft = "";
+    }
+
+    [RelayCommand]
+    public async Task DismissPerplexityAccountDialog()
+    {
+        ShowPerplexityAccountDialog = false;
+        IsPerplexityTokenGenerationMode = false;
+        IsPerplexityTokenFlowBusy = false;
+        PerplexityTokenStage = TokenFlowStage.Email;
+        PerplexityTokenStepLabel = "Step 1 of 3";
+        PerplexityTokenInputWatermark = "Email, code, or magic link";
+        PerplexityTokenContinueLabel = "Continue";
+        PerplexityTokenPrompt = "";
+        PerplexityTokenDetail = "";
+        PerplexityTokenHasError = false;
+        PerplexityGeneratedToken = "";
+        PerplexitySessionTokenDraft = "";
+        await _perplexityTokenGenerator.DisposeAsync();
+    }
+
+    public async Task StartPerplexityTokenFlowAsync()
+    {
+        await _perplexityTokenGenerator.DisposeAsync();
+        PerplexityTokenStage = TokenFlowStage.Email;
+        PerplexityTokenStepLabel = "Step 1 of 3";
+        PerplexityTokenInputWatermark = "Enter your Perplexity email";
+        PerplexityTokenContinueLabel = "Send code";
+        PerplexityGeneratedToken = "";
+        PerplexityTokenHasError = false;
+        PerplexityTokenPrompt = "Starting token generator…";
+        PerplexityTokenDetail = "This may take a few seconds.";
+        IsPerplexityTokenFlowBusy = true;
+        IsPerplexityTokenGenerationMode = true;
+
+        var update = await _perplexityTokenGenerator.StartAsync();
+        IsPerplexityTokenFlowBusy = false;
+
+        if (update.Stage == TokenFlowStage.Failed)
+        {
+            PerplexityTokenStage = TokenFlowStage.Failed;
+            PerplexityTokenStepLabel = "";
+            PerplexityTokenContinueLabel = "Retry";
+            PerplexityTokenHasError = true;
+            PerplexityTokenPrompt = "Token generation failed";
+            PerplexityTokenDetail = FormatPerplexityTokenError(update.Detail ?? update.Prompt);
+            return;
+        }
+
+        PerplexityTokenStage = update.Stage;
+        PerplexityTokenStepLabel = update.Stage == TokenFlowStage.Email ? "Step 1 of 3" : "Step 2 of 3";
+        PerplexityTokenInputWatermark = update.Stage == TokenFlowStage.Email ? "Enter your Perplexity email" : "Enter code or paste magic link";
+        PerplexityTokenContinueLabel = update.Stage == TokenFlowStage.Email ? "Send code" : "Verify";
+        PerplexityTokenHasError = false;
+        PerplexityTokenPrompt = update.Prompt;
+        PerplexityTokenDetail = update.Detail ?? "";
+    }
+
+    public async Task SubmitPerplexityTokenFlowAsync(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return;
+
+        var trimmedInput = input.Trim();
+        var currentStage = PerplexityTokenStage;
+        if (currentStage == TokenFlowStage.Email && !IsValidEmail(trimmedInput))
+        {
+            PerplexityTokenStage = TokenFlowStage.Email;
+            PerplexityTokenStepLabel = "Step 1 of 3";
+            PerplexityTokenInputWatermark = "Enter your Perplexity email";
+            PerplexityTokenContinueLabel = "Send code";
+            PerplexityTokenHasError = true;
+            PerplexityTokenPrompt = "Invalid email address";
+            PerplexityTokenDetail = "Enter a valid Perplexity account email before requesting a verification code.";
+            return;
+        }
+
+        if (currentStage == TokenFlowStage.Totp && !IsValidTotp(trimmedInput))
+        {
+            PerplexityTokenStage = TokenFlowStage.Totp;
+            PerplexityTokenStepLabel = "Step 3 of 3";
+            PerplexityTokenInputWatermark = "Enter 6-digit authenticator code";
+            PerplexityTokenContinueLabel = "Verify";
+            PerplexityTokenHasError = true;
+            PerplexityTokenPrompt = "Invalid two-factor code";
+            PerplexityTokenDetail = "Enter the 6-digit code from your authenticator app.";
+            return;
+        }
+
+        if (currentStage == TokenFlowStage.Email)
+        {
+            PerplexityTokenStage = TokenFlowStage.Verification;
+            PerplexityTokenStepLabel = "Step 2 of 3";
+            PerplexityTokenInputWatermark = "Enter code or paste magic link";
+            PerplexityTokenContinueLabel = "Verify";
+            PerplexityTokenPrompt = "Enter 6-digit code or paste magic link";
+            PerplexityTokenDetail = "Check your email for Perplexity verification message.";
+            PerplexityTokenHasError = false;
+        }
+
+        IsPerplexityTokenFlowBusy = true;
+        var update = await _perplexityTokenGenerator.SubmitAsync(trimmedInput, currentStage);
+        IsPerplexityTokenFlowBusy = false;
+
+        if (update.Stage == TokenFlowStage.Success && !string.IsNullOrWhiteSpace(update.Token))
+        {
+            PerplexityTokenStage = TokenFlowStage.Success;
+            PerplexityTokenStepLabel = "";
+            PerplexityTokenInputWatermark = "Enter code or paste magic link";
+            PerplexityTokenContinueLabel = "Verify";
+            PerplexityGeneratedToken = update.Token;
+            PerplexitySessionTokenDraft = update.Token;
+            PerplexityTokenHasError = false;
+            PerplexityTokenPrompt = "Token generated successfully";
+            PerplexityTokenDetail = "Review label in previous dialog and save account.";
+            return;
+        }
+
+        if (update.Stage == TokenFlowStage.Failed)
+        {
+            PerplexityTokenStage = TokenFlowStage.Failed;
+            PerplexityTokenContinueLabel = currentStage == TokenFlowStage.Email ? "Send code" : "Verify";
+            PerplexityTokenHasError = true;
+            PerplexityTokenPrompt = "Token generation failed";
+            PerplexityTokenDetail = FormatPerplexityTokenError(update.Detail ?? update.Prompt);
+            return;
+        }
+
+        if (update.Stage == TokenFlowStage.Totp)
+        {
+            PerplexityTokenStage = TokenFlowStage.Totp;
+            PerplexityTokenStepLabel = "Step 3 of 3";
+            PerplexityTokenInputWatermark = "Enter 6-digit authenticator code";
+            PerplexityTokenContinueLabel = "Verify";
+            PerplexityTokenHasError = false;
+            PerplexityTokenPrompt = update.Prompt;
+            PerplexityTokenDetail = update.Detail ?? "Use the 6-digit code from your authenticator app.";
+            return;
+        }
+
+        // Never regress: once user sent email, stay in Verification even if parser echoes Email prompt
+        if (update.Stage == TokenFlowStage.Email && currentStage != TokenFlowStage.Email)
+        {
+            PerplexityTokenHasError = false;
+            PerplexityTokenDetail = update.Prompt;
+            return;
+        }
+
+        // Don't re-prompt Verification: if scraper echoes the same prompt, keep user's input intact
+        if (update.Stage == TokenFlowStage.Verification && currentStage == TokenFlowStage.Verification)
+        {
+            PerplexityTokenHasError = false;
+            PerplexityTokenDetail = update.Detail ?? update.Prompt;
+            return;
+        }
+
+        PerplexityTokenStage = update.Stage;
+        PerplexityTokenStepLabel = update.Stage == TokenFlowStage.Email ? "Step 1 of 3" : "Step 2 of 3";
+        PerplexityTokenInputWatermark = update.Stage == TokenFlowStage.Email ? "Enter your Perplexity email" : "Enter code or paste magic link";
+        PerplexityTokenContinueLabel = update.Stage == TokenFlowStage.Email ? "Send code" : "Verify";
+        PerplexityTokenHasError = false;
+        PerplexityTokenPrompt = update.Prompt;
+        PerplexityTokenDetail = update.Detail ?? "";
+    }
+
+    private static bool IsValidTotp(string value) =>
+        value.Length == 6 && value.All(char.IsDigit);
+
+    private static bool IsValidEmail(string value)
+    {
+        try
+        {
+            var address = new MailAddress(value);
+            return string.Equals(address.Address, value, StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static string FormatPerplexityTokenError(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return "Unknown token generation error.";
+
+        if (raw.Contains("Invalid email address", StringComparison.OrdinalIgnoreCase))
+            return "Enter a valid Perplexity account email before requesting a verification code.";
+
+        if (raw.Contains("Authentication successful, but token not found", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Perplexity accepted the code, but did not return the session cookie. If your engine build is older, update it so the token generator can ask for the TOTP code. You can also paste the browser cookie manually: __Secure-next-auth.session-token.";
+        }
+
+        return raw
+            .Replace("⛔ Error:", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("Press ENTER to exit...", "", StringComparison.OrdinalIgnoreCase)
+            .Trim();
+    }
+
+    [RelayCommand]
+    public async Task CancelPerplexityTokenFlowAsync()
+    {
+        IsPerplexityTokenGenerationMode = false;
+        PerplexityTokenStage = TokenFlowStage.Email;
+        PerplexityTokenStepLabel = "Step 1 of 3";
+        PerplexityTokenInputWatermark = "Email, code, or magic link";
+        PerplexityTokenContinueLabel = "Continue";
+        PerplexityTokenPrompt = "";
+        PerplexityTokenDetail = "";
+        PerplexityTokenHasError = false;
+        PerplexityGeneratedToken = "";
+        await _perplexityTokenGenerator.DisposeAsync();
+    }
     [RelayCommand] private void DismissAddAccountDialog() => ShowAddAccountDialog = false;
 
     [RelayCommand]
@@ -662,6 +904,31 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     public async Task SetDefaultPerplexityAccountAsync(PerplexityAccountViewModel account) =>
         await _perplexityAccounts.SetDefaultAsync(account.Id);
+
+    [RelayCommand]
+    public void EditPerplexityAccountLabel(PerplexityAccountViewModel account)
+    {
+        EditPerplexityLabelTarget = account;
+        EditPerplexityLabelDraft = account.Label;
+        ShowEditPerplexityLabelDialog = true;
+    }
+
+    [RelayCommand]
+    public void DismissEditPerplexityLabelDialog()
+    {
+        ShowEditPerplexityLabelDialog = false;
+        EditPerplexityLabelTarget = null;
+        EditPerplexityLabelDraft = "";
+    }
+
+    [RelayCommand]
+    public async Task ConfirmEditPerplexityLabelAsync()
+    {
+        if (EditPerplexityLabelTarget is null) return;
+
+        await _perplexityAccounts.UpdateLabelAsync(EditPerplexityLabelTarget.Id, EditPerplexityLabelDraft);
+        DismissEditPerplexityLabelDialog();
+    }
 
     [RelayCommand] private void ResetPort() => Port = ActiveEngine.Definition.DefaultPort;
 

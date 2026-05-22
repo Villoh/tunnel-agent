@@ -31,6 +31,7 @@ public class SlidingTabBar : Panel
     private readonly Border _pill;
     private readonly TranslateTransform _pillTranslate;
     private readonly Grid _buttonGrid;
+    private readonly List<IDisposable> _resourceSubscriptions = new();
     private bool _initialised;
 
     static SlidingTabBar()
@@ -44,7 +45,7 @@ public class SlidingTabBar : Panel
 
         _pill = new Border
         {
-            Background = new SolidColorBrush(Color.Parse("#0A84FF")), // fallback; overridden by AccentBrush
+            Background = new SolidColorBrush(Color.Parse("#0A84FF")), // fallback; bound to AccentBrush
             CornerRadius = new CornerRadius(6),
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Stretch,
@@ -59,8 +60,8 @@ public class SlidingTabBar : Panel
 
         _outer = new Border
         {
-            Background = new SolidColorBrush(Color.Parse("#1C1E26")),  // fallback; overridden by CardBgBrush
-            BorderBrush = new SolidColorBrush(Color.Parse("#3A3A4A")), // fallback; overridden by CardBorderBrush
+            Background = new SolidColorBrush(Color.Parse("#1C1E26")),  // fallback; bound to CardBgBrush
+            BorderBrush = new SolidColorBrush(Color.Parse("#3A3A4A")), // fallback; bound to CardBorderBrush
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(8),
             Padding = new Thickness(4),
@@ -81,14 +82,7 @@ public class SlidingTabBar : Panel
     {
         base.OnAttachedToVisualTree(e);
 
-        // Apply dynamic resources — try visual tree first, fall back to Application
-        IBrush? Res(string key) =>
-            this.FindResource(key) as IBrush
-            ?? Avalonia.Application.Current?.FindResource(key) as IBrush;
-
-        if (Res("AccentBrush") is { } accent)      _pill.Background  = accent;
-        if (Res("CardBgBrush") is { } bg)           _outer.Background = bg;
-        if (Res("CardBorderBrush") is { } border)   _outer.BorderBrush = border;
+        BindThemeResources();
 
         _initialised = true;
         SizeChanged += (_, _) => MovePill(animate: false);
@@ -97,6 +91,28 @@ public class SlidingTabBar : Panel
         Avalonia.Threading.Dispatcher.UIThread.Post(
             () => { UpdateForegrounds(); MovePill(animate: false); },
             Avalonia.Threading.DispatcherPriority.Loaded);
+    }
+
+    private void BindThemeResources()
+    {
+        foreach (var subscription in _resourceSubscriptions)
+            subscription.Dispose();
+        _resourceSubscriptions.Clear();
+
+        _resourceSubscriptions.Add(this.GetResourceObservable("AccentBrush").Subscribe(new ResourceObserver(value =>
+        {
+            if (value is IBrush brush) _pill.Background = brush;
+        })));
+        _resourceSubscriptions.Add(this.GetResourceObservable("CardBgBrush").Subscribe(new ResourceObserver(value =>
+        {
+            if (value is IBrush brush) _outer.Background = brush;
+        })));
+        _resourceSubscriptions.Add(this.GetResourceObservable("CardBorderBrush").Subscribe(new ResourceObserver(value =>
+        {
+            if (value is IBrush brush) _outer.BorderBrush = brush;
+        })));
+        _resourceSubscriptions.Add(this.GetResourceObservable("FgBrush").Subscribe(new ResourceObserver(_ => UpdateForegrounds())));
+        UpdateForegrounds();
     }
 
     private void BuildButtons()
@@ -112,9 +128,10 @@ public class SlidingTabBar : Panel
             var tab = Tabs[i];
             var idx = i;
 
+            var label = new TextBlock { Text = tab.Header };
             var btn = new Button
             {
-                Content = tab.Header,
+                Content = label,
                 Background = Brushes.Transparent,
                 BorderThickness = new Thickness(0),
                 CornerRadius = new CornerRadius(6),
@@ -136,6 +153,14 @@ public class SlidingTabBar : Panel
             {
                 Setters = { new Setter(ContentPresenter.BackgroundProperty, new SolidColorBrush(Color.FromArgb(0x1A, 0, 0, 0))) }
             });
+
+            btn.PointerEntered += (_, _) => UpdateForegrounds();
+            btn.PointerExited += (_, _) => UpdateForegrounds();
+            btn.PropertyChanged += (_, args) =>
+            {
+                if (args.Property.Name is "IsPointerOver" or "IsPressed")
+                    Avalonia.Threading.Dispatcher.UIThread.Post(UpdateForegrounds, Avalonia.Threading.DispatcherPriority.Render);
+            };
 
             btn.Click += (_, _) =>
             {
@@ -200,18 +225,27 @@ public class SlidingTabBar : Panel
     private void UpdateForegrounds()
     {
         if (Tabs.Count == 0) return;
-        var idx = Math.Clamp(SelectedIndex, 0, Tabs.Count - 1);
 
-        IBrush activeFg = Brushes.White;
-        IBrush mutedFg =
-            this.FindResource("FgMutedBrush") as IBrush
-            ?? Avalonia.Application.Current?.FindResource("FgMutedBrush") as IBrush
-            ?? new SolidColorBrush(Color.Parse("#8E8E93"));
+        var idx = Math.Clamp(SelectedIndex, 0, Tabs.Count - 1);
+        var app = Avalonia.Application.Current;
+        var isDark = ActualThemeVariant == ThemeVariant.Dark ||
+                     app?.RequestedThemeVariant == ThemeVariant.Dark ||
+                     app?.ActualThemeVariant == ThemeVariant.Dark;
+
+        var inactiveBrush = isDark
+            ? Brushes.White
+            : this.FindResource("FgBrush") as IBrush
+              ?? app?.FindResource("FgBrush") as IBrush
+              ?? new SolidColorBrush(Color.Parse("#1A1D23"));
 
         for (var i = 0; i < _buttonGrid.Children.Count; i++)
         {
-            if (_buttonGrid.Children[i] is Button btn)
-                btn.Foreground = i == idx ? activeFg : mutedFg;
+            if (_buttonGrid.Children[i] is not Button btn) continue;
+            var brush = i == idx ? Brushes.White : inactiveBrush;
+            btn.ClearValue(Button.ForegroundProperty);
+            btn.Foreground = brush;
+            if (btn.Content is TextBlock label)
+                label.Foreground = brush;
         }
     }
 
@@ -226,6 +260,13 @@ public class SlidingTabBar : Panel
         _outer.Arrange(new Rect(finalSize));
         return finalSize;
     }
+}
+
+internal sealed class ResourceObserver(Action<object?> onNext) : IObserver<object?>
+{
+    public void OnCompleted() { }
+    public void OnError(Exception error) { }
+    public void OnNext(object? value) => onNext(value);
 }
 
 public class SlidingTab : AvaloniaObject

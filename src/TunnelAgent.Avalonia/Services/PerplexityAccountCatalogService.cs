@@ -53,6 +53,14 @@ public sealed class PerplexityAccountCatalogService
         return Task.FromResult(changed);
     }
 
+    public Task<bool> UpdateLabelAsync(string accountId, string label)
+    {
+        var changed = _accounts.UpdateLabel(accountId, label);
+        if (changed)
+            AccountsChanged?.Invoke(this, EventArgs.Empty);
+        return Task.FromResult(changed);
+    }
+
     public void RemoveAll()
     {
         _accounts.RemoveAll();

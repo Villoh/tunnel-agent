@@ -44,6 +44,19 @@ public sealed class PerplexityAccountCatalogServiceTests
     }
 
     [Fact]
+    public async Task UpdateLabelAsync_ChangesPersistedLabel()
+    {
+        using var temp = new TestTempDirectory();
+        var service = CreateService(temp);
+        await service.AddAsync("Old", "token-1");
+        var account = Assert.Single(service.List());
+
+        await service.UpdateLabelAsync(account.Id, "New");
+
+        Assert.Equal("New", Assert.Single(service.List()).Label);
+    }
+
+    [Fact]
     public async Task RemoveAsync_DefaultAccount_PromotesNext()
     {
         using var temp = new TestTempDirectory();

@@ -10,12 +10,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Perplexity engine controls in the system tray alongside CLIProxyAPI, including status, start, stop, and restart actions.
+- Inline token generator in the Add Perplexity Account modal: email → OTP → optional TOTP (three-step wizard, Step 1–3 of 3).
+- TOTP (two-factor authentication) support in the token generator flow, compatible with the updated perplexity-webui-scraper fork.
+- Email validation before sending OTP request; invalid email shows a contextual styled error inside the modal.
+- TOTP code validation (6-digit check) before sending the authenticator code.
+- Enter key advances the token wizard steps and saves the account from the manual Session Token form.
+- Contextual styled error alert for token generation failures with friendly guidance (2FA / manual cookie fallback).
+- Edit label button (pencil icon) on Perplexity session account rows, with a modal dialog and Enter-to-save support.
 
 ### Changed
 
 - README now documents the multi-engine architecture, first-class Perplexity support, and engine-specific account storage.
 - Providers view server action now uses compact play/stop icon buttons instead of text buttons.
 - Copy-endpoint and engine action buttons now use subtler hover/press transitions.
+- Add Perplexity Account modal: label field moved above session token field.
+- Token generator step labels changed from "Step N of 2" to "Step N of 3" to reflect the optional TOTP third step.
+- SlidingTabBar tab text uses FgBrush (theme-aware) for inactive tabs and white for active tab in light mode; white for all tabs in dark mode; no text color change on hover.
+- SlidingTabBar background and border now update immediately when switching between light and dark themes.
 
 ### Fixed
 
@@ -24,6 +35,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Explicit "Update now" now installs the latest release instead of reusing the pinned combo-box version.
 - Available models fetched from the Perplexity engine no longer show OpenAI branding when Perplexity is the active source.
 - Engine action hover artifacts/border seams in the Providers endpoint controls.
+- Token generator modal now shows "Step 1 of 3" immediately on first open without requiring a back/forward navigation.
+- Token generation errors (including TOTP-related failures) are shown inside the modal instead of the Configuration status area.
+- Submitting the TOTP code no longer requires two attempts; stale TOTP prompts no longer re-trigger the input step.
+- Token generator correctly handles Rich/ANSI terminal output from the upstream CLI binary.
+- Session token is automatically placed in the Session Token field after a successful token generation flow.
+- SlidingTabBar no longer stays dark when switching to light mode.
+- Active tab text in SlidingTabBar stays white on hover instead of reverting to the inactive color.
 
 ## [0.3.0] - 2026-05-21
 
