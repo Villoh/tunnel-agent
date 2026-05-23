@@ -8,8 +8,8 @@
         x:DataType="vm:MainWindowViewModel"
         Title="Tunnel Agent"
         Icon="/Assets/logo.ico"
-        Width="820" Height="600"
-        MinWidth="680" MinHeight="460"
+        Width="820" Height="620"
+        MinWidth="600" MinHeight="500"
         CanResize="True"
         SystemDecorations="Full"
         ExtendClientAreaToDecorationsHint="True"
@@ -226,7 +226,7 @@
 
                 <!-- Content area -->
                 <ScrollViewer Grid.Column="1"
-                              HorizontalScrollBarVisibility="Auto">
+                              HorizontalScrollBarVisibility="Disabled">
                     <ContentControl HorizontalContentAlignment="Stretch" Padding="18,16,18,44">
                         <ContentControl.Content>
                             <Grid>

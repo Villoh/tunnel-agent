@@ -12,7 +12,7 @@
 
 ## Pull Requests
 
-- Keep PRs focused — one feature or fix per PR.
+- Keep PRs focused: one feature or fix per PR.
 - Match existing code style and naming conventions.
 - Update the README if your change affects documented behaviour.
 - All CI checks must pass before a PR can be merged.

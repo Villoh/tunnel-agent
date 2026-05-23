@@ -45,7 +45,7 @@ public class SlidingTabBar : Panel
 
         _pill = new Border
         {
-            Background = new SolidColorBrush(Color.Parse("#0A84FF")), // fallback; bound to AccentBrush
+            Background = new SolidColorBrush(Color.Parse("#146CF9")), // fallback; bound to AccentBrush
             CornerRadius = new CornerRadius(6),
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Stretch,

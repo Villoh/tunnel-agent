@@ -4,8 +4,8 @@
     <Application.Styles>
         <FluentTheme>
             <FluentTheme.Palettes>
-                <ColorPaletteResources x:Key="Light" Accent="#0A84FF" />
-                <ColorPaletteResources x:Key="Dark" Accent="#4DA3FF" />
+                <ColorPaletteResources x:Key="Light" Accent="#146CF9" />
+                <ColorPaletteResources x:Key="Dark" Accent="#488CFA" />
             </FluentTheme.Palettes>
         </FluentTheme>
         <StyleInclude Source="avares://IconPacks.Avalonia.SimpleIcons/SimpleIcons.axaml" />

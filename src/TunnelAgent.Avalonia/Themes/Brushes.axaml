@@ -19,9 +19,9 @@
                     <Color x:Key="BtnBg">#FFFFFF</Color>
                     <Color x:Key="BtnBorder">#D8DBE0</Color>
                     <Color x:Key="BtnHover">#F5F6F8</Color>
-                    <Color x:Key="Accent">#0A84FF</Color>
-                    <Color x:Key="AccentHover">#2E96FF</Color>
-                    <Color x:Key="AccentSoft">#1A0A84FF</Color>
+                    <Color x:Key="Accent">#146CF9</Color>
+                    <Color x:Key="AccentHover">#307EFA</Color>
+                    <Color x:Key="AccentSoft">#1A146CF9</Color>
                     <Color x:Key="OkColor">#1F8A5B</Color>
                     <Color x:Key="WarnColor">#C98A0B</Color>
                     <Color x:Key="ErrColor">#C84B36</Color>
@@ -62,9 +62,9 @@
                     <Color x:Key="BtnBg">#2D3038</Color>
                     <Color x:Key="BtnBorder">#3A3D45</Color>
                     <Color x:Key="BtnHover">#343740</Color>
-                    <Color x:Key="Accent">#4DA3FF</Color>
-                    <Color x:Key="AccentHover">#6DB5FF</Color>
-                    <Color x:Key="AccentSoft">#264DA3FF</Color>
+                    <Color x:Key="Accent">#488CFA</Color>
+                    <Color x:Key="AccentHover">#669FFB</Color>
+                    <Color x:Key="AccentSoft">#26488CFA</Color>
                     <Color x:Key="OkColor">#46C788</Color>
                     <Color x:Key="WarnColor">#E2A52E</Color>
                     <Color x:Key="ErrColor">#E96B57</Color>

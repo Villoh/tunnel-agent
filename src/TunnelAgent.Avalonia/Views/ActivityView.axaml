@@ -19,7 +19,7 @@
                     <DataTemplate x:DataType="vm:ActivityLogViewModel">
                         <StackPanel>
                             <Grid Margin="14,12" ColumnDefinitions="30,*,Auto,Auto">
-                                <Border Grid.Column="0" Classes="provider-logo" Background="#1A0A84FF">
+                                <Border Grid.Column="0" Classes="provider-logo" Background="{DynamicResource AccentSoftBrush}">
                                     <lucide:PackIconLucide Kind="Logs" Width="15" Height="15"
                                                            Foreground="{DynamicResource AccentBrush}"
                                                            HorizontalAlignment="Center"

@@ -24,6 +24,19 @@ public sealed class SettingsService
 
     public AppSettings Current { get; private set; } = new();
 
+    /// <summary>Synchronous load for startup (avoids FOUC on theme application).</summary>
+    public void LoadSync()
+    {
+        try
+        {
+            if (!File.Exists(_settingsPath)) return;
+            var json = File.ReadAllText(_settingsPath);
+            if (!string.IsNullOrWhiteSpace(json))
+                Current = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
+        }
+        catch { }
+    }
+
     public async Task LoadAsync()
     {
         try

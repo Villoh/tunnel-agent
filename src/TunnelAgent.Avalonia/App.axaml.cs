@@ -21,6 +21,7 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var settings = new SettingsService();
+            settings.LoadSync(); // Apply persisted theme before window is shown to avoid flash
             var engineRegistry = new EngineRegistryService(settings);
             var engineConfig = new ConfigService(settings);
             var catalog = new ProviderCatalogService(settings, engineConfig);

@@ -2,15 +2,18 @@
 
 ## Supported Versions
 
-| Version | Supported |
-|---------|-----------|
-| 0.0.x   | Yes       |
+Only the latest release receives security fixes.
+
+| Version | Supported          |
+| ------- | ------------------ |
+| 0.3.x   | :white_check_mark: |
+| < 0.3.0 | :x:                |
 
 ## Reporting a Vulnerability
 
 **Do not open a public issue for security vulnerabilities.**
 
-Report vulnerabilities privately using GitHub private vulnerability reporting with:
+Use [GitHub private vulnerability reporting](https://github.com/Villoh/tunnel-agent/security/advisories/new) to submit a report. Include:
 
 - A description of the vulnerability
 - Steps to reproduce
@@ -21,8 +24,9 @@ You will receive an acknowledgement within 72 hours. Once the issue is confirmed
 
 ## Scope
 
-- Credential handling and DPAPI-backed storage
+- Credential handling and file-based session token storage
 - Local HTTP proxy endpoint exposure
 - Provider API key transmission
+- Engine binary download and integrity verification
 
 Out of scope: issues in third-party dependencies (report those upstream).

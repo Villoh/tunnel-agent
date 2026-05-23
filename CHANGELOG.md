@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-05-23
+
+### Added
+
+- Supported Ecosystem section in README listing AI providers and a placeholder for future agent integration.
+- App Data Storage section in README documenting paths for engine binaries and application settings.
+- Auth File Storage section in README documenting paths for CLIProxyAPI OAuth tokens and Perplexity session tokens.
+- `SettingsService.LoadSync()` for synchronous settings read at startup to prevent flash-of-wrong-theme before the window is shown.
+
+### Changed
+
+- Brand accent colour updated to `#146CF9` (extracted from the logo) across light and dark themes, replacing the previous `#0A84FF` / `#4DA3FF`.
+- Primary button text stays white on hover in light mode; Fluent template no longer overrides foreground on pointer-over.
+- Horizontal scroll disabled on the main content area (`HorizontalScrollBarVisibility="Disabled"`); the app layout is fully vertical and horizontal scrolling was never intentional.
+- Default window size changed to 820×620; minimum size set to 600×500.
+- README hero updated to reference both CLIProxyAPI and Perplexity WebUI Scraper with direct links.
+- README badges moved above navigation links.
+- Credits rewritten as a concise bullet list; perplexity-webui-scraper added.
+- `Build from Source` section renamed to `Development` with a single code block instead of a numbered list.
+- Em-dashes replaced with colons, semicolons, and commas throughout README and CONTRIBUTING.
+- SECURITY.md updated: supported versions table now shows 0.3.x as the only supported release; reporting instructions link directly to the GitHub private advisory form.
+
+### Fixed
+
+- Flash-of-wrong-theme on startup when light mode is saved: settings are now read synchronously before the window is created so `RequestedThemeVariant` is applied before the first render.
+
 ### Added
 
 - Perplexity engine controls in the system tray alongside CLIProxyAPI, including status, start, stop, and restart actions.
