@@ -1,14 +1,5 @@
 # Security Policy
 
-## Supported Versions
-
-Only the latest release receives security fixes.
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 0.3.x   | :white_check_mark: |
-| < 0.3.0 | :x:                |
-
 ## Reporting a Vulnerability
 
 **Do not open a public issue for security vulnerabilities.**
