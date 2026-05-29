@@ -27,7 +27,6 @@ public sealed class ProviderCatalogService : IDisposable
         new("kimi",           "Kimi",           "Moonshot AI via OAuth."),
         new("github-copilot", "GitHub Copilot", "GitHub Copilot via OAuth."),
         new("antigravity",    "Antigravity",    "Antigravity AI via OAuth."),
-        new("qwen",           "Qwen",           "Alibaba Qwen via OAuth."),
     ];
 
     private readonly record struct ProviderMeta(string Id, string Name, string Description);

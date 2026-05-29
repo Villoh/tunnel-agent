@@ -28,7 +28,7 @@ public static class ProviderIconRegistry
             "gemini-cli" or "google"        => new(PackIconSimpleIconsKind.GoogleGemini, "#4285F4"),
             "github-copilot"                => new(PackIconSimpleIconsKind.GitHub,       "#24292E"),
             "antigravity"                   => new(PackIconSimpleIconsKind.OpenAi,       "#7C3AED"),
-            "qwen" or "alibaba"             => new(PackIconSimpleIconsKind.AlibabaCloud, "#FF6A00"),
+            "alibaba"                       => new(PackIconSimpleIconsKind.AlibabaCloud, "#FF6A00"),
             "kimi"  or "moonshot"           => new(PackIconSimpleIconsKind.OpenAi,       "#000000", KimiIconData),
             _                               => new(PackIconSimpleIconsKind.OpenAi,       "#555555"),
         };

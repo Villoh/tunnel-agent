@@ -20,6 +20,7 @@ public sealed class ProviderCatalogServiceTests
 
         Assert.Contains(catalog.Providers, p => p.Id == "claude" && p.IsOAuth);
         Assert.Contains(catalog.Providers, p => p.Id == "codex" && p.IsOAuth);
+        Assert.DoesNotContain(catalog.Providers, p => p.Id == "qwen");
         Assert.All(catalog.Providers.Where(p => p.IsOAuth), p => Assert.False(p.Connected));
     }
 

@@ -13,7 +13,6 @@ public sealed class OAuthServiceTests
     [InlineData("kimi", true)]
     [InlineData("github-copilot", true)]
     [InlineData("antigravity", true)]
-    [InlineData("qwen", true)]
     [InlineData("local-ai", false)]
     [InlineData("unknown", false)]
     [InlineData("", false)]

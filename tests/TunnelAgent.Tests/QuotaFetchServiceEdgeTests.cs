@@ -13,7 +13,7 @@ public sealed class QuotaFetchServiceEdgeTests
         using var temp = new TestTempDirectory();
         var service = new QuotaFetchService(temp.Path);
 
-        var unsupported = new[] { "local-ai", "gemini-cli", "kimi", "antigravity", "qwen", "unknown" };
+        var unsupported = new[] { "local-ai", "gemini-cli", "kimi", "antigravity", "unknown" };
         foreach (var providerId in unsupported)
         {
             var provider = new ProviderViewModel(providerId, providerId, PackIconSimpleIconsKind.OpenAi, "#000000", "");

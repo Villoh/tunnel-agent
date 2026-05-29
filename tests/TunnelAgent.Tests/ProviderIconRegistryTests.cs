@@ -15,7 +15,6 @@ public sealed class ProviderIconRegistryTests
     [InlineData("google", PackIconSimpleIconsKind.GoogleGemini, "#4285F4")]
     [InlineData("github-copilot", PackIconSimpleIconsKind.GitHub, "#24292E")]
     [InlineData("antigravity", PackIconSimpleIconsKind.OpenAi, "#7C3AED")]
-    [InlineData("qwen", PackIconSimpleIconsKind.AlibabaCloud, "#FF6A00")]
     [InlineData("alibaba", PackIconSimpleIconsKind.AlibabaCloud, "#FF6A00")]
     [InlineData("moonshot", PackIconSimpleIconsKind.OpenAi, "#000000")]
     public void KnownProviders_ReturnExpectedIconAndColor(string providerId, PackIconSimpleIconsKind expectedIcon, string expectedColor)

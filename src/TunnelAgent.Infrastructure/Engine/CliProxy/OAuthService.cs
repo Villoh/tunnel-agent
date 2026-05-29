@@ -25,7 +25,6 @@ public sealed class OAuthService : IDisposable
             ["kimi"]            = "kimi-login",
             ["github-copilot"]  = "github-copilot-login",
             ["antigravity"]     = "antigravity-login",
-            ["qwen"]            = "qwen-login",
         };
 
     public static bool IsOAuthProvider(string providerId) =>
@@ -169,7 +168,6 @@ public sealed class OAuthService : IDisposable
         "kimi"           => "Kimi",
         "github-copilot" => "GitHub Copilot",
         "antigravity"    => "Antigravity",
-        "qwen"           => "Qwen",
         _                => providerId,
     };
 

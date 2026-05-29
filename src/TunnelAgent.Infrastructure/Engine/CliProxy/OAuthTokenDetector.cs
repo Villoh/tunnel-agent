@@ -36,7 +36,6 @@ public sealed class OAuthTokenDetector
             ["kimi"]            = "kimi",
             ["github-copilot"]  = "github-copilot",
             ["antigravity"]     = "antigravity",
-            ["qwen"]            = "qwen",
         };
 
     private readonly string _directory;
