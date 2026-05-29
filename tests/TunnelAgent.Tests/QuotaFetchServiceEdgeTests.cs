@@ -13,7 +13,7 @@ public sealed class QuotaFetchServiceEdgeTests
         using var temp = new TestTempDirectory();
         var service = new QuotaFetchService(temp.Path);
 
-        var unsupported = new[] { "local-ai", "gemini-cli", "kimi", "antigravity", "unknown" };
+        var unsupported = new[] { "local-ai", "kimi", "unknown" };
         foreach (var providerId in unsupported)
         {
             var provider = new ProviderViewModel(providerId, providerId, PackIconSimpleIconsKind.OpenAi, "#000000", "");
@@ -22,7 +22,7 @@ public sealed class QuotaFetchServiceEdgeTests
 
             await service.FetchAndApplyAsync(provider);
 
-            // Unsupported providers = no quota fetch, so QuotaBars stays empty
+            // Unsupported providers: no quota fetch, QuotaBars stays empty
             Assert.Empty(account.QuotaBars);
         }
     }
@@ -75,6 +75,79 @@ public sealed class QuotaFetchServiceEdgeTests
         var service = new QuotaFetchService(temp.Path);
         var provider = new ProviderViewModel("github-copilot", "GitHub Copilot", PackIconSimpleIconsKind.GitHub, "#24292E", "");
         var account = new ProviderAccountViewModel("github-copilot", "", "test@example.com", isDisabled: false);
+        provider.Accounts.Add(account);
+
+        await service.FetchAndApplyAsync(provider);
+
+        Assert.Empty(account.QuotaBars);
+    }
+
+    [Fact]
+    public void QuotaProviderCount_FiveProvidersInVm_CountsCorrectly()
+    {
+        var vm = new MainWindowViewModel();
+        var claude   = new ProviderViewModel("claude",         "Claude",         PackIconSimpleIconsKind.Claude,  "#000000", "");
+        var codex    = new ProviderViewModel("codex",          "Codex",          PackIconSimpleIconsKind.OpenAi,  "#000000", "");
+        var copilot  = new ProviderViewModel("github-copilot", "GitHub Copilot", PackIconSimpleIconsKind.GitHub,  "#000000", "");
+        var gemini   = new ProviderViewModel("gemini-cli",     "Gemini CLI",     PackIconSimpleIconsKind.OpenAi,  "#000000", "");
+        var anti     = new ProviderViewModel("antigravity",    "Antigravity",    PackIconSimpleIconsKind.OpenAi,  "#000000", "");
+        var local    = new ProviderViewModel("local-ai",       "Local",          PackIconSimpleIconsKind.OpenAi,  "#000000", "");
+
+        foreach (var p in new[] { claude, codex, copilot, gemini, anti, local })
+            vm.Providers.Add(p);
+
+        Assert.Equal(5, vm.QuotaProviderCount);
+    }
+
+    [Fact]
+    public async Task FetchAndApplyAsync_GeminiCli_WithoutTokenFile_CompletesWithoutError()
+    {
+        using var temp = new TestTempDirectory();
+        var service = new QuotaFetchService(temp.Path);
+        var provider = new ProviderViewModel("gemini-cli", "Gemini CLI", PackIconSimpleIconsKind.OpenAi, "#000000", "");
+        var account = new ProviderAccountViewModel("gemini-cli", "", "test@example.com", isDisabled: false);
+        provider.Accounts.Add(account);
+
+        await service.FetchAndApplyAsync(provider);
+
+        Assert.Empty(account.QuotaBars);
+    }
+
+    [Fact]
+    public async Task FetchAndApplyAsync_Antigravity_WithoutTokenFile_CompletesWithoutError()
+    {
+        using var temp = new TestTempDirectory();
+        var service = new QuotaFetchService(temp.Path);
+        var provider = new ProviderViewModel("antigravity", "Antigravity", PackIconSimpleIconsKind.OpenAi, "#000000", "");
+        var account = new ProviderAccountViewModel("antigravity", "", "test@example.com", isDisabled: false);
+        provider.Accounts.Add(account);
+
+        await service.FetchAndApplyAsync(provider);
+
+        Assert.Empty(account.QuotaBars);
+    }
+
+    [Fact]
+    public async Task FetchAndApplyAsync_Kiro_WithoutAuthFile_CompletesWithoutError()
+    {
+        using var temp = new TestTempDirectory();
+        var service = new QuotaFetchService(temp.Path);
+        var provider = new ProviderViewModel("kiro", "Kiro", PackIconSimpleIconsKind.OpenAi, "#FF9900", "");
+        var account = new ProviderAccountViewModel("kiro", "", "Kiro", isDisabled: false);
+        provider.Accounts.Add(account);
+
+        await service.FetchAndApplyAsync(provider);
+
+        Assert.Empty(account.QuotaBars);
+    }
+
+    [Fact]
+    public async Task FetchAndApplyAsync_Trae_WithoutAuthFile_CompletesWithoutError()
+    {
+        using var temp = new TestTempDirectory();
+        var service = new QuotaFetchService(temp.Path);
+        var provider = new ProviderViewModel("trae", "Trae", PackIconSimpleIconsKind.OpenAi, "#1464FF", "");
+        var account = new ProviderAccountViewModel("trae", "", "test@example.com", isDisabled: false);
         provider.Accounts.Add(account);
 
         await service.FetchAndApplyAsync(provider);

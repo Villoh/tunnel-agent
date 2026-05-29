@@ -113,6 +113,20 @@
                                 </Grid>
                             </Button>
 
+                            <Button Classes="side" Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Quota}"
+                                    Command="{Binding SelectQuotaCommand}">
+                                <Grid ColumnDefinitions="20,*,Auto">
+                                    <lucide:PackIconLucide Grid.Column="0" Kind="ChartBar" Width="15" Height="15"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="Quota" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
+                                               IsVisible="{Binding !IsSidebarCollapsed}"/>
+                                    <Border Grid.Column="2" CornerRadius="999" Background="#14000000" Padding="6,1"
+                                            IsVisible="{Binding !IsSidebarCollapsed}">
+                                        <TextBlock Text="{Binding QuotaProviderCount}" FontSize="11" />
+                                    </Border>
+                                </Grid>
+                            </Button>
+
                             <Button Classes="side" IsEnabled="False" Opacity="0.4"
                                     ToolTip.Tip="Coming soon">
                                 <Grid ColumnDefinitions="20,*,Auto">
@@ -231,6 +245,7 @@
                         <ContentControl.Content>
                             <Grid>
                                 <v:ProvidersView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Providers}" />
+                                <v:QuotaView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Quota}" />
                                 <!-- Agents disabled until implemented -->
                                 <!-- <v:AgentsView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Agents}" /> -->
                                 <v:ConfigurationView IsVisible="{Binding IsConfigSection}" />

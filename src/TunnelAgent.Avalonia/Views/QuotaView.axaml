@@ -1,0 +1,194 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TunnelAgent.ViewModels"
+             xmlns:cv="using:TunnelAgent.Converters"
+             xmlns:ctrl="using:TunnelAgent.Controls"
+             xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+             x:Class="TunnelAgent.Views.QuotaView"
+             x:Name="Root"
+             x:DataType="vm:MainWindowViewModel">
+    <UserControl.Resources>
+        <cv:StringNotEmptyConverter x:Key="StringNotEmpty" />
+        <cv:InvertBoolConverter     x:Key="InvertBool" />
+    </UserControl.Resources>
+
+    <StackPanel Spacing="0" Margin="0,0,0,24">
+        <ctrl:SlidingTabBar Margin="0,0,0,16"
+                            SelectedIndex="{Binding QuotaTabIndex}">
+            <ctrl:SlidingTabBar.Tabs>
+                <ctrl:SlidingTab Header="Claude" HasIcon="True" IconKind="Claude"
+                                 Command="{Binding SelectQuotaProviderByIdCommand}" CommandParameter="claude" />
+                <ctrl:SlidingTab Header="Codex" HasIcon="True" IconKind="OpenAi"
+                                 Command="{Binding SelectQuotaProviderByIdCommand}" CommandParameter="codex" />
+                <ctrl:SlidingTab Header="Copilot" HasIcon="True" IconKind="GitHub"
+                                 Command="{Binding SelectQuotaProviderByIdCommand}" CommandParameter="github-copilot" />
+                <ctrl:SlidingTab Header="Gemini"  HasIcon="True" IconKind="GoogleGemini"
+                                 Command="{Binding SelectQuotaProviderByIdCommand}" CommandParameter="gemini-cli" />
+                <ctrl:SlidingTab Header="Antigravity" HasIcon="True"
+                                 CustomIconData="M21.751 22.607c1.34 1.005 3.35.335 1.508-1.508C17.73 15.74 18.904 1 12.037 1 5.17 1 6.342 15.74.815 21.1c-2.01 2.009.167 2.511 1.507 1.506 5.192-3.517 4.857-9.714 9.715-9.714 4.857 0 4.522 6.197 9.714 9.715z"
+                                 Command="{Binding SelectQuotaProviderByIdCommand}" CommandParameter="antigravity" />
+                <ctrl:SlidingTab Header="Kiro" HasIcon="True"
+                                 CustomIconData="M7.97 16.376c-1.644 3.642 1.86 4.556 4.443 2.424.76 2.39 3.608.607 4.631-1.247 2.251-4.084 1.342-8.249 1.108-9.108-1.6-5.859-9.6-5.869-10.976.03-.323 1.033-.328 2.206-.507 3.423-.09.617-.16 1.009-.393 1.655-.139.373-.323.7-.62 1.257-.458.865-.264 2.53 2.101 1.665l.224-.1h-.01l-.001.001z"
+                                 Command="{Binding SelectQuotaProviderByIdCommand}" CommandParameter="kiro" />
+                <ctrl:SlidingTab Header="Trae" HasIcon="True"
+                                 CustomIconData="M24 20.541H3.428v-3.426H0V3.4h24V20.54zM3.428 17.115h17.144V6.827H3.428v10.288zm8.573-5.196l-2.425 2.424-2.424-2.424 2.424-2.424 2.425 2.424zm6.857-.001l-2.424 2.423-2.425-2.423 2.425-2.425 2.424 2.425z"
+                                 Command="{Binding SelectQuotaProviderByIdCommand}" CommandParameter="trae" />
+            </ctrl:SlidingTabBar.Tabs>
+        </ctrl:SlidingTabBar>
+
+        <Grid Margin="0,0,0,16" ColumnDefinitions="*,Auto">
+            <StackPanel>
+                <TextBlock Classes="page-title" Text="Quota" />
+                <TextBlock Classes="page-sub" Text="Track quota usage for supported CLIProxyAPI accounts." />
+            </StackPanel>
+            <Button Grid.Column="1"
+                    Classes="icon-btn"
+                    ToolTip.Tip="Refresh all quota providers"
+                    VerticalAlignment="Bottom"
+                    IsEnabled="{Binding HasQuotaAccounts}"
+                    Command="{Binding RefreshAllQuotaProvidersCommand}">
+                <lucide:PackIconLucide Kind="RefreshCw"
+                                       Width="14"
+                                       Height="14"
+                                       Classes.spin="{Binding IsRefreshingAllQuotaProviders}" />
+            </Button>
+        </Grid>
+
+        <Border Classes="card"
+                Padding="22"
+                IsVisible="{Binding HasQuotaProviders, Converter={StaticResource InvertBool}}">
+            <StackPanel Spacing="8" HorizontalAlignment="Center">
+                <lucide:PackIconLucide Kind="ChartBar"
+                                       Width="30"
+                                       Height="30"
+                                       Foreground="{DynamicResource FgFaintBrush}"
+                                       HorizontalAlignment="Center" />
+                <TextBlock Classes="row-label" Text="No quota providers" HorizontalAlignment="Center" />
+                <TextBlock Classes="row-desc"
+                           Text="{Binding QuotaEmptyStateText}"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"
+                           MaxWidth="420" />
+            </StackPanel>
+        </Border>
+
+        <Border Classes="card"
+                Padding="22"
+                IsVisible="{Binding ShowQuotaAccountEmptyState}">
+            <StackPanel Spacing="8" HorizontalAlignment="Center">
+                <lucide:PackIconLucide Kind="UserRoundX"
+                                       Width="30"
+                                       Height="30"
+                                       Foreground="{DynamicResource FgFaintBrush}"
+                                       HorizontalAlignment="Center" />
+                <TextBlock Classes="row-label" Text="No accounts to show" HorizontalAlignment="Center" />
+                <TextBlock Classes="row-desc"
+                           Text="{Binding QuotaEmptyStateText}"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"
+                           MaxWidth="420" />
+            </StackPanel>
+        </Border>
+
+        <ItemsControl ItemsSource="{Binding SelectedQuotaAccounts}"
+                      IsVisible="{Binding HasSelectedQuotaAccounts}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:ProviderAccountViewModel">
+                    <Border Classes="card" Padding="16" Margin="0,0,0,14">
+                        <StackPanel Spacing="14">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                <StackPanel Grid.Column="0"
+                                            Grid.RowSpan="2"
+                                            Orientation="Horizontal"
+                                            Spacing="10"
+                                            VerticalAlignment="Center">
+                                    <Border Classes="chip"
+                                            Background="{DynamicResource AccentSoftBrush}"
+                                            IsVisible="{Binding PlanBadge, Converter={StaticResource StringNotEmpty}}">
+                                        <TextBlock Text="{Binding PlanBadge}"
+                                                   Foreground="{DynamicResource AccentBrush}"
+                                                   FontWeight="Bold" />
+                                    </Border>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="{Binding DisplayName}"
+                                                   FontSize="14"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource FgBrush}" />
+                                        <TextBlock Text="{Binding MaskedKey}"
+                                                   FontFamily="Cascadia Mono,Consolas,monospace"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource FgMutedBrush}"
+                                                   IsVisible="{Binding IsCustomKey}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <Button Grid.Column="1"
+                                        Grid.Row="0"
+                                        Classes="icon-btn"
+                                        ToolTip.Tip="Refresh quota"
+                                        Click="OnRefreshQuota"
+                                        Tag="{Binding}">
+                                    <lucide:PackIconLucide Kind="RefreshCw"
+                                                           Width="14"
+                                                           Height="14"
+                                                           Classes.spin="{Binding IsRefreshing}" />
+                                </Button>
+                                <Border Grid.Column="1"
+                                        Grid.Row="1"
+                                        Classes="chip"
+                                        Background="#14000000"
+                                        HorizontalAlignment="Right"
+                                        Margin="0,6,0,0"
+                                        IsVisible="{Binding IsDisabled}">
+                                    <TextBlock Text="disabled" Foreground="{DynamicResource FgMutedBrush}" />
+                                </Border>
+                            </Grid>
+
+                            <StackPanel Spacing="10" IsVisible="{Binding HasQuota}">
+                                <TextBlock Classes="section-label" Text="USAGE" Margin="0" />
+                                <ItemsControl ItemsSource="{Binding QuotaBars}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:QuotaBarViewModel">
+                                            <StackPanel Spacing="5" Margin="0,0,0,10">
+                                                <Grid ColumnDefinitions="*,Auto">
+                                                    <TextBlock Grid.Column="0"
+                                                               Text="{Binding Title}"
+                                                               FontSize="12"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{DynamicResource FgBrush}" />
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding UsedLabel}"
+                                                               FontSize="12"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{DynamicResource AccentBrush}" />
+                                                </Grid>
+                                                <ProgressBar Minimum="0"
+                                                             Maximum="1"
+                                                             Value="{Binding Used}"
+                                                             Height="9" />
+                                                <TextBlock Text="{Binding ResetIn}"
+                                                           FontSize="10.5"
+                                                           Foreground="{DynamicResource FgFaintBrush}"
+                                                           IsVisible="{Binding ResetIn, Converter={StaticResource StringNotEmpty}}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <Border Background="#08FFFFFF"
+                                    CornerRadius="8"
+                                    Padding="14"
+                                    IsVisible="{Binding HasQuota, Converter={StaticResource InvertBool}}">
+                                <StackPanel Spacing="5">
+                                    <TextBlock Classes="row-label" Text="Quota not loaded" />
+                                    <TextBlock Classes="row-desc" Text="Refresh this account to fetch available quota windows." />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>

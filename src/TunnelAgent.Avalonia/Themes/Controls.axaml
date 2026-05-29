@@ -536,11 +536,15 @@
         <Setter Property="CornerRadius" Value="5" />
         <Setter Property="Padding" Value="4" />
         <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
     </Style>
     <Style Selector="Button.icon-btn:pointerover /template/ ContentPresenter">
         <Setter Property="Background" Value="#14000000" />
+    </Style>
+    <Style Selector="Button.icon-btn:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="#22000000" />
     </Style>
 
     <!-- Horizontal pill tab bar -->

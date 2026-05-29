@@ -1,3 +1,4 @@
+using IconPacks.Avalonia.SimpleIcons;
 using TunnelAgent.Services;
 using TunnelAgent.ViewModels;
 using Xunit;
@@ -94,6 +95,83 @@ public sealed class MainWindowViewModelTests
 
         Assert.NotNull(vm.AuthFilesDescription);
         Assert.NotEmpty(vm.AuthFilesDescription);
+    }
+
+    [Fact]
+    public void SelectQuotaCommand_SelectsQuotaSectionAndSupportedProvidersOnly()
+    {
+        var vm = new MainWindowViewModel();
+        var claude = new ProviderViewModel("claude", "Claude", PackIconSimpleIconsKind.Claude, "#000000", "Claude", isOAuth: true);
+        var codex = new ProviderViewModel("codex", "Codex", PackIconSimpleIconsKind.OpenAi, "#000000", "Codex", isOAuth: true);
+        var local = new ProviderViewModel("local-ai", "Local", PackIconSimpleIconsKind.OpenAi, "#000000", "Local");
+
+        vm.Providers.Add(local);
+        vm.Providers.Add(claude);
+        vm.Providers.Add(codex);
+        vm.SelectQuotaCommand.Execute(null);
+
+        Assert.Equal(SectionKey.Quota, vm.SelectedSection);
+        Assert.Equal(2, vm.QuotaProviderCount);
+        Assert.Same(claude, vm.SelectedQuotaProvider);
+        Assert.True(claude.IsQuotaSelected);
+        Assert.False(local.IsQuotaSelected);
+    }
+
+    [Fact]
+    public void SelectQuotaProviderCommand_UpdatesSelectedQuotaAccounts()
+    {
+        var vm = new MainWindowViewModel();
+        var claude = new ProviderViewModel("claude", "Claude", PackIconSimpleIconsKind.Claude, "#000000", "Claude", isOAuth: true);
+        var codex = new ProviderViewModel("codex", "Codex", PackIconSimpleIconsKind.OpenAi, "#000000", "Codex", isOAuth: true);
+        var account = new ProviderAccountViewModel("codex", "", "Primary", isDisabled: false);
+        codex.Accounts.Add(account);
+        vm.Providers.Add(claude);
+        vm.Providers.Add(codex);
+
+        vm.SelectQuotaProviderCommand.Execute(codex);
+
+        Assert.Same(codex, vm.SelectedQuotaProvider);
+        Assert.True(codex.IsQuotaSelected);
+        Assert.False(claude.IsQuotaSelected);
+        Assert.True(vm.HasQuotaAccounts);
+        Assert.True(vm.HasSelectedQuotaAccounts);
+        Assert.False(vm.ShowQuotaAccountEmptyState);
+        Assert.Contains(account, vm.SelectedQuotaAccounts);
+    }
+
+    [Fact]
+    public void SelectedQuotaAccounts_ExcludesDisabledAccounts()
+    {
+        var vm = new MainWindowViewModel();
+        var claude = new ProviderViewModel("claude", "Claude", PackIconSimpleIconsKind.Claude, "#000000", "Claude", isOAuth: true);
+        var enabled = new ProviderAccountViewModel("claude", "", "Enabled", isDisabled: false);
+        var disabled = new ProviderAccountViewModel("claude", "", "Disabled", isDisabled: true);
+        claude.Accounts.Add(enabled);
+        claude.Accounts.Add(disabled);
+        vm.Providers.Add(claude);
+
+        vm.SelectQuotaCommand.Execute(null);
+
+        Assert.Contains(enabled, vm.SelectedQuotaAccounts);
+        Assert.DoesNotContain(disabled, vm.SelectedQuotaAccounts);
+        Assert.True(vm.HasQuotaAccounts);
+    }
+
+    [Fact]
+    public void QuotaProviderCount_SevenProviders_CountsAll()
+    {
+        var vm = new MainWindowViewModel();
+        // 5 standard providers in Providers collection
+        vm.Providers.Add(new ProviderViewModel("claude",         "Claude",         PackIconSimpleIconsKind.Claude,  "#000000", ""));
+        vm.Providers.Add(new ProviderViewModel("codex",          "Codex",          PackIconSimpleIconsKind.OpenAi,  "#000000", ""));
+        vm.Providers.Add(new ProviderViewModel("github-copilot", "GitHub Copilot", PackIconSimpleIconsKind.GitHub,  "#000000", ""));
+        vm.Providers.Add(new ProviderViewModel("gemini-cli",     "Gemini CLI",     PackIconSimpleIconsKind.OpenAi,  "#000000", ""));
+        vm.Providers.Add(new ProviderViewModel("antigravity",    "Antigravity",    PackIconSimpleIconsKind.OpenAi,  "#000000", ""));
+        // 2 standalone quota providers
+        vm.StandaloneQuotaProviders.Add(new ProviderViewModel("kiro", "Kiro", PackIconSimpleIconsKind.OpenAi, "#FF9900", ""));
+        vm.StandaloneQuotaProviders.Add(new ProviderViewModel("trae", "Trae", PackIconSimpleIconsKind.OpenAi, "#1464FF", ""));
+
+        Assert.Equal(7, vm.QuotaProviderCount);
     }
 
     [Fact]

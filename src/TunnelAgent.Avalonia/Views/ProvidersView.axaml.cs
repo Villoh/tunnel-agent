@@ -73,22 +73,4 @@ public partial class ProvidersView : UserControl
             account.IsDisabled = !account.IsDisabled;
     }
 
-    private async void OnRefreshQuota(object? sender, RoutedEventArgs e)
-    {
-        if (DataContext is not MainWindowViewModel vm) return;
-        if (sender is not Button { Tag: ProviderAccountViewModel account }) return;
-
-        account.IsRefreshing = true;
-        try
-        {
-            await vm.RefreshQuotaAsync(account);
-        }
-        catch { }
-        finally
-        {
-            Avalonia.Threading.Dispatcher.UIThread.Post(() => account.IsRefreshing = false);
-        }
-    }
-
-
 }

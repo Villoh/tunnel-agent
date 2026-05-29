@@ -28,6 +28,16 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly TunnelAgent.Services.ModelFetchService _modelFetch;
     private readonly TokenGeneratorService _perplexityTokenGenerator = new();
     private readonly Dictionary<string, bool> _engineUpdateToastShown = new(StringComparer.OrdinalIgnoreCase);
+    private readonly QuotaFetchService _quota = new(IPlatformInfo.Current.AuthDirectory);
+    private readonly QuotaProviderService _quotaProviders = new();
+    private static readonly HashSet<string> QuotaSupportedProviderIds = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "claude",
+        "codex",
+        "github-copilot",
+        "gemini-cli",
+        "antigravity",
+    };
 
     private CancellationTokenSource? _modelFetchCts;
     private bool _engineReleaseSelectionReady;
@@ -38,6 +48,8 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _isDark;
     [ObservableProperty] private string _activeEngineId = EngineCatalog.CliProxyApi.Id;
     [ObservableProperty] private string _providersEngineId = EngineCatalog.CliProxyApi.Id;
+    [ObservableProperty] private ProviderViewModel? _selectedQuotaProvider;
+    [ObservableProperty] private bool _isRefreshingAllQuotaProviders;
 
     [ObservableProperty] private EngineState _engineState = EngineState.Stopped;
     [ObservableProperty] private string? _installedVersion;
@@ -84,6 +96,8 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private EngineReleaseViewModel? _selectedEngineRelease;
 
     public ObservableCollection<ProviderViewModel> Providers { get; } = new();
+    public ObservableCollection<ProviderViewModel> StandaloneQuotaProviders { get; } = new();
+    public ObservableCollection<QuotaProviderViewModel> QuotaAccounts { get; } = new();
     public ObservableCollection<PerplexityAccountViewModel> PerplexityAccounts { get; } = new();
     public ObservableCollection<AgentViewModel> Agents { get; } = new();
     public ObservableCollection<EngineReleaseViewModel> EngineReleases { get; } = new();
@@ -121,20 +135,39 @@ public partial class MainWindowViewModel : ViewModelBase
         foreach (var definition in EngineCatalog.All)
             EngineOptions.Add(new EngineOptionViewModel(definition));
 
+        Providers.CollectionChanged += (_, _) => RefreshQuotaNavigation();
+        StandaloneQuotaProviders.CollectionChanged += (_, _) => RefreshQuotaNavigation();
+
+        var kiroIcon = ProviderIconRegistry.Get("kiro");
+        QuotaAccounts.Add(new QuotaProviderViewModel("kiro", "Kiro", kiroIcon.IconKind, kiroIcon.LogoColor, "Amazon Kiro AI editor.", kiroIcon.CustomIconData));
+        var traeIcon = ProviderIconRegistry.Get("trae");
+        QuotaAccounts.Add(new QuotaProviderViewModel("trae", "Trae", traeIcon.IconKind, traeIcon.LogoColor, "ByteDance Trae AI editor.", traeIcon.CustomIconData));
+
         SeedDemoAgents();
     }
 
     // Providers submenu highlight — independent from Config section
     public bool IsCliProxyEngineSelected => string.Equals(ProvidersEngineId, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase);
     public bool IsPerplexityEngineSelected => string.Equals(ProvidersEngineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase);
+    public bool IsQuotaProvidersTab => string.Equals(ProvidersEngineId, "quota", StringComparison.OrdinalIgnoreCase);
 
     // Tab indices for SlidingTabBar
-    public int ProvidersTabIndex => IsPerplexityEngineSelected ? 1 : 0;
+    public int ProvidersTabIndex => IsQuotaProvidersTab ? 2 : (IsPerplexityEngineSelected ? 1 : 0);
     public int ConfigTabIndex => SelectedSection switch
     {
         SectionKey.ConfigCliProxy => 1,
         SectionKey.ConfigPerplexity => 2,
         _ => 0
+    };
+    public int QuotaTabIndex => SelectedQuotaProvider?.Id switch
+    {
+        "codex"          => 1,
+        "github-copilot" => 2,
+        "gemini-cli"     => 3,
+        "antigravity"    => 4,
+        "kiro"           => 5,
+        "trae"           => 6,
+        _                => 0,
     };
     public string ActiveEngineName => ActiveEngine.Definition.DisplayName;
     public string ActiveEngineDescription => ActiveEngine.Definition.Description;
@@ -142,6 +175,17 @@ public partial class MainWindowViewModel : ViewModelBase
     public string AppVersion { get; } = TunnelAgent.AppVersion.Current;
     public bool IsLaunchAtLoginSupported => _launchAtLogin.IsSupported;
     public int ConnectedProviderCount => Providers.Count(p => p.Connected || p.ActiveAccountCount > 0);
+    public IEnumerable<ProviderViewModel> QuotaProviders => Providers.Where(IsQuotaSupportedProvider).Concat(StandaloneQuotaProviders);
+    public int QuotaProviderCount => QuotaProviders.Count();
+    public IEnumerable<ProviderAccountViewModel> SelectedQuotaAccounts => SelectedQuotaProvider?.Accounts.Where(a => !a.IsDisabled) ?? Enumerable.Empty<ProviderAccountViewModel>();
+    public bool HasQuotaProviders => QuotaProviders.Any();
+    public bool HasQuotaAccounts => QuotaProviders.Any(p => p.Accounts.Any(a => !a.IsDisabled));
+    public bool HasAnyQuotaData => QuotaProviders.SelectMany(p => p.Accounts).Any(a => a.HasQuota);
+    public bool HasSelectedQuotaAccounts => SelectedQuotaAccounts.Any();
+    public bool ShowQuotaAccountEmptyState => HasQuotaProviders && !HasSelectedQuotaAccounts;
+    public string QuotaEmptyStateText => HasQuotaProviders
+        ? "Select a supported provider with connected accounts, then refresh quota for an account."
+        : "Quota tracking is available for Claude, OpenAI Codex, and GitHub Copilot after accounts are connected.";
     public int EnabledAgentCount => Agents.Count(a => a.Installed && a.Enabled);
     public int TotalAvailableModelCount => AvailableModelGroups.Sum(g => g.ModelCount);
     public int PerplexityAccountCount => PerplexityAccounts.Count;
@@ -293,6 +337,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(IsCliProxyEngineSelected));
         OnPropertyChanged(nameof(IsPerplexityEngineSelected));
+        OnPropertyChanged(nameof(IsQuotaProvidersTab));
         OnPropertyChanged(nameof(ProvidersTabIndex));
     }
 
@@ -360,6 +405,7 @@ public partial class MainWindowViewModel : ViewModelBase
             Providers.Add(vm);
         }
         OnPropertyChanged(nameof(ConnectedProviderCount));
+        RefreshQuotaNavigation();
 
         // Pass any legacy accounts from settings.json for one-time migration to files
         await _perplexityAccounts.InitializeAsync(_settings.Current.PerplexityAccounts);
@@ -379,6 +425,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         RefreshFocusedEngineState();
         await LoadEngineReleasesAsync();
+        _ = ScanQuotaProvidersAsync();
     }
 
     private void NormalizeActiveEngineSetting()
@@ -402,7 +449,33 @@ public partial class MainWindowViewModel : ViewModelBase
         Dispatcher.UIThread.Post(ReloadPerplexityAccounts);
 
     private void OnProvidersRefreshed(object? sender, EventArgs e) =>
-        Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(ConnectedProviderCount)));
+        Dispatcher.UIThread.Post(() =>
+        {
+            OnPropertyChanged(nameof(ConnectedProviderCount));
+            RefreshQuotaNavigation();
+        });
+
+    private static bool IsQuotaSupportedProvider(ProviderViewModel provider) =>
+        QuotaSupportedProviderIds.Contains(provider.Id);
+
+    private void RefreshQuotaNavigation()
+    {
+        var supportedProviders = QuotaProviders.ToList();
+        if (SelectedQuotaProvider is null || !supportedProviders.Contains(SelectedQuotaProvider))
+            SelectedQuotaProvider = supportedProviders.FirstOrDefault();
+        else
+            UpdateQuotaSelectionFlags();
+
+        OnPropertyChanged(nameof(QuotaProviders));
+        OnPropertyChanged(nameof(QuotaProviderCount));
+        OnPropertyChanged(nameof(SelectedQuotaAccounts));
+        OnPropertyChanged(nameof(HasQuotaProviders));
+        OnPropertyChanged(nameof(HasQuotaAccounts));
+        OnPropertyChanged(nameof(HasAnyQuotaData));
+        OnPropertyChanged(nameof(HasSelectedQuotaAccounts));
+        OnPropertyChanged(nameof(ShowQuotaAccountEmptyState));
+        OnPropertyChanged(nameof(QuotaEmptyStateText));
+    }
 
     private void OnAnyEngineStateChanged(object? sender, EventArgs e)
     {
@@ -632,9 +705,30 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public Task RefreshQuotaAsync(ProviderAccountViewModel account)
     {
-        var provider = Providers.FirstOrDefault(p => p.Accounts.Contains(account));
-        return provider is not null ? _catalog.RefreshAccountQuotaAsync(provider, account) : Task.CompletedTask;
+        var provider = Providers.FirstOrDefault(p => p.Accounts.Contains(account))
+                    ?? StandaloneQuotaProviders.FirstOrDefault(p => p.Accounts.Contains(account));
+        return provider is not null ? _quota.FetchAccountPublicAsync(provider.Id, account) : Task.CompletedTask;
     }
+
+    public async Task RefreshAllQuotaProvidersAsync()
+    {
+        if (IsRefreshingAllQuotaProviders) return;
+
+        IsRefreshingAllQuotaProviders = true;
+        try
+        {
+            foreach (var account in QuotaProviders.SelectMany(p => p.Accounts).Where(a => !a.IsDisabled).ToList())
+                await RefreshQuotaAsync(account);
+        }
+        finally
+        {
+            IsRefreshingAllQuotaProviders = false;
+            RefreshQuotaNavigation();
+        }
+    }
+
+    private Task EnsureInitialQuotaLoadedAsync() =>
+        HasQuotaAccounts && !HasAnyQuotaData ? RefreshAllQuotaProvidersAsync() : Task.CompletedTask;
 
     private void OnAddAccountRequested(object? sender, EventArgs e)
     {
@@ -947,6 +1041,81 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void FocusQuotaProviders()
+    {
+        ProvidersEngineId = "quota";
+        SelectedSection   = SectionKey.Providers;
+        ActiveEngineId    = EngineCatalog.CliProxyApi.Id;
+    }
+
+    [RelayCommand] private Task ScanQuotaProviders() => ScanQuotaProvidersAsync();
+
+    public async Task ScanQuotaProvidersAsync()
+    {
+        foreach (var vm in QuotaAccounts) vm.IsScanning = true;
+        try
+        {
+            var result = await _quotaProviders.ScanAsync();
+            await Dispatcher.UIThread.InvokeAsync(() => ApplyQuotaScanResult(result));
+        }
+        finally
+        {
+            foreach (var vm in QuotaAccounts) vm.IsScanning = false;
+        }
+    }
+
+    private void ApplyQuotaScanResult(QuotaScanResult result)
+    {
+        ApplySingleQuotaProvider("kiro", "Kiro", result.Kiro);
+        ApplySingleQuotaProvider("trae", "Trae", result.Trae);
+        RefreshQuotaNavigation();
+    }
+
+    private void ApplySingleQuotaProvider(string id, string name, QuotaProviderInfo info)
+    {
+        var icon      = ProviderIconRegistry.Get(id);
+        var accountVm = QuotaAccounts.FirstOrDefault(v => v.Id == id);
+        if (accountVm is null)
+        {
+            accountVm = new QuotaProviderViewModel(id, name, icon.IconKind, icon.LogoColor, $"{name} standalone quota.", icon.CustomIconData);
+            QuotaAccounts.Add(accountVm);
+        }
+        accountVm.IsDetected = info.IsDetected;
+        accountVm.Email      = info.Email;
+        accountVm.PlanType   = info.PlanType;
+
+        if (info.IsDetected)
+        {
+            var existing = StandaloneQuotaProviders.FirstOrDefault(p => p.Id == id);
+            if (existing is null)
+            {
+                existing = new ProviderViewModel(id, name, icon.IconKind, icon.LogoColor,
+                    $"{name} standalone quota.", isOAuth: false, customIconData: icon.CustomIconData);
+                StandaloneQuotaProviders.Add(existing);
+            }
+
+            var label = string.IsNullOrEmpty(info.Email) ? name : info.Email;
+            var existingAcct = existing.Accounts.FirstOrDefault();
+            if (existingAcct is null || existingAcct.Email != info.Email)
+            {
+                existing.Accounts.Clear();
+                var acct = new ProviderAccountViewModel(id, "", label, isDisabled: false)
+                {
+                    Email = info.Email,
+                };
+                existing.Accounts.Add(acct);
+                existing.RefreshAccountCount();
+            }
+        }
+        else
+        {
+            var existing = StandaloneQuotaProviders.FirstOrDefault(p => p.Id == id);
+            if (existing is not null)
+                StandaloneQuotaProviders.Remove(existing);
+        }
+    }
+
+    [RelayCommand]
     public void OpenAuthFolder()
     {
         try { _folderOpen.OpenFolder(IPlatformInfo.Current.AuthDirectory); }
@@ -1003,14 +1172,63 @@ public partial class MainWindowViewModel : ViewModelBase
     private void SelectProviders()
     {
         SelectedSection = SectionKey.Providers;
-        ActiveEngineId = ProvidersEngineId;
+        if (!IsQuotaProvidersTab)
+            ActiveEngineId = ProvidersEngineId;
     }
+
+    [RelayCommand]
+    private void SelectQuota()
+    {
+        SelectedSection = SectionKey.Quota;
+        ActiveEngineId = EngineCatalog.CliProxyApi.Id;
+        RefreshQuotaNavigation();
+        _ = EnsureInitialQuotaLoadedAsync();
+    }
+
+    [RelayCommand]
+    private void SelectQuotaProvider(ProviderViewModel provider)
+    {
+        if (!IsQuotaSupportedProvider(provider) && !StandaloneQuotaProviders.Contains(provider)) return;
+        SelectedQuotaProvider = provider;
+    }
+
+    [RelayCommand]
+    private void SelectQuotaProviderById(string providerId)
+    {
+        var provider = Providers.FirstOrDefault(p => string.Equals(p.Id, providerId, StringComparison.OrdinalIgnoreCase))
+                    ?? StandaloneQuotaProviders.FirstOrDefault(p => string.Equals(p.Id, providerId, StringComparison.OrdinalIgnoreCase));
+        if (provider is null) return;
+        SelectQuotaProvider(provider);
+    }
+
+    [RelayCommand] private Task RefreshAllQuotaProviders() => RefreshAllQuotaProvidersAsync();
+
     [RelayCommand] private void SelectConfiguration() => SelectedSection = SectionKey.ConfigGeneral;
     [RelayCommand] private void SelectConfigGeneral() => SelectedSection = SectionKey.ConfigGeneral;
     [RelayCommand] private void SelectConfigCliProxy() => SelectedSection = SectionKey.ConfigCliProxy;
     [RelayCommand] private void SelectConfigPerplexity() => SelectedSection = SectionKey.ConfigPerplexity;
 
     public bool IsConfigSection => SelectedSection is SectionKey.ConfigGeneral or SectionKey.ConfigCliProxy or SectionKey.ConfigPerplexity;
+
+    partial void OnSelectedQuotaProviderChanged(ProviderViewModel? value)
+    {
+        UpdateQuotaSelectionFlags();
+        OnPropertyChanged(nameof(QuotaTabIndex));
+        OnPropertyChanged(nameof(SelectedQuotaAccounts));
+        OnPropertyChanged(nameof(HasQuotaAccounts));
+        OnPropertyChanged(nameof(HasAnyQuotaData));
+        OnPropertyChanged(nameof(HasSelectedQuotaAccounts));
+        OnPropertyChanged(nameof(ShowQuotaAccountEmptyState));
+        OnPropertyChanged(nameof(QuotaEmptyStateText));
+    }
+
+    private void UpdateQuotaSelectionFlags()
+    {
+        foreach (var provider in Providers)
+            provider.IsQuotaSelected = ReferenceEquals(provider, SelectedQuotaProvider);
+        foreach (var provider in StandaloneQuotaProviders)
+            provider.IsQuotaSelected = ReferenceEquals(provider, SelectedQuotaProvider);
+    }
     [RelayCommand] private void ToggleSidebar() => IsSidebarCollapsed = !IsSidebarCollapsed;
     [RelayCommand] private void ToggleTheme() => ThemeMode = IsDark ? "light" : "dark";
     [RelayCommand] private void DismissToast() => ShowUpdateToast = false;

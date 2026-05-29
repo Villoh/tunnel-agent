@@ -119,6 +119,7 @@ public partial class MainWindow : Window
         vm.SelectedSection = item.Tag switch
         {
             "Providers"     => SectionKey.Providers,
+            "Quota"         => SectionKey.Quota,
             "Agents"        => SectionKey.Agents,
             "Configuration" => SectionKey.Configuration,
             _ => vm.SelectedSection

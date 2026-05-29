@@ -1,0 +1,102 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TunnelAgent.ViewModels"
+             xmlns:cv="using:TunnelAgent.Converters"
+             xmlns:si="using:IconPacks.Avalonia.SimpleIcons"
+             xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+             x:Class="TunnelAgent.Views.QuotaProvidersView"
+             x:DataType="vm:MainWindowViewModel">
+    <UserControl.Resources>
+        <cv:HexToBrushConverter     x:Key="HexBrush" />
+        <cv:InvertBoolConverter     x:Key="InvertBool" />
+        <cv:StringNotEmptyConverter x:Key="StringNotEmpty" />
+    </UserControl.Resources>
+
+    <StackPanel Spacing="0" Margin="0,0,0,24">
+
+        <Grid Margin="0,0,0,16" ColumnDefinitions="*,Auto">
+            <StackPanel>
+                <TextBlock Classes="page-title" Text="Quota Providers" />
+                <TextBlock Classes="page-sub" Text="Standalone accounts with local quota tracking." />
+            </StackPanel>
+            <Button Grid.Column="1"
+                    Classes="icon-btn"
+                    ToolTip.Tip="Scan for quota providers"
+                    VerticalAlignment="Bottom"
+                    Command="{Binding ScanQuotaProvidersCommand}">
+                <lucide:PackIconLucide Kind="ScanSearch" Width="14" Height="14"
+                                       Foreground="{DynamicResource FgMutedBrush}" />
+            </Button>
+        </Grid>
+
+        <ItemsControl ItemsSource="{Binding QuotaAccounts}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:QuotaProviderViewModel">
+                    <Border Classes="card" Margin="0,0,0,10" Padding="16">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+
+                            <!-- Provider logo -->
+                            <Border Grid.Column="0"
+                                    Classes="provider-logo" Width="34" Height="34"
+                                    Background="{Binding LogoColor, Converter={StaticResource HexBrush}}"
+                                    Margin="0,0,14,0" VerticalAlignment="Center">
+                                <Panel>
+                                    <si:PackIconSimpleIcons Kind="{Binding IconKind}"
+                                                            Foreground="White"
+                                                            Width="16" Height="16"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            IsVisible="{Binding !HasCustomIcon}" />
+                                    <Viewbox Width="16" Height="16"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"
+                                             IsVisible="{Binding HasCustomIcon}">
+                                        <Path Data="{Binding CustomIconData}" Fill="White" Stretch="Uniform" />
+                                    </Viewbox>
+                                </Panel>
+                            </Border>
+
+                            <!-- Name + detected state -->
+                            <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Classes="row-label" Text="{Binding Name}" />
+                                    <Border Classes="chip" Background="{DynamicResource AccentSoftBrush}"
+                                            IsVisible="{Binding IsDetected}">
+                                        <TextBlock Text="detected" Foreground="{DynamicResource AccentBrush}" />
+                                    </Border>
+                                    <Border Classes="chip" Background="#14000000"
+                                            IsVisible="{Binding IsScanning}">
+                                        <TextBlock Text="scanning…" Foreground="{DynamicResource FgMutedBrush}" />
+                                    </Border>
+                                </StackPanel>
+                                <!-- Detected: show email or plan, Undetected: show description -->
+                                <TextBlock Classes="row-desc"
+                                           Text="{Binding Email}"
+                                           IsVisible="{Binding IsDetected}"
+                                           Foreground="#3CB371" />
+                                <TextBlock Classes="row-desc"
+                                           IsVisible="{Binding IsDetected, Converter={StaticResource InvertBool}}"
+                                           Foreground="{DynamicResource FgMutedBrush}">
+                                    <Run Text="Not detected. Install or sign in to" />
+                                    <Run Text="{Binding Name}" />
+                                </TextBlock>
+                            </StackPanel>
+
+                            <!-- Plan badge -->
+                            <Border Grid.Column="2"
+                                    Classes="chip" Background="{DynamicResource AccentSoftBrush}"
+                                    IsVisible="{Binding PlanType, Converter={StaticResource StringNotEmpty}}"
+                                    VerticalAlignment="Center">
+                                <TextBlock Text="{Binding PlanType}"
+                                           Foreground="{DynamicResource AccentBrush}"
+                                           FontWeight="Bold" />
+                            </Border>
+
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+    </StackPanel>
+</UserControl>

@@ -4,10 +4,12 @@ using Avalonia;
 using Avalonia.Animation;
 using Avalonia.Animation.Easings;
 using Avalonia.Controls;
+using Avalonia.Controls.Shapes;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Controls.Presenters;
 using Avalonia.Styling;
+using IconPacks.Avalonia.SimpleIcons;
 
 namespace TunnelAgent.Controls;
 
@@ -128,10 +130,46 @@ public class SlidingTabBar : Panel
             var tab = Tabs[i];
             var idx = i;
 
-            var label = new TextBlock { Text = tab.Header };
+            var label = new TextBlock { Text = tab.Header, VerticalAlignment = VerticalAlignment.Center };
+            Control content = label;
+            PackIconSimpleIcons? icon = null;
+            Path? customPath = null;
+            if (tab.HasIcon)
+            {
+                if (tab.CustomIconData is not null)
+                {
+                    customPath = new Path
+                    {
+                        Data    = Avalonia.Media.PathGeometry.Parse(tab.CustomIconData),
+                        Width   = 14,
+                        Height  = 14,
+                        Stretch = Avalonia.Media.Stretch.Uniform,
+                        VerticalAlignment = VerticalAlignment.Center,
+                    };
+                }
+                else
+                {
+                    icon = new PackIconSimpleIcons
+                    {
+                        Kind = tab.IconKind,
+                        Width = 14,
+                        Height = 14,
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+                }
+                Control iconControl = (Control?)customPath ?? icon!;
+                content = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Spacing = 6,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Children = { iconControl, label }
+                };
+            }
+
             var btn = new Button
             {
-                Content = label,
+                Content = content,
                 Background = Brushes.Transparent,
                 BorderThickness = new Thickness(0),
                 CornerRadius = new CornerRadius(6),
@@ -244,8 +282,22 @@ public class SlidingTabBar : Panel
             var brush = i == idx ? Brushes.White : inactiveBrush;
             btn.ClearValue(Button.ForegroundProperty);
             btn.Foreground = brush;
-            if (btn.Content is TextBlock label)
+            if (btn.Content is StackPanel panel)
+            {
+                foreach (var child in panel.Children)
+                {
+                    if (child is TextBlock text)
+                        text.Foreground = brush;
+                    else if (child is PackIconSimpleIcons icon)
+                        icon.Foreground = brush;
+                    else if (child is Path svgPath)
+                        svgPath.Fill = brush;
+                }
+            }
+            else if (btn.Content is TextBlock label)
+            {
                 label.Foreground = brush;
+            }
         }
     }
 
@@ -280,6 +332,15 @@ public class SlidingTab : AvaloniaObject
     public static readonly StyledProperty<object?> CommandParameterProperty =
         AvaloniaProperty.Register<SlidingTab, object?>(nameof(CommandParameter));
 
+    public static readonly StyledProperty<PackIconSimpleIconsKind> IconKindProperty =
+        AvaloniaProperty.Register<SlidingTab, PackIconSimpleIconsKind>(nameof(IconKind), PackIconSimpleIconsKind.OpenAi);
+
+    public static readonly StyledProperty<bool> HasIconProperty =
+        AvaloniaProperty.Register<SlidingTab, bool>(nameof(HasIcon));
+
+    public static readonly StyledProperty<string?> CustomIconDataProperty =
+        AvaloniaProperty.Register<SlidingTab, string?>(nameof(CustomIconData));
+
     public string Header
     {
         get => GetValue(HeaderProperty);
@@ -296,5 +357,23 @@ public class SlidingTab : AvaloniaObject
     {
         get => GetValue(CommandParameterProperty);
         set => SetValue(CommandParameterProperty, value);
+    }
+
+    public PackIconSimpleIconsKind IconKind
+    {
+        get => GetValue(IconKindProperty);
+        set => SetValue(IconKindProperty, value);
+    }
+
+    public bool HasIcon
+    {
+        get => GetValue(HasIconProperty);
+        set => SetValue(HasIconProperty, value);
+    }
+
+    public string? CustomIconData
+    {
+        get => GetValue(CustomIconDataProperty);
+        set => SetValue(CustomIconDataProperty, value);
     }
 }

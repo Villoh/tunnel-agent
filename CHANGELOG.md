@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Quota view**: dedicated sidebar section to track quota usage for CLIProxyAPI providers (Claude, Codex, GitHub Copilot, Gemini CLI, Antigravity) and standalone IDE accounts (Kiro, Trae).
+- **Quota providers tab** in Providers view: read-only tab showing detected standalone quota providers (Kiro, Trae) that are not managed by CLIProxyAPI or Perplexity.
+- **Gemini CLI quota fetching**: direct API calls to `cloudcode-pa.googleapis.com/v1internal:retrieveUserQuota` with OAuth token refresh support.
+- **Antigravity quota fetching**: direct API calls to `cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels` with OAuth token refresh support.
+- **Kiro quota fetching**: direct API calls to AWS CodeWhisperer usage API with Social/IdC token refresh support.
+- **Trae quota fetching**: direct API calls to Trae entitlement API with Cloud-IDE-JWT authentication.
+- **Custom SVG icons**: `SlidingTabBar` now supports `CustomIconData` property for SVG path rendering; `ProviderIconRegistry` includes custom icons for Antigravity, Kiro, and Trae.
+- **Global quota refresh**: single refresh button in Quota view header refreshes all providers with active accounts.
+- **Initial quota load**: Quota view auto-loads quota data on first open if accounts exist but no data is loaded.
+
+### Changed
+
+- **Quota UI moved** from Providers account cards to dedicated Quota view; Providers now focuses solely on account management (add/remove/enable/disable/connect/disconnect).
+- **Quota refresh policy**: tab switching no longer triggers refresh; explicit refresh actions (global button, per-account button) or initial load only.
+- **Shorter tab labels**: "GitHub Copilot" → "Copilot", "Gemini CLI" → "Gemini" to fit 7 tabs in Quota view.
+- **Provider icon colors**: Kiro uses `#9046FF` (Kiro purple), Trae uses `#32F08C` (Trae green), Antigravity uses `#7C3AED` with custom butterfly icon.
+- **icon-btn style**: added `Foreground` setter using `FgBrush` and `:pressed` state for consistent button feedback.
+
+### Fixed
+
+- **Qwen provider removed**: CLIProxyAPI upstream does not support Qwen; removed from built-in OAuth providers, login flags, token detection, and documentation.
+- **Refresh button visibility**: global refresh button now visible with proper icon styling.
+- **icon-btn click feedback**: added `:pressed` pseudo-class styling to prevent default Fluent button background flash.
+
 ## [0.3.1] - 2026-05-23
 
 ### Added

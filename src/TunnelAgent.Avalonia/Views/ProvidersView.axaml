@@ -5,6 +5,7 @@
              xmlns:si="using:IconPacks.Avalonia.SimpleIcons"
              xmlns:lucide="using:IconPacks.Avalonia.Lucide"
              xmlns:ctrl="using:TunnelAgent.Controls"
+             xmlns:v="using:TunnelAgent.Views"
              x:Class="TunnelAgent.Views.ProvidersView"
              x:Name="Root"
              x:DataType="vm:MainWindowViewModel">
@@ -29,10 +30,14 @@
                     <ctrl:SlidingTabBar.Tabs>
                         <ctrl:SlidingTab Header="CLIProxyAPI" Command="{Binding FocusCliProxyCommand}" />
                         <ctrl:SlidingTab Header="Perplexity"  Command="{Binding FocusPerplexityCommand}" />
+                        <ctrl:SlidingTab Header="Quota"       Command="{Binding FocusQuotaProvidersCommand}" />
                     </ctrl:SlidingTabBar.Tabs>
                 </ctrl:SlidingTabBar>
 
-                <Grid Margin="0,0,0,14">
+                <v:QuotaProvidersView IsVisible="{Binding IsQuotaProvidersTab}" />
+
+                <Grid Margin="0,0,0,14"
+                      IsVisible="{Binding IsQuotaProvidersTab, Converter={StaticResource InvertBool}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -76,7 +81,8 @@
                     </StackPanel>
                 </Grid>
 
-                <Border Classes="card" Margin="0,0,0,6">
+                <Border Classes="card" Margin="0,0,0,6"
+                        IsVisible="{Binding IsQuotaProvidersTab, Converter={StaticResource InvertBool}}">
                     <Grid Margin="16,12" ColumnDefinitions="22,*,Auto">
                         <Grid Classes="status-indicator">
                             <Ellipse Classes="status-pulse"
@@ -243,7 +249,7 @@
                                                 <DataTemplate x:DataType="vm:ProviderAccountViewModel">
                                                     <Border Background="#08FFFFFF" Margin="16,8,16,10" CornerRadius="8" Padding="14,12,14,14">
                                                         <StackPanel Spacing="10">
-                                                            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
+                                                            <Grid ColumnDefinitions="*,Auto,Auto">
                                                                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                                                                     <TextBlock Text="{Binding DisplayName}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource FgBrush}" />
                                                                     <Border Classes="chip" Background="{DynamicResource AccentSoftBrush}"
@@ -255,39 +261,17 @@
                                                                                    FontFamily="Cascadia Mono,Consolas,monospace" FontSize="10" />
                                                                     </Border>
                                                                 </StackPanel>
-                                                                <Button Grid.Column="2" Classes="icon-btn power-toggle" Classes.account-disabled="{Binding IsDisabled}"
+                                                                <Button Grid.Column="1" Classes="icon-btn power-toggle" Classes.account-disabled="{Binding IsDisabled}"
                                                                         IsEnabled="{Binding IsProviderEnabled}" ToolTip.Tip="Enable / disable this account"
                                                                         Click="OnToggleAccount" Tag="{Binding}" VerticalAlignment="Center">
                                                                     <lucide:PackIconLucide Kind="Power" Width="13" Height="13" />
                                                                 </Button>
-                                                                <Button Grid.Column="3" Classes="icon-btn" ToolTip.Tip="Refresh quota"
-                                                                        Click="OnRefreshQuota" Tag="{Binding}" VerticalAlignment="Center">
-                                                                    <lucide:PackIconLucide Kind="RefreshCw" Width="13" Height="13"
-                                                                                           Foreground="{DynamicResource FgMutedBrush}"
-                                                                                           Classes.spin="{Binding IsRefreshing}" />
-                                                                </Button>
-                                                                <Button Grid.Column="4" Classes="icon-btn" ToolTip.Tip="Remove account"
+                                                                <Button Grid.Column="2" Classes="icon-btn" ToolTip.Tip="Remove account"
                                                                         Command="{Binding #Root.DataContext.RemoveAccountCommand}"
                                                                         CommandParameter="{Binding}" VerticalAlignment="Center">
                                                                     <lucide:PackIconLucide Kind="Trash2" Width="13" Height="13" Foreground="{DynamicResource FgMutedBrush}" />
                                                                 </Button>
                                                             </Grid>
-
-                                                            <ItemsControl ItemsSource="{Binding QuotaBars}" IsVisible="{Binding HasQuota}">
-                                                                <ItemsControl.ItemTemplate>
-                                                                    <DataTemplate x:DataType="vm:QuotaBarViewModel">
-                                                                        <StackPanel Spacing="4">
-                                                                            <Grid ColumnDefinitions="*,Auto">
-                                                                                <TextBlock Grid.Column="0" Text="{Binding Title}" FontSize="11.5" Foreground="{DynamicResource FgBrush}" />
-                                                                                <TextBlock Grid.Column="1" Text="{Binding UsedLabel}" FontSize="11" Foreground="{DynamicResource FgMutedBrush}" />
-                                                                            </Grid>
-                                                                            <ProgressBar Minimum="0" Maximum="1" Value="{Binding Used}" Height="8" />
-                                                                            <TextBlock Text="{Binding ResetIn}" FontSize="10.5" Foreground="{DynamicResource FgFaintBrush}"
-                                                                                       IsVisible="{Binding ResetIn, Converter={StaticResource StringNotEmpty}}" />
-                                                                        </StackPanel>
-                                                                    </DataTemplate>
-                                                                </ItemsControl.ItemTemplate>
-                                                            </ItemsControl>
                                                         </StackPanel>
                                                     </Border>
                                                 </DataTemplate>
@@ -303,8 +287,10 @@
 
                 </StackPanel>
 
-                <TextBlock Classes="section-label" Text="AVAILABLE MODELS" />
-                <Border Classes="card">
+                <TextBlock Classes="section-label" Text="AVAILABLE MODELS"
+                           IsVisible="{Binding IsQuotaProvidersTab, Converter={StaticResource InvertBool}}" />
+                <Border Classes="card"
+                        IsVisible="{Binding IsQuotaProvidersTab, Converter={StaticResource InvertBool}}">
                     <StackPanel>
                         <Grid Margin="16,12" ColumnDefinitions="30,*,Auto">
                             <Border Grid.Column="0" Classes="provider-logo" Background="{DynamicResource AccentSoftBrush}">

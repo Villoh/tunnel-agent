@@ -109,6 +109,9 @@ public partial class ProviderViewModel : ViewModelBase
     /// <summary>Whether the account/quota panel is expanded.</summary>
     [ObservableProperty] private bool _isExpanded;
 
+    /// <summary>Whether this provider is selected in the quota page provider rail.</summary>
+    [ObservableProperty] private bool _isQuotaSelected;
+
     /// <summary>Per-account slots — populated for custom (non-OAuth) providers
     /// and for OAuth providers with detected accounts.</summary>
     public ObservableCollection<ProviderAccountViewModel> Accounts { get; } = new();
