@@ -147,6 +147,7 @@ dotnet run --project src/TunnelAgent.Avalonia/TunnelAgent.Avalonia.csproj
 - [VibeProxy](https://github.com/automazeio/vibeproxy): original concept and inspiration
 - [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI): the unified proxy that powers multi-provider support
 - [perplexity-webui-scraper](https://github.com/henrique-coder/perplexity-webui-scraper): Perplexity engine and session token CLI
+- [Quotio](https://github.com/nguyenphutrong/quotio): reference implementation for quota tracking and IDE account detection
 
 ## Contributing
 

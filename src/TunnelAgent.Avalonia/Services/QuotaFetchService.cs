@@ -396,6 +396,8 @@ public sealed class QuotaFetchService
 
     private async Task<string?> ReadAntigravityTokenAsync(string email, CancellationToken ct)
     {
+        // Antigravity OAuth credentials (from Quotio open-source implementation)
+        // These are public OAuth app credentials, not user secrets
         const string clientId     = "1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com";
         const string clientSecret = "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";
         const string tokenUri     = "https://oauth2.googleapis.com/token";
