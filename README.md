@@ -98,14 +98,6 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 | Cursor Agent    | Environment variables          |
 | Aider           | Environment variables          |
 
-## Auth File Storage
-
-See [docs/auth-file-storage.md](docs/auth-file-storage.md).
-
-## App Data Storage
-
-See [docs/app-data-storage.md](docs/app-data-storage.md).
-
 ## Usage
 
 1. **Install an engine**: go to Providers, select CLIProxyAPI or Perplexity, and click Install if no engine is detected.
