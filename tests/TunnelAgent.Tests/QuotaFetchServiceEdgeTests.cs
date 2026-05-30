@@ -92,6 +92,9 @@ public sealed class QuotaFetchServiceEdgeTests
         var gemini   = new ProviderViewModel("gemini-cli",     "Gemini CLI",     PackIconSimpleIconsKind.OpenAi,  "#000000", "");
         var anti     = new ProviderViewModel("antigravity",    "Antigravity",    PackIconSimpleIconsKind.OpenAi,  "#000000", "");
         var local    = new ProviderViewModel("local-ai",       "Local",          PackIconSimpleIconsKind.OpenAi,  "#000000", "");
+        // QuotaProviderCount counts providers that have at least one active account.
+        foreach (var p in new[] { claude, codex, copilot, gemini, anti })
+            p.Accounts.Add(new ProviderAccountViewModel(p.Id, "", "Account", isDisabled: false));
 
         foreach (var p in new[] { claude, codex, copilot, gemini, anti, local })
             vm.Providers.Add(p);

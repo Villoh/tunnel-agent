@@ -104,6 +104,8 @@ public sealed class MainWindowViewModelTests
         var claude = new ProviderViewModel("claude", "Claude", PackIconSimpleIconsKind.Claude, "#000000", "Claude", isOAuth: true);
         var codex = new ProviderViewModel("codex", "Codex", PackIconSimpleIconsKind.OpenAi, "#000000", "Codex", isOAuth: true);
         var local = new ProviderViewModel("local-ai", "Local", PackIconSimpleIconsKind.OpenAi, "#000000", "Local");
+        claude.Accounts.Add(new ProviderAccountViewModel("claude", "", "Account", isDisabled: false));
+        codex.Accounts.Add(new ProviderAccountViewModel("codex", "", "Account", isDisabled: false));
 
         vm.Providers.Add(local);
         vm.Providers.Add(claude);
@@ -161,15 +163,27 @@ public sealed class MainWindowViewModelTests
     public void QuotaProviderCount_SevenProviders_CountsAll()
     {
         var vm = new MainWindowViewModel();
-        // 5 standard providers in Providers collection
-        vm.Providers.Add(new ProviderViewModel("claude",         "Claude",         PackIconSimpleIconsKind.Claude,  "#000000", ""));
-        vm.Providers.Add(new ProviderViewModel("codex",          "Codex",          PackIconSimpleIconsKind.OpenAi,  "#000000", ""));
-        vm.Providers.Add(new ProviderViewModel("github-copilot", "GitHub Copilot", PackIconSimpleIconsKind.GitHub,  "#000000", ""));
-        vm.Providers.Add(new ProviderViewModel("gemini-cli",     "Gemini CLI",     PackIconSimpleIconsKind.OpenAi,  "#000000", ""));
-        vm.Providers.Add(new ProviderViewModel("antigravity",    "Antigravity",    PackIconSimpleIconsKind.OpenAi,  "#000000", ""));
-        // 2 standalone quota providers
-        vm.StandaloneQuotaProviders.Add(new ProviderViewModel("kiro", "Kiro", PackIconSimpleIconsKind.OpenAi, "#FF9900", ""));
-        vm.StandaloneQuotaProviders.Add(new ProviderViewModel("trae", "Trae", PackIconSimpleIconsKind.OpenAi, "#1464FF", ""));
+        // 5 standard providers, each with one active account
+        foreach (var (id, name, icon) in new[]
+        {
+            ("claude",         "Claude",         PackIconSimpleIconsKind.Claude),
+            ("codex",          "Codex",          PackIconSimpleIconsKind.OpenAi),
+            ("github-copilot", "GitHub Copilot", PackIconSimpleIconsKind.GitHub),
+            ("gemini-cli",     "Gemini CLI",     PackIconSimpleIconsKind.OpenAi),
+            ("antigravity",    "Antigravity",    PackIconSimpleIconsKind.OpenAi),
+        })
+        {
+            var p = new ProviderViewModel(id, name, icon, "#000000", "");
+            p.Accounts.Add(new ProviderAccountViewModel(id, "", "Account", isDisabled: false));
+            vm.Providers.Add(p);
+        }
+        // 2 standalone quota providers, each with one active account
+        foreach (var (id, name, color) in new[] { ("kiro", "Kiro", "#FF9900"), ("trae", "Trae", "#1464FF") })
+        {
+            var p = new ProviderViewModel(id, name, PackIconSimpleIconsKind.OpenAi, color, "");
+            p.Accounts.Add(new ProviderAccountViewModel(id, "", "Account", isDisabled: false));
+            vm.StandaloneQuotaProviders.Add(p);
+        }
 
         Assert.Equal(7, vm.QuotaProviderCount);
     }
