@@ -77,35 +77,21 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 
 ### Agents
 
-> Agent integration is not yet implemented. The Agents section is planned for a future release.
+| Agent           | Config method                  |
+| --------------- | ------------------------------ |
+| Claude Code     | `~/.claude/settings.json`      |
+| Codex CLI       | `~/.codex/config.toml`         |
+| Gemini CLI      | Environment variables          |
+| Amp             | `settings.json` + `secrets.json` |
+| OpenCode        | `~/.config/opencode/opencode.json` |
+| Pi              | `~/.pi/agent/models.json`      |
+| Factory Droid   | `~/.factory/config.json`       |
+| Cursor Agent    | Environment variables          |
+| Aider           | Environment variables          |
 
 ## Auth File Storage
 
-Tunnel Agent stores credentials and session data in the following locations.
-
-### CLIProxyAPI OAuth tokens and custom keys
-
-Managed by CLIProxyAPI. Tunnel Agent reads and modifies files in:
-
-| Platform | Path                            |
-| -------- | ------------------------------- |
-| Windows  | `%UserProfile%\.cli-proxy-api\` |
-| macOS    | `~/.cli-proxy-api/`             |
-| Linux    | `~/.cli-proxy-api/`             |
-
-The credential reset action backs up and removes only TunnelAgent-managed files (`openai-compat-*.json`, OAuth tokens). Unrelated files in the folder are preserved.
-
-### Perplexity WebUI session tokens
-
-Each Perplexity account is stored as a separate JSON file:
-
-| Platform | Path                                                              |
-| -------- | ----------------------------------------------------------------- |
-| Windows  | `%AppData%\TunnelAgent\perplexity-accounts\{id}.json`             |
-| macOS    | `~/Library/Preferences/TunnelAgent/perplexity-accounts/{id}.json` |
-| Linux    | `~/.config/TunnelAgent/perplexity-accounts/{id}.json`             |
-
-Session tokens are stored in plain text; access is restricted to the current user by OS file permissions. Reset backs up files to `.backup/{timestamp}/` before deleting.
+See [docs/auth-file-storage.md](docs/auth-file-storage.md).
 
 ## App Data Storage
 
@@ -126,6 +112,15 @@ Tunnel Agent writes non-credential app data to the following locations.
 | Windows  | `%AppData%\TunnelAgent\settings.json`             |
 | macOS    | `~/Library/Preferences/TunnelAgent/settings.json` |
 | Linux    | `~/.config/TunnelAgent/settings.json`             |
+
+## Usage
+
+1. **Install an engine** — go to Providers, select CLIProxyAPI or Perplexity, and click Install if no engine is detected.
+2. **Start the engine** — click the play button next to the endpoint. The status indicator turns green when the engine is running.
+3. **Connect providers** — open the Providers tab for CLIProxyAPI, connect OAuth providers (Claude, GitHub Copilot, Gemini CLI…) or add custom API key accounts.
+4. **Copy the endpoint** — the local endpoint (e.g. `http://127.0.0.1:8317/v1`) is shown in the Providers header. Copy it to use in any OpenAI-compatible client.
+5. **Configure agents** — open the Agents tab, detect installed agents, then use the gear icon to auto-write the proxy config for each agent. Select multiple agents at once for bulk setup.
+6. **Track quota** — open the Quota tab to see remaining quota for connected CLIProxyAPI providers and standalone IDE accounts (Kiro, Trae).
 
 ## Development
 
