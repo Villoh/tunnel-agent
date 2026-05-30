@@ -546,6 +546,12 @@
     <Style Selector="Button.icon-btn:pressed /template/ ContentPresenter">
         <Setter Property="Background" Value="#22000000" />
     </Style>
+    <Style Selector="Button.icon-btn.engine-action.start">
+        <Setter Property="Foreground" Value="#58B97B" />
+    </Style>
+    <Style Selector="Button.icon-btn.engine-action.stop">
+        <Setter Property="Foreground" Value="#D46A6A" />
+    </Style>
 
     <!-- Horizontal pill tab bar -->
     <Style Selector="Border.tab-bar">

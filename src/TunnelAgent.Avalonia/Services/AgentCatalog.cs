@@ -85,7 +85,7 @@ public static class AgentCatalog
             "pi", "Pi",
             "Pi coding agent by pi.dev.",
             new[] { "pi", "pi.exe", "pi.cmd" },
-            new[] { "~/.pi/models.json" },
+            new[] { "~/.pi/agent/models.json" },
             "https://pi.dev/docs/latest/models",
             "#FFFFFF",
             AssetsBase + "pi.svg"),

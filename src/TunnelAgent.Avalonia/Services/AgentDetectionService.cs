@@ -12,6 +12,8 @@ namespace TunnelAgent.Services;
 public sealed class AgentDetectionService : IAgentDetectionService
 {
     private readonly Dictionary<string, AgentDetectionResult> _cache = new();
+    private static readonly string[] PathDirs = (Environment.GetEnvironmentVariable("PATH") ?? "")
+        .Split(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ';' : ':', StringSplitOptions.RemoveEmptyEntries);
 
     public async Task<IReadOnlyList<AgentDetectionResult>> DetectAllAsync(CancellationToken ct = default)
     {
@@ -34,24 +36,38 @@ public sealed class AgentDetectionService : IAgentDetectionService
 
     private static async Task<string?> FindBinaryAsync(string[] names, CancellationToken ct)
     {
-        foreach (var name in names)
+        // Run all binary name checks in parallel and return the first hit.
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        var tasks = names.Select(name => FindSingleBinaryAsync(name, cts.Token)).ToList();
+        while (tasks.Count > 0)
         {
-            // Step 1: where.exe / which
-            var found = await WhichAsync(name, ct).ConfigureAwait(false);
-            if (found != null) return found;
-
-            // Step 2: PATH scan
-            found = ScanPath(name);
-            if (found != null) return found;
-
-            // Step 3: Well-known dirs (Windows)
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            var done = await Task.WhenAny(tasks).ConfigureAwait(false);
+            tasks.Remove(done);
+            var result = await done.ConfigureAwait(false);
+            if (result != null)
             {
-                found = ScanWellKnownDirs(name);
-                if (found != null) return found;
+                cts.Cancel();
+                return result;
             }
         }
         return null;
+    }
+
+    private static async Task<string?> FindSingleBinaryAsync(string name, CancellationToken ct)
+    {
+        // Step 1: PATH scan (instant — no subprocess)
+        var found = ScanPath(name);
+        if (found != null) return found;
+
+        // Step 2: Well-known dirs (instant — no subprocess)
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            found = ScanWellKnownDirs(name);
+            if (found != null) return found;
+        }
+
+        // Step 3: where.exe / which as fallback for exotic installs
+        return await WhichAsync(name, ct).ConfigureAwait(false);
     }
 
     private static async Task<string?> WhichAsync(string name, CancellationToken ct)
@@ -92,9 +108,7 @@ public sealed class AgentDetectionService : IAgentDetectionService
 
     private static string? ScanPath(string name)
     {
-        var path = Environment.GetEnvironmentVariable("PATH") ?? "";
-        var sep = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ';' : ':';
-        foreach (var dir in path.Split(sep, StringSplitOptions.RemoveEmptyEntries))
+        foreach (var dir in PathDirs)
         {
             var full = Path.Combine(dir, name);
             if (File.Exists(full)) return full;

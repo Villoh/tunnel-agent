@@ -232,7 +232,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsLaunchAtLoginSupported => _launchAtLogin.IsSupported;
     public int ConnectedProviderCount => Providers.Count(p => p.Connected || p.ActiveAccountCount > 0);
     public IEnumerable<ProviderViewModel> QuotaProviders => Providers.Where(IsQuotaSupportedProvider).Concat(StandaloneQuotaProviders);
-    public int QuotaProviderCount => QuotaProviders.Count();
+    public int QuotaProviderCount => QuotaProviders.Count(p => p.Accounts.Any(a => !a.IsDisabled));
     public IEnumerable<ProviderAccountViewModel> SelectedQuotaAccounts => SelectedQuotaProvider?.Accounts.Where(a => !a.IsDisabled) ?? Enumerable.Empty<ProviderAccountViewModel>();
     public bool HasQuotaProviders => QuotaProviders.Any();
     public bool HasQuotaAccounts => QuotaProviders.Any(p => p.Accounts.Any(a => !a.IsDisabled));
@@ -1501,8 +1501,11 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         finally
         {
-            IsApplyingAgentConfig = false;
-            ApplyAgentConfigCommand.NotifyCanExecuteChanged();
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                IsApplyingAgentConfig = false;
+                ApplyAgentConfigCommand.NotifyCanExecuteChanged();
+            });
         }
     }
     private bool CanApplyAgentConfig() => !IsApplyingAgentConfig;

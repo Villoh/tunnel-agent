@@ -41,6 +41,7 @@ public sealed class AgentConfigurationService
     // Sentinel comment used to bracket managed blocks in TOML/shell files.
     private const string ManagedBanner = "# >>> Managed by Tunnel Agent — do not edit this block <<<";
     private const string ManagedEnd    = "# <<< End Tunnel Agent block >>>";
+    private static readonly Encoding Utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 
     // ── Public entry points ──────────────────────────────────────────────────
 
@@ -160,7 +161,7 @@ public sealed class AgentConfigurationService
 
         // Write back with indented JSON
         var json = root.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(configPath, json, Encoding.UTF8);
+        File.WriteAllText(configPath, json, Utf8NoBom);
 
         var instructions = remove
             ? $"Removed proxy configuration from {configPath}. Claude Code will use its default Anthropic endpoint."
@@ -195,26 +196,26 @@ public sealed class AgentConfigurationService
         if (File.Exists(configPath))
         {
             backupPath = $"{configPath}.backup.{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
-            File.WriteAllText(backupPath, existing, Encoding.UTF8);
+            File.WriteAllText(backupPath, existing, Utf8NoBom);
         }
 
         var stripped = StripManagedBlock(existing);
 
         if (remove)
         {
-            File.WriteAllText(configPath, stripped.Trim() + "\n", Encoding.UTF8);
+            File.WriteAllText(configPath, stripped.Trim() + "\n", Utf8NoBom);
         }
         else
         {
             var block = BuildCodexManagedBlock(proxyBaseUrl, apiKey);
-            File.WriteAllText(configPath, stripped.Trim() + "\n\n" + block + "\n", Encoding.UTF8);
+            File.WriteAllText(configPath, stripped.Trim() + "\n\n" + block + "\n", Utf8NoBom);
 
             if (HasApiKey(apiKey))
             {
                 // auth.json stores the API key
                 var authJson = new JsonObject { ["OPENAI_API_KEY"] = apiKey }
                     .ToJsonString(new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(authPath, authJson, Encoding.UTF8);
+                File.WriteAllText(authPath, authJson, Utf8NoBom);
             }
         }
 
@@ -302,11 +303,11 @@ public sealed class AgentConfigurationService
             if (HasApiKey(apiKey)) secrets[$"apiKey@{baseUrl}"] = apiKey;
             else secrets.Remove($"apiKey@{baseUrl}");
             File.WriteAllText(secretsPath,
-                secrets.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Encoding.UTF8);
+                secrets.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Utf8NoBom);
         }
 
         File.WriteAllText(settingsPath,
-            settings.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Encoding.UTF8);
+            settings.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Utf8NoBom);
 
         var msg = remove
             ? "Removed proxy config from Amp CLI settings."
@@ -375,7 +376,7 @@ public sealed class AgentConfigurationService
         }
 
         File.WriteAllText(configPath,
-            root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Encoding.UTF8);
+            root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Utf8NoBom);
 
         var modelCount = models?.Count ?? 0;
         var msg = remove
@@ -391,7 +392,7 @@ public sealed class AgentConfigurationService
             ["baseURL"]     = proxyBaseUrl,
             ["litellmProxy"] = true
         };
-        if (HasApiKey(apiKey)) options["apiKey"] = apiKey;
+        options["apiKey"] = HasApiKey(apiKey) ? apiKey : "no-key";
         var provider = new JsonObject
         {
             ["name"] = "Tunnel Agent",
@@ -431,13 +432,12 @@ public sealed class AgentConfigurationService
 
     private static JsonObject BuildPiProviderBlock(string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models)
     {
-        var baseUrl  = StripV1(proxyBaseUrl);
         var provider = new JsonObject
         {
-            ["baseUrl"] = baseUrl,
+            ["baseUrl"] = proxyBaseUrl,
             ["api"]     = "openai-completions"
         };
-        if (HasApiKey(apiKey)) provider["apiKey"] = apiKey;
+        provider["apiKey"] = HasApiKey(apiKey) ? apiKey : "no-key";
         if (models is { Count: > 0 })
             provider["models"] = new JsonArray(
                 models.Select(id => (JsonNode?)new JsonObject { ["id"] = id }).ToArray());
@@ -446,7 +446,7 @@ public sealed class AgentConfigurationService
 
     private static AgentConfigApplyResult ApplyPi(string proxyBaseUrl, string apiKey, bool remove, IReadOnlyList<string>? models)
     {
-        var configPath = ExpandPath("~/.pi/models.json");
+        var configPath = ExpandPath("~/.pi/agent/models.json");
         var dir        = Path.GetDirectoryName(configPath)!;
         if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
@@ -469,30 +469,30 @@ public sealed class AgentConfigurationService
 
         if (remove)
         {
-            providers.Remove("cliproxy");
+            providers.Remove("tunnel-agent");
             if (providers.Count == 0) root.Remove("providers");
         }
         else
         {
-            providers["cliproxy"] = BuildPiProviderBlock(proxyBaseUrl, apiKey, models);
+            providers["tunnel-agent"] = BuildPiProviderBlock(proxyBaseUrl, apiKey, models);
         }
 
         File.WriteAllText(configPath,
-            root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Encoding.UTF8);
+            root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Utf8NoBom);
 
         var modelCount = models?.Count ?? 0;
         var msg = remove
-            ? "Removed cliproxy provider from Pi models.json."
+            ? "Removed tunnel-agent provider from Pi models.json."
             : $"Configuration written to {configPath}.{(modelCount > 0 ? $" {modelCount} model(s) registered." : "")} Restart Pi for changes to take effect.";
         return AgentConfigApplyResult.Ok(msg, configPath, backupPath);
     }
 
     private static RawConfigPreview PiRaw(string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models)
     {
-        var configPath = ExpandPath("~/.pi/models.json");
+        var configPath = ExpandPath("~/.pi/agent/models.json");
         var preview    = new JsonObject
         {
-            ["providers"] = new JsonObject { ["cliproxy"] = BuildPiProviderBlock(proxyBaseUrl, apiKey, models) }
+            ["providers"] = new JsonObject { ["tunnel-agent"] = BuildPiProviderBlock(proxyBaseUrl, apiKey, models) }
         };
         return new RawConfigPreview("models.json", configPath,
             preview.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
@@ -550,7 +550,7 @@ public sealed class AgentConfigurationService
         }
 
         File.WriteAllText(configPath,
-            root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Encoding.UTF8);
+            root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Utf8NoBom);
 
         var modelCount = models?.Count ?? 0;
         var msg = remove

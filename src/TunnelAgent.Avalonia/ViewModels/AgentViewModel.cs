@@ -32,7 +32,7 @@ public partial class AgentViewModel : ViewModelBase
     /// <summary>True when installed but not yet configured through the proxy.</summary>
     public bool IsInstalledOnly => Installed && !Configured;
 
-    public string ConfigureButtonLabel => Configured ? "Reconfigurar" : "Configurar";
+    public string ConfigureButtonLabel => Configured ? "Reconfigure" : "Configure";
 
     /// <summary>Checked in the Configure dialog to pick which agents to configure at once.</summary>
     [ObservableProperty] private bool _isSelectedForConfig;

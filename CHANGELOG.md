@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-05-30
+
 ### Added
 
 - **GitHub Copilot username display**: reads the `username` field from `github-copilot-*.json` auth files so accounts show the GitHub username instead of falling back to filename parsing.
@@ -57,6 +59,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Codex setup now writes both `config.toml` and `auth.json`.
 - Secret input dialogs no longer retain cancelled API keys when reopened.
 - Legacy settings migration avoids stripping `Providers` and `PerplexityAccounts` before migration consumers can run.
+- Agent detection speed: PATH and well-known directories are scanned first (no subprocess); `where.exe`/`which` is used only as a fallback; binary name candidates are checked in parallel; `$PATH` split is computed once at startup.
+- Pi `baseUrl` now correctly includes `/v1` in the generated `models.json`.
+- Pi and OpenCode `apiKey` field always written; uses `"no-key"` placeholder when CLIProxy auth is disabled so provider schemas that require a non-empty key do not reject the config.
+- Pi provider key in `models.json` renamed from `cliproxy` to `tunnel-agent` for consistency with OpenCode.
+- Pi config path corrected to `~/.pi/agent/models.json`.
+- All agent config files written as UTF-8 without BOM; prevents JSON parse errors in runtimes that do not strip the BOM.
+- `ApplyAgentConfigAsync` finally block dispatched to UI thread; fixes unhandled `InvalidOperationException` (`Call from invalid thread`) when applying agent config.
+- Start/stop engine-action button colours restored after `icon-btn` `Foreground` override introduced a style-specificity conflict.
+- Quota sidebar badge now counts providers with at least one active account instead of all quota-supported providers.
+- Agent configure tooltip translated to English (`"Configurar"` → `"Configure"`, `"Reconfigurar"` → `"Reconfigure"`).
 
 ## [0.3.1] - 2026-05-23
 
