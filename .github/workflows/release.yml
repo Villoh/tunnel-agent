@@ -1,9 +1,12 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - "v*"
+  # Triggered automatically after CI passes on a tag commit.
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+  # Manual trigger (GitHub UI or changelog-release.yml).
   workflow_dispatch:
     inputs:
       version:
@@ -25,12 +28,23 @@ jobs:
     permissions:
       contents: write
 
+    # workflow_run: only proceed when CI succeeded on a tag push.
+    # workflow_dispatch: always proceed (manual / changelog trigger).
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.workflow_run.conclusion == 'success' &&
+        startsWith(github.event.workflow_run.head_branch, 'v')
+      )
+
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          # For workflow_run, check out the exact commit that CI tested.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -55,14 +69,13 @@ jobs:
           if ("${{ github.event_name }}" -eq "workflow_dispatch") {
             $version = "${{ github.event.inputs.version }}".TrimStart('v')
           } else {
-            $version = "${{ github.ref_name }}".TrimStart('v')
+            # workflow_run: head_branch contains the tag name (e.g. "v0.4.0")
+            $version = "${{ github.event.workflow_run.head_branch }}".TrimStart('v')
           }
 
-          # Velopack requires strict semver without pre-release suffixes for the
-          # package version; we keep the original tag for the GitHub Release name.
           $semver = ($version -split '-')[0]
-
           $isPrerelease = $version -match '-(rc|beta|alpha)\.'
+
           "version=$version"       >> $env:GITHUB_OUTPUT
           "semver=$semver"         >> $env:GITHUB_OUTPUT
           "tag=v$version"          >> $env:GITHUB_OUTPUT
@@ -77,22 +90,6 @@ jobs:
       # ── Restore ───────────────────────────────────────────────────────────
       - name: Restore
         run: dotnet restore TunnelAgent.slnx
-
-      # ── Test (fail fast before packaging) ─────────────────────────────────
-      - name: Test
-        run: >
-          dotnet test tests/TunnelAgent.Tests/TunnelAgent.Tests.csproj
-          --no-restore -c Release
-          --logger "trx;LogFileName=results.trx"
-          --results-directory TestResults
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: test-results
-          path: TestResults/
-          retention-days: 7
 
       # ── Publish self-contained win-x64 ────────────────────────────────────
       - name: Publish
