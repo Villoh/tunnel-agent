@@ -22,36 +22,50 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-test:
-    name: Build & Test
+  build:
+    name: Build
     runs-on: windows-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: "10.x"
 
-      - name: Cache NuGet packages
-        uses: actions/cache@v5
+      - uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
           key: nuget-${{ hashFiles('**/*.csproj', '**/TunnelAgent.slnx') }}
           restore-keys: nuget-
 
-      - name: Restore
-        run: dotnet restore TunnelAgent.slnx
+      - run: dotnet restore TunnelAgent.slnx
 
-      - name: Build
-        run: dotnet build TunnelAgent.slnx --no-restore -c Release
+      - run: dotnet build TunnelAgent.slnx --no-restore -c Release
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.x"
+
+      - uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ hashFiles('**/*.csproj', '**/TunnelAgent.slnx') }}
+          restore-keys: nuget-
+
+      - run: dotnet restore TunnelAgent.slnx
 
       - name: Test
         run: >
           dotnet test tests/TunnelAgent.Tests/TunnelAgent.Tests.csproj
-          --no-build -c Release
+          --no-restore -c Release
           --logger "trx;LogFileName=results.trx"
           --collect:"XPlat Code Coverage"
           --results-directory TestResults
