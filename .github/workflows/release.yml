@@ -1,0 +1,186 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g. 0.5.0 or 0.5.0-rc.1)"
+        required: true
+        type: string
+      # Internal: set to 'true' by changelog-release.yml so the version-bump
+      # commit is skipped (CHANGELOG already updated the branch).
+      skip_version_commit:
+        description: "Skip committing version bump back to branch (internal)"
+        required: false
+        default: "false"
+        type: string
+
+jobs:
+  release:
+    name: Build & Publish
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.x"
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ hashFiles('**/*.csproj', '**/TunnelAgent.slnx') }}
+          restore-keys: nuget-
+
+      - name: Install Velopack CLI (vpk)
+        run: dotnet tool install -g vpk
+
+      # ── Resolve version ────────────────────────────────────────────────────
+      - name: Resolve version
+        id: version
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $version = "${{ github.event.inputs.version }}".TrimStart('v')
+          } else {
+            $version = "${{ github.ref_name }}".TrimStart('v')
+          }
+
+          # Velopack requires strict semver without pre-release suffixes for the
+          # package version; we keep the original tag for the GitHub Release name.
+          $semver = ($version -split '-')[0]
+
+          $isPrerelease = $version -match '-(rc|beta|alpha)\.'
+          "version=$version"       >> $env:GITHUB_OUTPUT
+          "semver=$semver"         >> $env:GITHUB_OUTPUT
+          "tag=v$version"          >> $env:GITHUB_OUTPUT
+          "is_prerelease=$($isPrerelease.ToString().ToLower())" >> $env:GITHUB_OUTPUT
+          Write-Host "Version: $version  |  Semver: $semver  |  Pre-release: $isPrerelease"
+
+      # ── Bump .csproj files ─────────────────────────────────────────────────
+      - name: Bump version in .csproj files
+        shell: pwsh
+        run: .\scripts\bump-version.ps1 -Version "${{ steps.version.outputs.version }}"
+
+      # ── Restore ───────────────────────────────────────────────────────────
+      - name: Restore
+        run: dotnet restore TunnelAgent.slnx
+
+      # ── Test (fail fast before packaging) ─────────────────────────────────
+      - name: Test
+        run: >
+          dotnet test tests/TunnelAgent.Tests/TunnelAgent.Tests.csproj
+          --no-restore -c Release
+          --logger "trx;LogFileName=results.trx"
+          --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: TestResults/
+          retention-days: 7
+
+      # ── Publish self-contained win-x64 ────────────────────────────────────
+      - name: Publish
+        run: >
+          dotnet publish src/TunnelAgent.Avalonia/TunnelAgent.Avalonia.csproj
+          --no-restore -c Release
+          -r win-x64 --self-contained true
+          -p:PublishSingleFile=false
+          -o artifacts/publish
+
+      # ── Package with Velopack ─────────────────────────────────────────────
+      # vpk pack produces:
+      #   - TunnelAgent-{semver}-win-Setup.exe  (NSIS installer, first install)
+      #   - TunnelAgent-{semver}-win-full.nupkg (full delta package, auto-update)
+      #   - RELEASES-win                        (update manifest)
+      - name: Package with Velopack
+        shell: pwsh
+        run: |
+          vpk pack `
+            --packId   TunnelAgent `
+            --packVersion "${{ steps.version.outputs.semver }}" `
+            --packDir  artifacts/publish `
+            --mainExe  TunnelAgent.exe `
+            --icon     src/TunnelAgent.Avalonia/Assets/logo.ico `
+            --outputDir artifacts/velopack
+
+      # ── Create tag (workflow_dispatch only) ───────────────────────────────
+      - name: Create and push tag
+        if: github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        run: |
+          $tag = "${{ steps.version.outputs.tag }}"
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if (git tag -l $tag) {
+            Write-Host "Tag $tag already exists, skipping."
+          } else {
+            git tag -a $tag -m "Release $tag"
+            git push origin $tag
+            Write-Host "Pushed tag $tag"
+          }
+
+      # ── Commit bumped .csproj files back to branch ────────────────────────
+      - name: Commit version bump
+        if: github.event.inputs.skip_version_commit != 'true'
+        shell: pwsh
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          $changed = git diff --name-only
+          if (-not $changed) { Write-Host "Nothing to commit."; exit 0 }
+
+          git add **/*.csproj
+          git commit -m "chore: bump version to ${{ steps.version.outputs.version }} [skip ci]"
+
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $branch = "${{ github.ref_name }}"
+          } else {
+            $branch = git branch -r --contains HEAD |
+              Select-String 'origin/(main|master)' |
+              ForEach-Object { $_.Matches[0].Groups[1].Value } |
+              Select-Object -First 1
+            if (-not $branch) { $branch = "main" }
+          }
+
+          git push origin "HEAD:refs/heads/$branch"
+          Write-Host "Pushed version bump to $branch"
+
+      # ── Publish GitHub Release with Velopack assets ───────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: TunnelAgent ${{ steps.version.outputs.version }}
+          prerelease: ${{ steps.version.outputs.is_prerelease == 'true' }}
+          generate_release_notes: true
+          append_body: true
+          body: |
+
+            ## Installation
+
+            **Fresh install:** download and run `TunnelAgent-${{ steps.version.outputs.semver }}-win-Setup.exe`.
+
+            **Requirements:** Windows 10 or later.
+
+            > Existing installations update automatically — no manual download needed.
+          files: |
+            artifacts/velopack/*.exe
+            artifacts/velopack/*.nupkg
+            artifacts/velopack/RELEASES-win

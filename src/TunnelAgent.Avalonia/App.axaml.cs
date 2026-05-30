@@ -43,6 +43,8 @@ public partial class App : Application
                 try { await vm.InitializeAsync(); }
                 catch { }
             }, DispatcherPriority.Background);
+
+            vm.InitAppUpdater();
         }
 
         base.OnFrameworkInitializationCompleted();
