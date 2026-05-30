@@ -10,9 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **GitHub Copilot username display**: reads the `username` field from `github-copilot-*.json` auth files so accounts show the GitHub username instead of falling back to filename parsing.
-
 - **Hide sensitive information** setting in Configuration → General: masks all account email addresses with bullet dots (`•••@•••`) to keep them private on shared screens.
-
 - **Quota view**: dedicated sidebar section to track quota usage for CLIProxyAPI providers (Claude, Codex, GitHub Copilot, Gemini CLI, Antigravity) and standalone IDE accounts (Kiro, Trae).
 - **Quota providers tab** in Providers view: read-only tab showing detected standalone quota providers (Kiro, Trae) that are not managed by CLIProxyAPI or Perplexity.
 - **Gemini CLI quota fetching**: direct API calls to `cloudcode-pa.googleapis.com/v1internal:retrieveUserQuota` with OAuth token refresh support.
@@ -22,22 +20,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Custom SVG icons**: `SlidingTabBar` now supports `CustomIconData` property for SVG path rendering; `ProviderIconRegistry` includes custom icons for Antigravity, Kiro, and Trae.
 - **Global quota refresh**: single refresh button in Quota view header refreshes all providers with active accounts.
 - **Initial quota load**: Quota view auto-loads quota data on first open if accounts exist but no data is loaded.
+- Agents page with CLI tool detection, installed/configured state, SVG icons, documentation links, individual setup, and multi-agent setup.
+- Agent configuration support for Claude Code, Codex, Gemini CLI, Amp, OpenCode, Pi, Factory Droid, Cursor Agent, and Aider.
+- Model picker in the Agents setup dialog with search, tri-state select-all for visible results, and dynamic manual config previews.
+- CLIProxyAPI key management UI with optional default key selection, removable keys, and generated agent configs that omit auth when no default key exists.
+- Eye/eye-off reveal toggles for CLIProxy API key, custom provider API key, and Perplexity session token inputs.
+- SVG agent assets for Amp, Claude Code, Codex, Cursor Agent, Factory Droid, Gemini CLI, OpenCode, and Pi.
 
 ### Changed
 
 - **GitHub Copilot quota fetching**: fixed API response parsing to use the real field structure (`quota_snapshots.{chat,completions,premium_interactions}` with `percent_remaining`/`remaining`/`entitlement`; `limited_user_quotas`+`monthly_quotas` for Free/Individual plans); added reset date from `quota_reset_date_utc`; corrected plan badge detection via `copilot_plan`+`access_type_sku`; updated request headers to `Accept: application/vnd.github+json` + `X-GitHub-Api-Version: 2022-11-28`.
-
 - **Quota UI moved** from Providers account cards to dedicated Quota view; Providers now focuses solely on account management (add/remove/enable/disable/connect/disconnect).
 - **Quota refresh policy**: tab switching no longer triggers refresh; explicit refresh actions (global button, per-account button) or initial load only.
 - **Shorter tab labels**: "GitHub Copilot" → "Copilot", "Gemini CLI" → "Gemini" to fit 7 tabs in Quota view.
 - **Provider icon colors**: Kiro uses `#9046FF` (Kiro purple), Trae uses `#32F08C` (Trae green), Antigravity uses `#7C3AED` with custom butterfly icon.
 - **icon-btn style**: added `Foreground` setter using `FgBrush` and `:pressed` state for consistent button feedback.
+- Agents detection now runs in the background, uses parallel detection, and exposes a compact spinning refresh action.
+- Agents setup now uses icon-only gear actions for single and bulk configuration.
+- OpenCode, Pi, and Factory Droid setup now register selected models dynamically instead of relying on static model slots.
+- Factory Droid config now writes `customModels` entries per model and migrates legacy `custom_models` entries.
+- OpenCode config now omits hardcoded context/output/vision limits and lets OpenCode use provider/model defaults.
+- CLIProxy API keys are now optional: empty key list means no `api-keys` entry in `proxy-config.yaml` and no bearer header from Tunnel Agent.
+- `settings.json` no longer persists provider/runtime state (`Providers`, `PerplexityAccounts`); provider intent is loaded from `proxy-config.yaml` where practical and credentials remain file-backed.
+- Agents setup dialogs use improved scrolling, spacing, and compact controls.
 
 ### Fixed
 
 - **Qwen provider removed**: CLIProxyAPI upstream does not support Qwen; removed from built-in OAuth providers, login flags, token detection, and documentation.
 - **Refresh button visibility**: global refresh button now visible with proper icon styling.
 - **icon-btn click feedback**: added `:pressed` pseudo-class styling to prevent default Fluent button background flash.
+- `/v1/models` health and model fetch requests now include the selected default CLIProxy bearer token when CLIProxy auth is enabled.
+- Available models now keep polling after CLIProxy health passes, covering startup races while auth/models are still loading.
+- Manual Agents config previews refresh when available models load while the dialog is already open.
+- CLIProxy `proxy-config.yaml` API key output no longer corrupts YAML formatting.
+- Amp setup now writes `settings.json` plus `secrets.json` using the base URL without `/v1`.
+- Codex setup now writes both `config.toml` and `auth.json`.
+- Secret input dialogs no longer retain cancelled API keys when reopened.
+- Legacy settings migration avoids stripping `Providers` and `PerplexityAccounts` before migration consumers can run.
 
 ## [0.3.1] - 2026-05-23
 

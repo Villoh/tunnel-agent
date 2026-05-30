@@ -85,4 +85,37 @@ public sealed class ConfigServiceEdgeTests
         Assert.Contains("port: 2222", yaml2);
         Assert.DoesNotContain("port: 1111", yaml2);
     }
+
+    [Fact]
+    public async Task ReadProviderSettingsFromConfig_ReadsDisabledOAuthAndCustomProvider()
+    {
+        using var temp = new TestTempDirectory();
+        var settings = new SettingsService(temp.File("settings.json"));
+        await settings.LoadAsync();
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
+        await File.WriteAllTextAsync(config.ConfigPath, """
+host: "127.0.0.1"
+port: 8317
+auth-dir: "auth"
+oauth-excluded-models:
+  codex:
+    - "*"
+openai-compatibility:
+  - name: local-ai
+    display-name: "Local AI"
+    base-url: "http://localhost:11434/v1"
+    api-key-entries:
+      - api-key: "key"
+""");
+
+        var providers = config.ReadProviderSettingsFromConfig();
+
+        var codex = Assert.Single(providers, p => p.Id == "codex");
+        Assert.False(codex.Enabled);
+        var local = Assert.Single(providers, p => p.Id == "local-ai");
+        Assert.True(local.Enabled);
+        Assert.Equal("Local AI", local.DisplayName);
+        Assert.Equal("http://localhost:11434/v1", local.BaseUrl);
+    }
+
 }

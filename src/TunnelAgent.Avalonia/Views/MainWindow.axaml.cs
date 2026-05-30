@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia;
@@ -210,5 +211,15 @@ public partial class MainWindow : Window
         if (e.Key != Key.Enter || DataContext is not MainWindowViewModel vm) return;
         e.Handled = true;
         await vm.ConfirmEditPerplexityLabelAsync();
+    }
+
+    private async void OnCopyAgentConfigClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        var all = string.Join("\n\n---\n\n",
+            vm.AgentConfigPreviews.Select(p => $"# {p.Filename}\n# {p.TargetPath}\n\n{p.Content}"));
+        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+        if (clipboard != null)
+            await clipboard.SetTextAsync(all);
     }
 }

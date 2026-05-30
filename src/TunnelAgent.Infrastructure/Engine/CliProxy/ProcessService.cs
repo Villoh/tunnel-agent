@@ -25,7 +25,7 @@ public sealed class ProcessService
 
     private Process? _process;
 
-    public async Task StartAsync(string binaryPath, string configPath, int port, CancellationToken ct = default)
+    public async Task StartAsync(string binaryPath, string configPath, int port, string? apiKey = null, CancellationToken ct = default)
     {
         Port = port;
         SetState(EngineState.Starting);
@@ -61,7 +61,7 @@ public sealed class ProcessService
         _process.Start();
 
         // Poll the health endpoint until the server is up (up to 5s)
-        var healthy = await WaitForHealthAsync(port, ct);
+        var healthy = await WaitForHealthAsync(port, apiKey, ct);
         if (!healthy)
         {
             LastError = "Engine did not respond in time.";
@@ -90,7 +90,7 @@ public sealed class ProcessService
         return Task.CompletedTask;
     }
 
-    private static async Task<bool> WaitForHealthAsync(int port, CancellationToken ct)
+    private static async Task<bool> WaitForHealthAsync(int port, string? apiKey, CancellationToken ct)
     {
         var url = $"http://127.0.0.1:{port}/v1/models";
         for (var i = 0; i < 25; i++)
@@ -98,7 +98,10 @@ public sealed class ProcessService
             try
             {
                 await Task.Delay(200, ct);
-                var response = await HealthClient.GetAsync(url, ct);
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                if (!string.IsNullOrWhiteSpace(apiKey))
+                    request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {apiKey}");
+                var response = await HealthClient.SendAsync(request, ct);
                 if ((int)response.StatusCode < 500)
                     return true;
             }

@@ -22,6 +22,8 @@ public sealed class AppSettingsTests
         Assert.Empty(settings.Providers);
         Assert.Empty(settings.Engines);
         Assert.Empty(settings.PerplexityAccounts);
+        Assert.Equal("", settings.DefaultCliProxyApiKey);
+        Assert.Empty(settings.CliProxyApiKeys);
     }
 
     [Fact]
@@ -36,6 +38,8 @@ public sealed class AppSettingsTests
             AutoUpdate = true,
             PreferredEngineVersion = "v1.2.3",
             RoutingStrategy = ViewModels.RoutingStrategy.FillFirst,
+            DefaultCliProxyApiKey = "sk-extra",
+            CliProxyApiKeys = ["cliproxyapi", "sk-extra"],
             Engines =
             [
                 new EngineRuntimeSettings { EngineId = "cliproxyapi", Port = 9001, PreferredVersion = "v1.2.3" },
@@ -58,6 +62,8 @@ public sealed class AppSettingsTests
         Assert.True(deserialized.AutoUpdate);
         Assert.Equal("v1.2.3", deserialized.PreferredEngineVersion);
         Assert.Equal(ViewModels.RoutingStrategy.FillFirst, deserialized.RoutingStrategy);
+        Assert.Equal("sk-extra", deserialized.DefaultCliProxyApiKey);
+        Assert.Equal(["cliproxyapi", "sk-extra"], deserialized.CliProxyApiKeys);
         Assert.Equal(2, deserialized.Engines.Count);
         Assert.Equal("perplexity-webui-scraper", deserialized.Engines[1].EngineId);
         Assert.Single(deserialized.PerplexityAccounts);

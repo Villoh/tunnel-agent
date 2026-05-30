@@ -203,10 +203,19 @@
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
+                                    <TextBlock Classes="row-label" Text="API keys"/>
+                                    <TextBlock Classes="row-desc" Text="Keys accepted by CLIProxyAPI clients. Agent setup uses the default key."/>
+                                </StackPanel>
+                                <Button Grid.Column="1" Classes="app" Content="Manage"
+                                        Command="{Binding OpenApiKeysCommand}" />
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
                                     <TextBlock Classes="row-label" Text="Reset all credentials"/>
                                     <TextBlock Classes="row-desc" Text="Backs up and removes TunnelAgent-managed OAuth tokens and API keys."/>
                                 </StackPanel>
-                                <Button Grid.Column="1" Classes="app danger" Content="Reset…"
+                                <Button Grid.Column="1" Classes="app danger" Content="Reset"
                                         Command="{Binding ResetAllCredentialsCommand}" />
                             </Grid>
                         </StackPanel>
@@ -380,7 +389,7 @@
                                     <TextBlock Classes="row-label" Text="Reset session accounts"/>
                                     <TextBlock Classes="row-desc" Text="Removes all saved Perplexity WebUI session tokens."/>
                                 </StackPanel>
-                                <Button Grid.Column="1" Classes="app danger" Content="Reset…"
+                                <Button Grid.Column="1" Classes="app danger" Content="Reset"
                                         Command="{Binding ResetPerplexityAccountsCommand}" />
                             </Grid>
                         </StackPanel>

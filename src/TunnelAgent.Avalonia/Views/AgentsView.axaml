@@ -1,63 +1,181 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TunnelAgent.ViewModels"
+             xmlns:cv="using:TunnelAgent.Converters"
+             xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+             xmlns:svg="using:Avalonia.Svg.Skia"
              x:Class="TunnelAgent.Views.AgentsView"
              x:DataType="vm:MainWindowViewModel">
+    <UserControl.Resources>
+        <cv:HexToBrushConverter        x:Key="HexBrush" />
+        <cv:SvgImageConverter          x:Key="SvgImage" />
+        <cv:IntGreaterThanZeroConverter x:Key="IntGtZero" />
+        <cv:StringNotEmptyConverter    x:Key="StringNotEmpty" />
+        <cv:InvertBoolConverter        x:Key="InvertBool" />
+    </UserControl.Resources>
+
     <StackPanel Spacing="0">
-        <Grid Margin="0,0,0,14" ColumnDefinitions="*,Auto">
+
+        <!-- ── Header ─────────────────────────────────────────────────── -->
+        <Grid Margin="0,0,0,14" ColumnDefinitions="*,Auto,Auto">
             <StackPanel>
                 <TextBlock Classes="page-title" Text="Agents" />
                 <TextBlock Classes="page-sub" Text="Route each CLI tool through a connected provider." />
             </StackPanel>
-            <Button Grid.Column="1" Classes="app" Content="Detect" VerticalAlignment="Bottom" />
+            <Button Grid.Column="1" Classes="icon" VerticalAlignment="Bottom" Margin="0,0,8,0"
+                    ToolTip.Tip="Configure multiple"
+                    Command="{Binding OpenBulkAgentConfigCommand}">
+                <lucide:PackIconLucide Kind="Settings" Width="15" Height="15" />
+            </Button>
+            <Button Grid.Column="2" Classes="icon" VerticalAlignment="Bottom"
+                    ToolTip.Tip="Detect agents"
+                    Command="{Binding DetectAgentsCommand}">
+                <lucide:PackIconLucide Kind="RefreshCw" Width="15" Height="15"
+                                       Classes.spin="{Binding IsDetectingAgents}" />
+            </Button>
         </Grid>
 
-        <Border Classes="card">
-            <ItemsControl ItemsSource="{Binding Agents}">
+        <!-- ── Stats chips ─────────────────────────────────────────────── -->
+        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,0,18">
+            <Border Classes="chip" Background="#1446C788">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <TextBlock Text="{Binding InstalledAgentCount}"
+                               Foreground="#46C788" FontWeight="SemiBold" FontSize="12" />
+                    <TextBlock Text="installed" Foreground="#46C788" FontSize="12" />
+                </StackPanel>
+            </Border>
+            <Border Classes="chip" Background="#144285F4">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <TextBlock Text="{Binding ConfiguredAgentCount}"
+                               Foreground="#4285F4" FontWeight="SemiBold" FontSize="12" />
+                    <TextBlock Text="configured" Foreground="#4285F4" FontSize="12" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!-- ── Installed section ───────────────────────────────────────── -->
+        <StackPanel Spacing="6" Margin="0,0,0,18"
+                    IsVisible="{Binding InstalledAgentCount, Converter={StaticResource IntGtZero}}">
+            <TextBlock Classes="section-label" Text="INSTALLED" Margin="4,0,4,6" />
+            <ItemsControl ItemsSource="{Binding InstalledAgents}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:AgentViewModel">
-                        <StackPanel>
-                            <Grid Margin="14,12" ColumnDefinitions="22,*,Auto">
-                                <TextBlock Grid.Column="0" Text="▸" FontSize="14" VerticalAlignment="Center"
-                                           Foreground="{DynamicResource FgMutedBrush}"/>
-                                <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                        <Border Classes="card" Margin="0,0,0,6">
+                            <Grid ColumnDefinitions="48,*,Auto" Margin="14,12">
+
+                                <!-- Agent icon: SVG or initials fallback -->
+                                <Panel Grid.Column="0" Width="40" Height="40" VerticalAlignment="Center">
+                                    <Image Source="{Binding IconAssetPath, Converter={StaticResource SvgImage}}"
+                                           Width="32" Height="32"
+                                           Stretch="Uniform"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           IsVisible="{Binding HasIcon}" />
+                                    <Panel IsVisible="{Binding HasIcon, Converter={StaticResource InvertBool}}">
+                                        <Border Width="40" Height="40" CornerRadius="20"
+                                                Background="{Binding AccentHex, Converter={StaticResource HexBrush}}"
+                                                Opacity="0.15" />
+                                        <TextBlock Text="{Binding Initials}"
+                                                   Foreground="{Binding AccentHex, Converter={StaticResource HexBrush}}"
+                                                   FontWeight="SemiBold" FontSize="13"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Panel>
+                                </Panel>
+
+                                <!-- Name + badge + description + path -->
+                                <StackPanel Grid.Column="1" Margin="10,0,0,0"
+                                            VerticalAlignment="Center" Spacing="2">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <TextBlock Classes="row-label" Text="{Binding Name}" />
-                                        <Border Classes="chip" Background="#14000000"
-                                                IsVisible="{Binding !Installed}">
-                                            <TextBlock Text="Not installed"
-                                                       Foreground="{DynamicResource FgMutedBrush}" />
+                                        <Border Classes="chip" Background="#1446C788"
+                                                IsVisible="{Binding Configured}">
+                                            <TextBlock Text="Configured" Foreground="#46C788" FontSize="10" FontWeight="SemiBold" />
+                                        </Border>
+                                        <Border Classes="chip" Background="#14E2A52E"
+                                                IsVisible="{Binding IsInstalledOnly}">
+                                            <TextBlock Text="Installed" Foreground="#E2A52E" FontSize="10" FontWeight="SemiBold" />
                                         </Border>
                                     </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Spacing="6"
-                                                IsVisible="{Binding Installed}">
-                                        <TextBlock Text="{Binding Binary}"
-                                                   FontFamily="Cascadia Mono,Consolas,monospace"
-                                                   FontSize="11"
-                                                   Foreground="{DynamicResource FgMutedBrush}"/>
-                                        <TextBlock Text="→" FontSize="11"
-                                                   Foreground="{DynamicResource FgFaintBrush}"/>
-                                        <TextBlock Text="{Binding RouteProviderId}"
-                                                   FontSize="11"
-                                                   Foreground="{DynamicResource FgMutedBrush}"/>
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding Hint}" Classes="row-desc"
-                                               IsVisible="{Binding !Installed}" />
+                                    <TextBlock Classes="row-desc" Text="{Binding Description}" />
+                                    <TextBlock Text="{Binding BinaryPath}"
+                                               FontFamily="Cascadia Mono,Consolas,monospace"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource FgMutedBrush}"
+                                               TextTrimming="CharacterEllipsis"
+                                               IsVisible="{Binding BinaryPath, Converter={StaticResource StringNotEmpty}}" />
                                 </StackPanel>
-                                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <ToggleButton Classes="enable-toggle"
-                                                  IsChecked="{Binding Enabled, Mode=TwoWay}"
-                                                  IsVisible="{Binding Installed}" />
-                                    <Button Classes="app" Content="Install"
-                                            IsVisible="{Binding !Installed}" />
+
+                                <!-- Actions -->
+                                <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                            Spacing="4" VerticalAlignment="Center">
+                                    <Button Classes="icon"
+                                            ToolTip.Tip="View documentation"
+                                            IsVisible="{Binding DocsUrl, Converter={StaticResource StringNotEmpty}}"
+                                            Tag="{Binding DocsUrl}"
+                                            Click="OnDocsClick">
+                                        <lucide:PackIconLucide Kind="ExternalLink" Width="13" Height="13" />
+                                    </Button>
+                                    <Button Classes="icon"
+                                            ToolTip.Tip="{Binding ConfigureButtonLabel}"
+                                            Click="OnConfigureClick">
+                                        <lucide:PackIconLucide Kind="Settings" Width="14" Height="14" />
+                                    </Button>
                                 </StackPanel>
                             </Grid>
-                            <Border Classes="row-divider" />
-                        </StackPanel>
+                        </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-        </Border>
+        </StackPanel>
+
+        <!-- ── Not-installed section ───────────────────────────────────── -->
+        <StackPanel Spacing="8"
+                    IsVisible="{Binding NotInstalledAgentCount, Converter={StaticResource IntGtZero}}">
+            <TextBlock Classes="section-label" Text="NOT INSTALLED"
+                       Foreground="{DynamicResource FgMutedBrush}" Margin="4,0,4,6" />
+            <ItemsControl ItemsSource="{Binding NotInstalledAgents}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:AgentViewModel">
+                        <Border CornerRadius="6" Padding="8,6" Margin="0,0,6,6"
+                                Background="{DynamicResource CardBgBrush}">
+                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <!-- Icon: SVG or initials -->
+                                <Panel Width="20" Height="20">
+                                    <Image Source="{Binding IconAssetPath, Converter={StaticResource SvgImage}}"
+                                           Width="16" Height="16"
+                                           Stretch="Uniform"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           IsVisible="{Binding HasIcon}" />
+                                    <Panel IsVisible="{Binding HasIcon, Converter={StaticResource InvertBool}}">
+                                        <Border Width="20" Height="20" CornerRadius="10"
+                                                Background="{Binding AccentHex, Converter={StaticResource HexBrush}}"
+                                                Opacity="0.2" />
+                                        <TextBlock Text="{Binding Initials}"
+                                                   Foreground="{Binding AccentHex, Converter={StaticResource HexBrush}}"
+                                                   FontSize="9" FontWeight="SemiBold"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Panel>
+                                </Panel>
+                                <TextBlock Text="{Binding Name}" FontSize="13"
+                                           Foreground="{DynamicResource FgMutedBrush}"
+                                           VerticalAlignment="Center" />
+                                <Button Classes="icon"
+                                        ToolTip.Tip="View documentation"
+                                        IsVisible="{Binding DocsUrl, Converter={StaticResource StringNotEmpty}}"
+                                        Tag="{Binding DocsUrl}"
+                                        Click="OnDocsClick">
+                                    <lucide:PackIconLucide Kind="ExternalLink" Width="11" Height="11" />
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
 
     </StackPanel>
 </UserControl>

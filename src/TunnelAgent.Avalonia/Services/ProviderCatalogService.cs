@@ -69,6 +69,20 @@ public sealed class ProviderCatalogService : IDisposable
     /// </summary>
     public Task InitializeAsync()
     {
+        var fromConfig = _config.ReadProviderSettingsFromConfig();
+        foreach (var provider in fromConfig)
+        {
+            var existing = _settings.Current.Providers.FirstOrDefault(p => p.Id == provider.Id);
+            if (existing is null)
+            {
+                _settings.Current.Providers.Add(provider);
+                continue;
+            }
+
+            existing.Enabled = provider.Enabled;
+            if (!string.IsNullOrWhiteSpace(provider.BaseUrl)) existing.BaseUrl = provider.BaseUrl;
+            if (!string.IsNullOrWhiteSpace(provider.DisplayName)) existing.DisplayName = provider.DisplayName;
+        }
         BuildProviderList();
         return Task.CompletedTask;
     }

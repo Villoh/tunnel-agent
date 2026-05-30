@@ -4,7 +4,10 @@
         xmlns:v="using:TunnelAgent.Views"
         xmlns:cv="using:TunnelAgent.Converters"
         xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+        xmlns:svc="using:TunnelAgent.Services"
+        xmlns:svg="using:Avalonia.Svg.Skia"
         x:Class="TunnelAgent.Views.MainWindow"
+        x:Name="Root"
         x:DataType="vm:MainWindowViewModel"
         Title="Tunnel Agent"
         Icon="/Assets/logo.ico"
@@ -24,6 +27,11 @@
         <cv:SidebarWidthConverter       x:Key="SidebarWidth" />
         <cv:InvertBoolConverter         x:Key="InvertBool" />
         <cv:StringNotEmptyConverter     x:Key="StringNotEmpty" />
+        <cv:HexToBrushConverter         x:Key="HexBrush" />
+        <cv:SvgImageConverter           x:Key="SvgImage" />
+        <cv:SecretPasswordCharConverter x:Key="SecretPasswordChar" />
+        <cv:BoolToEyeIconConverter      x:Key="EyeIcon" />
+        <cv:IntGreaterThanZeroConverter  x:Key="IntGtZero" />
     </Window.Resources>
 
     <Border Background="{DynamicResource WinBgBrush}"
@@ -127,8 +135,9 @@
                                 </Grid>
                             </Button>
 
-                            <Button Classes="side" IsEnabled="False" Opacity="0.4"
-                                    ToolTip.Tip="Coming soon">
+                            <Button Classes="side"
+                                    Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Agents}"
+                                    Command="{Binding SelectAgentsCommand}">
                                 <Grid ColumnDefinitions="20,*,Auto">
                                     <lucide:PackIconLucide Grid.Column="0" Kind="Bot" Width="15" Height="15"
                                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -136,7 +145,7 @@
                                                IsVisible="{Binding !IsSidebarCollapsed}"/>
                                     <Border Grid.Column="2" CornerRadius="999" Background="#14000000" Padding="6,1"
                                             IsVisible="{Binding !IsSidebarCollapsed}">
-                                        <TextBlock Text="Soon" FontSize="10" />
+                                        <TextBlock Text="{Binding ConfiguredAgentCount}" FontSize="11" />
                                     </Border>
                                 </Grid>
                             </Button>
@@ -246,8 +255,7 @@
                             <Grid>
                                 <v:ProvidersView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Providers}" />
                                 <v:QuotaView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Quota}" />
-                                <!-- Agents disabled until implemented -->
-                                <!-- <v:AgentsView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Agents}" /> -->
+                                <v:AgentsView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Agents}" />
                                 <v:ConfigurationView IsVisible="{Binding IsConfigSection}" />
                             </Grid>
                         </ContentControl.Content>
@@ -281,6 +289,76 @@
             </Border>
         </Border>
 
+        <!-- CLIProxy API keys dialog -->
+        <Border IsVisible="{Binding ShowApiKeysDialog}" Background="#88000000"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50">
+            <Border Classes="card" Width="480" MaxHeight="560" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0">
+                <Grid RowDefinitions="Auto,*,Auto">
+                    <StackPanel Grid.Row="0" Margin="24,20,24,14" Spacing="4">
+                        <TextBlock Classes="row-label" FontSize="15" Text="CLIProxyAPI keys" />
+                        <TextBlock Classes="row-desc" TextWrapping="Wrap"
+                                   Text="Keys accepted by CLIProxyAPI clients. Agent setup uses the default key; leave empty for no auth." />
+                    </StackPanel>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Spacing="12" Margin="24,0,24,0">
+                            <ItemsControl ItemsSource="{Binding CliProxyApiKeys}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:CliProxyApiKeyViewModel">
+                                        <Border Background="{DynamicResource SideBgBrush}" CornerRadius="8" Padding="10,8" Margin="0,0,0,6">
+                                            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Masked}"
+                                                               FontFamily="Cascadia Mono,Consolas,monospace"
+                                                               FontSize="12" VerticalAlignment="Center" />
+                                                    <Border Classes="chip" Background="{DynamicResource AccentSoftBrush}"
+                                                            IsVisible="{Binding IsDefault}">
+                                                        <TextBlock Text="default" Foreground="{DynamicResource AccentBrush}" FontSize="10" />
+                                                    </Border>
+                                                </StackPanel>
+                                                <Button Grid.Column="1" Classes="app" Content="Use"
+                                                        Margin="8,0,4,0" Padding="8,0"
+                                                        Height="24" MinHeight="0"
+                                                        VerticalContentAlignment="Center"
+                                                        IsVisible="{Binding CanSetDefault}"
+                                                        Command="{Binding #Root.DataContext.SetDefaultApiKeyCommand}"
+                                                        CommandParameter="{Binding}" />
+                                                <Button Grid.Column="2" Classes="icon-btn"
+                                                        ToolTip.Tip="Remove key"
+                                                        IsVisible="{Binding CanRemove}"
+                                                        Command="{Binding #Root.DataContext.RemoveApiKeyCommand}"
+                                                        CommandParameter="{Binding}">
+                                                    <lucide:PackIconLucide Kind="Trash2" Width="13" Height="13"
+                                                                           Foreground="{DynamicResource FgMutedBrush}" />
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <StackPanel Spacing="4">
+                                <TextBlock Classes="row-desc" Text="Add key" />
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBox Grid.Column="0" Classes="app"
+                                             PasswordChar="{Binding ShowApiKeyDraft, Converter={StaticResource SecretPasswordChar}}"
+                                             Watermark="sk-..."
+                                             Text="{Binding ApiKeyDraft, Mode=TwoWay}" />
+                                    <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0"
+                                            ToolTip.Tip="Show/hide key"
+                                            Command="{Binding ToggleApiKeyDraftVisibilityCommand}">
+                                        <lucide:PackIconLucide Kind="{Binding ShowApiKeyDraft, Converter={StaticResource EyeIcon}}" Width="14" Height="14" />
+                                    </Button>
+                                </Grid>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="24,14,24,20">
+                        <Button Classes="app" Content="Close" Command="{Binding DismissApiKeysCommand}" />
+                        <Button Classes="app primary" Content="Add key" Command="{Binding AddApiKeyCommand}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Border>
+
         <!-- Add CLIProxy account dialog -->
         <Border IsVisible="{Binding ShowAddAccountDialog}" Background="#88000000"
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50">
@@ -293,7 +371,17 @@
                     </StackPanel>
                     <StackPanel Spacing="4">
                         <TextBlock Classes="row-desc" Text="API Key" />
-                        <TextBox x:Name="ApiKeyBox" Classes="app" PasswordChar="●" Watermark="sk-..." />
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBox Grid.Column="0" x:Name="ApiKeyBox" Classes="app"
+                                     PasswordChar="{Binding ShowAddAccountApiKey, Converter={StaticResource SecretPasswordChar}}"
+                                     Watermark="sk-..."
+                                     Text="{Binding AddAccountApiKeyDraft, Mode=TwoWay}" />
+                            <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0"
+                                    ToolTip.Tip="Show/hide key"
+                                    Command="{Binding ToggleAddAccountApiKeyVisibilityCommand}">
+                                <lucide:PackIconLucide Kind="{Binding ShowAddAccountApiKey, Converter={StaticResource EyeIcon}}" Width="14" Height="14" />
+                            </Button>
+                        </Grid>
                     </StackPanel>
                     <StackPanel Spacing="4">
                         <TextBlock Classes="row-desc" Text="Label (optional)" />
@@ -321,9 +409,18 @@
                         </StackPanel>
                         <StackPanel Spacing="4">
                             <TextBlock Classes="row-desc" Text="Session token" />
-                            <TextBox x:Name="PerplexitySessionTokenBox" Classes="app" PasswordChar="●" Watermark="pplx-session-token"
-                                     Text="{Binding PerplexitySessionTokenDraft, Mode=TwoWay}"
-                                     KeyDown="OnPerplexityAccountInputKeyDown" />
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBox Grid.Column="0" x:Name="PerplexitySessionTokenBox" Classes="app"
+                                         PasswordChar="{Binding ShowPerplexitySessionToken, Converter={StaticResource SecretPasswordChar}}"
+                                         Watermark="pplx-session-token"
+                                         Text="{Binding PerplexitySessionTokenDraft, Mode=TwoWay}"
+                                         KeyDown="OnPerplexityAccountInputKeyDown" />
+                                <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0"
+                                        ToolTip.Tip="Show/hide token"
+                                        Command="{Binding TogglePerplexitySessionTokenVisibilityCommand}">
+                                    <lucide:PackIconLucide Kind="{Binding ShowPerplexitySessionToken, Converter={StaticResource EyeIcon}}" Width="14" Height="14" />
+                                </Button>
+                            </Grid>
                         </StackPanel>
                         <TextBlock Classes="row-desc" TextWrapping="Wrap"
                                    Text="Paste your Perplexity WebUI session token, or generate one via email verification." />
@@ -401,6 +498,334 @@
                         <Button Classes="app danger" Content="Reset accounts" Command="{Binding ConfirmResetPerplexityAccountsCommand}" />
                     </StackPanel>
                 </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- Agent config dialog -->
+        <Border IsVisible="{Binding ShowAgentConfigDialog}" Background="#88000000"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                Padding="20" ZIndex="50">
+            <Border Classes="card" Width="580" Height="520"
+                    HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0">
+                <Grid RowDefinitions="Auto,Auto,*,Auto,Auto">
+
+                    <!-- Header -->
+                    <Grid Grid.Row="0" Margin="18,14" ColumnDefinitions="Auto,*,Auto">
+                        <lucide:PackIconLucide Grid.Column="0" Kind="Bot" Width="20" Height="20"
+                                              VerticalAlignment="Top"
+                                              Margin="0,2,0,0"
+                                              Foreground="{DynamicResource FgMutedBrush}" />
+                        <StackPanel Grid.Column="1" Margin="8,0,0,0" Spacing="2">
+                            <TextBlock Classes="row-label" FontSize="14"
+                                       Text="{Binding AgentConfigDialogTitle}" />
+                            <TextBlock Classes="row-desc"
+                                       Text="{Binding AgentConfigDialogDescription}"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button Grid.Column="2" Classes="icon" VerticalAlignment="Top"
+                                Command="{Binding DismissAgentConfigCommand}">
+                            <lucide:PackIconLucide Kind="X" Width="14" Height="14" />
+                        </Button>
+                    </Grid>
+
+                    <Border Grid.Row="1" Classes="row-divider" />
+
+                    <!-- Body -->
+                    <ScrollViewer Grid.Row="2"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Spacing="14" Margin="18,14,18,24">
+
+                            <!-- Pre-result view -->
+                            <StackPanel Spacing="12" IsVisible="{Binding !AgentConfigHasResult}">
+
+                                <!-- Single agent summary -->
+                                <Border Classes="card" Padding="12,10"
+                                        IsVisible="{Binding ShowSingleAgentSummary}">
+                                    <Grid ColumnDefinitions="Auto,*">
+                                        <Panel Grid.Column="0" Width="28" Height="28" VerticalAlignment="Center">
+                                            <Image Source="{Binding AgentConfigTarget.IconAssetPath, Converter={StaticResource SvgImage}}"
+                                                   Width="22" Height="22"
+                                                   Stretch="Uniform"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   IsVisible="{Binding AgentConfigTarget.HasIcon}" />
+                                            <Panel IsVisible="{Binding AgentConfigTarget.HasIcon, Converter={StaticResource InvertBool}}">
+                                                <Border Width="28" Height="28" CornerRadius="14"
+                                                        Background="{Binding AgentConfigTarget.AccentHex, Converter={StaticResource HexBrush}}"
+                                                        Opacity="0.15" />
+                                                <TextBlock Text="{Binding AgentConfigTarget.Initials}"
+                                                           Foreground="{Binding AgentConfigTarget.AccentHex, Converter={StaticResource HexBrush}}"
+                                                           FontSize="10" FontWeight="SemiBold"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Panel>
+                                        </Panel>
+                                        <StackPanel Grid.Column="1" Margin="10,0,0,0" Spacing="2">
+                                            <TextBlock Text="{Binding AgentConfigTarget.Name}" FontSize="13" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding AgentConfigTarget.BinaryPath}"
+                                                       FontFamily="Cascadia Mono,Consolas,monospace"
+                                                       FontSize="11"
+                                                       Foreground="{DynamicResource FgMutedBrush}"
+                                                       TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Bulk agent picker -->
+                                <StackPanel Spacing="6" IsVisible="{Binding ShowAgentConfigAgentPicker}">
+                                    <TextBlock Classes="section-label" Text="AGENTS" Margin="2,0" />
+                                    <ItemsControl ItemsSource="{Binding InstalledAgents}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Padding="8,6" Margin="0,0,0,3"
+                                                        Background="{DynamicResource SideBgBrush}"
+                                                        CornerRadius="6">
+                                                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                                        <CheckBox IsChecked="{Binding IsSelectedForConfig, Mode=TwoWay}"
+                                                                  VerticalAlignment="Center" />
+                                                        <Panel Width="22" Height="22">
+                                                            <Image Source="{Binding IconAssetPath, Converter={StaticResource SvgImage}}"
+                                                                   Width="18" Height="18"
+                                                                   Stretch="Uniform"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                   IsVisible="{Binding HasIcon}" />
+                                                            <Panel IsVisible="{Binding HasIcon, Converter={StaticResource InvertBool}}">
+                                                                <Border Width="22" Height="22" CornerRadius="11"
+                                                                        Background="{Binding AccentHex, Converter={StaticResource HexBrush}}"
+                                                                        Opacity="0.15" />
+                                                                <TextBlock Text="{Binding Initials}"
+                                                                           Foreground="{Binding AccentHex, Converter={StaticResource HexBrush}}"
+                                                                           FontSize="9" FontWeight="SemiBold"
+                                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                            </Panel>
+                                                        </Panel>
+                                                        <StackPanel Spacing="1" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding Name}" FontSize="13" />
+                                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                                <Border Classes="chip" Background="#1446C788"
+                                                                        IsVisible="{Binding Configured}">
+                                                                    <TextBlock Text="Configured" Foreground="#46C788" FontSize="9" />
+                                                                </Border>
+                                                                <Border Classes="chip" Background="#14E2A52E"
+                                                                        IsVisible="{Binding IsInstalledOnly}">
+                                                                    <TextBlock Text="Installed" Foreground="#E2A52E" FontSize="9" />
+                                                                </Border>
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Classes="row-desc"
+                                               IsVisible="{Binding NotInstalledAgentCount, Converter={StaticResource IntGtZero}}"
+                                               Text="{Binding NotInstalledAgentCount, StringFormat='{}{0} agent(s) not installed — install them to configure.'}"
+                                               Margin="2,2,0,0" />
+                                </StackPanel>
+
+                                <!-- Config mode selector (Proxy only) -->
+                                <StackPanel Spacing="6" IsVisible="{Binding !IsAgentConfigDefaultMode}">
+                                    <TextBlock Classes="section-label" Text="CONFIG MODE" Margin="2,0" />
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Button Classes="app"
+                                                Classes.primary="{Binding !IsAgentConfigManualMode}"
+                                                Command="{Binding SetAgentAutoModeCommand}">Automatic</Button>
+                                        <Button Classes="app"
+                                                Classes.primary="{Binding IsAgentConfigManualMode}"
+                                                Command="{Binding SetAgentManualModeCommand}">Manual</Button>
+                                    </StackPanel>
+                                    <TextBlock Classes="row-desc" IsVisible="{Binding !IsAgentConfigManualMode}"
+                                               Text="Writes config files directly. A backup is created before any changes." />
+                                    <TextBlock Classes="row-desc" IsVisible="{Binding IsAgentConfigManualMode}"
+                                               Text="Preview the config and copy it manually to the target location." />
+                                </StackPanel>
+
+                                <!-- Models selector -->
+                                <StackPanel Spacing="4">
+                                    <Button Classes="app" Command="{Binding ToggleModelsCommand}"
+                                            HorizontalAlignment="Stretch" Padding="10,6">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <TextBlock Grid.Column="0" Classes="section-label"
+                                                       Text="{Binding ModelsExpanderLabel}"
+                                                       VerticalAlignment="Center" Margin="0" />
+                                            <lucide:PackIconLucide Grid.Column="1" Width="13" Height="13"
+                                                                   Kind="ChevronDown"
+                                                                   Foreground="{DynamicResource FgMutedBrush}"
+                                                                   IsVisible="{Binding !IsModelsExpanded}" />
+                                            <lucide:PackIconLucide Grid.Column="1" Width="13" Height="13"
+                                                                   Kind="ChevronUp"
+                                                                   Foreground="{DynamicResource FgMutedBrush}"
+                                                                   IsVisible="{Binding IsModelsExpanded}" />
+                                        </Grid>
+                                    </Button>
+                                    <StackPanel IsVisible="{Binding IsModelsExpanded}" Spacing="12">
+                                        <!-- Empty state -->
+                                        <TextBlock Classes="row-desc" Margin="2,0"
+                                                   Text="Start CLIProxyAPI to load available models."
+                                                   IsVisible="{Binding HasSelectableModels, Converter={StaticResource InvertBool}}" />
+                                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasSelectableModels}">
+                                            <TextBox Grid.Column="0" Classes="app" Watermark="Search models"
+                                                     Height="26" MinHeight="26" Padding="8,3"
+                                                     VerticalAlignment="Center"
+                                                     Text="{Binding ModelSearchText, Mode=TwoWay}" />
+                                            <CheckBox Grid.Column="1"
+                                                      Margin="14,0,0,0"
+                                                      VerticalAlignment="Center"
+                                                      IsThreeState="True"
+                                                      Content="Select all"
+                                                      IsChecked="{Binding AllVisibleModelsSelected, Mode=TwoWay}" />
+                                        </Grid>
+                                        <TextBlock Classes="row-desc" Margin="2,0"
+                                                   Text="No models match your search."
+                                                   IsVisible="{Binding ShowNoModelSearchResults}" />
+                                        <!-- Model list -->
+                                        <ItemsControl ItemsSource="{Binding SelectableModels}"
+                                                      IsVisible="{Binding HasSelectableModels}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:SelectableModelViewModel">
+                                                    <Grid ColumnDefinitions="Auto,*,Auto" Margin="2,3"
+                                                          IsVisible="{Binding IsVisible}">
+                                                        <CheckBox Grid.Column="0"
+                                                                  IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                                  VerticalAlignment="Center" />
+                                                        <TextBlock Grid.Column="1" Text="{Binding Name}"
+                                                                   FontSize="12" VerticalAlignment="Center"
+                                                                   TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Grid.Column="2" Text="{Binding Provider}"
+                                                                   FontSize="10" VerticalAlignment="Center"
+                                                                   Foreground="{DynamicResource FgFaintBrush}"
+                                                                   Margin="8,0,0,0" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Proxy endpoint info (Automatic) -->
+                                <Border Classes="card" Padding="12,10"
+                                        IsVisible="{Binding !IsAgentConfigManualMode}">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Classes="section-label" Text="PROXY ENDPOINT" Margin="0,0,0,2" />
+                                        <TextBlock Text="{Binding AgentProxyBaseUrl}"
+                                                   FontFamily="Cascadia Mono,Consolas,monospace"
+                                                   FontSize="11" Foreground="{DynamicResource FgMutedBrush}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Manual config preview -->
+                                <StackPanel Spacing="8" IsVisible="{Binding IsAgentConfigManualMode}">
+                                    <TextBlock Classes="section-label" Text="CONFIG PREVIEW" Margin="2,0" />
+                                    <ItemsControl ItemsSource="{Binding AgentConfigPreviews}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="svc:RawConfigPreview">
+                                                <Border Classes="card" Padding="10,8" Margin="0,0,0,6">
+                                                    <StackPanel Spacing="6">
+                                                        <Grid ColumnDefinitions="*,Auto">
+                                                            <TextBlock Grid.Column="0" Classes="row-desc"
+                                                                       Text="{Binding Filename}"
+                                                                       FontFamily="Cascadia Mono,Consolas,monospace"
+                                                                       FontSize="11" FontWeight="SemiBold" />
+                                                            <TextBlock Grid.Column="1" Classes="row-desc"
+                                                                       Text="{Binding TargetPath}" FontSize="10"
+                                                                       Foreground="{DynamicResource FgFaintBrush}" />
+                                                        </Grid>
+                                                        <Border Background="{DynamicResource SideBgBrush}"
+                                                                CornerRadius="4" Padding="8">
+                                                            <ScrollViewer MaxHeight="180"
+                                                                          VerticalScrollBarVisibility="Auto"
+                                                                          HorizontalScrollBarVisibility="Disabled">
+                                                                <TextBlock Text="{Binding Content}"
+                                                                           FontFamily="Cascadia Mono,Consolas,monospace"
+                                                                           FontSize="11" TextWrapping="Wrap"
+                                                                           Foreground="{DynamicResource FgBrush}" />
+                                                            </ScrollViewer>
+                                                        </Border>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+
+                            </StackPanel>
+
+                            <!-- Result view -->
+                            <StackPanel Spacing="12" IsVisible="{Binding AgentConfigHasResult}">
+
+                                <!-- Summary line -->
+                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                    <lucide:PackIconLucide Kind="CircleCheck" Width="22" Height="22" Foreground="#46C788"
+                                                           IsVisible="{Binding AgentConfigSuccess}" />
+                                    <lucide:PackIconLucide Kind="TriangleAlert" Width="22" Height="22"
+                                                           Foreground="{DynamicResource ErrBrush}"
+                                                           IsVisible="{Binding AgentConfigSuccess, Converter={StaticResource InvertBool}}" />
+                                    <TextBlock Text="{Binding AgentConfigResult.Instructions, FallbackValue=''}"
+                                               FontSize="13" VerticalAlignment="Center" />
+                                </StackPanel>
+
+                                <!-- Per-agent result rows -->
+                                <ItemsControl ItemsSource="{Binding AgentConfigMultiResults}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:AgentConfigItemResult">
+                                            <Border Padding="10,8" Margin="0,0,0,4"
+                                                    Background="{DynamicResource SideBgBrush}"
+                                                    CornerRadius="6">
+                                                <Grid ColumnDefinitions="22,*">
+                                                    <lucide:PackIconLucide Grid.Column="0" Width="14" Height="14"
+                                                                           VerticalAlignment="Center"
+                                                                           Kind="CircleCheck" Foreground="#46C788"
+                                                                           IsVisible="{Binding Success}" />
+                                                    <lucide:PackIconLucide Grid.Column="0" Width="14" Height="14"
+                                                                           VerticalAlignment="Center"
+                                                                           Kind="CircleX"
+                                                                           Foreground="{DynamicResource ErrBrush}"
+                                                                           IsVisible="{Binding Success, Converter={StaticResource InvertBool}}" />
+                                                    <StackPanel Grid.Column="1" Spacing="2">
+                                                        <TextBlock Text="{Binding AgentName}"
+                                                                   FontSize="13" FontWeight="Medium" />
+                                                        <TextBlock Text="{Binding ConfigPath, FallbackValue=''}"
+                                                                   FontFamily="Cascadia Mono,Consolas,monospace" FontSize="10"
+                                                                   Foreground="{DynamicResource FgFaintBrush}"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   IsVisible="{Binding Success}" />
+                                                        <TextBlock Text="{Binding Error, FallbackValue=''}"
+                                                                   FontSize="11" Foreground="{DynamicResource ErrBrush}"
+                                                                   TextWrapping="Wrap"
+                                                                   IsVisible="{Binding Success, Converter={StaticResource InvertBool}}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                            </StackPanel>
+
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <Border Grid.Row="3" Classes="row-divider" />
+
+                    <!-- Footer -->
+                    <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right"
+                                Spacing="8" Margin="18,12">
+                        <Button Classes="app" Content="Cancel"
+                                IsVisible="{Binding !AgentConfigHasResult}"
+                                Command="{Binding DismissAgentConfigCommand}" />
+                        <Button Classes="app primary" Content="Copy All"
+                                IsVisible="{Binding ShowAgentConfigCopyButton}"
+                                Click="OnCopyAgentConfigClick" />
+                        <Button Classes="app primary"
+                                Content="{Binding AgentConfigApplyLabel}"
+                                IsVisible="{Binding ShowAgentConfigApplyButton}"
+                                IsEnabled="{Binding IsApplyingAgentConfig, Converter={StaticResource InvertBool}}"
+                                Command="{Binding ApplyAgentConfigCommand}" />
+                        <Button Classes="app primary" Content="Done"
+                                IsVisible="{Binding AgentConfigHasResult}"
+                                Command="{Binding DismissAgentConfigCommand}" />
+                    </StackPanel>
+
+                </Grid>
             </Border>
         </Border>
 
