@@ -68,11 +68,23 @@ public partial class ProviderAccountViewModel : ViewModelBase
     /// <summary>True when this is a custom API-key account (no email, shows masked key).</summary>
     public bool IsCustomKey => !string.IsNullOrEmpty(ApiKey);
 
+    [ObservableProperty] private bool _maskEmails;
+    partial void OnMaskEmailsChanged(bool value) => OnPropertyChanged(nameof(DisplayName));
+
     /// <summary>Display name: email if available, else label, else masked key.</summary>
     public string DisplayName =>
-        !string.IsNullOrEmpty(Email) ? Email :
+        !string.IsNullOrEmpty(Email) ? (MaskEmails ? MaskEmailAddress(Email) : Email) :
         !string.IsNullOrEmpty(Label) ? Label :
         MaskedKey;
+
+    private static string MaskEmailAddress(string email)
+    {
+        var at = email.IndexOf('@');
+        if (at <= 0) return email;
+        var maskedLocal  = new string('•', at);
+        var maskedDomain = new string('•', email.Length - at - 1);
+        return $"{maskedLocal}@{maskedDomain}";
+    }
 
 }
 

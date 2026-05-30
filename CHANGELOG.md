@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Hide sensitive information** setting in Configuration → General: masks all account email addresses with bullet dots (`•••@•••`) to keep them private on shared screens.
+
 - **Quota view**: dedicated sidebar section to track quota usage for CLIProxyAPI providers (Claude, Codex, GitHub Copilot, Gemini CLI, Antigravity) and standalone IDE accounts (Kiro, Trae).
 - **Quota providers tab** in Providers view: read-only tab showing detected standalone quota providers (Kiro, Trae) that are not managed by CLIProxyAPI or Perplexity.
 - **Gemini CLI quota fetching**: direct API calls to `cloudcode-pa.googleapis.com/v1internal:retrieveUserQuota` with OAuth token refresh support.

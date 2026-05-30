@@ -71,7 +71,7 @@
                                 </StackPanel>
                                 <!-- Detected: show email or plan, Undetected: show description -->
                                 <TextBlock Classes="row-desc"
-                                           Text="{Binding Email}"
+                                           Text="{Binding DisplayEmail}"
                                            IsVisible="{Binding IsDetected}"
                                            Foreground="#3CB371" />
                                 <TextBlock Classes="row-desc"

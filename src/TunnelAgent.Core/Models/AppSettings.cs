@@ -55,6 +55,7 @@ public sealed class AppSettings
     public string ThemeMode { get; set; } = "system";
     public bool AutoCheckForUpdates { get; set; } = true;
     public bool AutoUpdate { get; set; } = false;
+    public bool MaskEmails { get; set; } = false;
     public string PreferredEngineVersion { get; set; } = "";
     public List<EngineRuntimeSettings> Engines { get; set; } = [];
     public List<PerplexityAccountSettings> PerplexityAccounts { get; set; } = [];

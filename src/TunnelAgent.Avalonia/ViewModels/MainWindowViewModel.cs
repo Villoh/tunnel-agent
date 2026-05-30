@@ -277,6 +277,31 @@ public partial class MainWindowViewModel : ViewModelBase
         set { _settings.Current.AutoUpdate = value; _settings.Save(); OnPropertyChanged(); UpdateBadgeState(); }
     }
 
+    public bool MaskEmails
+    {
+        get => _settings.Current.MaskEmails;
+        set
+        {
+            if (_settings.Current.MaskEmails == value) return;
+            _settings.Current.MaskEmails = value;
+            _settings.Save();
+            OnPropertyChanged();
+            PropagateEmailMasking(value);
+        }
+    }
+
+    private void PropagateEmailMasking(bool mask)
+    {
+        foreach (var p in Providers)
+            foreach (var a in p.Accounts)
+                a.MaskEmails = mask;
+        foreach (var p in StandaloneQuotaProviders)
+            foreach (var a in p.Accounts)
+                a.MaskEmails = mask;
+        foreach (var q in QuotaAccounts)
+            q.MaskEmails = mask;
+    }
+
     public RoutingStrategy RoutingStrategy
     {
         get => _settings.Current.RoutingStrategy;
@@ -425,6 +450,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         RefreshFocusedEngineState();
         await LoadEngineReleasesAsync();
+        PropagateEmailMasking(MaskEmails);
         _ = ScanQuotaProvidersAsync();
     }
 
@@ -453,6 +479,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             OnPropertyChanged(nameof(ConnectedProviderCount));
             RefreshQuotaNavigation();
+            PropagateEmailMasking(MaskEmails);
         });
 
     private static bool IsQuotaSupportedProvider(ProviderViewModel provider) =>
@@ -608,6 +635,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsAutoUpdateEnabled));
         OnPropertyChanged(nameof(AutoUpdate));
         OnPropertyChanged(nameof(RoutingStrategy));
+        OnPropertyChanged(nameof(MaskEmails));
         UpdateBadgeState();
     }
 
@@ -744,6 +772,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ShowAddAccountDialog = false;
         await _catalog.AddAccountAsync(providerId, baseUrl, apiKey, label);
         OnPropertyChanged(nameof(ConnectedProviderCount));
+        PropagateEmailMasking(MaskEmails);
     }
 
     public async Task ConfirmAddPerplexityAccountAsync(string? label, string sessionToken)
@@ -1069,6 +1098,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ApplySingleQuotaProvider("kiro", "Kiro", result.Kiro);
         ApplySingleQuotaProvider("trae", "Trae", result.Trae);
         RefreshQuotaNavigation();
+        PropagateEmailMasking(MaskEmails);
     }
 
     private void ApplySingleQuotaProvider(string id, string name, QuotaProviderInfo info)

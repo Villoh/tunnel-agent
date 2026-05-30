@@ -67,6 +67,15 @@
                                           SelectedItem="{Binding ThemeMode, Mode=TwoWay}"
                                           Width="110" Height="26" MinHeight="0" Padding="8,0" VerticalContentAlignment="Center" />
                             </Grid>
+                            <Border Classes="row-divider"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Hide sensitive information"/>
+                                    <TextBlock Classes="row-desc" Text="Replaces account email addresses with dots to keep them private."/>
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                              IsChecked="{Binding MaskEmails, Mode=TwoWay}" />
+                            </Grid>
                         </StackPanel>
                     </Border>
 
