@@ -1,0 +1,82 @@
+name: Release from CHANGELOG
+
+# Triggers whenever CHANGELOG.md is pushed to the main branch.
+# If the top versioned entry is new (no matching tag exists yet),
+# it dispatches the release workflow automatically.
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - CHANGELOG.md
+
+jobs:
+  detect-and-release:
+    name: Detect new version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # needed to create the tag via gh workflow run
+      actions: write # needed to dispatch the release workflow
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      # Parse the first versioned section in CHANGELOG.md.
+      # We look for the pattern:  ## [X.Y.Z...] - YYYY-MM-DD
+      # [Unreleased] is intentionally skipped.
+      - name: Parse CHANGELOG version
+        id: changelog
+        run: |
+          version=$(grep -oP '(?<=## \[)[\d]+\.[\d]+\.[\d]+[^\]]*(?=\])' CHANGELOG.md | head -1)
+
+          if [[ -z "$version" ]]; then
+            echo "No versioned entry found in CHANGELOG.md — skipping."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Found version: $version"
+          echo "version=$version"   >> "$GITHUB_OUTPUT"
+          echo "tag=v$version"      >> "$GITHUB_OUTPUT"
+          echo "found=true"         >> "$GITHUB_OUTPUT"
+
+      # Check whether a release for this version already exists.
+      # We check both git tags and GitHub Releases to be safe.
+      - name: Check if release already exists
+        id: check
+        if: steps.changelog.outputs.found == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.changelog.outputs.tag }}
+        run: |
+          if git tag --list "$TAG" | grep -q .; then
+            echo "Tag $TAG already exists — skipping release."
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "GitHub Release $TAG already exists — skipping."
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "No existing tag or release for $TAG — will trigger release."
+          echo "should_release=true" >> "$GITHUB_OUTPUT"
+
+      # Dispatch the release workflow with the detected version.
+      - name: Dispatch release workflow
+        if: steps.check.outputs.should_release == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.changelog.outputs.version }}
+        run: |
+          echo "Dispatching release workflow for version $VERSION"
+          gh workflow run release.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$GITHUB_REF_NAME" \
+            --field version="$VERSION" \
+            --field skip_version_commit="true"

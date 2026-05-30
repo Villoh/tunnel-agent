@@ -58,6 +58,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private CancellationTokenSource? _modelFetchCts;
     private bool _engineReleaseSelectionReady;
     private string? _suppressAutoUpdateForEngineId;
+    private readonly AppUpdateService _appUpdate = new();
 
     [ObservableProperty] private SectionKey _selectedSection = SectionKey.Providers;
     [ObservableProperty] private bool _isSidebarCollapsed;
@@ -74,6 +75,8 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _updateAvailable;
     [ObservableProperty] private bool _isCheckingForUpdate;
     [ObservableProperty] private bool _configHasBadge;
+    [ObservableProperty] private AppUpdateState _appUpdateState = AppUpdateState.Idle;
+    [ObservableProperty] private string? _appUpdateNewVersion;
     [ObservableProperty] private bool _showUpdateToast;
     [ObservableProperty] private bool _showNoUpdateToast;
     [ObservableProperty] private bool _endpointCopied;
@@ -1836,5 +1839,45 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             OnPropertyChanged(nameof(ConfiguredAgentCount));
         }
+    }
+
+    // ── App self-update (Velopack) ────────────────────────────────────────────
+
+    public bool AppUpdateAvailable    => AppUpdateState == AppUpdateState.UpdateAvailable;
+    public bool AppUpdateDownloading  => AppUpdateState == AppUpdateState.Downloading;
+    public bool AppUpdateReady        => AppUpdateState == AppUpdateState.ReadyToInstall;
+    public bool AppUpdateSupported    => _appUpdate.IsInstalled;
+
+    public void InitAppUpdater()
+    {
+        _appUpdate.StateChanged += () => Dispatcher.UIThread.Post(() =>
+        {
+            AppUpdateState      = _appUpdate.State;
+            AppUpdateNewVersion = _appUpdate.NewVersion;
+            OnPropertyChanged(nameof(AppUpdateAvailable));
+            OnPropertyChanged(nameof(AppUpdateDownloading));
+            OnPropertyChanged(nameof(AppUpdateReady));
+        });
+
+        if (_settings.Current.AutoCheckForUpdates)
+            _ = _appUpdate.CheckAsync();
+    }
+
+    [RelayCommand]
+    private async Task CheckForAppUpdate()
+    {
+        await _appUpdate.CheckAsync();
+    }
+
+    [RelayCommand]
+    private async Task DownloadAppUpdate()
+    {
+        await _appUpdate.DownloadAsync();
+    }
+
+    [RelayCommand]
+    private void InstallAppUpdateAndRestart()
+    {
+        _appUpdate.ApplyAndRestart();
     }
 }
