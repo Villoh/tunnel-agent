@@ -120,8 +120,11 @@ public sealed class OAuthTokenDetector
                        || doc.Count > 2;
             if (!hasAuth) return null;
 
-            // Email: prefer JSON field, fall back to filename parsing
+            // Email: prefer JSON field; Copilot files use "username" instead of "email"
             var email = doc["email"]?.GetValue<string>() ?? "";
+            if (string.IsNullOrEmpty(email) &&
+                providerId.Equals("github-copilot", StringComparison.OrdinalIgnoreCase))
+                email = doc["username"]?.GetValue<string>() ?? "";
             if (string.IsNullOrEmpty(email))
                 email = EmailFromFilename(filePath, prefix);
 

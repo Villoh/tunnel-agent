@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **GitHub Copilot username display**: reads the `username` field from `github-copilot-*.json` auth files so accounts show the GitHub username instead of falling back to filename parsing.
+
 - **Hide sensitive information** setting in Configuration → General: masks all account email addresses with bullet dots (`•••@•••`) to keep them private on shared screens.
 
 - **Quota view**: dedicated sidebar section to track quota usage for CLIProxyAPI providers (Claude, Codex, GitHub Copilot, Gemini CLI, Antigravity) and standalone IDE accounts (Kiro, Trae).
@@ -22,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Initial quota load**: Quota view auto-loads quota data on first open if accounts exist but no data is loaded.
 
 ### Changed
+
+- **GitHub Copilot quota fetching**: fixed API response parsing to use the real field structure (`quota_snapshots.{chat,completions,premium_interactions}` with `percent_remaining`/`remaining`/`entitlement`; `limited_user_quotas`+`monthly_quotas` for Free/Individual plans); added reset date from `quota_reset_date_utc`; corrected plan badge detection via `copilot_plan`+`access_type_sku`; updated request headers to `Accept: application/vnd.github+json` + `X-GitHub-Api-Version: 2022-11-28`.
 
 - **Quota UI moved** from Providers account cards to dedicated Quota view; Providers now focuses solely on account management (add/remove/enable/disable/connect/disconnect).
 - **Quota refresh policy**: tab switching no longer triggers refresh; explicit refresh actions (global button, per-account button) or initial load only.

@@ -152,9 +152,11 @@ public sealed class QuotaFetchService
 
     // ── GitHub Copilot ───────────────────────────────────────────────────────
     // GET https://api.github.com/copilot_internal/user
-    // { "plan": "pro", "quota": {
-    //     "premium_interactions": { "remaining": 75, "total": 300 },
-    //     "chat":                  { "remaining": 90, "total": 100 } } }
+    // Pro/Business: quota_snapshots.{ chat, completions, premium_interactions }
+    //               each: { percent_remaining, remaining, entitlement, unlimited }
+    // Free/Individual: limited_user_quotas + monthly_quotas: { chat, completions }
+    // Reset: quota_reset_date_utc
+    // Plan:  copilot_plan + access_type_sku
 
     private async Task FetchCopilotAsync(ProviderAccountViewModel account, CancellationToken ct)
     {
@@ -166,7 +168,8 @@ public sealed class QuotaFetchService
             using var req = new HttpRequestMessage(HttpMethod.Get,
                 "https://api.github.com/copilot_internal/user");
             req.Headers.Add("Authorization", $"Bearer {token}");
-            req.Headers.Add("Accept", "application/json");
+            req.Headers.Add("Accept", "application/vnd.github+json");
+            req.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
             req.Headers.Add("User-Agent", "TunnelAgent/1.0");
 
             using var resp = await Http.SendAsync(req, ct);
@@ -175,37 +178,90 @@ public sealed class QuotaFetchService
             var body = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
             if (body is null) return;
 
-            var plan = body["plan"]?.GetValue<string>() ?? "";
-            if (!string.IsNullOrEmpty(plan))
+            // Plan badge
+            var sku      = body["access_type_sku"]?.GetValue<string>()?.ToLowerInvariant() ?? "";
+            var planRaw  = body["copilot_plan"]?.GetValue<string>()?.ToLowerInvariant() ?? "";
+            var planBadge = CopilotPlanBadge(sku, planRaw);
+            if (!string.IsNullOrEmpty(planBadge))
+                Avalonia.Threading.Dispatcher.UIThread.Post(() => account.PlanBadge = planBadge);
+
+            var resetIso = body["quota_reset_date_utc"]?.GetValue<string>()
+                        ?? body["quota_reset_date"]?.GetValue<string>();
+
+            var bars = new List<(string title, double used, string? resetTime)>();
+
+            // Method 1: quota_snapshots (Pro / Business / Enterprise)
+            var snapshots = body["quota_snapshots"];
+            if (snapshots is not null)
             {
-                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-                    account.PlanBadge = plan.ToUpperInvariant());
+                TryCopilotSnapshot(bars, snapshots["chat"],                 "Chat",        resetIso);
+                TryCopilotSnapshot(bars, snapshots["completions"],          "Completions", resetIso);
+                TryCopilotSnapshot(bars, snapshots["premium_interactions"], "Premium",     resetIso);
             }
 
-            var quota   = body["quota"];
-            var premium = quota?["premium_interactions"];
-            var chat    = quota?["chat"];
-
-            var bars = new List<(string title, double used, double total)>();
-
-            if (premium is not null)
+            // Method 2: limited_user_quotas + monthly_quotas (Free / Individual)
+            if (bars.Count == 0)
             {
-                var remaining = premium["remaining"]?.GetValue<double>() ?? 0;
-                var total     = premium["total"]?.GetValue<double>() ?? 1;
-                bars.Add(("Premium Interactions", total - remaining, total));
+                var limited = body["limited_user_quotas"];
+                var monthly = body["monthly_quotas"];
+                if (limited is not null && monthly is not null)
+                {
+                    TryCopilotLimited(bars, limited["chat"],        monthly["chat"],        "Chat",        resetIso);
+                    TryCopilotLimited(bars, limited["completions"], monthly["completions"], "Completions", resetIso);
+                }
             }
 
-            if (chat is not null)
-            {
-                var remaining = chat["remaining"]?.GetValue<double>() ?? 0;
-                var total     = chat["total"]?.GetValue<double>() ?? 1;
-                bars.Add(("Chat Quota", total - remaining, total));
-            }
-
-            ApplyBarsFromUsedTotal(account, bars);
+            if (bars.Count > 0)
+                ApplyBarsFromFraction(account, bars);
         }
         catch (OperationCanceledException) { throw; }
         catch { }
+    }
+
+    private static void TryCopilotSnapshot(
+        List<(string, double, string?)> bars, JsonNode? snap, string title, string? resetIso)
+    {
+        if (snap is null) return;
+        if (snap["unlimited"]?.GetValue<bool>() == true) return;
+
+        double used;
+        if (snap["percent_remaining"] is JsonNode pct)
+        {
+            used = (100.0 - Math.Clamp(pct.GetValue<double>(), 0, 100)) / 100.0;
+        }
+        else
+        {
+            var remaining   = snap["remaining"]?.GetValue<double>()   ?? 0;
+            var entitlement = snap["entitlement"]?.GetValue<double>() ?? 0;
+            if (entitlement <= 0) return;
+            used = Math.Clamp((entitlement - remaining) / entitlement, 0, 1);
+        }
+
+        bars.Add((title, used, resetIso));
+    }
+
+    private static void TryCopilotLimited(
+        List<(string, double, string?)> bars,
+        JsonNode? remaining, JsonNode? total, string title, string? resetIso)
+    {
+        if (remaining is null || total is null) return;
+        var rem = remaining.GetValue<double>();
+        var tot = total.GetValue<double>();
+        if (tot <= 0) return;
+        bars.Add((title, Math.Clamp((tot - rem) / tot, 0, 1), resetIso));
+    }
+
+    private static string CopilotPlanBadge(string sku, string plan)
+    {
+        if (sku.Contains("enterprise") || plan == "enterprise") return "ENTERPRISE";
+        if (sku.Contains("business")   || plan == "business")   return "BUSINESS";
+        if (sku.Contains("educational"))                         return "PRO";
+        if (sku.Contains("pro")        || plan.Contains("pro")) return "PRO";
+        if (plan == "individual" && !sku.Contains("free_limited")) return "PRO";
+        if (sku.Contains("free_limited") || sku == "free")       return "FREE";
+        if (plan.Contains("free"))                               return "FREE";
+        if (!string.IsNullOrEmpty(plan)) return plan.ToUpperInvariant();
+        return sku.ToUpperInvariant();
     }
 
     // ── Gemini CLI ────────────────────────────────────────────────────────────
