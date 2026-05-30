@@ -1,0 +1,33 @@
+version: 2
+
+updates:
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # NuGet
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "chore"
+    ignore:
+      # Avalonia 12.x is a major bump — review manually before upgrading
+      - dependency-name: "Avalonia*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      avalonia:
+        patterns: ["Avalonia*"]
+      nuget-packages:
+        patterns: ["*"]
+        exclude-patterns: ["Avalonia*"]
