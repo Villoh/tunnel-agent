@@ -17,6 +17,19 @@ using TunnelAgent.Infrastructure.Engine.Perplexity;
 
 namespace TunnelAgent.ViewModels;
 
+/// <summary>Per-agent result inside a multi-agent configure operation.</summary>
+public sealed record AgentConfigItemResult(
+    string AgentName, bool Success, string? Error, string? ConfigPath);
+
+public sealed record CliProxyApiKeyViewModel(string Value, bool IsDefault)
+{
+    public string Masked => string.IsNullOrEmpty(Value)
+        ? ""
+        : Value.Length > 12 ? $"{Value[..8]}...{Value[^4..]}" : Value;
+    public bool CanRemove => true;
+    public bool CanSetDefault => !IsDefault;
+}
+
 public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly SettingsService _settings;
@@ -28,6 +41,9 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly TunnelAgent.Services.ModelFetchService _modelFetch;
     private readonly TokenGeneratorService _perplexityTokenGenerator = new();
     private readonly Dictionary<string, bool> _engineUpdateToastShown = new(StringComparer.OrdinalIgnoreCase);
+    private readonly IAgentDetectionService _agentDetection = new AgentDetectionService();
+    private readonly AgentConfigurationService _agentConfiguration = new AgentConfigurationService();
+    private bool _agentsDetectedOnce;
 
     private CancellationTokenSource? _modelFetchCts;
     private bool _engineReleaseSelectionReady;
@@ -79,9 +95,40 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _configurationStatusIsError;
     [ObservableProperty] private string _configurationStatusMessage = "";
     [ObservableProperty] private bool _showResetCredentialsDialog;
+    [ObservableProperty] private bool _showApiKeysDialog;
+    [ObservableProperty] private string _apiKeyDraft = "";
+    [ObservableProperty] private bool _showApiKeyDraft;
+    [ObservableProperty] private string _addAccountApiKeyDraft = "";
+    [ObservableProperty] private bool _showAddAccountApiKey;
+    [ObservableProperty] private bool _showPerplexitySessionToken;
+    [ObservableProperty] private bool _isModelsExpanded;
+    [ObservableProperty] private string _modelSearchText = "";
 
     [ObservableProperty] private bool _isLoadingEngineReleases;
     [ObservableProperty] private EngineReleaseViewModel? _selectedEngineRelease;
+    [ObservableProperty]
+    private bool _isDetectingAgents;
+
+    // Agent config dialog state
+    [ObservableProperty] private bool _showAgentConfigDialog;
+    [ObservableProperty] private AgentViewModel? _agentConfigTarget;
+    [ObservableProperty] private bool _isAgentConfigBulkMode;
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ApplyAgentConfigCommand))]
+    private bool _isApplyingAgentConfig;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowAgentConfigApplyButton))]
+    [NotifyPropertyChangedFor(nameof(ShowAgentConfigCopyButton))]
+    private bool _isAgentConfigManualMode;
+    [ObservableProperty] private bool _isAgentConfigDefaultMode;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(AgentConfigHasResult))]
+    [NotifyPropertyChangedFor(nameof(AgentConfigSuccess))]
+    [NotifyPropertyChangedFor(nameof(ShowAgentConfigApplyButton))]
+    [NotifyPropertyChangedFor(nameof(ShowAgentConfigCopyButton))]
+    private AgentConfigApplyResult? _agentConfigResult;
+    [ObservableProperty] private IReadOnlyList<RawConfigPreview> _agentConfigPreviews = Array.Empty<RawConfigPreview>();
+    [ObservableProperty] private IReadOnlyList<AgentConfigItemResult> _agentConfigMultiResults = Array.Empty<AgentConfigItemResult>();
 
     public ObservableCollection<ProviderViewModel> Providers { get; } = new();
     public ObservableCollection<PerplexityAccountViewModel> PerplexityAccounts { get; } = new();
@@ -89,6 +136,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public ObservableCollection<EngineReleaseViewModel> EngineReleases { get; } = new();
     public ObservableCollection<AvailableModelGroupViewModel> AvailableModelGroups { get; }
     public ObservableCollection<EngineOptionViewModel> EngineOptions { get; } = new();
+    public ObservableCollection<CliProxyApiKeyViewModel> CliProxyApiKeys { get; } = new();
+    public ObservableCollection<SelectableModelViewModel> SelectableModels { get; } = new();
 
     public MainWindowViewModel() : this(new SettingsService(), null!, null!, null!, null!, null!) { }
 
@@ -109,7 +158,13 @@ public partial class MainWindowViewModel : ViewModelBase
         _folderOpen = folderOpen ?? new FolderOpenService();
 
         AvailableModelGroups = new ObservableCollection<AvailableModelGroupViewModel>();
-        AvailableModelGroups.CollectionChanged += (_, _) => OnPropertyChanged(nameof(TotalAvailableModelCount));
+        AvailableModelGroups.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(TotalAvailableModelCount));
+            // Repopulate selectable models if agent config dialog is open
+            if (ShowAgentConfigDialog && !AgentConfigHasResult)
+                PopulateSelectableModels();
+        };
         _modelFetch = new TunnelAgent.Services.ModelFetchService(settings);
 
         foreach (var engine in _engineRegistry.Engines)
@@ -121,7 +176,8 @@ public partial class MainWindowViewModel : ViewModelBase
         foreach (var definition in EngineCatalog.All)
             EngineOptions.Add(new EngineOptionViewModel(definition));
 
-        SeedDemoAgents();
+        InitApiKeysFromSettings();
+        InitAgentsFromCatalog();
     }
 
     // Providers submenu highlight — independent from Config section
@@ -142,7 +198,57 @@ public partial class MainWindowViewModel : ViewModelBase
     public string AppVersion { get; } = TunnelAgent.AppVersion.Current;
     public bool IsLaunchAtLoginSupported => _launchAtLogin.IsSupported;
     public int ConnectedProviderCount => Providers.Count(p => p.Connected || p.ActiveAccountCount > 0);
-    public int EnabledAgentCount => Agents.Count(a => a.Installed && a.Enabled);
+    public int EnabledAgentCount    => Agents.Count(a => a.Installed && a.Enabled);
+    public int InstalledAgentCount   => Agents.Count(a => a.Installed);
+    public int ConfiguredAgentCount  => Agents.Count(a => a.Configured);
+    public int NotInstalledAgentCount => Agents.Count(a => !a.Installed);
+    public IEnumerable<AgentViewModel> InstalledAgents    => Agents.Where(a => a.Installed);
+    public IEnumerable<AgentViewModel> NotInstalledAgents => Agents.Where(a => !a.Installed);
+
+    // Proxy URL agents should point to (CLIProxy v1 endpoint)
+    public string AgentProxyBaseUrl => CliProxyEndpointUrl + "/v1";
+    public string CurrentAgentApiKey => _settings.Current.CliProxyApiKeys.Contains(_settings.Current.DefaultCliProxyApiKey)
+        ? _settings.Current.DefaultCliProxyApiKey
+        : "";
+    public bool AgentConfigHasResult         => AgentConfigResult != null;
+    public bool AgentConfigSuccess            => AgentConfigResult?.Success == true;
+    public bool ShowAgentConfigApplyButton    => !AgentConfigHasResult && !IsAgentConfigManualMode;
+    public bool ShowAgentConfigCopyButton     => !AgentConfigHasResult && IsAgentConfigManualMode;
+    public bool ShowAgentConfigAgentPicker    => IsAgentConfigBulkMode;
+    public bool ShowSingleAgentSummary        => !IsAgentConfigBulkMode && AgentConfigTarget != null;
+    public bool HasSelectableModels           => SelectableModels.Count > 0;
+    public int VisibleSelectableModelCount    => SelectableModels.Count(m => m.IsVisible);
+    public bool HasVisibleSelectableModels    => VisibleSelectableModelCount > 0;
+    public bool ShowNoModelSearchResults      => HasSelectableModels && !HasVisibleSelectableModels;
+    public bool? AllVisibleModelsSelected
+    {
+        get
+        {
+            var visible = SelectableModels.Where(m => m.IsVisible).ToList();
+            if (visible.Count == 0) return false;
+            var selected = visible.Count(m => m.IsSelected);
+            if (selected == 0) return false;
+            return selected == visible.Count ? true : null;
+        }
+        set
+        {
+            var select = value != false;
+            foreach (var model in SelectableModels.Where(m => m.IsVisible))
+                model.IsSelected = select;
+            OnPropertyChanged(nameof(AllVisibleModelsSelected));
+        }
+    }
+    public string ModelsExpanderLabel         => $"Models — {SelectableModels.Count(m => m.IsSelected)} of {SelectableModels.Count} selected";
+    public int AgentConfigSelectedCount       => IsAgentConfigBulkMode
+        ? Agents.Count(a => a.IsSelectedForConfig && a.Installed)
+        : AgentConfigTarget?.Installed == true ? 1 : 0;
+    public string AgentConfigApplyLabel       => IsAgentConfigBulkMode ? $"Apply ({AgentConfigSelectedCount})" : "Apply";
+    public string AgentConfigDialogTitle      => IsAgentConfigBulkMode
+        ? "Configure Agents"
+        : AgentConfigTarget is { } target ? $"Configure {target.Name}" : "Configure Agent";
+    public string AgentConfigDialogDescription => IsAgentConfigBulkMode
+        ? "Choose installed agents, then apply shared config."
+        : AgentConfigTarget?.Description ?? "";
     public int TotalAvailableModelCount => AvailableModelGroups.Sum(g => g.ModelCount);
     public int PerplexityAccountCount => PerplexityAccounts.Count;
     public bool HasPerplexityAccounts => PerplexityAccounts.Count > 0;
@@ -379,6 +485,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
         RefreshFocusedEngineState();
         await LoadEngineReleasesAsync();
+
+        // Pre-detect agents in background so Agents section is ready when opened
+        _ = DetectAgentsAsync();
     }
 
     private void NormalizeActiveEngineSetting()
@@ -414,13 +523,19 @@ public partial class MainWindowViewModel : ViewModelBase
 
                 if (engine.State == EngineState.Running)
                 {
-                    _modelFetchCts?.Cancel();
-                    _modelFetchCts = new CancellationTokenSource();
-                    _ = _modelFetch.FetchAndApplyAsync(AvailableModelGroups, engine.Port, engine.Definition.Id, _modelFetchCts.Token);
+                    // Only start a new fetch on actual transition to Running.
+                    // DownloadService fires StateChanged while the process is already Running
+                    // (e.g. update check), which previously cancelled in-progress retries.
+                    if (_modelFetchCts is null || _modelFetchCts.IsCancellationRequested)
+                    {
+                        _modelFetchCts = new CancellationTokenSource();
+                        _ = _modelFetch.FetchAndApplyAsync(AvailableModelGroups, engine.Port, engine.Definition.Id, _modelFetchCts.Token);
+                    }
                 }
                 else if (engine.State == EngineState.Stopped || engine.State == EngineState.Error)
                 {
                     _modelFetchCts?.Cancel();
+                    _modelFetchCts = null;
                     AvailableModelGroups.Clear();
                 }
 
@@ -641,6 +756,8 @@ public partial class MainWindowViewModel : ViewModelBase
         if (sender is ProviderViewModel vm)
         {
             AddAccountTarget = vm;
+            AddAccountApiKeyDraft = "";
+            ShowAddAccountApiKey = false;
             ShowAddAccountDialog = true;
         }
     }
@@ -648,6 +765,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public async Task ConfirmAddAccountAsync(string providerId, string baseUrl, string apiKey, string? label)
     {
         ShowAddAccountDialog = false;
+        AddAccountApiKeyDraft = "";
+        ShowAddAccountApiKey = false;
         await _catalog.AddAccountAsync(providerId, baseUrl, apiKey, label);
         OnPropertyChanged(nameof(ConnectedProviderCount));
     }
@@ -655,6 +774,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public async Task ConfirmAddPerplexityAccountAsync(string? label, string sessionToken)
     {
         ShowPerplexityAccountDialog = false;
+        ShowPerplexitySessionToken = false;
         PerplexitySessionTokenDraft = "";
         await _perplexityAccounts.AddAsync(label, sessionToken);
     }
@@ -663,6 +783,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private void ShowAddPerplexityAccount()
     {
         ShowPerplexityAccountDialog = true;
+        ShowPerplexitySessionToken = false;
         IsPerplexityTokenGenerationMode = false;
         IsPerplexityTokenFlowBusy = false;
         PerplexityTokenStage = TokenFlowStage.Email;
@@ -680,6 +801,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public async Task DismissPerplexityAccountDialog()
     {
         ShowPerplexityAccountDialog = false;
+        ShowPerplexitySessionToken = false;
         IsPerplexityTokenGenerationMode = false;
         IsPerplexityTokenFlowBusy = false;
         PerplexityTokenStage = TokenFlowStage.Email;
@@ -885,7 +1007,17 @@ public partial class MainWindowViewModel : ViewModelBase
         PerplexityGeneratedToken = "";
         await _perplexityTokenGenerator.DisposeAsync();
     }
-    [RelayCommand] private void DismissAddAccountDialog() => ShowAddAccountDialog = false;
+    [RelayCommand]
+    private void DismissAddAccountDialog()
+    {
+        ShowAddAccountDialog = false;
+        AddAccountApiKeyDraft = "";
+        ShowAddAccountApiKey = false;
+    }
+
+    [RelayCommand] private void ToggleApiKeyDraftVisibility() => ShowApiKeyDraft = !ShowApiKeyDraft;
+    [RelayCommand] private void ToggleAddAccountApiKeyVisibility() => ShowAddAccountApiKey = !ShowAddAccountApiKey;
+    [RelayCommand] private void TogglePerplexitySessionTokenVisibility() => ShowPerplexitySessionToken = !ShowPerplexitySessionToken;
 
     [RelayCommand]
     public async Task RemoveAccountAsync(ProviderAccountViewModel account)
@@ -1005,6 +1137,289 @@ public partial class MainWindowViewModel : ViewModelBase
         SelectedSection = SectionKey.Providers;
         ActiveEngineId = ProvidersEngineId;
     }
+    [RelayCommand]
+    private void SelectAgents()
+    {
+        SelectedSection = SectionKey.Agents;
+        if (!_agentsDetectedOnce)
+            _ = DetectAgentsAsync();
+    }
+
+    [RelayCommand]
+    private void OpenAgentConfig(AgentViewModel vm)
+    {
+        foreach (var a in Agents) a.IsSelectedForConfig = false;
+        IsAgentConfigBulkMode   = false;
+        AgentConfigTarget       = vm;
+        AgentConfigResult       = null;
+        AgentConfigMultiResults = Array.Empty<AgentConfigItemResult>();
+        IsAgentConfigManualMode = false;
+        IsAgentConfigDefaultMode = false;
+        IsApplyingAgentConfig   = false;
+        AgentConfigPreviews     = Array.Empty<RawConfigPreview>();
+        IsModelsExpanded        = false;
+        ModelSearchText         = "";
+        PopulateSelectableModels();
+        ShowAgentConfigDialog   = true;
+        OnPropertyChanged(nameof(ShowAgentConfigAgentPicker));
+        OnPropertyChanged(nameof(ShowSingleAgentSummary));
+        OnPropertyChanged(nameof(AgentConfigSelectedCount));
+        OnPropertyChanged(nameof(AgentConfigApplyLabel));
+        OnPropertyChanged(nameof(AgentConfigDialogTitle));
+        OnPropertyChanged(nameof(AgentConfigDialogDescription));
+    }
+
+    [RelayCommand]
+    private void OpenBulkAgentConfig()
+    {
+        foreach (var a in Agents) a.IsSelectedForConfig = false;
+        IsAgentConfigBulkMode   = true;
+        AgentConfigTarget       = null;
+        AgentConfigResult       = null;
+        AgentConfigMultiResults = Array.Empty<AgentConfigItemResult>();
+        IsAgentConfigManualMode = false;
+        IsAgentConfigDefaultMode = false;
+        IsApplyingAgentConfig   = false;
+        AgentConfigPreviews     = Array.Empty<RawConfigPreview>();
+        IsModelsExpanded        = false;
+        ModelSearchText         = "";
+        PopulateSelectableModels();
+        ShowAgentConfigDialog   = true;
+        OnPropertyChanged(nameof(ShowAgentConfigAgentPicker));
+        OnPropertyChanged(nameof(ShowSingleAgentSummary));
+        OnPropertyChanged(nameof(AgentConfigSelectedCount));
+        OnPropertyChanged(nameof(AgentConfigApplyLabel));
+        OnPropertyChanged(nameof(AgentConfigDialogTitle));
+        OnPropertyChanged(nameof(AgentConfigDialogDescription));
+    }
+
+    [RelayCommand]
+    private void DismissAgentConfig()
+    {
+        ShowAgentConfigDialog = false;
+        IsAgentConfigBulkMode = false;
+        AgentConfigTarget = null;
+        AgentConfigResult = null;
+        AgentConfigMultiResults = Array.Empty<AgentConfigItemResult>();
+        AgentConfigPreviews = Array.Empty<RawConfigPreview>();
+        foreach (var a in Agents) a.IsSelectedForConfig = false;
+        ModelSearchText = "";
+        ClearSelectableModels();
+        OnPropertyChanged(nameof(ShowAgentConfigAgentPicker));
+        OnPropertyChanged(nameof(ShowSingleAgentSummary));
+        OnPropertyChanged(nameof(AgentConfigSelectedCount));
+        OnPropertyChanged(nameof(AgentConfigApplyLabel));
+        OnPropertyChanged(nameof(AgentConfigDialogTitle));
+        OnPropertyChanged(nameof(AgentConfigDialogDescription));
+    }
+
+    [RelayCommand] private void ToggleModels() => IsModelsExpanded = !IsModelsExpanded;
+
+    partial void OnModelSearchTextChanged(string value) => ApplyModelFilter();
+
+    private void ApplyModelFilter()
+    {
+        foreach (var model in SelectableModels)
+            model.IsVisible = model.Matches(ModelSearchText);
+        OnPropertyChanged(nameof(VisibleSelectableModelCount));
+        OnPropertyChanged(nameof(HasVisibleSelectableModels));
+        OnPropertyChanged(nameof(ShowNoModelSearchResults));
+        OnPropertyChanged(nameof(AllVisibleModelsSelected));
+    }
+
+    [RelayCommand] private void SetAgentAutoMode() => IsAgentConfigManualMode = false;
+    [RelayCommand]
+    private void SetAgentManualMode()
+    {
+        IsAgentConfigManualMode = true;
+        RefreshManualPreview();
+    }
+    [RelayCommand] private void SetAgentProxyMode()   => IsAgentConfigDefaultMode = false;
+    [RelayCommand] private void SetAgentDefaultMode() => IsAgentConfigDefaultMode = true;
+
+    [RelayCommand(CanExecute = nameof(CanApplyAgentConfig))]
+    private async Task ApplyAgentConfigAsync()
+    {
+        if (IsAgentConfigManualMode) return;
+        var targets = GetAgentConfigTargets();
+        if (targets.Count == 0) return;
+
+        IsApplyingAgentConfig = true;
+        AgentConfigResult = null;
+        var models = GetSelectedModels();
+        var itemResults = new List<AgentConfigItemResult>();
+        try
+        {
+            foreach (var target in targets)
+            {
+                var def = FindDef(target.Id);
+                var r = IsAgentConfigDefaultMode
+                    ? await Task.Run(() => _agentConfiguration.Revert(def)).ConfigureAwait(false)
+                    : await Task.Run(() => _agentConfiguration.Apply(def, AgentProxyBaseUrl, CurrentAgentApiKey, models)).ConfigureAwait(false);
+                itemResults.Add(new AgentConfigItemResult(target.Name, r.Success, r.Error, r.ConfigPath));
+            }
+
+            await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                AgentConfigMultiResults = itemResults;
+                var ok  = itemResults.Count(r => r.Success);
+                var msg = ok == itemResults.Count
+                    ? $"All {ok} agent(s) configured successfully."
+                    : $"{ok} of {itemResults.Count} configured. Check errors below.";
+                AgentConfigResult = AgentConfigApplyResult.Ok(msg);
+            });
+
+            _ = DetectAgentsAsync();
+        }
+        finally
+        {
+            IsApplyingAgentConfig = false;
+            ApplyAgentConfigCommand.NotifyCanExecuteChanged();
+        }
+    }
+    private bool CanApplyAgentConfig() => !IsApplyingAgentConfig;
+
+    private List<AgentViewModel> GetAgentConfigTargets() => IsAgentConfigBulkMode
+        ? Agents.Where(a => a.IsSelectedForConfig && a.Installed).ToList()
+        : AgentConfigTarget is { Installed: true } target ? new List<AgentViewModel> { target } : new List<AgentViewModel>();
+
+    private static AgentDefinition FindDef(string id) =>
+        AgentCatalog.All.First(d => d.Id == id);
+
+    private List<string> GetSelectedModels() =>
+        SelectableModels.Where(m => m.IsSelected).Select(m => m.Name).ToList();
+
+    private void PopulateSelectableModels()
+    {
+        ClearSelectableModels();
+        foreach (var group in AvailableModelGroups)
+            foreach (var model in group.Models)
+            {
+                var vm = new SelectableModelViewModel(model.Name, group.ProviderName);
+                vm.PropertyChanged += OnSelectableModelPropertyChanged;
+                SelectableModels.Add(vm);
+            }
+        ApplyModelFilter();
+        OnPropertyChanged(nameof(HasSelectableModels));
+        OnPropertyChanged(nameof(ModelsExpanderLabel));
+        OnPropertyChanged(nameof(AllVisibleModelsSelected));
+        if (IsAgentConfigManualMode && ShowAgentConfigDialog && !AgentConfigHasResult)
+            RefreshManualPreview();
+    }
+
+    private void ClearSelectableModels()
+    {
+        foreach (var vm in SelectableModels)
+            vm.PropertyChanged -= OnSelectableModelPropertyChanged;
+        SelectableModels.Clear();
+        OnPropertyChanged(nameof(HasSelectableModels));
+        OnPropertyChanged(nameof(VisibleSelectableModelCount));
+        OnPropertyChanged(nameof(HasVisibleSelectableModels));
+        OnPropertyChanged(nameof(ShowNoModelSearchResults));
+        OnPropertyChanged(nameof(AllVisibleModelsSelected));
+        OnPropertyChanged(nameof(ModelsExpanderLabel));
+    }
+
+    private void OnSelectableModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(SelectableModelViewModel.IsSelected)) return;
+        OnPropertyChanged(nameof(ModelsExpanderLabel));
+        OnPropertyChanged(nameof(AllVisibleModelsSelected));
+        if (IsAgentConfigManualMode && ShowAgentConfigDialog && !AgentConfigHasResult)
+            RefreshManualPreview();
+    }
+
+    private void RefreshManualPreview()
+    {
+        var targets = GetAgentConfigTargets();
+        var models  = GetSelectedModels();
+        AgentConfigPreviews = targets
+            .SelectMany(a => _agentConfiguration.Preview(FindDef(a.Id), AgentProxyBaseUrl, CurrentAgentApiKey, models))
+            .ToList();
+    }
+
+    private void InitApiKeysFromSettings()
+    {
+        NormalizeApiKeys();
+        RefreshApiKeyItems();
+    }
+
+    private void NormalizeApiKeys()
+    {
+        _settings.Current.CliProxyApiKeys = _settings.Current.CliProxyApiKeys
+            .Where(k => !string.IsNullOrWhiteSpace(k))
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+        if (!_settings.Current.CliProxyApiKeys.Contains(_settings.Current.DefaultCliProxyApiKey, StringComparer.Ordinal))
+            _settings.Current.DefaultCliProxyApiKey = _settings.Current.CliProxyApiKeys.FirstOrDefault() ?? "";
+    }
+
+    private void RefreshApiKeyItems()
+    {
+        CliProxyApiKeys.Clear();
+        foreach (var key in _settings.Current.CliProxyApiKeys.Where(k => !string.IsNullOrWhiteSpace(k)).Distinct())
+            CliProxyApiKeys.Add(new CliProxyApiKeyViewModel(
+                key,
+                string.Equals(key, _settings.Current.DefaultCliProxyApiKey, StringComparison.Ordinal)));
+        OnPropertyChanged(nameof(CurrentAgentApiKey));
+    }
+
+    [RelayCommand]
+    private void OpenApiKeys()
+    {
+        NormalizeApiKeys();
+        RefreshApiKeyItems();
+        ApiKeyDraft = "";
+        ShowApiKeyDraft = false;
+        ShowApiKeysDialog = true;
+    }
+
+    [RelayCommand]
+    private void DismissApiKeys()
+    {
+        ApiKeyDraft = "";
+        ShowApiKeyDraft = false;
+        ShowApiKeysDialog = false;
+    }
+
+    [RelayCommand]
+    private async Task AddApiKeyAsync()
+    {
+        var key = ApiKeyDraft.Trim();
+        if (string.IsNullOrWhiteSpace(key)) return;
+        if (!_settings.Current.CliProxyApiKeys.Contains(key, StringComparer.Ordinal))
+            _settings.Current.CliProxyApiKeys.Add(key);
+        ApiKeyDraft = "";
+        ShowApiKeyDraft = false;
+        await PersistApiKeysAsync();
+    }
+
+    [RelayCommand]
+    private async Task RemoveApiKeyAsync(CliProxyApiKeyViewModel? key)
+    {
+        if (key is null) return;
+        _settings.Current.CliProxyApiKeys.RemoveAll(k => string.Equals(k, key.Value, StringComparison.Ordinal));
+        if (string.Equals(_settings.Current.DefaultCliProxyApiKey, key.Value, StringComparison.Ordinal))
+            _settings.Current.DefaultCliProxyApiKey = _settings.Current.CliProxyApiKeys.FirstOrDefault() ?? "";
+        await PersistApiKeysAsync();
+    }
+
+    [RelayCommand]
+    private async Task SetDefaultApiKeyAsync(CliProxyApiKeyViewModel? key)
+    {
+        if (key is null) return;
+        _settings.Current.DefaultCliProxyApiKey = key.Value;
+        await PersistApiKeysAsync();
+    }
+
+    private async Task PersistApiKeysAsync()
+    {
+        NormalizeApiKeys();
+        _settings.Save();
+        RefreshApiKeyItems();
+        await CliProxyEngine.WriteConfigAsync();
+    }
+
     [RelayCommand] private void SelectConfiguration() => SelectedSection = SectionKey.ConfigGeneral;
     [RelayCommand] private void SelectConfigGeneral() => SelectedSection = SectionKey.ConfigGeneral;
     [RelayCommand] private void SelectConfigCliProxy() => SelectedSection = SectionKey.ConfigCliProxy;
@@ -1116,11 +1531,59 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(EnabledAgentCount));
     }
 
-    private void SeedDemoAgents()
+    [RelayCommand]
+    private async Task DetectAgentsAsync()
     {
-        Agents.Add(new AgentViewModel("claude-code", "Claude Code", "claude", "Terminal", true) { Enabled = true, RouteProviderId = "claude" });
-        Agents.Add(new AgentViewModel("codex", "Codex CLI", "codex", "Code", true) { Enabled = true, RouteProviderId = "codex" });
-        Agents.Add(new AgentViewModel("cursor", "Cursor Agent", "cursor-agent", "Sparkles", true) { Enabled = false, RouteProviderId = "claude" });
-        Agents.Add(new AgentViewModel("aider", "Aider", "aider", "Terminal", false, "Install via pip to route through Tunnel."));
+        if (IsDetectingAgents) return;
+        IsDetectingAgents = true;
+        _agentsDetectedOnce = true;
+        try
+        {
+            var results = await _agentDetection.DetectAllAsync().ConfigureAwait(false);
+            await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                foreach (var vm in Agents)
+                {
+                    var r = results.FirstOrDefault(x => x.AgentId == vm.Id)
+                            ?? AgentDetectionResult.NotFound(vm.Id);
+                    vm. ApplyDetection(r);
+                }
+                OnPropertyChanged(nameof(EnabledAgentCount));
+                OnPropertyChanged(nameof(InstalledAgentCount));
+                OnPropertyChanged(nameof(ConfiguredAgentCount));
+                OnPropertyChanged(nameof(NotInstalledAgentCount));
+                OnPropertyChanged(nameof(InstalledAgents));
+                OnPropertyChanged(nameof(NotInstalledAgents));
+            });
+        }
+        finally
+        {
+            IsDetectingAgents = false;
+        }
+    }
+
+    private void InitAgentsFromCatalog()
+    {
+        foreach (var def in AgentCatalog.All)
+        {
+            var vm = new AgentViewModel(def);
+            vm.PropertyChanged += OnAgentPropertyChanged;
+            Agents.Add(vm);
+        }
+    }
+
+    private void OnAgentPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(AgentViewModel.IsSelectedForConfig))
+        {
+            OnPropertyChanged(nameof(AgentConfigSelectedCount));
+            OnPropertyChanged(nameof(AgentConfigApplyLabel));
+            if (IsAgentConfigManualMode && IsAgentConfigBulkMode && ShowAgentConfigDialog && !AgentConfigHasResult)
+                RefreshManualPreview();
+        }
+        else if (e.PropertyName == nameof(AgentViewModel.Configured))
+        {
+            OnPropertyChanged(nameof(ConfiguredAgentCount));
+        }
     }
 }

@@ -34,14 +34,38 @@ public sealed class ModelFetchService
     {
         var url  = $"http://127.0.0.1:{port}/v1/models";
 
+        // Poll until models are available (CLIProxy loads auth/models after health check).
+        // Max 30 seconds: 1 immediate attempt + 14 retries every 2s.
+        const int pollIntervalMs = 2000;
+        const int maxAttempts    = 15;
+        JsonArray? data          = null;
+
+        for (var attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            if (ct.IsCancellationRequested) return;
+            if (attempt > 0) await Task.Delay(pollIntervalMs, ct);
+            try
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                var apiKey = _settings.Current.CliProxyApiKeys.Contains(_settings.Current.DefaultCliProxyApiKey)
+                    ? _settings.Current.DefaultCliProxyApiKey
+                    : "";
+                if (!string.IsNullOrWhiteSpace(apiKey))
+                    request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {apiKey}");
+                using var resp = await Http.SendAsync(request, ct);
+                if (!resp.IsSuccessStatusCode) continue;
+                var body = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
+                var candidate = body?["data"]?.AsArray();
+                if (candidate is { Count: > 0 }) { data = candidate; break; }
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested) { return; }
+            catch { /* server not ready — retry */ }
+        }
+
+        if (data is null) return;
+
         try
         {
-            using var resp = await Http.GetAsync(url, ct);
-            if (!resp.IsSuccessStatusCode) return;
-
-            var body = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
-            var data = body?["data"]?.AsArray();
-            if (data is null) return;
 
             // Group by owned_by
             var byOwner = new Dictionary<string, List<(string id, string ownedBy)>>(StringComparer.OrdinalIgnoreCase);

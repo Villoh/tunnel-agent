@@ -7,7 +7,7 @@ namespace TunnelAgent.Tests;
 public sealed class SettingsServiceEdgeTests
 {
     [Fact]
-    public async Task SaveImmediateAsync_WithProviders_PersistsAllData()
+    public async Task SaveImmediateAsync_DoesNotPersistRuntimeProviderState()
     {
         using var temp = new TestTempDirectory();
         var path = temp.File("settings.json");
@@ -24,11 +24,34 @@ public sealed class SettingsServiceEdgeTests
         });
         await service.SaveImmediateAsync();
 
+        var json = await File.ReadAllTextAsync(path);
+        Assert.DoesNotContain("Providers", json);
+
         var reloaded = new SettingsService(path);
         await reloaded.LoadAsync();
-        Assert.Single(reloaded.Current.Providers);
-        Assert.Equal("custom-provider", reloaded.Current.Providers[0].Id);
-        Assert.Equal("key-1", reloaded.Current.Providers[0].Accounts[0].ApiKey);
+        Assert.Empty(reloaded.Current.Providers);
+    }
+
+    [Fact]
+    public async Task LoadAsync_WithLegacyRuntimeState_DoesNotStripBeforeMigration()
+    {
+        using var temp = new TestTempDirectory();
+        var path = temp.File("settings.json");
+        await File.WriteAllTextAsync(path, JsonSerializer.Serialize(new
+        {
+            Port = 5555,
+            Providers = new[] { new { Id = "custom-provider", Enabled = true, BaseUrl = "https://api.example.com" } },
+            PerplexityAccounts = new[] { new { Id = "acct", Label = "Primary", SessionToken = "token" } }
+        }));
+
+        var service = new SettingsService(path);
+        await service.LoadAsync();
+
+        Assert.Single(service.Current.Providers);
+        Assert.Single(service.Current.PerplexityAccounts);
+        var persisted = await File.ReadAllTextAsync(path);
+        Assert.Contains("Providers", persisted);
+        Assert.Contains("PerplexityAccounts", persisted);
     }
 
     [Fact]

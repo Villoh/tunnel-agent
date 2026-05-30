@@ -58,6 +58,8 @@ public sealed class AppSettings
     public string PreferredEngineVersion { get; set; } = "";
     public List<EngineRuntimeSettings> Engines { get; set; } = [];
     public List<PerplexityAccountSettings> PerplexityAccounts { get; set; } = [];
+    public string DefaultCliProxyApiKey { get; set; } = "";
+    public List<string> CliProxyApiKeys { get; set; } = [];
 
     /// <summary>
     /// How requests are distributed across multiple API keys for a provider.

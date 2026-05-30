@@ -98,6 +98,9 @@ public sealed class EngineService : IManagedEngine
             DownloadService.BinaryPath,
             _config.ConfigPath,
             _settings.Current.Port,
+            _settings.Current.CliProxyApiKeys.Contains(_settings.Current.DefaultCliProxyApiKey)
+                ? _settings.Current.DefaultCliProxyApiKey
+                : "",
             ct);
     }
 

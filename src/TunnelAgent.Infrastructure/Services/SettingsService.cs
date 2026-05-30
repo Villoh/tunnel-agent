@@ -1,5 +1,6 @@
 // Services/SettingsService.cs
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
@@ -60,7 +61,9 @@ public sealed class SettingsService
 
             Current = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
             var changed = EnsureEngineDefaults(Current);
-            if (IsMissingDefaultFields(json) || changed)
+            // If legacy runtime state exists, do not auto-save here: saving strips
+            // Providers/PerplexityAccounts before migration consumers can run.
+            if ((IsMissingDefaultFields(json) || changed) && !ContainsRuntimeState(json))
                 await SaveImmediateAsync();
         }
         catch
@@ -98,6 +101,17 @@ public sealed class SettingsService
         return changed;
     }
 
+    private static bool ContainsRuntimeState(string json)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            return doc.RootElement.TryGetProperty("Providers", out var providers) && providers.ValueKind == JsonValueKind.Array && providers.GetArrayLength() > 0
+                || doc.RootElement.TryGetProperty("PerplexityAccounts", out var accounts) && accounts.ValueKind == JsonValueKind.Array && accounts.GetArrayLength() > 0;
+        }
+        catch (JsonException) { return false; }
+    }
+
     private static bool IsMissingDefaultFields(string json)
     {
         try
@@ -106,7 +120,7 @@ public sealed class SettingsService
             if (current.RootElement.ValueKind != JsonValueKind.Object)
                 return true;
 
-            var defaultsJson = JsonSerializer.Serialize(new AppSettings(), JsonOptions);
+            var defaultsJson = StripRuntimeState(JsonSerializer.Serialize(new AppSettings(), JsonOptions));
             using var defaults = JsonDocument.Parse(defaultsJson);
 
             foreach (var property in defaults.RootElement.EnumerateObject())
@@ -149,7 +163,16 @@ public sealed class SettingsService
     {
         var dir = Path.GetDirectoryName(_settingsPath)!;
         Directory.CreateDirectory(dir);
-        var json = JsonSerializer.Serialize(Current, JsonOptions);
+        var json = StripRuntimeState(JsonSerializer.Serialize(Current, JsonOptions));
         await File.WriteAllTextAsync(_settingsPath, json);
+    }
+
+    private static string StripRuntimeState(string json)
+    {
+        var root = JsonDocument.Parse(json).RootElement.Clone();
+        var node = JsonSerializer.Deserialize<Dictionary<string, object?>>(root.GetRawText(), JsonOptions) ?? [];
+        node.Remove("Providers");
+        node.Remove("PerplexityAccounts");
+        return JsonSerializer.Serialize(node, JsonOptions);
     }
 }

@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Media;
+using IconPacks.Avalonia.Lucide;
 using TunnelAgent.Converters;
 using TunnelAgent.Services;
 using TunnelAgent.ViewModels;
@@ -103,6 +104,26 @@ public sealed class ConverterTests
     }
 
     [Theory]
+    [InlineData(true, '\0')]
+    [InlineData(false, '●')]
+    public void SecretPasswordCharConverter_Convert_TogglesMask(bool visible, char expected)
+    {
+        var converter = new SecretPasswordCharConverter();
+
+        Assert.Equal(expected, converter.Convert(visible, typeof(char), null, Culture));
+    }
+
+    [Theory]
+    [InlineData(true, PackIconLucideKind.EyeOff)]
+    [InlineData(false, PackIconLucideKind.Eye)]
+    public void BoolToEyeIconConverter_Convert_TogglesIcon(bool visible, PackIconLucideKind expected)
+    {
+        var converter = new BoolToEyeIconConverter();
+
+        Assert.Equal(expected, converter.Convert(visible, typeof(PackIconLucideKind), null, Culture));
+    }
+
+    [Theory]
     [InlineData(true, false)]
     [InlineData(false, true)]
     public void InvertBoolConverter_ConvertAndConvertBack_InvertBooleans(bool value, bool expected)
@@ -157,6 +178,8 @@ public sealed class ConverterTests
         Assert.Throws<NotImplementedException>(() => BoolToEnableDisableTextConverter.Instance.ConvertBack(null, typeof(object), null, Culture));
         Assert.Throws<NotImplementedException>(() => BoolToOpacityConverter.Instance.ConvertBack(null, typeof(object), null, Culture));
         Assert.Throws<NotImplementedException>(() => StringNotEmptyConverter.Instance.ConvertBack(null, typeof(object), null, Culture));
+        Assert.Throws<NotImplementedException>(() => new SecretPasswordCharConverter().ConvertBack(null, typeof(object), null, Culture));
+        Assert.Throws<NotImplementedException>(() => new BoolToEyeIconConverter().ConvertBack(null, typeof(object), null, Culture));
         Assert.Throws<NotImplementedException>(() => new EngineStateToTextConverter().ConvertBack(null, typeof(object), null, Culture));
     }
 }

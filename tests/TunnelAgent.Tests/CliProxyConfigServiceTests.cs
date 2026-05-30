@@ -22,7 +22,28 @@ public sealed class ConfigServiceTests
         Assert.Contains("host: \"127.0.0.1\"", yaml);
         Assert.Contains("port: 9999", yaml);
         Assert.Contains($"auth-dir: \"{authDir.Replace('\\', '/')}\"", yaml);
+        Assert.Contains("\nauth-dir: ", yaml);
+        Assert.DoesNotContain("\napi-keys:", yaml);
+        Assert.DoesNotContain("\"api-keys:", yaml);
         Assert.Contains("debug: false", yaml);
+    }
+
+    [Fact]
+    public async Task WriteConfigAsync_WritesConfiguredApiKeys()
+    {
+        using var temp = new TestTempDirectory();
+        var settings = new SettingsService(temp.File("settings.json"));
+        await settings.LoadAsync();
+        settings.Current.CliProxyApiKeys = ["sk-one", "sk-two", "sk-one"];
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
+
+        await config.WriteConfigAsync();
+
+        var yaml = await File.ReadAllTextAsync(config.ConfigPath);
+        Assert.Contains("api-keys:", yaml);
+        Assert.Contains("  - \"sk-one\"", yaml);
+        Assert.Contains("  - \"sk-two\"", yaml);
+        Assert.Equal(1, CountOccurrences(yaml, "sk-one"));
     }
 
     [Fact]

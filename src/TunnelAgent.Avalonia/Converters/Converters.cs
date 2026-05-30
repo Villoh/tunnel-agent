@@ -7,6 +7,8 @@ using Avalonia.Controls;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 using Avalonia.Styling;
+using Avalonia.Svg.Skia;
+using IconPacks.Avalonia.Lucide;
 using TunnelAgent.Services;
 using TunnelAgent.ViewModels;
 
@@ -65,6 +67,24 @@ public sealed class HexToBrushConverter : IValueConverter
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
         value is string s && Color.TryParse(s, out var c) ? new SolidColorBrush(c) : Brushes.Transparent;
     public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
+}
+
+public sealed class SvgImageConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is not string path || string.IsNullOrWhiteSpace(path)) return null;
+        var normalized = NormalizeAssetPath(path);
+        var source = SvgSource.Load(normalized, null);
+        return source is null ? null : new SvgImage { Source = source };
+    }
+
+    public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
+
+    internal static string NormalizeAssetPath(string path) =>
+        path.StartsWith("avares://", StringComparison.OrdinalIgnoreCase)
+            ? path
+            : "avares://TunnelAgent" + (path.StartsWith('/') ? path : "/" + path);
 }
 
 public sealed class SectionEqualsConverter : IValueConverter
@@ -126,6 +146,20 @@ public sealed class StringNotEmptyConverter : IValueConverter
     public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
 }
 
+public sealed class SecretPasswordCharConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is true ? '\0' : '●';
+    public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
+}
+
+public sealed class BoolToEyeIconConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is true ? PackIconLucideKind.EyeOff : PackIconLucideKind.Eye;
+    public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
+}
+
 /// <summary>Inverts a bool value. Usable as a markup extension via InvertBoolConverter.</summary>
 public sealed class InvertBoolConverter : IValueConverter
 {
@@ -156,5 +190,14 @@ public sealed class EngineStateToTextConverter : IValueConverter
                     s == EngineState.Installing);
         return value is EngineState state ? state.ToString() : "";
     }
+    public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
+}
+
+/// <summary>Returns true when the bound integer is greater than zero. Used to show/hide sections.</summary>
+public sealed class IntGreaterThanZeroConverter : IValueConverter
+{
+    public static readonly IntGreaterThanZeroConverter Instance = new();
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is int i && i > 0;
     public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
 }

@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Agents page with CLI tool detection, installed/configured state, SVG icons, documentation links, individual setup, and multi-agent setup.
+- Agent configuration support for Claude Code, Codex, Gemini CLI, Amp, OpenCode, Pi, Factory Droid, Cursor Agent, and Aider.
+- Model picker in the Agents setup dialog with search, tri-state select-all for visible results, and dynamic manual config previews.
+- CLIProxyAPI key management UI with optional default key selection, removable keys, and generated agent configs that omit auth when no default key exists.
+- Eye/eye-off reveal toggles for CLIProxy API key, custom provider API key, and Perplexity session token inputs.
+- SVG agent assets for Amp, Claude Code, Codex, Cursor Agent, Factory Droid, Gemini CLI, OpenCode, and Pi.
+
+### Changed
+
+- Agents detection now runs in the background, uses parallel detection, and exposes a compact spinning refresh action.
+- Agents setup now uses icon-only gear actions for single and bulk configuration.
+- OpenCode, Pi, and Factory Droid setup now register selected models dynamically instead of relying on static model slots.
+- Factory Droid config now writes `customModels` entries per model and migrates legacy `custom_models` entries.
+- OpenCode config now omits hardcoded context/output/vision limits and lets OpenCode use provider/model defaults.
+- CLIProxy API keys are now optional: empty key list means no `api-keys` entry in `proxy-config.yaml` and no bearer header from Tunnel Agent.
+- `settings.json` no longer persists provider/runtime state (`Providers`, `PerplexityAccounts`); provider intent is loaded from `proxy-config.yaml` where practical and credentials remain file-backed.
+- Agents setup dialogs use improved scrolling, spacing, and compact controls.
+
+### Fixed
+
+- `/v1/models` health and model fetch requests now include the selected default CLIProxy bearer token when CLIProxy auth is enabled.
+- Available models now keep polling after CLIProxy health passes, covering startup races while auth/models are still loading.
+- Manual Agents config previews refresh when available models load while the dialog is already open.
+- CLIProxy `proxy-config.yaml` API key output no longer corrupts YAML formatting.
+- Amp setup now writes `settings.json` plus `secrets.json` using the base URL without `/v1`.
+- Codex setup now writes both `config.toml` and `auth.json`.
+- Secret input dialogs no longer retain cancelled API keys when reopened.
+- Legacy settings migration avoids stripping `Providers` and `PerplexityAccounts` before migration consumers can run.
+
 ## [0.3.1] - 2026-05-23
 
 ### Added

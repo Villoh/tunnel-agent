@@ -27,7 +27,11 @@ public sealed class ViewModelTests
     [Fact]
     public void AgentViewModel_SetMutableProperties_RaisesChangesAndStoresValues()
     {
-        var vm = new AgentViewModel("id", "Name", "binary", "icon", installed: true, hint: "hint");
+        var def = new AgentDefinition(
+            "id", "Name", "A description",
+            new[] { "binary" }, Array.Empty<string>(),
+            null, "#CC785C");
+        var vm = new AgentViewModel(def);
         var changed = new List<string?>();
         vm.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
 
@@ -36,10 +40,7 @@ public sealed class ViewModelTests
 
         Assert.Equal("id", vm.Id);
         Assert.Equal("Name", vm.Name);
-        Assert.Equal("binary", vm.Binary);
-        Assert.Equal("icon", vm.IconKey);
-        Assert.True(vm.Installed);
-        Assert.Equal("hint", vm.Hint);
+        Assert.Equal("binary", vm.BinaryName);
         Assert.True(vm.Enabled);
         Assert.Equal("claude", vm.RouteProviderId);
         Assert.Contains(nameof(AgentViewModel.Enabled), changed);
