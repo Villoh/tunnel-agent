@@ -101,10 +101,6 @@ jobs:
           -o artifacts/publish
 
       # ── Package with Velopack ─────────────────────────────────────────────
-      # vpk pack produces:
-      #   - TunnelAgent-{semver}-win-Setup.exe  (NSIS installer, first install)
-      #   - TunnelAgent-{semver}-win-full.nupkg (full delta package, auto-update)
-      #   - RELEASES-win                        (update manifest)
       - name: Package with Velopack
         shell: pwsh
         run: |
@@ -115,6 +111,33 @@ jobs:
             --mainExe  TunnelAgent.exe `
             --icon     src/TunnelAgent.Avalonia/Assets/logo.ico `
             --outputDir artifacts/velopack
+
+      # ── Generate latest.json ──────────────────────────────────────────────
+      # Simple metadata file consumed by Scoop autoupdate and other tooling.
+      - name: Generate latest.json
+        shell: pwsh
+        run: |
+          $tag     = "${{ steps.version.outputs.tag }}"
+          $version = "${{ steps.version.outputs.semver }}"
+          $repo    = "${{ github.repository }}"
+          $base    = "https://github.com/$repo/releases/download/$tag"
+
+          $setupExe = Get-ChildItem artifacts/velopack -Filter "*-win-Setup.exe" |
+                        Select-Object -First 1
+
+          $hash = (Get-FileHash $setupExe.FullName -Algorithm SHA256).Hash.ToLower()
+
+          @{
+            version  = $version
+            tag      = $tag
+            installer = @{
+              url    = "$base/$($setupExe.Name)"
+              sha256 = $hash
+            }
+          } | ConvertTo-Json -Depth 3 | Set-Content artifacts/velopack/latest.json -Encoding UTF8
+
+          Write-Host "Generated latest.json:"
+          Get-Content artifacts/velopack/latest.json
 
       # ── Create tag (workflow_dispatch only) ───────────────────────────────
       - name: Create and push tag
@@ -159,8 +182,9 @@ jobs:
           git push origin "HEAD:refs/heads/$branch"
           Write-Host "Pushed version bump to $branch"
 
-      # ── Publish GitHub Release with Velopack assets ───────────────────────
+      # ── Publish GitHub Release ────────────────────────────────────────────
       - name: Create GitHub Release
+        id: gh_release
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.version.outputs.tag }}
@@ -181,3 +205,43 @@ jobs:
             artifacts/velopack/*.exe
             artifacts/velopack/*.nupkg
             artifacts/velopack/RELEASES-win
+            artifacts/velopack/latest.json
+
+      # ── Notify Scoop bucket (stable releases only) ────────────────────────
+      - name: Update Scoop bucket
+        if: steps.version.outputs.is_prerelease == 'false'
+        shell: pwsh
+        env:
+          SCOOP_TOKEN: ${{ secrets.SCOOP_BUCKET_TOKEN }}
+        run: |
+          $version = "${{ steps.version.outputs.semver }}"
+          $tag     = "${{ steps.version.outputs.tag }}"
+          $repo    = "${{ github.repository }}"
+          $base    = "https://github.com/$repo/releases/download/$tag"
+
+          $setupExe = Get-ChildItem artifacts/velopack -Filter "*-win-Setup.exe" |
+                        Select-Object -First 1
+          $hash = (Get-FileHash $setupExe.FullName -Algorithm SHA256).Hash.ToLower()
+
+          $body = @{
+            event_type     = "new-release"
+            client_payload = @{
+              version  = $version
+              url      = "$base/$($setupExe.Name)"
+              sha256   = $hash
+            }
+          } | ConvertTo-Json -Depth 3
+
+          $headers = @{
+            Authorization = "Bearer $env:SCOOP_TOKEN"
+            Accept        = "application/vnd.github+json"
+          }
+
+          Invoke-RestMethod `
+            -Uri     "https://api.github.com/repos/Villoh/scoop-bucket/dispatches" `
+            -Method  POST `
+            -Headers $headers `
+            -Body    $body `
+            -ContentType "application/json"
+
+          Write-Host "Dispatched new-release event to scoop-bucket for $version"
