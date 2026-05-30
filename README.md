@@ -75,6 +75,15 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 | Perplexity               | WebUI session token |
 | Custom OpenAI-compatible | API key + base URL  |
 
+### IDE Quota Tracking (Monitor Only)
+
+| IDE    | Description                                        |
+| ------ | -------------------------------------------------- |
+| Cursor | Auto-detected when installed and logged in         |
+| Trae   | Auto-detected when installed and logged in         |
+
+> These IDEs are only used for quota usage monitoring. They cannot be used as providers for the proxy.
+
 ### Agents
 
 | Agent           | Config method                  |
