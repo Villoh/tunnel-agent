@@ -108,12 +108,12 @@ See [docs/app-data-storage.md](docs/app-data-storage.md).
 
 ## Usage
 
-1. **Install an engine** — go to Providers, select CLIProxyAPI or Perplexity, and click Install if no engine is detected.
-2. **Start the engine** — click the play button next to the endpoint. The status indicator turns green when the engine is running.
-3. **Connect providers** — open the Providers tab for CLIProxyAPI, connect OAuth providers (Claude, GitHub Copilot, Gemini CLI…) or add custom API key accounts.
-4. **Copy the endpoint** — the local endpoint (e.g. `http://127.0.0.1:8317/v1`) is shown in the Providers header. Copy it to use in any OpenAI-compatible client.
-5. **Configure agents** — open the Agents tab, detect installed agents, then use the gear icon to auto-write the proxy config for each agent. Select multiple agents at once for bulk setup.
-6. **Track quota** — open the Quota tab to see remaining quota for connected CLIProxyAPI providers and standalone IDE accounts (Kiro, Trae).
+1. **Install an engine**: go to Providers, select CLIProxyAPI or Perplexity, and click Install if no engine is detected.
+2. **Start the engine**: click the play button next to the endpoint. The status indicator turns green when the engine is running.
+3. **Connect providers**: open the Providers tab for CLIProxyAPI, connect OAuth providers (Claude, GitHub Copilot, Gemini CLI…) or add custom API key accounts.
+4. **Copy the endpoint**: the local endpoint (e.g. `http://127.0.0.1:8317/v1`) is shown in the Providers header. Copy it to use in any OpenAI-compatible client.
+5. **Configure agents**: open the Agents tab, detect installed agents, then use the gear icon to auto-write the proxy config for each agent. Select multiple agents at once for bulk setup.
+6. **Track quota**: open the Quota tab to see remaining quota for connected CLIProxyAPI providers and standalone IDE accounts (Kiro, Trae).
 
 ## Development
 
