@@ -57,7 +57,10 @@ public sealed class CliProxyDownloadServiceTests
 
         Assert.NotNull(path);
         Assert.NotEmpty(path);
-        Assert.EndsWith(".exe", path, StringComparison.OrdinalIgnoreCase);
+        if (OperatingSystem.IsWindows())
+            Assert.EndsWith(".exe", path, StringComparison.OrdinalIgnoreCase);
+        else
+            Assert.DoesNotContain(".exe", path, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
