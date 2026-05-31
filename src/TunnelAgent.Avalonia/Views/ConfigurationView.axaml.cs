@@ -13,4 +13,10 @@ public partial class ConfigurationView : UserControl
         if (DataContext is MainWindowViewModel vm)
             vm.ShowNoUpdateToast = false;
     }
+
+    private void OnDismissAppNoUpdateToast(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm)
+            vm.ShowAppNoUpdateToast = false;
+    }
 }

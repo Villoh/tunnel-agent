@@ -79,6 +79,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private string? _appUpdateNewVersion;
     [ObservableProperty] private bool _showUpdateToast;
     [ObservableProperty] private bool _showNoUpdateToast;
+    [ObservableProperty] private bool _showAppNoUpdateToast;
     [ObservableProperty] private bool _endpointCopied;
     [ObservableProperty] private bool _showUpdateSuccess;
     [ObservableProperty] private string _engineStatusText = "Stopped";
@@ -1878,7 +1879,18 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task CheckForAppUpdate()
     {
-        await _appUpdate.CheckAsync();
+        if (!_appUpdate.IsInstalled)
+        {
+            ShowAppNoUpdateToast = true;
+            _ = Task.Delay(4000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowAppNoUpdateToast = false));
+            return;
+        }
+        var hasUpdate = await _appUpdate.CheckAsync();
+        if (!hasUpdate)
+        {
+            ShowAppNoUpdateToast = true;
+            _ = Task.Delay(4000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowAppNoUpdateToast = false));
+        }
     }
 
     [RelayCommand]

@@ -858,6 +858,7 @@
             </Grid>
         </Border>
 
+
         <!-- Engine update toast overlay -->
         <Border IsVisible="{Binding ShowUpdateToast}"
                 Background="{DynamicResource CardBgBrush}"

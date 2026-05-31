@@ -470,5 +470,19 @@
             </Grid>
         </Border>
 
+        <!-- App no update toast -->
+        <Border IsVisible="{Binding ShowAppNoUpdateToast}" Classes="card" MaxWidth="400"
+                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,12,12,0" Padding="14,10" ZIndex="10">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Text="Tunnel Agent is up to date."
+                           TextWrapping="Wrap" FontSize="12" VerticalAlignment="Center"
+                           Foreground="{DynamicResource FgBrush}" MaxWidth="330" />
+                <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0" VerticalAlignment="Top"
+                        Click="OnDismissAppNoUpdateToast">
+                    <lucide:PackIconLucide Kind="X" Width="12" Height="12" Foreground="{DynamicResource FgMutedBrush}" />
+                </Button>
+            </Grid>
+        </Border>
+
     </Panel>
 </UserControl>
