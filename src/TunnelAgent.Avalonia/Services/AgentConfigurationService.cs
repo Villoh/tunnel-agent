@@ -91,7 +91,7 @@ public sealed class AgentConfigurationService
 
     // ── Apply / revert ───────────────────────────────────────────────────────
 
-    private static AgentConfigApplyResult WriteConfigSync(
+    private AgentConfigApplyResult WriteConfigSync(
         AgentDefinition agent, string proxyBaseUrl, string apiKey, bool remove, IReadOnlyList<string>? models, IReadOnlyList<ModelEntry>? modelEntries)
     {
         try
