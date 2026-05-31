@@ -53,6 +53,27 @@ public sealed class AgentConfigurationService
     public IReadOnlyList<RawConfigPreview> Preview(AgentDefinition agent, string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models = null, IReadOnlyList<ModelEntry>? modelEntries = null) =>
         GenerateRaw(agent, proxyBaseUrl, apiKey, models, modelEntries);
 
+    /// <summary>Async preview — resolves context windows for Pi.</summary>
+    public async Task<IReadOnlyList<RawConfigPreview>> PreviewAsync(AgentDefinition agent, string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models = null, IReadOnlyList<ModelEntry>? modelEntries = null, CancellationToken ct = default)
+    {
+        if (agent.Id == "pi" && models is { Count: > 0 })
+        {
+            var modelInfoMap = new Dictionary<string, OpenRouterContextService.ModelInfo>(StringComparer.OrdinalIgnoreCase);
+            foreach (var id in models)
+            {
+                var info = await OpenRouterContextService.Instance.GetModelInfoAsync(id, ct).ConfigureAwait(false);
+                if (info is not null) modelInfoMap[id] = info;
+            }
+            var configPath = ExpandPath("~/.pi/agent/models.json");
+            var preview = new System.Text.Json.Nodes.JsonObject
+            {
+                ["providers"] = new System.Text.Json.Nodes.JsonObject { ["tunnel-agent"] = BuildPiProviderBlock(proxyBaseUrl, apiKey, models, modelInfoMap) }
+            };
+            return new[] { new RawConfigPreview("models.json", configPath, preview.ToJsonString(new JsonSerializerOptions { WriteIndented = true })) };
+        }
+        return GenerateRaw(agent, proxyBaseUrl, apiKey, models, modelEntries);
+    }
+
     /// <summary>Apply proxy configuration. Backs up existing files before writing.</summary>
     public async Task<AgentConfigApplyResult> ApplyAsync(AgentDefinition agent, string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models = null, IReadOnlyList<ModelEntry>? modelEntries = null, CancellationToken ct = default)
     {
@@ -444,7 +465,7 @@ public sealed class AgentConfigurationService
 
     // ── Pi ──────────────────────────────────────────────────────────────
 
-    private static JsonObject BuildPiProviderBlock(string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models, Dictionary<string, int>? contextMap = null)
+    private static JsonObject BuildPiProviderBlock(string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models, Dictionary<string, OpenRouterContextService.ModelInfo>? modelInfoMap = null)
     {
         var provider = new JsonObject
         {
@@ -458,8 +479,14 @@ public sealed class AgentConfigurationService
                 models.Select(id =>
                 {
                     var entry = new JsonObject { ["id"] = id };
-                    if (contextMap is not null && contextMap.TryGetValue(id, out var ctx))
-                        entry["contextWindow"] = ctx;
+                    if (modelInfoMap is not null && modelInfoMap.TryGetValue(id, out var info))
+                    {
+                        if (info.ContextLength > 0)
+                            entry["contextWindow"] = info.ContextLength;
+                        entry["input"] = new JsonArray(info.SupportsImage
+                            ? new JsonNode[] { "text", "image" }
+                            : new JsonNode[] { "text" });
+                    }
                     return (JsonNode?)entry;
                 }).ToArray());
         }
@@ -496,17 +523,17 @@ public sealed class AgentConfigurationService
         }
         else
         {
-            Dictionary<string, int>? contextMap = null;
+            Dictionary<string, OpenRouterContextService.ModelInfo>? modelInfoMap = null;
             if (models is { Count: > 0 })
             {
-                contextMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                modelInfoMap = new Dictionary<string, OpenRouterContextService.ModelInfo>(StringComparer.OrdinalIgnoreCase);
                 foreach (var id in models)
                 {
-                    var ctx = await OpenRouterContextService.Instance.GetContextLengthAsync(id, ct).ConfigureAwait(false);
-                    if (ctx.HasValue) contextMap[id] = ctx.Value;
+                    var info = await OpenRouterContextService.Instance.GetModelInfoAsync(id, ct).ConfigureAwait(false);
+                    if (info is not null) modelInfoMap[id] = info;
                 }
             }
-            providers["tunnel-agent"] = BuildPiProviderBlock(proxyBaseUrl, apiKey, models, contextMap);
+            providers["tunnel-agent"] = BuildPiProviderBlock(proxyBaseUrl, apiKey, models, modelInfoMap);
         }
 
         File.WriteAllText(configPath,

@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Pi context window**: when configuring Pi, `contextWindow` is now fetched from OpenRouter's public `/v1/models` endpoint and written per-model in `models.json`. Results are cached in-memory. If a model is not found, the field is omitted (Pi defaults to 128k).
+- **Pi input modalities**: `input` is now written per-model based on OpenRouter's `input_modalities` — `["text", "image"]` for vision-capable models, `["text"]` for text-only.
+- **Pi preview**: the manual preview now also resolves `contextWindow` and `input` from OpenRouter, so what you see matches what Apply writes.
 
 ### Fixed
 

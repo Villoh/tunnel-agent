@@ -1476,7 +1476,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private void SetAgentManualMode()
     {
         IsAgentConfigManualMode = true;
-        RefreshManualPreview();
+        _ = RefreshManualPreviewAsync();
     }
     [RelayCommand] private void SetAgentProxyMode()   => IsAgentConfigDefaultMode = false;
     [RelayCommand] private void SetAgentDefaultMode() => IsAgentConfigDefaultMode = true;
@@ -1555,7 +1555,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(ModelsExpanderLabel));
         OnPropertyChanged(nameof(AllVisibleModelsSelected));
         if (IsAgentConfigManualMode && ShowAgentConfigDialog && !AgentConfigHasResult)
-            RefreshManualPreview();
+            _ = RefreshManualPreviewAsync();
     }
 
     private void ClearSelectableModels()
@@ -1577,17 +1577,18 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(ModelsExpanderLabel));
         OnPropertyChanged(nameof(AllVisibleModelsSelected));
         if (IsAgentConfigManualMode && ShowAgentConfigDialog && !AgentConfigHasResult)
-            RefreshManualPreview();
+            _ = RefreshManualPreviewAsync();
     }
 
-    private void RefreshManualPreview()
+    private async Task RefreshManualPreviewAsync()
     {
-        var targets = GetAgentConfigTargets();
+        var targets      = GetAgentConfigTargets();
         var models       = GetSelectedModels();
         var modelEntries = GetSelectedModelEntries();
-        AgentConfigPreviews = targets
-            .SelectMany(a => _agentConfiguration.Preview(FindDef(a.Id), AgentProxyBaseUrl, CurrentAgentApiKey, models, modelEntries))
-            .ToList();
+        var previews     = new List<RawConfigPreview>();
+        foreach (var a in targets)
+            previews.AddRange(await _agentConfiguration.PreviewAsync(FindDef(a.Id), AgentProxyBaseUrl, CurrentAgentApiKey, models, modelEntries).ConfigureAwait(false));
+        AgentConfigPreviews = previews;
     }
 
     private void InitApiKeysFromSettings()
@@ -1851,7 +1852,7 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(AgentConfigSelectedCount));
             OnPropertyChanged(nameof(AgentConfigApplyLabel));
             if (IsAgentConfigManualMode && IsAgentConfigBulkMode && ShowAgentConfigDialog && !AgentConfigHasResult)
-                RefreshManualPreview();
+                _ = RefreshManualPreviewAsync();
         }
         else if (e.PropertyName == nameof(AgentViewModel.Configured))
         {
