@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.4] - 2026-06-01
+
 ### Added
 
 - **Pi context window**: when configuring Pi, `contextWindow` is now fetched from OpenRouter's public `/v1/models` endpoint and written per-model in `models.json`. Results are cached in-memory. If a model is not found, the field is omitted (Pi defaults to 128k).
