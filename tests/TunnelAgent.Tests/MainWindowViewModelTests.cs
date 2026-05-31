@@ -29,31 +29,15 @@ public sealed class MainWindowViewModelTests
         Assert.False(vm.ConfigHasBadge);
     }
 
-    [Theory]
-    [InlineData(EngineState.Running, ServerState.Running)]
-    [InlineData(EngineState.Starting, ServerState.Starting)]
-    [InlineData(EngineState.Error, ServerState.Error)]
-    [InlineData(EngineState.Stopped, ServerState.Stopped)]
-    [InlineData(EngineState.NotInstalled, ServerState.Stopped)]
-    [InlineData(EngineState.Downloading, ServerState.Stopped)]
-    [InlineData(EngineState.Installing, ServerState.Stopped)]
-    public async Task EngineService_ServerState_MapsCorrectly(EngineState engineState, ServerState expectedServerState)
+    [Fact]
+    public async Task EngineService_InitialServerState_IsStopped()
     {
-        // The MainWindowViewModel exposes ServerState based on EngineState.
-        // We test the mapping by constructing a real EngineService and
-        // checking how the VM derives ServerState.
-
-        // ServerState is a computed property: EngineState switch { Running=>Running, Starting=>Starting, Error=>Error, _=>Stopped }
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
         await settings.LoadAsync();
-
-        // EngineService initializes to NotInstalled or Stopped. ServerState mapping
-        // is: Running→Running, Starting→Starting, Error→Error, _→Stopped
         var registry = new EngineRegistryService(settings);
         var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
 
-        // Initial state should be in {Stopped, NotInstalled}
         Assert.Equal(ServerState.Stopped, vm.ServerState);
     }
 
