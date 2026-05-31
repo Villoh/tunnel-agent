@@ -150,17 +150,22 @@ jobs:
           $repo    = "${{ github.repository }}"
           $base    = "https://github.com/$repo/releases/download/$tag"
 
-          $setupExe = Get-ChildItem artifacts/velopack -Filter "*-win-Setup.exe" |
-                        Select-Object -First 1
+          $setupExe  = Get-ChildItem artifacts/velopack -Filter "*-win-Setup.exe" | Select-Object -First 1
+          $portable  = Get-ChildItem artifacts/velopack -Filter "*-win-x64-portable.zip" | Select-Object -First 1
 
-          $hash = (Get-FileHash $setupExe.FullName -Algorithm SHA256).Hash.ToLower()
+          $setupHash    = (Get-FileHash $setupExe.FullName  -Algorithm SHA256).Hash.ToLower()
+          $portableHash = (Get-FileHash $portable.FullName  -Algorithm SHA256).Hash.ToLower()
 
           @{
-            version  = $version
-            tag      = $tag
+            version   = $version
+            tag       = $tag
             installer = @{
               url    = "$base/$($setupExe.Name)"
-              sha256 = $hash
+              sha256 = $setupHash
+            }
+            portable  = @{
+              url    = "$base/$($portable.Name)"
+              sha256 = $portableHash
             }
           } | ConvertTo-Json -Depth 3 | Set-Content artifacts/velopack/latest.json -Encoding UTF8
 
@@ -248,16 +253,15 @@ jobs:
           $repo    = "${{ github.repository }}"
           $base    = "https://github.com/$repo/releases/download/$tag"
 
-          $setupExe = Get-ChildItem artifacts/velopack -Filter "*-win-Setup.exe" |
-                        Select-Object -First 1
-          $hash = (Get-FileHash $setupExe.FullName -Algorithm SHA256).Hash.ToLower()
+          $portable     = Get-ChildItem artifacts/velopack -Filter "*-win-x64-portable.zip" | Select-Object -First 1
+          $portableHash = (Get-FileHash $portable.FullName -Algorithm SHA256).Hash.ToLower()
 
           $body = @{
             event_type     = "new-release"
             client_payload = @{
               version  = $version
-              url      = "$base/$($setupExe.Name)"
-              sha256   = $hash
+              url      = "$base/$($portable.Name)"
+              sha256   = $portableHash
             }
           } | ConvertTo-Json -Depth 3
 

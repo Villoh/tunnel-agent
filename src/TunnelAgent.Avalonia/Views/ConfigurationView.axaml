@@ -45,7 +45,7 @@
                         <TextBlock Classes="page-sub" Text="App appearance and startup." />
                     </StackPanel>
 
-                    <TextBlock Classes="section-label" Text="TUNNEL AGENT" Margin="4,0,4,8"/>
+                    <TextBlock Classes="section-label" Text="TUNNEL AGENT"/>
                     <Border Classes="card" Margin="0,0,0,16">
                         <StackPanel>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
@@ -84,7 +84,7 @@
                         </StackPanel>
                     </Border>
 
-                    <TextBlock Classes="section-label" Text="APP" Margin="4,0,4,8"/>
+                    <TextBlock Classes="section-label" Text="APP"/>
                     <Border Classes="card">
                         <StackPanel>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
