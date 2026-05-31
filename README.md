@@ -98,6 +98,20 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 | Cursor Agent    | Environment variables          |
 | Aider           | Environment variables          |
 
+## Installation
+
+**Installer (recommended):** download `TunnelAgent-x.y.z-win-Setup.exe` from the [latest release](https://github.com/Villoh/tunnel-agent/releases/latest) and run it. Updates are applied automatically in the background.
+
+**Portable:** download `TunnelAgent-x.y.z-win-x64-portable.zip`, extract it, and run `TunnelAgent.exe`. No installation required.
+
+**Scoop:**
+```powershell
+scoop bucket add villoh https://github.com/Villoh/scoop-bucket
+scoop install tunnel-agent
+```
+
+**Requirements:** Windows 10 or later.
+
 ## Usage
 
 1. **Install an engine**: go to Providers, select CLIProxyAPI or Perplexity, and click Install if no engine is detected.
