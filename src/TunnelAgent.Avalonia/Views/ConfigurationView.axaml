@@ -45,6 +45,45 @@
                         <TextBlock Classes="page-sub" Text="App appearance and startup." />
                     </StackPanel>
 
+                    <TextBlock Classes="section-label" Text="TUNNEL AGENT" Margin="4,0,4,8"/>
+                    <Border Classes="card" Margin="0,0,0,16">
+                        <StackPanel>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Tunnel Agent"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,2,0,0">
+                                        <TextBlock Classes="row-desc" Text="{Binding AppVersion, StringFormat='Installed: {0}'}" />
+                                        <TextBlock Classes="row-desc" Text="→" IsVisible="{Binding AppUpdateAvailable}" />
+                                        <TextBlock Classes="row-desc" Foreground="{DynamicResource AccentBrush}"
+                                                   Text="{Binding AppUpdateNewVersion, StringFormat='{}{0} available'}"
+                                                   IsVisible="{Binding AppUpdateAvailable}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Button Classes="app" Content="Check"
+                                            Command="{Binding CheckForAppUpdateCommand}"
+                                            IsVisible="{Binding !AppUpdateAvailable}" />
+                                    <Button Classes="app primary" Content="Download"
+                                            Command="{Binding DownloadAppUpdateCommand}"
+                                            IsVisible="{Binding AppUpdateAvailable}"
+                                            IsEnabled="{Binding !AppUpdateDownloading}" />
+                                    <Button Classes="app primary" Content="Restart &amp; Install"
+                                            Command="{Binding InstallAppUpdateAndRestartCommand}"
+                                            IsVisible="{Binding AppUpdateReady}" />
+                                </StackPanel>
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Auto-check for app updates"/>
+                                    <TextBlock Classes="row-desc" Text="Check GitHub for a new Tunnel Agent version on startup."/>
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                              IsChecked="{Binding AutoCheckForAppUpdates, Mode=TwoWay}" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
                     <TextBlock Classes="section-label" Text="APP" Margin="4,0,4,8"/>
                     <Border Classes="card">
                         <StackPanel>

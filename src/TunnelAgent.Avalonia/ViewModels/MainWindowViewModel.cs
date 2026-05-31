@@ -380,6 +380,18 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public bool IsAutoUpdateEnabled => AutoCheckForUpdates;
 
+    public bool AutoCheckForAppUpdates
+    {
+        get => _settings.Current.AutoCheckForAppUpdates;
+        set
+        {
+            if (_settings.Current.AutoCheckForAppUpdates == value) return;
+            _settings.Current.AutoCheckForAppUpdates = value;
+            _settings.Save();
+            OnPropertyChanged();
+        }
+    }
+
     public bool AutoUpdate
     {
         get => _settings.Current.AutoUpdate;
@@ -1859,7 +1871,7 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(AppUpdateReady));
         });
 
-        if (_settings.Current.AutoCheckForUpdates)
+        if (_settings.Current.AutoCheckForAppUpdates)
             _ = _appUpdate.CheckAsync();
     }
 

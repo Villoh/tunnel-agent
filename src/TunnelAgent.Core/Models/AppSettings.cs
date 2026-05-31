@@ -54,6 +54,7 @@ public sealed class AppSettings
     public bool LaunchAtLogin { get; set; } = true;
     public string ThemeMode { get; set; } = "system";
     public bool AutoCheckForUpdates { get; set; } = true;
+    public bool AutoCheckForAppUpdates { get; set; } = true;
     public bool AutoUpdate { get; set; } = false;
     public bool MaskEmails { get; set; } = false;
     public string PreferredEngineVersion { get; set; } = "";

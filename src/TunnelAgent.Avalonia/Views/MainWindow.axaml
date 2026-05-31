@@ -829,7 +829,36 @@
             </Border>
         </Border>
 
-        <!-- Update toast overlay -->
+        <!-- App self-update toast -->
+        <Border IsVisible="{Binding AppUpdateAvailable}"
+                Background="{DynamicResource CardBgBrush}"
+                BorderBrush="{DynamicResource CardBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="14,10"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Margin="0,0,0,60"
+                MaxWidth="400"
+                ZIndex="50">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Spacing="2">
+                    <TextBlock Classes="row-label" Text="Tunnel Agent update available"/>
+                    <TextBlock Classes="row-desc"
+                               Text="{Binding AppUpdateNewVersion, StringFormat='Version {0} is ready to download.'}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="12,0,0,0" VerticalAlignment="Center">
+                    <Button Classes="app primary" Content="Download" Command="{Binding DownloadAppUpdateCommand}"
+                            IsVisible="{Binding !AppUpdateDownloading}" />
+                    <Button Classes="app primary" Content="Restart &amp; Install" Command="{Binding InstallAppUpdateAndRestartCommand}"
+                            IsVisible="{Binding AppUpdateReady}" />
+                    <TextBlock Classes="row-desc" Text="Downloading…" VerticalAlignment="Center"
+                               IsVisible="{Binding AppUpdateDownloading}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Engine update toast overlay -->
         <Border IsVisible="{Binding ShowUpdateToast}"
                 Background="{DynamicResource CardBgBrush}"
                 BorderBrush="{DynamicResource CardBorderBrush}"
