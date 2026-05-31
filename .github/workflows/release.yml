@@ -126,7 +126,8 @@ jobs:
             --packDir  artifacts/publish `
             --mainExe  TunnelAgent.exe `
             --icon     src/TunnelAgent.Avalonia/Assets/logo.ico `
-            --outputDir artifacts/velopack
+            --outputDir artifacts/velopack `
+            --noPortable
 
       # ── Generate latest.json ──────────────────────────────────────────────
       # Simple metadata file consumed by Scoop autoupdate and other tooling.
