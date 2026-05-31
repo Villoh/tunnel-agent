@@ -25,26 +25,29 @@ public sealed class OpenRouterContextService
 
     /// <summary>
     /// Returns the context length for a model id, or null if not found.
-    /// Model id can be bare (e.g. "claude-sonnet-4-6") or prefixed (e.g. "anthropic/claude-sonnet-4-6").
+    /// Normalizes dots to dashes before matching to bridge e.g. "claude-sonnet-4.6" (OpenRouter) vs "claude-sonnet-4-6" (proxy).
     /// </summary>
     public async Task<int?> GetContextLengthAsync(string modelId, CancellationToken ct = default)
     {
         var map = await GetOrFetchAsync(ct).ConfigureAwait(false);
         if (map is null) return null;
 
-        // Exact match first
-        if (map.TryGetValue(modelId, out var exact)) return exact;
+        var needle = Normalize(modelId);
 
-        // Try stripping provider prefix from OpenRouter id (e.g. "anthropic/claude-sonnet-4-6" -> "claude-sonnet-4-6")
         foreach (var (key, value) in map)
         {
-            var slash = key.IndexOf('/');
-            if (slash >= 0 && key[(slash + 1)..].Equals(modelId, StringComparison.OrdinalIgnoreCase))
+            // Strip provider prefix (e.g. "anthropic/claude-sonnet-4.6" -> "claude-sonnet-4.6")
+            var bare = key.Contains('/') ? key[(key.IndexOf('/') + 1)..] : key;
+            // Skip deprecated/aliased entries prefixed with ~
+            if (bare.StartsWith('~')) continue;
+            if (Normalize(bare).Equals(needle, StringComparison.OrdinalIgnoreCase))
                 return value;
         }
 
         return null;
     }
+
+    private static string Normalize(string id) => id.Replace('.', '-');
 
     private async Task<Dictionary<string, int>?> GetOrFetchAsync(CancellationToken ct)
     {
