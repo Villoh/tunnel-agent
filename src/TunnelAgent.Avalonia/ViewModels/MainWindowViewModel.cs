@@ -1327,7 +1327,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ShowResetCredentialsDialog = false;
         await _catalog.ResetAllCredentialsAsync();
         ConfigurationStatusIsError = false;
-        ConfigurationStatusMessage = "TunnelAgent-managed credentials were backed up and removed.";
+        ConfigurationStatusMessage = "Tunnel Agent-managed credentials were backed up and removed.";
         ShowConfigurationStatus = true;
         OnPropertyChanged(nameof(ConnectedProviderCount));
     }
