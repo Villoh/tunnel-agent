@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-06-01
+
+### Added
+
+- Scoop bucket support — `scoop bucket add villoh https://github.com/Villoh/scoop-bucket` then `scoop install villoh/tunnel-agent`.
+
+### Fixed
+
+- App name corrected to "Tunnel Agent" (with space) in installer, GitHub Releases title, and all user-visible UI strings.
+
 ## [0.4.1] - 2026-06-01
 
 ### Fixed
@@ -370,7 +380,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/Villoh/tunnel-agent/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/Villoh/tunnel-agent/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/Villoh/tunnel-agent/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/Villoh/tunnel-agent/compare/v0.3.0...v0.3.1
