@@ -2,7 +2,7 @@ name: Release from CHANGELOG
 
 # Triggers whenever CHANGELOG.md is pushed to the main branch.
 # If the top versioned entry is new (no matching tag exists yet),
-# it dispatches the release workflow automatically.
+# waits for CI to pass on the same commit, then dispatches the release workflow.
 
 on:
   push:
@@ -15,8 +15,8 @@ jobs:
     name: Detect new version
     runs-on: ubuntu-latest
     permissions:
-      contents: write # needed to create the tag via gh workflow run
-      actions: write # needed to dispatch the release workflow
+      contents: write
+      actions: write
 
     steps:
       - name: Checkout
@@ -39,12 +39,11 @@ jobs:
           fi
 
           echo "Found version: $version"
-          echo "version=$version"   >> "$GITHUB_OUTPUT"
-          echo "tag=v$version"      >> "$GITHUB_OUTPUT"
-          echo "found=true"         >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version"    >> "$GITHUB_OUTPUT"
+          echo "found=true"       >> "$GITHUB_OUTPUT"
 
       # Check whether a release for this version already exists.
-      # We check both git tags and GitHub Releases to be safe.
       - name: Check if release already exists
         id: check
         if: steps.changelog.outputs.found == 'true'
@@ -64,8 +63,45 @@ jobs:
             exit 0
           fi
 
-          echo "No existing tag or release for $TAG — will trigger release."
           echo "should_release=true" >> "$GITHUB_OUTPUT"
+
+      # Wait for the CI workflow to complete successfully on this exact commit.
+      # Polls every 30 s for up to 15 minutes before giving up.
+      - name: Wait for CI to pass
+        if: steps.check.outputs.should_release == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHA: ${{ github.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          echo "Waiting for CI workflow to complete on $SHA..."
+          deadline=$(( $(date +%s) + 900 ))
+
+          while true; do
+            status=$(gh api \
+              "repos/$REPO/actions/runs?head_sha=$SHA&name=CI&per_page=10" \
+              --jq '[.workflow_runs[] | select(.name == "CI")] | sort_by(.created_at) | last | .conclusion // "pending"')
+
+            echo "  CI status: $status"
+
+            case "$status" in
+              success)
+                echo "CI passed — proceeding with release."
+                break
+                ;;
+              failure|cancelled|timed_out|action_required|skipped)
+                echo "CI did not pass (conclusion: $status) — aborting release."
+                exit 1
+                ;;
+            esac
+
+            if (( $(date +%s) >= deadline )); then
+              echo "Timed out waiting for CI after 15 minutes — aborting."
+              exit 1
+            fi
+
+            sleep 30
+          done
 
       # Dispatch the release workflow with the detected version.
       - name: Dispatch release workflow

@@ -1,11 +1,10 @@
 name: Release
 
 on:
-  # Triggered automatically after CI passes on a tag commit.
-  workflow_run:
-    workflows: [CI]
-    types: [completed]
-    branches: ["v*"]
+  # Triggered automatically when a v* tag is pushed.
+  # CI runs on the tag commit in parallel; this job waits for it to pass.
+  push:
+    tags: ["v*"]
 
   # Manual trigger (GitHub UI or changelog-release.yml).
   workflow_dispatch:
@@ -33,23 +32,12 @@ jobs:
     permissions:
       contents: write
 
-    # workflow_run: only proceed when CI succeeded on a tag push.
-    # workflow_dispatch: always proceed (manual / changelog trigger).
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (
-        github.event.workflow_run.conclusion == 'success' &&
-        startsWith(github.event.workflow_run.head_branch, 'v')
-      )
-
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-          # For workflow_run, check out the exact commit that CI tested.
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -74,8 +62,8 @@ jobs:
           if ("${{ github.event_name }}" -eq "workflow_dispatch") {
             $version = "${{ github.event.inputs.version }}".TrimStart('v')
           } else {
-            # workflow_run: head_branch contains the tag name (e.g. "v0.4.0")
-            $version = "${{ github.event.workflow_run.head_branch }}".TrimStart('v')
+            # push tag: github.ref_name is the tag name (e.g. "v0.4.0")
+            $version = "${{ github.ref_name }}".TrimStart('v')
           }
 
           $semver = ($version -split '-')[0]
@@ -86,6 +74,45 @@ jobs:
           "tag=v$version"          >> $env:GITHUB_OUTPUT
           "is_prerelease=$($isPrerelease.ToString().ToLower())" >> $env:GITHUB_OUTPUT
           Write-Host "Version: $version  |  Semver: $semver  |  Pre-release: $isPrerelease"
+
+      # ── Wait for CI to pass on this commit (tag push only) ─────────────────
+      # CI triggers on the same tag push in parallel; wait for it before building.
+      - name: Wait for CI to pass
+        if: github.event_name == 'push'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHA: ${{ github.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          echo "Waiting for CI workflow to complete on $SHA..."
+          deadline=$(( $(date +%s) + 900 ))
+
+          while true; do
+            status=$(gh api \
+              "repos/$REPO/actions/runs?head_sha=$SHA&name=CI&per_page=10" \
+              --jq '[.workflow_runs[] | select(.name == "CI")] | sort_by(.created_at) | last | .conclusion // "pending"')
+
+            echo "  CI status: $status"
+
+            case "$status" in
+              success)
+                echo "CI passed — proceeding with release."
+                break
+                ;;
+              failure|cancelled|timed_out|action_required|skipped)
+                echo "CI did not pass (conclusion: $status) — aborting release."
+                exit 1
+                ;;
+            esac
+
+            if (( $(date +%s) >= deadline )); then
+              echo "Timed out waiting for CI after 15 minutes — aborting."
+              exit 1
+            fi
+
+            sleep 30
+          done
 
       # ── Bump .csproj files ─────────────────────────────────────────────────
       - name: Bump version in .csproj files
@@ -141,7 +168,6 @@ jobs:
             --noPortable
 
       # ── Generate latest.json ──────────────────────────────────────────────
-      # Simple metadata file consumed by Scoop autoupdate and other tooling.
       - name: Generate latest.json
         shell: pwsh
         run: |
