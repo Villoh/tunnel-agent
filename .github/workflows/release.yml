@@ -242,6 +242,23 @@ jobs:
           Write-Host "Pushed version bump to $branch"
 
       # ── Publish GitHub Release ────────────────────────────────────────────
+      # Generate release notes via API first, then prepend the Installation block.
+      - name: Generate release notes
+        id: notes
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
+          REPO: ${{ github.repository }}
+        run: |
+          notes=$(gh api "repos/$REPO/releases/generate-notes" \
+            --method POST \
+            --field tag_name="$TAG" \
+            --jq '.body')
+          echo "notes<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$notes"    >> "$GITHUB_OUTPUT"
+          echo "EOF"        >> "$GITHUB_OUTPUT"
+
       - name: Create GitHub Release
         id: gh_release
         uses: softprops/action-gh-release@v3
@@ -249,10 +266,7 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag }}
           name: Tunnel Agent ${{ steps.version.outputs.version }}
           prerelease: ${{ steps.version.outputs.is_prerelease == 'true' }}
-          generate_release_notes: true
-          append_body: true
           body: |
-
             ## Installation
 
             **Fresh install:** download and run `TunnelAgent-${{ steps.version.outputs.semver }}-win-Setup.exe`.
@@ -260,6 +274,8 @@ jobs:
             **Requirements:** Windows 10 or later.
 
             > Existing installations update automatically — no manual download needed.
+
+            ${{ steps.notes.outputs.notes }}
           files: |
             artifacts/velopack/*.exe
             artifacts/velopack/*.nupkg
