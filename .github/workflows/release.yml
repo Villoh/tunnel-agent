@@ -199,7 +199,7 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: TunnelAgent ${{ steps.version.outputs.version }}
+          name: Tunnel Agent ${{ steps.version.outputs.version }}
           prerelease: ${{ steps.version.outputs.is_prerelease == 'true' }}
           generate_release_notes: true
           append_body: true
