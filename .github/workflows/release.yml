@@ -96,23 +96,34 @@ jobs:
       - name: Restore
         run: dotnet restore TunnelAgent.slnx -r win-x64
 
-      # ── Publish self-contained win-x64 ────────────────────────────────────
+      # ── Publish self-contained multi-file (for Velopack installer) ─────────
       - name: Publish
         run: >
           dotnet publish src/TunnelAgent.Avalonia/TunnelAgent.Avalonia.csproj
           --no-restore -c Release
           -r win-x64 --self-contained true
           -p:PublishSingleFile=false
+          -p:DebugType=None -p:DebugSymbols=false
           -o artifacts/publish
 
-      # ── Portable zip ──────────────────────────────────────────────────────
+      # ── Publish portable (self-contained single exe, ~110 MB) ─────────────
+      - name: Publish portable
+        run: >
+          dotnet publish src/TunnelAgent.Avalonia/TunnelAgent.Avalonia.csproj
+          --no-restore -c Release
+          -r win-x64 --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:DebugType=None -p:DebugSymbols=false
+          -o artifacts/portable
+
       - name: Create portable zip
         shell: pwsh
         run: |
           $version = "${{ steps.version.outputs.semver }}"
           $dest = "artifacts/velopack/TunnelAgent-$version-win-x64-portable.zip"
           New-Item -ItemType Directory -Force -Path artifacts/velopack | Out-Null
-          Compress-Archive -Path artifacts/publish/* -DestinationPath $dest
+          Compress-Archive -Path artifacts/portable/TunnelAgent.exe -DestinationPath $dest
           Write-Host "Created $dest"
 
       # ── Package with Velopack ─────────────────────────────────────────────

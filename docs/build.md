@@ -18,65 +18,54 @@ dotnet build TunnelAgent.slnx
 
 ## Publishing Options
 
-### Option 1 — Framework-dependent, single file (recommended for releases)
-
-Requires **.NET 10 runtime** installed on the user's machine.  
-Produces **one `.exe`** (~106MB) — all managed DLLs and native libs bundled inside.
-
-```pwsh
-dotnet publish src/TunnelAgent.Avalonia/TunnelAgent.Avalonia.csproj -c Release -r win-x64 --self-contained false `
-  -p:PublishSingleFile=true `
-  -p:IncludeNativeLibrariesForSelfExtract=true `
-  -p:EnableCompressionInSingleFile=true
-```
-
-| | |
-|---|---|
-| Output | `src/TunnelAgent.Avalonia/bin/Release/net10.0-windows/win-x64/publish/TunnelAgent.exe` |
-| Size | ~51 MB |
-| Files | 1 (+ `.pdb` debug symbols, can be dropped) |
-| Requires | .NET 10 Runtime on target machine |
-
----
-
-### Option 2 — Self-contained, single file (no runtime required)
+### Option 1 — Self-contained, single file (portable / no runtime required) ✅ Used for portable release
 
 Bundles the entire .NET 10 runtime inside the exe. No prerequisites for the user.  
-Uses trimming to remove unused framework code — watch for runtime crashes if reflection-heavy code paths are hit.
+No trimming — avoids Avalonia reflection binding issues.
 
 ```pwsh
 dotnet publish src/TunnelAgent.Avalonia/TunnelAgent.Avalonia.csproj -c Release -r win-x64 --self-contained true `
   -p:PublishSingleFile=true `
-  -p:PublishTrimmed=true `
-  -p:PublishReadyToRun=true `
-  -p:IncludeNativeLibrariesForSelfExtract=true
+  -p:IncludeNativeLibrariesForSelfExtract=true `
+  -p:DebugType=None -p:DebugSymbols=false
 ```
 
 | | |
 |---|---|
-| Output | `src/TunnelAgent.Avalonia/bin/Release/net10.0-windows/win-x64/publish/TunnelAgent.exe` |
-| Size | ~60-70 MB (trimmed) |
-| Files | 1 (+ `.pdb`) |
+| Output | `artifacts/portable/TunnelAgent.exe` |
+| Size | ~110 MB |
+| Files | 1 |
 | Requires | Nothing |
 
-> ⚠️ Trimming may break Avalonia reflection bindings. Always test the trimmed build before shipping.
+> ⚠️ `EnableCompressionInSingleFile=true` is **only** valid with `--self-contained true`.  
+> ⚠️ `PublishTrimmed=true` is omitted intentionally — trimming breaks Avalonia reflection bindings.
 
 ---
 
-### Option 3 — Self-contained, multiple files (safest)
+### Option 2 — Self-contained, multiple files (installer) ✅ Used for Velopack installer
 
-No trimming, no single file. All DLLs explicit. Largest but most reliable.
+No trimming, no single file. All DLLs explicit. Required by Velopack — it needs the folder structure to generate delta packages.
 
 ```pwsh
-dotnet publish src/TunnelAgent.Avalonia/TunnelAgent.Avalonia.csproj -c Release -r win-x64 --self-contained true
+dotnet publish src/TunnelAgent.Avalonia/TunnelAgent.Avalonia.csproj -c Release -r win-x64 --self-contained true `
+  -p:PublishSingleFile=false `
+  -p:DebugType=None -p:DebugSymbols=false
 ```
 
 | | |
 |---|---|
-| Output | `src/TunnelAgent.Avalonia/bin/Release/net10.0-windows/win-x64/publish/` folder |
+| Output | `artifacts/publish/` folder |
 | Size | ~135 MB total |
 | Files | ~30 files |
 | Requires | Nothing |
+
+---
+
+### Option 3 — Framework-dependent, single file ❌ Does not work
+
+`EnableCompressionInSingleFile=true` requires `--self-contained true` — fails with `NETSDK1176`.  
+Without compression the exe is ~51 MB but requires .NET 10 installed on the target machine.  
+Not used.
 
 ---
 
@@ -135,34 +124,17 @@ dotnet publish ... -p:DebugType=None -p:DebugSymbols=false
 
 ## Argument reference
 
-Every argument explained:
-
 | Argument | What it does |
 |---|---|
 | `publish` | Compiles and prepares output for deployment. Unlike `build`, it resolves all dependencies and produces a distributable folder. |
 | `-c Release` | Build configuration. `Release` enables optimizations and disables debug info. `Debug` is the default for `dotnet run`. |
 | `-r win-x64` | Runtime identifier — the target OS and CPU architecture. Tells the compiler which native binaries to include. See the RID table above. |
 | `--self-contained false` | Do **not** bundle the .NET runtime. The user's machine must have .NET 10 installed. Makes the output much smaller. |
-| `--self-contained true` | Bundle the entire .NET runtime inside the output. The user needs nothing installed. Makes output ~80MB larger. |
+| `--self-contained true` | Bundle the entire .NET runtime inside the output. The user needs nothing installed. Makes output ~80 MB larger. |
 | `-p:PublishSingleFile=true` | Pack all managed DLLs into a single executable. Without this you get a folder full of `.dll` files. |
 | `-p:IncludeNativeLibrariesForSelfExtract=true` | Also embed unmanaged native DLLs (Skia, HarfBuzz, ANGLE) inside the exe. They extract to a temp folder at first run. Without this they sit alongside the exe as separate files. |
-| `-p:PublishTrimmed=true` | Remove unused .NET framework code via static analysis. Reduces self-contained size by ~50%. Risk: can break code that relies on reflection (like Avalonia bindings). |
+| `-p:PublishTrimmed=true` | Remove unused .NET framework code via static analysis. Reduces self-contained size by ~50%. **Not used** — breaks Avalonia reflection bindings. |
 | `-p:PublishReadyToRun=true` | Pre-JIT the managed code to native during publish. Faster cold startup at the cost of slightly larger output. Only useful with `--self-contained true`. |
-| `-p:EnableCompressionInSingleFile=true` | Compress all bundled DLLs and native libs inside the exe. Roughly halves the output size. Adds ~100-200ms to cold startup while decompressing to temp. |
-| `-p:DebugType=None` | Do not produce a `.pdb` debug symbols file. Fine for distribution — only useful if you want crash stack traces from users. |
+| `-p:EnableCompressionInSingleFile=true` | Compress bundled DLLs inside the exe. **Only valid with `--self-contained true`** — fails with `NETSDK1176` otherwise. |
+| `-p:DebugType=None` | Do not produce a `.pdb` debug symbols file. Fine for distribution. |
 | `-p:DebugSymbols=false` | Companion to `DebugType=None`. Together they ensure no symbol files are emitted. |
-
----
-
-## Current release command
-
-```pwsh
-dotnet publish src/TunnelAgent.Avalonia/TunnelAgent.Avalonia.csproj -c Release -r win-x64 --self-contained false `
-  -p:PublishSingleFile=true `
-  -p:IncludeNativeLibrariesForSelfExtract=true `
-  -p:EnableCompressionInSingleFile=true `
-  -p:DebugType=None `
-  -p:DebugSymbols=false
-```
-
-Produces a single `TunnelAgent.exe` (~51MB, no debug symbols) requiring .NET 10 on the target machine.
