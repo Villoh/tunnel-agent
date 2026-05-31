@@ -5,6 +5,7 @@ on:
   workflow_run:
     workflows: [CI]
     types: [completed]
+    branches: ["v*"]
 
   # Manual trigger (GitHub UI or changelog-release.yml).
   workflow_dispatch:
@@ -20,6 +21,10 @@ on:
         required: false
         default: "false"
         type: string
+
+concurrency:
+  group: release
+  cancel-in-progress: true
 
 jobs:
   release:
