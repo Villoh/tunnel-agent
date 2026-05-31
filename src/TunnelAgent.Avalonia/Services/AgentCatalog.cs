@@ -94,7 +94,7 @@ public static class AgentCatalog
             "factory-droid", "Factory Droid",
             "Factory's AI coding agent.",
             new[] { "droid", "factory-droid" },
-            new[] { "~/.factory/config.json" },
+            new[] { "~/.factory/settings.json" },
             "https://docs.factory.ai",
             "#238636",
             AssetsBase + "factory-droid.svg"),

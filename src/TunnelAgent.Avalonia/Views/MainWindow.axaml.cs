@@ -43,6 +43,12 @@ public partial class MainWindow : Window
                     ApplyThemeMode(vm);
                     Dispatcher.UIThread.Post(ApplyNativeBorderColor, DispatcherPriority.Background);
                 }
+                else if (args.PropertyName == nameof(MainWindowViewModel.ShowApiKeysDialog) && vm.ShowApiKeysDialog)
+                    Dispatcher.UIThread.Post(() => ApiKeysOverlay.Focus(), DispatcherPriority.Input);
+                else if (args.PropertyName == nameof(MainWindowViewModel.ShowPerplexityAccountDialog) && vm.ShowPerplexityAccountDialog)
+                    Dispatcher.UIThread.Post(() => PerplexityAccountOverlay.Focus(), DispatcherPriority.Input);
+                else if (args.PropertyName == nameof(MainWindowViewModel.ShowAgentConfigDialog) && vm.ShowAgentConfigDialog)
+                    Dispatcher.UIThread.Post(() => AgentConfigOverlay.Focus(), DispatcherPriority.Input);
             };
     }
 
@@ -211,6 +217,62 @@ public partial class MainWindow : Window
         if (e.Key != Key.Enter || DataContext is not MainWindowViewModel vm) return;
         e.Handled = true;
         await vm.ConfirmEditPerplexityLabelAsync();
+    }
+
+    private static void OnDialogCardPressed(object? sender, PointerPressedEventArgs e) => e.Handled = true;
+
+    private void OnApiKeysOverlayPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm) vm.DismissApiKeysCommand.Execute(null);
+    }
+
+    private void OnPerplexityAccountOverlayPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm) vm.DismissPerplexityAccountDialogCommand.Execute(null);
+    }
+
+    private void OnAgentConfigOverlayPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm) vm.DismissAgentConfigCommand.Execute(null);
+    }
+
+    private void OnApiKeysDialogKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape && DataContext is MainWindowViewModel vm)
+        {
+            e.Handled = true;
+            vm.DismissApiKeysCommand.Execute(null);
+        }
+    }
+
+    private async void OnPerplexityAccountDialogKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            vm.DismissPerplexityAccountDialogCommand.Execute(null);
+        }
+        else if (e.Key == Key.Enter)
+        {
+            e.Handled = true;
+            await ConfirmPerplexityAccountFromInputsAsync();
+        }
+    }
+
+    private async void OnAgentConfigDialogKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            vm.DismissAgentConfigCommand.Execute(null);
+        }
+        else if (e.Key == Key.Enter && !vm.AgentConfigHasResult && vm.CanApplyAgentConfig())
+        {
+            e.Handled = true;
+            await vm.ApplyAgentConfigCommand.ExecuteAsync(null);
+        }
     }
 
     private async void OnCopyAgentConfigClick(object? sender, RoutedEventArgs e)

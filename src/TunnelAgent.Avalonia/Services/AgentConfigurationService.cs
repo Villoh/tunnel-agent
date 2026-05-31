@@ -502,7 +502,7 @@ public sealed class AgentConfigurationService
 
     private static AgentConfigApplyResult ApplyFactoryDroid(string proxyBaseUrl, string apiKey, bool remove, IReadOnlyList<string>? models)
     {
-        var configPath = ExpandPath("~/.factory/config.json");
+        var configPath = ExpandPath("~/.factory/settings.json");
         var dir = Path.GetDirectoryName(configPath)!;
         if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
@@ -517,14 +517,6 @@ public sealed class AgentConfigurationService
             File.Copy(configPath, backupPath, overwrite: false);
         }
 
-        // Migrate legacy snake_case key if present
-        if (root["custom_models"] is JsonArray legacy)
-        {
-            root.Remove("custom_models");
-            if (root["customModels"] is null)
-                root["customModels"] = legacy;
-        }
-
         if (root["customModels"] is not JsonArray existing)
         {
             existing = new JsonArray();
@@ -535,7 +527,7 @@ public sealed class AgentConfigurationService
         // Do not delete unrelated local Factory Droid models that also use localhost.
         for (int i = existing.Count - 1; i >= 0; i--)
         {
-            var url = existing[i]?["base_url"]?.GetValue<string>() ?? "";
+            var url = existing[i]?["baseUrl"]?.GetValue<string>() ?? "";
             if (string.Equals(url.TrimEnd('/'), proxyBaseUrl.TrimEnd('/'), StringComparison.OrdinalIgnoreCase))
                 existing.RemoveAt(i);
         }
@@ -559,22 +551,33 @@ public sealed class AgentConfigurationService
         return AgentConfigApplyResult.Ok(msg, configPath, backupPath);
     }
 
+    private static (string provider, string baseUrl) InferFactoryDroidProvider(string modelId, string proxyBaseUrl)
+    {
+        var id = modelId.ToLowerInvariant();
+        if (id.Contains("claude") || id.Contains("haiku") || id.Contains("sonnet") || id.Contains("opus"))
+            return ("anthropic", StripV1(proxyBaseUrl));
+        if (id.StartsWith("gpt") || id.StartsWith("o1") || id.StartsWith("o3") || id.StartsWith("o4") || id.Contains("codex"))
+            return ("openai", proxyBaseUrl);
+        return ("generic-chat-completion-api", proxyBaseUrl);
+    }
+
     private static JsonObject BuildFactoryDroidEntry(string modelId, string proxyBaseUrl, string apiKey)
     {
+        var (provider, baseUrl) = InferFactoryDroidProvider(modelId, proxyBaseUrl);
         var entry = new JsonObject
         {
-            ["model"]               = modelId,
-            ["model_display_name"]  = modelId,
-            ["base_url"]            = proxyBaseUrl,
-            ["provider"]            = "openai"
+            ["model"]       = modelId,
+            ["displayName"] = modelId,
+            ["baseUrl"]     = baseUrl,
+            ["provider"]    = provider
         };
-        if (HasApiKey(apiKey)) entry["api_key"] = apiKey;
+        entry["apiKey"] = HasApiKey(apiKey) ? apiKey : "no-key";
         return entry;
     }
 
     private static RawConfigPreview FactoryDroidRaw(string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models)
     {
-        var configPath = ExpandPath("~/.factory/config.json");
+        var configPath = ExpandPath("~/.factory/settings.json");
         var modelIds   = models?.Count > 0 ? models : (IEnumerable<string>)new[] { "tunnel-agent" };
         var entries    = new JsonArray(modelIds
             .Select(m => (JsonNode?)BuildFactoryDroidEntry(m, proxyBaseUrl, apiKey))

@@ -1524,7 +1524,7 @@ public partial class MainWindowViewModel : ViewModelBase
             });
         }
     }
-    private bool CanApplyAgentConfig() => !IsApplyingAgentConfig;
+    public bool CanApplyAgentConfig() => !IsApplyingAgentConfig;
 
     private List<AgentViewModel> GetAgentConfigTargets() => IsAgentConfigBulkMode
         ? Agents.Where(a => a.IsSelectedForConfig && a.Installed).ToList()

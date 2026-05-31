@@ -290,9 +290,12 @@
         </Border>
 
         <!-- CLIProxy API keys dialog -->
-        <Border IsVisible="{Binding ShowApiKeysDialog}" Background="#88000000"
-                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50">
-            <Border Classes="card" Width="480" MaxHeight="560" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0">
+        <Border x:Name="ApiKeysOverlay" IsVisible="{Binding ShowApiKeysDialog}" Background="#88000000"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50"
+                KeyDown="OnApiKeysDialogKeyDown" Focusable="True"
+                PointerPressed="OnApiKeysOverlayPressed">
+            <Border Classes="card" Width="480" MaxHeight="560" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0"
+                    PointerPressed="OnDialogCardPressed">
                 <Grid RowDefinitions="Auto,*,Auto">
                     <StackPanel Grid.Row="0" Margin="24,20,24,14" Spacing="4">
                         <TextBlock Classes="row-label" FontSize="15" Text="CLIProxyAPI keys" />
@@ -396,9 +399,12 @@
         </Border>
 
         <!-- Add Perplexity account dialog -->
-        <Border IsVisible="{Binding ShowPerplexityAccountDialog}" Background="#88000000"
-                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50">
-            <Border Classes="card" Width="440" MinHeight="150" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24">
+        <Border x:Name="PerplexityAccountOverlay" IsVisible="{Binding ShowPerplexityAccountDialog}" Background="#88000000"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50"
+                KeyDown="OnPerplexityAccountDialogKeyDown" Focusable="True"
+                PointerPressed="OnPerplexityAccountOverlayPressed">
+            <Border Classes="card" Width="440" MinHeight="150" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24"
+                    PointerPressed="OnDialogCardPressed">
                 <Grid>
                     <StackPanel Spacing="14" IsVisible="{Binding IsPerplexityTokenGenerationMode, Converter={StaticResource InvertBool}}">
                         <TextBlock Classes="row-label" FontSize="15" Text="Add Perplexity account" />
@@ -502,11 +508,14 @@
         </Border>
 
         <!-- Agent config dialog -->
-        <Border IsVisible="{Binding ShowAgentConfigDialog}" Background="#88000000"
+        <Border x:Name="AgentConfigOverlay" IsVisible="{Binding ShowAgentConfigDialog}" Background="#88000000"
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                Padding="20" ZIndex="50">
-            <Border Classes="card" Width="580" Height="520"
-                    HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0">
+                Padding="20" ZIndex="50"
+                KeyDown="OnAgentConfigDialogKeyDown" Focusable="True"
+                PointerPressed="OnAgentConfigOverlayPressed">
+            <Border Classes="card" Width="580" MaxHeight="520"
+                    HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0"
+                    PointerPressed="OnDialogCardPressed">
                 <Grid RowDefinitions="Auto,Auto,*,Auto,Auto">
 
                     <!-- Header -->
