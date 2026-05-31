@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-06-01
+
+### Fixed
+
+- CI test suite now runs on Ubuntu (faster, cheaper) with Windows reserved for the build and release jobs.
+- Platform-specific tests (`Win32Exception`, binary path `.exe`) correctly skip on Linux instead of failing.
+- Blocking `GetAwaiter().GetResult()` calls in tests replaced with `async/await` (xUnit1031).
+- `QuotaProviderCount` tests updated to match current account-based semantics.
+- Unused `[Theory]` parameters removed from `EngineService_ServerState_MapsCorrectly` (xUnit1026).
+- CI runner pinned to `windows-2025` to avoid GitHub's `windows-latest` redirect notice.
+
 ## [0.4.0] - 2026-05-30
 
 ### Added
