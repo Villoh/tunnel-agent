@@ -100,6 +100,16 @@ jobs:
           -p:PublishSingleFile=false
           -o artifacts/publish
 
+      # ── Portable zip ──────────────────────────────────────────────────────
+      - name: Create portable zip
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.semver }}"
+          $dest = "artifacts/velopack/TunnelAgent-$version-win-x64-portable.zip"
+          New-Item -ItemType Directory -Force -Path artifacts/velopack | Out-Null
+          Compress-Archive -Path artifacts/publish/* -DestinationPath $dest
+          Write-Host "Created $dest"
+
       # ── Package with Velopack ─────────────────────────────────────────────
       - name: Package with Velopack
         shell: pwsh
@@ -204,6 +214,7 @@ jobs:
           files: |
             artifacts/velopack/*.exe
             artifacts/velopack/*.nupkg
+            artifacts/velopack/*.zip
             artifacts/velopack/RELEASES-win
             artifacts/velopack/latest.json
 
