@@ -115,7 +115,8 @@ jobs:
         shell: pwsh
         run: |
           vpk pack `
-            --packId   TunnelAgent `
+            --packId    TunnelAgent `
+            --packTitle "Tunnel Agent" `
             --packVersion "${{ steps.version.outputs.semver }}" `
             --packDir  artifacts/publish `
             --mainExe  TunnelAgent.exe `
