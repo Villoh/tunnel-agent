@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-06-01
+
+### Added
+
+- **App update UI**: Configuration → General now shows the installed Tunnel Agent version, a "Check" button, and a toggle for auto-check on startup.
+- **Update toast**: a non-blocking toast appears when a new Tunnel Agent version is available, with "Download" and "Restart & Install" actions.
+
+### Fixed
+
+- Scoop bucket now uses the portable zip instead of the installer — simpler install with no UAC prompt.
+- `latest.json` release asset now includes the portable zip hash (`portable.sha256`) alongside the installer hash.
+- Section spacing in Configuration → General matches the CLIProxy section.
+
 ## [0.4.2] - 2026-06-01
 
 ### Added
@@ -380,7 +393,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.4.3...HEAD
+[0.4.3]: https://github.com/Villoh/tunnel-agent/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/Villoh/tunnel-agent/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/Villoh/tunnel-agent/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/Villoh/tunnel-agent/compare/v0.3.1...v0.4.0
