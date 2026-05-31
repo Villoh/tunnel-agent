@@ -1500,7 +1500,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 var def = FindDef(target.Id);
                 var r = IsAgentConfigDefaultMode
                     ? await Task.Run(() => _agentConfiguration.Revert(def)).ConfigureAwait(false)
-                    : await Task.Run(() => _agentConfiguration.Apply(def, AgentProxyBaseUrl, CurrentAgentApiKey, models, modelEntries)).ConfigureAwait(false);
+                    : await _agentConfiguration.ApplyAsync(def, AgentProxyBaseUrl, CurrentAgentApiKey, models, modelEntries).ConfigureAwait(false);
                 itemResults.Add(new AgentConfigItemResult(target.Name, r.Success, r.Error, r.ConfigPath));
             }
 

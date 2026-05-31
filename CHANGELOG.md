@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Pi context window**: when configuring Pi, `contextWindow` is now fetched from OpenRouter's public `/v1/models` endpoint and written per-model in `models.json`. Results are cached in-memory. If a model is not found, the field is omitted (Pi defaults to 128k).
+
 ### Fixed
 
 - **Factory Droid config**: config file corrected to `~/.factory/settings.json` (was `config.json`), field names updated to camelCase (`displayName`, `baseUrl`, `apiKey`), and provider changed to `generic-chat-completion-api` per official docs.
@@ -24,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **App update UI**: Configuration → General now shows the installed Tunnel Agent version, a "Check" button, and a toggle for auto-check on startup.
 - **Update toast**: a non-blocking toast appears when a new Tunnel Agent version is available, with "Download" and "Restart & Install" actions.
 
+### Added
+
+- **Pi context window**: when configuring Pi, `contextWindow` is now fetched from OpenRouter's public `/v1/models` endpoint and written per-model in `models.json`. Results are cached in-memory. If a model is not found, the field is omitted (Pi defaults to 128k).
+
 ### Fixed
 
 - Scoop bucket now uses the portable zip instead of the installer — simpler install with no UAC prompt.
@@ -36,11 +44,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Scoop bucket support — `scoop bucket add villoh https://github.com/Villoh/scoop-bucket` then `scoop install villoh/tunnel-agent`.
 
+### Added
+
+- **Pi context window**: when configuring Pi, `contextWindow` is now fetched from OpenRouter's public `/v1/models` endpoint and written per-model in `models.json`. Results are cached in-memory. If a model is not found, the field is omitted (Pi defaults to 128k).
+
 ### Fixed
 
 - App name corrected to "Tunnel Agent" (with space) in installer, GitHub Releases title, and all user-visible UI strings.
 
 ## [0.4.1] - 2026-06-01
+
+### Added
+
+- **Pi context window**: when configuring Pi, `contextWindow` is now fetched from OpenRouter's public `/v1/models` endpoint and written per-model in `models.json`. Results are cached in-memory. If a model is not found, the field is omitted (Pi defaults to 128k).
 
 ### Fixed
 
@@ -90,6 +106,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `settings.json` no longer persists provider/runtime state (`Providers`, `PerplexityAccounts`); provider intent is loaded from `proxy-config.yaml` where practical and credentials remain file-backed.
 - Agents setup dialogs use improved scrolling, spacing, and compact controls.
 
+### Added
+
+- **Pi context window**: when configuring Pi, `contextWindow` is now fetched from OpenRouter's public `/v1/models` endpoint and written per-model in `models.json`. Results are cached in-memory. If a model is not found, the field is omitted (Pi defaults to 128k).
+
 ### Fixed
 
 - **Qwen provider removed**: CLIProxyAPI upstream does not support Qwen; removed from built-in OAuth providers, login flags, token detection, and documentation.
@@ -136,6 +156,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Em-dashes replaced with colons, semicolons, and commas throughout README and CONTRIBUTING.
 - SECURITY.md updated: supported versions table now shows 0.3.x as the only supported release; reporting instructions link directly to the GitHub private advisory form.
 
+### Added
+
+- **Pi context window**: when configuring Pi, `contextWindow` is now fetched from OpenRouter's public `/v1/models` endpoint and written per-model in `models.json`. Results are cached in-memory. If a model is not found, the field is omitted (Pi defaults to 128k).
+
 ### Fixed
 
 - Flash-of-wrong-theme on startup when light mode is saved: settings are now read synchronously before the window is created so `RequestedThemeVariant` is applied before the first render.
@@ -160,6 +184,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Token generator step labels changed from "Step N of 2" to "Step N of 3" to reflect the optional TOTP third step.
 - SlidingTabBar tab text uses FgBrush (theme-aware) for inactive tabs and white for active tab in light mode; white for all tabs in dark mode; no text color change on hover.
 - SlidingTabBar background and border now update immediately when switching between light and dark themes.
+
+### Added
+
+- **Pi context window**: when configuring Pi, `contextWindow` is now fetched from OpenRouter's public `/v1/models` endpoint and written per-model in `models.json`. Results are cached in-memory. If a model is not found, the field is omitted (Pi defaults to 128k).
 
 ### Fixed
 
@@ -197,6 +225,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - App startup now defaults Providers focus to CLIProxyAPI while keeping engine selection logic consistent across pages.
 - Sidebar branding updated: smaller Tunnel Agent lockup in sidebar, version removed from titlebar.
 
+### Added
+
+- **Pi context window**: when configuring Pi, `contextWindow` is now fetched from OpenRouter's public `/v1/models` endpoint and written per-model in `models.json`. Results are cached in-memory. If a model is not found, the field is omitted (Pi defaults to 128k).
+
 ### Fixed
 
 - Available models now query the active engine endpoint/port instead of always using CLIProxyAPI.
@@ -226,6 +258,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Credential reset now backs up managed token files to `.tunnelagent-backup/{timestamp}/` before deleting them, and only deletes TunnelAgent-managed files (OAuth prefixes and `openai-compat-*.json`). Unrelated JSON in the auth folder is preserved.
 - Status messages from credential operations (reset, open folder) appear in the Configuration view, not the Providers view.
 - Reset credentials confirmation and status feedback are shown in the correct UI context.
+
+### Added
+
+- **Pi context window**: when configuring Pi, `contextWindow` is now fetched from OpenRouter's public `/v1/models` endpoint and written per-model in `models.json`. Results are cached in-memory. If a model is not found, the field is omitted (Pi defaults to 128k).
 
 ### Fixed
 
@@ -281,6 +317,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Provider management now supports connected accounts, enable/disable state, OAuth and custom providers, live quota bars, and available models from the running proxy.
 - Provider rows were redesigned with clearer connection status, account panels, refresh actions, and provider icons.
 - OAuth callback pages now show branded success and error states.
+
+### Added
+
+- **Pi context window**: when configuring Pi, `contextWindow` is now fetched from OpenRouter's public `/v1/models` endpoint and written per-model in `models.json`. Results are cached in-memory. If a model is not found, the field is omitted (Pi defaults to 128k).
 
 ### Fixed
 
@@ -344,6 +384,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `App.axaml.cs` instantiates and passes `EngineConfigService` + `ProviderCatalogService` to the ViewModel
 - `ProvidersView` header renamed "Services" to match VibeProxy
 
+### Added
+
+- **Pi context window**: when configuring Pi, `contextWindow` is now fetched from OpenRouter's public `/v1/models` endpoint and written per-model in `models.json`. Results are cached in-memory. If a model is not found, the field is omitted (Pi defaults to 128k).
+
 ### Fixed
 
 - Provider row `Button` wrapper disabled all children (toggle, connect) — replaced with `Grid` + name-only clickable `Button.provider-row-name`
@@ -391,6 +435,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Manual "Update now" button with progress bar and success banner
 - Port change in UI immediately rewrites config and restarts the engine if running
 - Management control panel download disabled (`disable-control-panel: true`)
+
+### Added
+
+- **Pi context window**: when configuring Pi, `contextWindow` is now fetched from OpenRouter's public `/v1/models` endpoint and written per-model in `models.json`. Results are cached in-memory. If a model is not found, the field is omitted (Pi defaults to 128k).
 
 ### Fixed
 

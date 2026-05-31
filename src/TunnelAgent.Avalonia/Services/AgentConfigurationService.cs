@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace TunnelAgent.Services;
 
@@ -52,12 +54,23 @@ public sealed class AgentConfigurationService
         GenerateRaw(agent, proxyBaseUrl, apiKey, models, modelEntries);
 
     /// <summary>Apply proxy configuration. Backs up existing files before writing.</summary>
-    public AgentConfigApplyResult Apply(AgentDefinition agent, string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models = null, IReadOnlyList<ModelEntry>? modelEntries = null) =>
-        WriteConfig(agent, proxyBaseUrl, apiKey, remove: false, models, modelEntries);
+    public async Task<AgentConfigApplyResult> ApplyAsync(AgentDefinition agent, string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models = null, IReadOnlyList<ModelEntry>? modelEntries = null, CancellationToken ct = default)
+    {
+        try
+        {
+            if (agent.Id == "pi")
+                return await ApplyPiAsync(proxyBaseUrl, apiKey, remove: false, models, ct).ConfigureAwait(false);
+            return WriteConfigSync(agent, proxyBaseUrl, apiKey, remove: false, models, modelEntries);
+        }
+        catch (Exception ex)
+        {
+            return AgentConfigApplyResult.Failure(ex.Message);
+        }
+    }
 
     /// <summary>Remove proxy configuration (restore to default).</summary>
     public AgentConfigApplyResult Revert(AgentDefinition agent) =>
-        WriteConfig(agent, string.Empty, string.Empty, remove: true, null);
+        WriteConfigSync(agent, string.Empty, string.Empty, remove: true, null, null);
 
     // ── Config generation ────────────────────────────────────────────────────
 
@@ -78,8 +91,8 @@ public sealed class AgentConfigurationService
 
     // ── Apply / revert ───────────────────────────────────────────────────────
 
-    private AgentConfigApplyResult WriteConfig(
-        AgentDefinition agent, string proxyBaseUrl, string apiKey, bool remove, IReadOnlyList<string>? models, IReadOnlyList<ModelEntry>? modelEntries = null)
+    private static AgentConfigApplyResult WriteConfigSync(
+        AgentDefinition agent, string proxyBaseUrl, string apiKey, bool remove, IReadOnlyList<string>? models, IReadOnlyList<ModelEntry>? modelEntries)
     {
         try
         {
@@ -92,7 +105,6 @@ public sealed class AgentConfigurationService
                     raw: new[] { EnvExportRaw("gemini-cli", GeminiEnv(proxyBaseUrl, apiKey)) }),
                 "amp"          => ApplyAmp(proxyBaseUrl, apiKey, remove),
                 "opencode"     => ApplyOpenCode(proxyBaseUrl, apiKey, remove, models),
-                "pi"           => ApplyPi(proxyBaseUrl, apiKey, remove, models),
                 "factory-droid"=> ApplyFactoryDroid(proxyBaseUrl, apiKey, remove, modelEntries),
                 "cursor-agent" => AgentConfigApplyResult.Ok(
                     "Cursor Agent uses environment variables. Copy the shell export and add it to your shell profile.",
@@ -432,7 +444,7 @@ public sealed class AgentConfigurationService
 
     // ── Pi ──────────────────────────────────────────────────────────────
 
-    private static JsonObject BuildPiProviderBlock(string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models)
+    private static JsonObject BuildPiProviderBlock(string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models, Dictionary<string, int>? contextMap = null)
     {
         var provider = new JsonObject
         {
@@ -441,12 +453,20 @@ public sealed class AgentConfigurationService
         };
         provider["apiKey"] = HasApiKey(apiKey) ? apiKey : "no-key";
         if (models is { Count: > 0 })
+        {
             provider["models"] = new JsonArray(
-                models.Select(id => (JsonNode?)new JsonObject { ["id"] = id }).ToArray());
+                models.Select(id =>
+                {
+                    var entry = new JsonObject { ["id"] = id };
+                    if (contextMap is not null && contextMap.TryGetValue(id, out var ctx))
+                        entry["contextWindow"] = ctx;
+                    return (JsonNode?)entry;
+                }).ToArray());
+        }
         return provider;
     }
 
-    private static AgentConfigApplyResult ApplyPi(string proxyBaseUrl, string apiKey, bool remove, IReadOnlyList<string>? models)
+    private static async Task<AgentConfigApplyResult> ApplyPiAsync(string proxyBaseUrl, string apiKey, bool remove, IReadOnlyList<string>? models, CancellationToken ct)
     {
         var configPath = ExpandPath("~/.pi/agent/models.json");
         var dir        = Path.GetDirectoryName(configPath)!;
@@ -476,7 +496,17 @@ public sealed class AgentConfigurationService
         }
         else
         {
-            providers["tunnel-agent"] = BuildPiProviderBlock(proxyBaseUrl, apiKey, models);
+            Dictionary<string, int>? contextMap = null;
+            if (models is { Count: > 0 })
+            {
+                contextMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                foreach (var id in models)
+                {
+                    var ctx = await OpenRouterContextService.Instance.GetContextLengthAsync(id, ct).ConfigureAwait(false);
+                    if (ctx.HasValue) contextMap[id] = ctx.Value;
+                }
+            }
+            providers["tunnel-agent"] = BuildPiProviderBlock(proxyBaseUrl, apiKey, models, contextMap);
         }
 
         File.WriteAllText(configPath,
