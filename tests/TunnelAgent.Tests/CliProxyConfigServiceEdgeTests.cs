@@ -55,11 +55,11 @@ public sealed class ConfigServiceEdgeTests
     }
 
     [Fact]
-    public void ConfigPath_IsSetByConstructor()
+    public async Task ConfigPath_IsSetByConstructor()
     {
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
-        settings.LoadAsync().GetAwaiter().GetResult();
+        await settings.LoadAsync();
         var configPath = temp.File("my-config.yaml");
         var config = new ConfigService(settings, configPath, temp.File("auth"));
 

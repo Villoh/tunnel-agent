@@ -46,11 +46,11 @@ public sealed class OAuthServiceTests
     }
 
     [Fact]
-    public void Dispose_DoesNotThrow_WhenCalledMultipleTimes()
+    public async Task Dispose_DoesNotThrow_WhenCalledMultipleTimes()
     {
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
-        settings.LoadAsync().GetAwaiter().GetResult();
+        await settings.LoadAsync();
         var config = new ConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
         var service = new OAuthService(config);
 
@@ -59,11 +59,11 @@ public sealed class OAuthServiceTests
     }
 
     [Fact]
-    public void CancelPreviousAuth_WithoutActiveAuth_DoesNotThrow()
+    public async Task CancelPreviousAuth_WithoutActiveAuth_DoesNotThrow()
     {
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
-        settings.LoadAsync().GetAwaiter().GetResult();
+        await settings.LoadAsync();
         var config = new ConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
         var service = new OAuthService(config);
 

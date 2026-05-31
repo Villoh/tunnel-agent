@@ -37,7 +37,7 @@ public sealed class MainWindowViewModelTests
     [InlineData(EngineState.NotInstalled, ServerState.Stopped)]
     [InlineData(EngineState.Downloading, ServerState.Stopped)]
     [InlineData(EngineState.Installing, ServerState.Stopped)]
-    public void EngineService_ServerState_MapsCorrectly(EngineState engineState, ServerState expectedServerState)
+    public async Task EngineService_ServerState_MapsCorrectly(EngineState engineState, ServerState expectedServerState)
     {
         // The MainWindowViewModel exposes ServerState based on EngineState.
         // We test the mapping by constructing a real EngineService and
@@ -46,7 +46,7 @@ public sealed class MainWindowViewModelTests
         // ServerState is a computed property: EngineState switch { Running=>Running, Starting=>Starting, Error=>Error, _=>Stopped }
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
-        settings.LoadAsync().GetAwaiter().GetResult();
+        await settings.LoadAsync();
 
         // EngineService initializes to NotInstalled or Stopped. ServerState mapping
         // is: Running→Running, Starting→Starting, Error→Error, _→Stopped
@@ -58,11 +58,11 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
-    public void RoutingStrategy_Default_IsRoundRobin()
+    public async Task RoutingStrategy_Default_IsRoundRobin()
     {
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
-        settings.LoadAsync().GetAwaiter().GetResult();
+        await settings.LoadAsync();
         var registry = new EngineRegistryService(settings);
         var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
 
@@ -189,11 +189,11 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
-    public void IsLaunchAtLoginSupported_DependsOnService()
+    public async Task IsLaunchAtLoginSupported_DependsOnService()
     {
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
-        settings.LoadAsync().GetAwaiter().GetResult();
+        await settings.LoadAsync();
         var registry = new EngineRegistryService(settings);
         var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
 

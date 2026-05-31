@@ -107,11 +107,11 @@ public sealed class ViewModelEdgeTests
     }
 
     [Fact]
-    public void MainWindowViewModel_SelectedEngineVersionDescription_Default()
+    public async Task MainWindowViewModel_SelectedEngineVersionDescription_Default()
     {
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
-        settings.LoadAsync().GetAwaiter().GetResult();
+        await settings.LoadAsync();
         var registry = new EngineRegistryService(settings);
         var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
 
@@ -119,11 +119,11 @@ public sealed class ViewModelEdgeTests
     }
 
     [Fact]
-    public void MainWindowViewModel_CanSelectEngineRelease_Defaults()
+    public async Task MainWindowViewModel_CanSelectEngineRelease_Defaults()
     {
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
-        settings.LoadAsync().GetAwaiter().GetResult();
+        await settings.LoadAsync();
         var registry = new EngineRegistryService(settings);
         var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
 
@@ -132,11 +132,11 @@ public sealed class ViewModelEdgeTests
     }
 
     [Fact]
-    public void MainWindowViewModel_CanInstallSelectedEngine_NoSelection_ReturnsFalse()
+    public async Task MainWindowViewModel_CanInstallSelectedEngine_NoSelection_ReturnsFalse()
     {
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
-        settings.LoadAsync().GetAwaiter().GetResult();
+        await settings.LoadAsync();
         var registry = new EngineRegistryService(settings);
         var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
 
@@ -144,11 +144,11 @@ public sealed class ViewModelEdgeTests
     }
 
     [Fact]
-    public void MainWindowViewModel_IsAutoUpdateEnabled_ReflectsAutoCheck()
+    public async Task MainWindowViewModel_IsAutoUpdateEnabled_ReflectsAutoCheck()
     {
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
-        settings.LoadAsync().GetAwaiter().GetResult();
+        await settings.LoadAsync();
         settings.Current.AutoCheckForUpdates = true;
         var registry = new EngineRegistryService(settings);
         var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);

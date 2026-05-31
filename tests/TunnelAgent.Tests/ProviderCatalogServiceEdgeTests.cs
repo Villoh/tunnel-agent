@@ -52,15 +52,15 @@ public sealed class ProviderCatalogServiceEdgeTests
     }
 
     [Fact]
-    public void DisconnectOAuth_NonExistentProvider_DoesNotThrow()
+    public async Task DisconnectOAuth_NonExistentProvider_DoesNotThrow()
     {
         using var temp = new TestTempDirectory();
         var authDir = temp.File("auth");
         var settings = new SettingsService(temp.File("settings.json"));
-        settings.LoadAsync().GetAwaiter().GetResult();
+        await settings.LoadAsync();
         var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir);
         using var catalog = new ProviderCatalogService(settings, config, authDir);
-        catalog.InitializeAsync().GetAwaiter().GetResult();
+        await catalog.InitializeAsync();
 
         // Should not throw for unknown provider
         catalog.DisconnectOAuth("nonexistent-provider-id");

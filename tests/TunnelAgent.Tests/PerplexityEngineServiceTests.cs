@@ -73,11 +73,11 @@ public sealed class PerplexityEngineServiceTests
     }
 
     [Fact]
-    public void InstalledVersion_ReflectsDownloadService()
+    public async Task InstalledVersion_ReflectsDownloadService()
     {
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
-        settings.LoadAsync().GetAwaiter().GetResult();
+        await settings.LoadAsync();
         var engine = new EngineService(settings);
 
         Assert.Null(engine.InstalledVersion);
@@ -97,11 +97,11 @@ public sealed class PerplexityEngineServiceTests
     }
 
     [Fact]
-    public void Properties_ExposeSubserviceState()
+    public async Task Properties_ExposeSubserviceState()
     {
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
-        settings.LoadAsync().GetAwaiter().GetResult();
+        await settings.LoadAsync();
         var engine = new EngineService(settings);
 
         Assert.Null(engine.InstalledBinarySha256);
