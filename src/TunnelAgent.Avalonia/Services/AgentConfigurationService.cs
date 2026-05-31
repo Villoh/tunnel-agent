@@ -34,6 +34,8 @@ public sealed record AgentConfigApplyResult(
         new(true, configPath, backupPath, null, instructions, raw ?? Array.Empty<RawConfigPreview>());
 }
 
+public sealed record ModelEntry(string Id, string OwnedBy);
+
 // ── Service ───────────────────────────────────────────────────────────────────
 
 public sealed class AgentConfigurationService
@@ -46,12 +48,12 @@ public sealed class AgentConfigurationService
     // ── Public entry points ──────────────────────────────────────────────────
 
     /// <summary>Generate a preview of what Apply would write, without touching any files.</summary>
-    public IReadOnlyList<RawConfigPreview> Preview(AgentDefinition agent, string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models = null) =>
-        GenerateRaw(agent, proxyBaseUrl, apiKey, models);
+    public IReadOnlyList<RawConfigPreview> Preview(AgentDefinition agent, string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models = null, IReadOnlyList<ModelEntry>? modelEntries = null) =>
+        GenerateRaw(agent, proxyBaseUrl, apiKey, models, modelEntries);
 
     /// <summary>Apply proxy configuration. Backs up existing files before writing.</summary>
-    public AgentConfigApplyResult Apply(AgentDefinition agent, string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models = null) =>
-        WriteConfig(agent, proxyBaseUrl, apiKey, remove: false, models);
+    public AgentConfigApplyResult Apply(AgentDefinition agent, string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models = null, IReadOnlyList<ModelEntry>? modelEntries = null) =>
+        WriteConfig(agent, proxyBaseUrl, apiKey, remove: false, models, modelEntries);
 
     /// <summary>Remove proxy configuration (restore to default).</summary>
     public AgentConfigApplyResult Revert(AgentDefinition agent) =>
@@ -59,7 +61,7 @@ public sealed class AgentConfigurationService
 
     // ── Config generation ────────────────────────────────────────────────────
 
-    private IReadOnlyList<RawConfigPreview> GenerateRaw(AgentDefinition agent, string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models) =>
+    private IReadOnlyList<RawConfigPreview> GenerateRaw(AgentDefinition agent, string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models, IReadOnlyList<ModelEntry>? modelEntries = null) =>
         agent.Id switch
         {
             "claude-code"    => new[] { ClaudeCodeRaw(proxyBaseUrl, apiKey) },
@@ -68,7 +70,7 @@ public sealed class AgentConfigurationService
             "amp"            => AmpRaw(proxyBaseUrl, apiKey),
             "opencode"       => new[] { OpenCodeRaw(proxyBaseUrl, apiKey, models) },
             "pi"             => new[] { PiRaw(proxyBaseUrl, apiKey, models) },
-            "factory-droid"  => new[] { FactoryDroidRaw(proxyBaseUrl, apiKey, models) },
+            "factory-droid"  => new[] { FactoryDroidRaw(proxyBaseUrl, apiKey, modelEntries) },
             "cursor-agent"   => new[] { EnvExportRaw("cursor-agent", CursorEnv(proxyBaseUrl, apiKey)) },
             "aider"          => new[] { EnvExportRaw("aider", AiderEnv(proxyBaseUrl, apiKey)) },
             _                => Array.Empty<RawConfigPreview>()
@@ -77,7 +79,7 @@ public sealed class AgentConfigurationService
     // ── Apply / revert ───────────────────────────────────────────────────────
 
     private AgentConfigApplyResult WriteConfig(
-        AgentDefinition agent, string proxyBaseUrl, string apiKey, bool remove, IReadOnlyList<string>? models)
+        AgentDefinition agent, string proxyBaseUrl, string apiKey, bool remove, IReadOnlyList<string>? models, IReadOnlyList<ModelEntry>? modelEntries = null)
     {
         try
         {
@@ -91,7 +93,7 @@ public sealed class AgentConfigurationService
                 "amp"          => ApplyAmp(proxyBaseUrl, apiKey, remove),
                 "opencode"     => ApplyOpenCode(proxyBaseUrl, apiKey, remove, models),
                 "pi"           => ApplyPi(proxyBaseUrl, apiKey, remove, models),
-                "factory-droid"=> ApplyFactoryDroid(proxyBaseUrl, apiKey, remove, models),
+                "factory-droid"=> ApplyFactoryDroid(proxyBaseUrl, apiKey, remove, modelEntries),
                 "cursor-agent" => AgentConfigApplyResult.Ok(
                     "Cursor Agent uses environment variables. Copy the shell export and add it to your shell profile.",
                     raw: new[] { EnvExportRaw("cursor-agent", CursorEnv(proxyBaseUrl, apiKey)) }),
@@ -500,7 +502,7 @@ public sealed class AgentConfigurationService
 
     // ── Factory Droid ─────────────────────────────────────────────────────────
 
-    private static AgentConfigApplyResult ApplyFactoryDroid(string proxyBaseUrl, string apiKey, bool remove, IReadOnlyList<string>? models)
+    private static AgentConfigApplyResult ApplyFactoryDroid(string proxyBaseUrl, string apiKey, bool remove, IReadOnlyList<ModelEntry>? models)
     {
         var configPath = ExpandPath("~/.factory/settings.json");
         var dir = Path.GetDirectoryName(configPath)!;
@@ -534,10 +536,10 @@ public sealed class AgentConfigurationService
 
         if (!remove)
         {
-            var modelIds = models?.Count > 0
+            var modelEntries2 = models?.Count > 0
                 ? models
-                : (IEnumerable<string>)new[] { "tunnel-agent" };
-            foreach (var m in modelIds)
+                : (IEnumerable<ModelEntry>)new[] { new ModelEntry("tunnel-agent", "") };
+            foreach (var m in modelEntries2)
                 existing.Add(BuildFactoryDroidEntry(m, proxyBaseUrl, apiKey));
         }
 
@@ -551,23 +553,23 @@ public sealed class AgentConfigurationService
         return AgentConfigApplyResult.Ok(msg, configPath, backupPath);
     }
 
-    private static (string provider, string baseUrl) InferFactoryDroidProvider(string modelId, string proxyBaseUrl)
+    private static (string provider, string baseUrl) InferFactoryDroidProvider(ModelEntry model, string proxyBaseUrl)
     {
-        var id = modelId.ToLowerInvariant();
-        if (id.Contains("claude") || id.Contains("haiku") || id.Contains("sonnet") || id.Contains("opus"))
+        var owner = model.OwnedBy.ToLowerInvariant();
+        if (owner == "anthropic")
             return ("anthropic", StripV1(proxyBaseUrl));
-        if (id.StartsWith("gpt") || id.StartsWith("o1") || id.StartsWith("o3") || id.StartsWith("o4") || id.Contains("codex"))
+        if (owner == "openai")
             return ("openai", proxyBaseUrl);
         return ("generic-chat-completion-api", proxyBaseUrl);
     }
 
-    private static JsonObject BuildFactoryDroidEntry(string modelId, string proxyBaseUrl, string apiKey)
+    private static JsonObject BuildFactoryDroidEntry(ModelEntry model, string proxyBaseUrl, string apiKey)
     {
-        var (provider, baseUrl) = InferFactoryDroidProvider(modelId, proxyBaseUrl);
+        var (provider, baseUrl) = InferFactoryDroidProvider(model, proxyBaseUrl);
         var entry = new JsonObject
         {
-            ["model"]       = modelId,
-            ["displayName"] = modelId,
+            ["model"]       = model.Id,
+            ["displayName"] = model.Id,
             ["baseUrl"]     = baseUrl,
             ["provider"]    = provider
         };
@@ -575,11 +577,11 @@ public sealed class AgentConfigurationService
         return entry;
     }
 
-    private static RawConfigPreview FactoryDroidRaw(string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models)
+    private static RawConfigPreview FactoryDroidRaw(string proxyBaseUrl, string apiKey, IReadOnlyList<ModelEntry>? models)
     {
         var configPath = ExpandPath("~/.factory/settings.json");
-        var modelIds   = models?.Count > 0 ? models : (IEnumerable<string>)new[] { "tunnel-agent" };
-        var entries    = new JsonArray(modelIds
+        var modelEntries = models?.Count > 0 ? models : (IEnumerable<ModelEntry>)new[] { new ModelEntry("tunnel-agent", "") };
+        var entries    = new JsonArray(modelEntries
             .Select(m => (JsonNode?)BuildFactoryDroidEntry(m, proxyBaseUrl, apiKey))
             .ToArray());
         var content    = new JsonObject { ["customModels"] = entries }

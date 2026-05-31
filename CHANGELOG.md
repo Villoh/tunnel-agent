@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Factory Droid config**: config file corrected to `~/.factory/settings.json` (was `config.json`), field names updated to camelCase (`displayName`, `baseUrl`, `apiKey`), and provider changed to `generic-chat-completion-api` per official docs.
-- **Factory Droid provider inference**: provider is now inferred from the model id — `anthropic` (with `/v1` stripped) for Claude models, `openai` for GPT/o-series/Codex, `generic-chat-completion-api` for everything else.
+- **Factory Droid provider inference**: provider is now resolved from the model's `owned_by` field (from `/v1/models`) — `anthropic` (with `/v1` stripped) for Anthropic models, `openai` for OpenAI models, `generic-chat-completion-api` for everything else.
 - **Factory Droid apiKey**: `apiKey` is now always written (using `"no-key"` as fallback) since Factory Droid requires the field.
 - **Agent config dialog**: dialog height is now `MaxHeight` instead of fixed, so it shrinks to fit content after applying.
 - **Dialog keyboard shortcuts**: Escape closes and Enter confirms in the Agent Config, Manage Keys, and Add Perplexity Account dialogs.

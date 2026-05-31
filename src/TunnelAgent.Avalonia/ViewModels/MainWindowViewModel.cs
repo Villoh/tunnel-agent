@@ -1490,8 +1490,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
         IsApplyingAgentConfig = true;
         AgentConfigResult = null;
-        var models = GetSelectedModels();
-        var itemResults = new List<AgentConfigItemResult>();
+        var models       = GetSelectedModels();
+        var modelEntries = GetSelectedModelEntries();
+        var itemResults  = new List<AgentConfigItemResult>();
         try
         {
             foreach (var target in targets)
@@ -1499,7 +1500,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 var def = FindDef(target.Id);
                 var r = IsAgentConfigDefaultMode
                     ? await Task.Run(() => _agentConfiguration.Revert(def)).ConfigureAwait(false)
-                    : await Task.Run(() => _agentConfiguration.Apply(def, AgentProxyBaseUrl, CurrentAgentApiKey, models)).ConfigureAwait(false);
+                    : await Task.Run(() => _agentConfiguration.Apply(def, AgentProxyBaseUrl, CurrentAgentApiKey, models, modelEntries)).ConfigureAwait(false);
                 itemResults.Add(new AgentConfigItemResult(target.Name, r.Success, r.Error, r.ConfigPath));
             }
 
@@ -1535,6 +1536,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private List<string> GetSelectedModels() =>
         SelectableModels.Where(m => m.IsSelected).Select(m => m.Name).ToList();
+
+    private List<TunnelAgent.Services.ModelEntry> GetSelectedModelEntries() =>
+        SelectableModels.Where(m => m.IsSelected).Select(m => new TunnelAgent.Services.ModelEntry(m.Name, m.Provider)).ToList();
 
     private void PopulateSelectableModels()
     {
@@ -1579,9 +1583,10 @@ public partial class MainWindowViewModel : ViewModelBase
     private void RefreshManualPreview()
     {
         var targets = GetAgentConfigTargets();
-        var models  = GetSelectedModels();
+        var models       = GetSelectedModels();
+        var modelEntries = GetSelectedModelEntries();
         AgentConfigPreviews = targets
-            .SelectMany(a => _agentConfiguration.Preview(FindDef(a.Id), AgentProxyBaseUrl, CurrentAgentApiKey, models))
+            .SelectMany(a => _agentConfiguration.Preview(FindDef(a.Id), AgentProxyBaseUrl, CurrentAgentApiKey, models, modelEntries))
             .ToList();
     }
 
