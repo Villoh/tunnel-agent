@@ -89,7 +89,7 @@ jobs:
 
       # ── Restore ───────────────────────────────────────────────────────────
       - name: Restore
-        run: dotnet restore TunnelAgent.slnx
+        run: dotnet restore TunnelAgent.slnx -r win-x64
 
       # ── Publish self-contained win-x64 ────────────────────────────────────
       - name: Publish
