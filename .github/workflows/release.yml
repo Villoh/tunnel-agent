@@ -242,7 +242,6 @@ jobs:
           name: Tunnel Agent ${{ steps.version.outputs.version }}
           prerelease: ${{ steps.version.outputs.is_prerelease == 'true' }}
           generate_release_notes: true
-          append_body: true
           body: |
             ## Installation
 
@@ -251,6 +250,8 @@ jobs:
             **Requirements:** Windows 10 or later.
 
             > Existing installations update automatically — no manual download needed.
+
+            ---
           files: |
             artifacts/velopack/*.exe
             artifacts/velopack/*.nupkg
