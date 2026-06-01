@@ -246,22 +246,25 @@ jobs:
           name: Tunnel Agent ${{ steps.version.outputs.version }}
           prerelease: ${{ steps.version.outputs.is_prerelease == 'true' }}
           generate_release_notes: true
-          body: |
-            ## Installation
-
-            **Fresh install:** download and run `TunnelAgent-${{ steps.version.outputs.semver }}-win-Setup.exe`.
-
-            **Requirements:** Windows 10 or later.
-
-            > Existing installations update automatically — no manual download needed.
-
-            ---
           files: |
             artifacts/velopack/*.exe
             artifacts/velopack/*.nupkg
             artifacts/velopack/*.zip
             artifacts/velopack/RELEASES-win
             artifacts/velopack/latest.json
+
+      # ── Prepend installation instructions to release body ────────────────
+      - name: Prepend installation instructions
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
+          SEMVER: ${{ steps.version.outputs.semver }}
+          REPO: ${{ github.repository }}
+        run: |
+          current=$(gh release view "$TAG" --repo "$REPO" --json body -q .body)
+          printf '## Installation\n\n**Fresh install:** download and run `TunnelAgent-%s-win-Setup.exe`.\n\n**Requirements:** Windows 10 or later.\n\n> Existing installations update automatically — no manual download needed.\n\n---\n\n%s' "$SEMVER" "$current" > /tmp/release_body.md
+          gh release edit "$TAG" --repo "$REPO" --notes-file /tmp/release_body.md
 
       # ── Notify Scoop bucket (stable releases only) ────────────────────────
       - name: Update Scoop bucket
