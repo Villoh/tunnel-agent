@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Models in agent config dialog were empty on open if engines were already running before the dialog was opened.
 - UI no longer freezes when adding, removing or changing the default CLIProxy API key or Perplexity account — env var writes and `WM_SETTINGCHANGE` broadcast now run on a background thread.
+- GitHub releases now correctly show "What's Changed", contributors and "Full Changelog" sections.
+- Release workflow now always commits the version bump back to `main` (previously skipped when triggered from CHANGELOG).
 
 ## [0.4.4] - 2026-06-01
 
