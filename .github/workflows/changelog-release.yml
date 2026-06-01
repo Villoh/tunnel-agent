@@ -114,5 +114,4 @@ jobs:
           gh workflow run release.yml \
             --repo "$GITHUB_REPOSITORY" \
             --ref "$GITHUB_REF_NAME" \
-            --field version="$VERSION" \
-            --field skip_version_commit="true"
+            --field version="$VERSION"

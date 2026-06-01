@@ -13,13 +13,6 @@ on:
         description: "Version to release (e.g. 0.5.0 or 0.5.0-rc.1)"
         required: true
         type: string
-      # Internal: set to 'true' by changelog-release.yml so the version-bump
-      # commit is skipped (CHANGELOG already updated the branch).
-      skip_version_commit:
-        description: "Skip committing version bump back to branch (internal)"
-        required: false
-        default: "false"
-        type: string
 
 concurrency:
   group: release
@@ -216,7 +209,6 @@ jobs:
 
       # ── Commit bumped .csproj files back to branch ────────────────────────
       - name: Commit version bump
-        if: github.event.inputs.skip_version_commit != 'true'
         shell: pwsh
         run: |
           git config user.name  "github-actions[bot]"
