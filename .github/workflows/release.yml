@@ -237,6 +237,25 @@ jobs:
           git push origin "HEAD:refs/heads/$branch"
           Write-Host "Pushed version bump to $branch"
 
+      # ── Extract changelog section for this version ───────────────────────
+      - name: Extract changelog
+        shell: bash
+        run: |
+          version="${{ steps.version.outputs.semver }}"
+          awk "/^## \\[$version\\]/,/^## \\[/" CHANGELOG.md \
+            | sed '1d;$d' > /tmp/changelog_section.md
+          echo "## Installation" > /tmp/release_body.md
+          echo "" >> /tmp/release_body.md
+          echo "**Fresh install:** download and run \`TunnelAgent-${version}-win-Setup.exe\`." >> /tmp/release_body.md
+          echo "" >> /tmp/release_body.md
+          echo "**Requirements:** Windows 10 or later." >> /tmp/release_body.md
+          echo "" >> /tmp/release_body.md
+          echo "> Existing installations update automatically — no manual download needed." >> /tmp/release_body.md
+          echo "" >> /tmp/release_body.md
+          echo "---" >> /tmp/release_body.md
+          echo "" >> /tmp/release_body.md
+          cat /tmp/changelog_section.md >> /tmp/release_body.md
+
       # ── Publish GitHub Release ────────────────────────────────────────────
       - name: Create GitHub Release
         id: gh_release
@@ -246,6 +265,8 @@ jobs:
           name: Tunnel Agent ${{ steps.version.outputs.version }}
           prerelease: ${{ steps.version.outputs.is_prerelease == 'true' }}
           generate_release_notes: true
+          append_body: true
+          body_path: /tmp/release_body.md
           files: |
             artifacts/velopack/*.exe
             artifacts/velopack/*.nupkg
@@ -254,31 +275,6 @@ jobs:
             artifacts/velopack/releases.win.json
             artifacts/velopack/assets.win.json
             artifacts/velopack/latest.json
-
-      # ── Prepend installation instructions to release body ────────────────
-      - name: Prepend installation instructions
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.version.outputs.tag }}
-          SEMVER: ${{ steps.version.outputs.semver }}
-          REPO: ${{ github.repository }}
-        run: |
-          # Find the previous tag to generate proper What's Changed
-          prev_tag=$(gh api repos/$REPO/releases --jq '[.[] | select(.tag_name != "'"$TAG"'") | .tag_name] | first')
-          # Generate auto release notes via GitHub API
-          if [ -n "$prev_tag" ]; then
-            generated=$(gh api repos/$REPO/releases/generate-notes \
-              -f tag_name="$TAG" \
-              -f previous_tag_name="$prev_tag" \
-              --jq .body)
-          else
-            generated=$(gh api repos/$REPO/releases/generate-notes \
-              -f tag_name="$TAG" \
-              --jq .body)
-          fi
-          printf '## Installation\n\n**Fresh install:** download and run `TunnelAgent-%s-win-Setup.exe`.\n\n**Requirements:** Windows 10 or later.\n\n> Existing installations update automatically — no manual download needed.\n\n---\n\n%s' "$SEMVER" "$generated" > /tmp/release_body.md
-          gh release edit "$TAG" --repo "$REPO" --notes-file /tmp/release_body.md
 
       # ── Notify Scoop bucket (stable releases only) ────────────────────────
       - name: Update Scoop bucket
