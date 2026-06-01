@@ -238,23 +238,48 @@ jobs:
           Write-Host "Pushed version bump to $branch"
 
       # ── Extract changelog section for this version ───────────────────────
-      - name: Extract changelog
+      - name: Build release notes from CHANGELOG
         shell: bash
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.semver }}
+          REPO: ${{ github.repository }}
         run: |
-          version="${{ steps.version.outputs.semver }}"
-          awk "/^## \\[$version\\]/,/^## \\[/" CHANGELOG.md \
-            | sed '1d;$d' > /tmp/changelog_section.md
-          echo "## Installation" > /tmp/release_body.md
-          echo "" >> /tmp/release_body.md
-          echo "**Fresh install:** download and run \`TunnelAgent-${version}-win-Setup.exe\`." >> /tmp/release_body.md
-          echo "" >> /tmp/release_body.md
-          echo "**Requirements:** Windows 10 or later." >> /tmp/release_body.md
-          echo "" >> /tmp/release_body.md
-          echo "> Existing installations update automatically — no manual download needed." >> /tmp/release_body.md
-          echo "" >> /tmp/release_body.md
-          echo "---" >> /tmp/release_body.md
-          echo "" >> /tmp/release_body.md
-          cat /tmp/changelog_section.md >> /tmp/release_body.md
+          set -euo pipefail
+
+          awk "/^## \\[$VERSION\\]/,/^## \\[/" CHANGELOG.md \
+            | sed '1d;$d' \
+            | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' > /tmp/changelog_section.md
+
+          previous_tag=$(git tag --sort=-v:refname | grep -v "^${TAG}$" | head -n 1 || true)
+          range=""
+          if [ -n "$previous_tag" ]; then
+            range="$previous_tag..$TAG"
+          else
+            range="$TAG"
+          fi
+
+          {
+            echo "## Installation"
+            echo ""
+            echo "**Fresh install:** download and run \`TunnelAgent-${VERSION}-win-Setup.exe\`."
+            echo ""
+            echo "**Requirements:** Windows 10 or later."
+            echo ""
+            echo "> Existing installations update automatically — no manual download needed."
+            echo ""
+            echo "---"
+            echo ""
+            cat /tmp/changelog_section.md
+            echo ""
+            echo "### Contributors"
+            echo ""
+            git log --format='- %aN' "$range" | sort -u || true
+            echo ""
+            if [ -n "$previous_tag" ]; then
+              echo "**Full Changelog**: https://github.com/${REPO}/compare/${previous_tag}...${TAG}"
+            fi
+          } > /tmp/release_body.md
 
       # ── Publish GitHub Release ────────────────────────────────────────────
       - name: Create GitHub Release
