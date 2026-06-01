@@ -324,7 +324,7 @@
                         </StackPanel>
 
                         <!-- Model groups -->
-                        <ItemsControl ItemsSource="{Binding AvailableModelGroups}"
+                        <ItemsControl ItemsSource="{Binding FocusedModelGroups}"
                                       IsVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:AvailableModelGroupViewModel">

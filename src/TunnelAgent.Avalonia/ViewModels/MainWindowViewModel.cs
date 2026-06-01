@@ -187,6 +187,10 @@ public partial class MainWindowViewModel : ViewModelBase
             AvailableModelGroups.Clear();
             foreach (var g in CliProxyModelGroups) AvailableModelGroups.Add(g);
             foreach (var g in PerplexityModelGroups) AvailableModelGroups.Add(g);
+            OnPropertyChanged(nameof(FocusedModelGroups));
+            OnPropertyChanged(nameof(TotalAvailableModelCount));
+            OnPropertyChanged(nameof(HasCliProxySelectableModels));
+            OnPropertyChanged(nameof(HasPerplexitySelectableModels));
         }
         CliProxyModelGroups.CollectionChanged += OnEngineModelsChanged;
         PerplexityModelGroups.CollectionChanged += OnEngineModelsChanged;
@@ -299,7 +303,7 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(AllVisibleModelsSelected));
         }
     }
-    public string ModelsExpanderLabel         => $"Models — {SelectableModels.Count(m => m.IsSelected)} of {SelectableModels.Count} selected";
+    public string ModelsExpanderLabel         => $"Models {SelectableModels.Count(m => m.IsSelected)} of {SelectableModels.Count} selected";
     public int AgentConfigSelectedCount       => IsAgentConfigBulkMode
         ? Agents.Count(a => a.IsSelectedForConfig && a.Installed)
         : AgentConfigTarget?.Installed == true ? 1 : 0;
@@ -310,7 +314,9 @@ public partial class MainWindowViewModel : ViewModelBase
     public string AgentConfigDialogDescription => IsAgentConfigBulkMode
         ? "Choose installed agents, then apply shared config."
         : AgentConfigTarget?.Description ?? "";
-    public int TotalAvailableModelCount => AvailableModelGroups.Sum(g => g.ModelCount);
+    public IEnumerable<AvailableModelGroupViewModel> FocusedModelGroups =>
+        IsPerplexityEngineSelected ? PerplexityModelGroups : CliProxyModelGroups;
+    public int TotalAvailableModelCount => FocusedModelGroups.Sum(g => g.ModelCount);
     public int PerplexityAccountCount => PerplexityAccounts.Count;
     public bool HasPerplexityAccounts => PerplexityAccounts.Count > 0;
     public string PerplexityEmptyStateText => "Perplexity needs at least one saved WebUI session token account.";
@@ -498,6 +504,8 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsPerplexityEngineSelected));
         OnPropertyChanged(nameof(IsQuotaProvidersTab));
         OnPropertyChanged(nameof(ProvidersTabIndex));
+        OnPropertyChanged(nameof(FocusedModelGroups));
+        OnPropertyChanged(nameof(TotalAvailableModelCount));
     }
 
     partial void OnFocusedConfigEngineIdChanged(string value)
@@ -573,6 +581,23 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             try { await engine.InitializeAsync(); }
             catch { }
+        }
+
+        // Kick off model fetch for any engine already Running after init
+        foreach (var engine in _engineRegistry.Engines)
+        {
+            if (engine.State != EngineState.Running) continue;
+            var isCliProxy = string.Equals(engine.Definition.Id, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase);
+            if (isCliProxy)
+            {
+                _cliProxyModelFetchCts = new CancellationTokenSource();
+                _ = _modelFetch.FetchAndApplyAsync(CliProxyModelGroups, engine.Port, engine.Definition.Id, _cliProxyModelFetchCts.Token);
+            }
+            else
+            {
+                _perplexityModelFetchCts = new CancellationTokenSource();
+                _ = _modelFetch.FetchAndApplyAsync(PerplexityModelGroups, engine.Port, engine.Definition.Id, _perplexityModelFetchCts.Token);
+            }
         }
 
         RefreshFocusedEngineState();
@@ -1569,6 +1594,10 @@ public partial class MainWindowViewModel : ViewModelBase
             }
         ApplyModelFilter();
         OnPropertyChanged(nameof(HasSelectableModels));
+        OnPropertyChanged(nameof(HasCliProxySelectableModels));
+        OnPropertyChanged(nameof(HasPerplexitySelectableModels));
+        OnPropertyChanged(nameof(CliProxySelectableModels));
+        OnPropertyChanged(nameof(PerplexitySelectableModels));
         OnPropertyChanged(nameof(ModelsExpanderLabel));
         OnPropertyChanged(nameof(AllVisibleModelsSelected));
         if (IsAgentConfigManualMode && ShowAgentConfigDialog && !AgentConfigHasResult)
