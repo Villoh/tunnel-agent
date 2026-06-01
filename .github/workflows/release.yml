@@ -249,7 +249,7 @@ jobs:
 
           awk "/^## \\[$VERSION\\]/,/^## \\[/" CHANGELOG.md \
             | sed '1d;$d' \
-            | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' > /tmp/changelog_section.md
+            | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' > changelog_section.md
 
           previous_tag=$(git tag --sort=-v:refname | grep -v "^${TAG}$" | head -n 1 || true)
           range=""
@@ -270,7 +270,7 @@ jobs:
             echo ""
             echo "---"
             echo ""
-            cat /tmp/changelog_section.md
+            cat changelog_section.md
             echo ""
             echo "### Contributors"
             echo ""
@@ -279,7 +279,7 @@ jobs:
             if [ -n "$previous_tag" ]; then
               echo "**Full Changelog**: https://github.com/${REPO}/compare/${previous_tag}...${TAG}"
             fi
-          } > /tmp/release_body.md
+          } > release_body.md
 
       # ── Publish GitHub Release ────────────────────────────────────────────
       - name: Create GitHub Release
@@ -291,7 +291,7 @@ jobs:
           prerelease: ${{ steps.version.outputs.is_prerelease == 'true' }}
           generate_release_notes: true
           append_body: true
-          body_path: /tmp/release_body.md
+          body_path: release_body.md
           files: |
             artifacts/velopack/*.exe
             artifacts/velopack/*.nupkg
