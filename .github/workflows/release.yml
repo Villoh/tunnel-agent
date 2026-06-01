@@ -264,8 +264,11 @@ jobs:
           SEMVER: ${{ steps.version.outputs.semver }}
           REPO: ${{ github.repository }}
         run: |
-          current=$(gh release view "$TAG" --repo "$REPO" --json body -q .body)
-          printf '## Installation\n\n**Fresh install:** download and run `TunnelAgent-%s-win-Setup.exe`.\n\n**Requirements:** Windows 10 or later.\n\n> Existing installations update automatically — no manual download needed.\n\n---\n\n%s' "$SEMVER" "$current" > /tmp/release_body.md
+          # Generate auto release notes via GitHub API
+          generated=$(gh api repos/$REPO/releases/generate-notes \
+            -f tag_name="$TAG" \
+            --jq .body)
+          printf '## Installation\n\n**Fresh install:** download and run `TunnelAgent-%s-win-Setup.exe`.\n\n**Requirements:** Windows 10 or later.\n\n> Existing installations update automatically — no manual download needed.\n\n---\n\n%s' "$SEMVER" "$generated" > /tmp/release_body.md
           gh release edit "$TAG" --repo "$REPO" --notes-file /tmp/release_body.md
 
       # ── Notify Scoop bucket (stable releases only) ────────────────────────
