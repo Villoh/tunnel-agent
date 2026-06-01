@@ -66,6 +66,17 @@ public sealed class AgentConfigurationService
             };
             return new[] { new RawConfigPreview("models.json", configPath, preview.ToJsonString(new JsonSerializerOptions { WriteIndented = true })) };
         }
+        if (agent.Id == "opencode" && modelEntries is { Count: > 0 })
+        {
+            var modelInfoMap = await BuildModelInfoMapAsync(modelEntries.Select(m => m.Id).ToList(), ct).ConfigureAwait(false);
+            var configPath = ExpandPath("~/.config/opencode/opencode.json");
+            var preview = new JsonObject
+            {
+                ["$schema"]  = "https://opencode.ai/config.json",
+                ["provider"] = BuildOpenCodeProvidersBlock(modelEntries, modelInfoMap)
+            };
+            return new[] { new RawConfigPreview("opencode.json", configPath, preview.ToJsonString(new JsonSerializerOptions { WriteIndented = true })) };
+        }
         return GenerateRaw(agent, proxyBaseUrl, apiKey, models, modelEntries);
     }
 
@@ -76,6 +87,8 @@ public sealed class AgentConfigurationService
         {
             if (agent.Id == "pi")
                 return await ApplyPiAsync(remove: false, modelEntries, ct).ConfigureAwait(false);
+            if (agent.Id == "opencode")
+                return await ApplyOpenCodeAsync(proxyBaseUrl, apiKey, remove: false, modelEntries, ct).ConfigureAwait(false);
             return WriteConfigSync(agent, proxyBaseUrl, apiKey, remove: false, models, modelEntries);
         }
         catch (Exception ex)
@@ -120,7 +133,7 @@ public sealed class AgentConfigurationService
                     "Gemini CLI uses environment variables. Copy the shell export and add it to your shell profile.",
                     raw: new[] { EnvExportRaw("gemini-cli", GeminiEnv(proxyBaseUrl, apiKey)) }),
                 "amp"          => ApplyAmp(proxyBaseUrl, apiKey, remove),
-                "opencode"     => ApplyOpenCode(proxyBaseUrl, apiKey, remove, models),
+                "opencode"     => AgentConfigApplyResult.Failure("OpenCode requires async apply."),
                 "factory-droid"=> ApplyFactoryDroid(proxyBaseUrl, apiKey, remove, modelEntries),
                 "cursor-agent" => AgentConfigApplyResult.Ok(
                     "Cursor Agent uses environment variables. Copy the shell export and add it to your shell profile.",
@@ -369,7 +382,55 @@ public sealed class AgentConfigurationService
 
     // ── OpenCode ──────────────────────────────────────────────────────────────
 
-    private static AgentConfigApplyResult ApplyOpenCode(string proxyBaseUrl, string apiKey, bool remove, IReadOnlyList<string>? models)
+    private const string OpenCodeCliProxyProviderKey   = "tunnel-agent-cliproxy";
+    private const string OpenCodePerplexityProviderKey = "tunnel-agent-perplexity";
+
+    private static JsonObject BuildOpenCodeProvidersBlock(
+        IReadOnlyList<ModelEntry> entries,
+        Dictionary<string, OpenRouterContextService.ModelInfo> modelInfoMap)
+    {
+        var cliproxy   = entries.Where(m => !IsPerplexityEntry(m)).ToList();
+        var perplexity = entries.Where(IsPerplexityEntry).ToList();
+        var providers  = new JsonObject();
+        if (cliproxy.Count > 0)
+            providers[OpenCodeCliProxyProviderKey]   = BuildOpenCodeProviderBlock(cliproxy, modelInfoMap);
+        if (perplexity.Count > 0)
+            providers[OpenCodePerplexityProviderKey] = BuildOpenCodeProviderBlock(perplexity, modelInfoMap);
+        return providers;
+    }
+
+    private static JsonObject BuildOpenCodeProviderBlock(
+        IReadOnlyList<ModelEntry> entries,
+        Dictionary<string, OpenRouterContextService.ModelInfo> modelInfoMap)
+    {
+        var first   = entries[0];
+        var options = new JsonObject
+        {
+            ["baseURL"]      = !string.IsNullOrEmpty(first.EngineBaseUrl) ? first.EngineBaseUrl : (string?)null,
+            ["litellmProxy"] = true
+        };
+        options["apiKey"] = HasApiKey(first.ApiKey) ? first.ApiKey : "no-key";
+
+        var modelsObj = new JsonObject();
+        foreach (var m in entries)
+        {
+            var modelEntry = new JsonObject();
+            if (!string.IsNullOrEmpty(m.DisplayName))
+                modelEntry["name"] = m.DisplayName;
+            modelsObj[m.Id] = modelEntry;
+        }
+
+        return new JsonObject
+        {
+            ["name"]    = "Tunnel Agent",
+            ["npm"]     = "@ai-sdk/openai-compatible",
+            ["options"] = options,
+            ["models"]  = modelsObj
+        };
+    }
+
+    private static async Task<AgentConfigApplyResult> ApplyOpenCodeAsync(
+        string proxyBaseUrl, string apiKey, bool remove, IReadOnlyList<ModelEntry>? modelEntries, CancellationToken ct)
     {
         var configPath = ExpandPath("~/.config/opencode/opencode.json");
         var dir = Path.GetDirectoryName(configPath)!;
@@ -397,62 +458,47 @@ public sealed class AgentConfigurationService
 
         if (remove)
         {
-            providers.Remove("tunnel-agent");
+            providers.Remove(OpenCodeCliProxyProviderKey);
+            providers.Remove(OpenCodePerplexityProviderKey);
             if (providers.Count == 0) root.Remove("provider");
         }
-        else
+        else if (modelEntries is { Count: > 0 })
         {
-            providers["tunnel-agent"] = BuildOpenCodeProvider(proxyBaseUrl, apiKey, models);
+            var modelInfoMap = await BuildModelInfoMapAsync(modelEntries.Select(m => m.Id), ct).ConfigureAwait(false);
+            foreach (var kvp in BuildOpenCodeProvidersBlock(modelEntries, modelInfoMap))
+                providers[kvp.Key] = kvp.Value?.DeepClone();
         }
 
         File.WriteAllText(configPath,
             root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Utf8NoBom);
 
-        var modelCount = models?.Count ?? 0;
+        var modelCount = modelEntries?.Count ?? 0;
         var msg = remove
-            ? "Removed Tunnel Agent provider. OpenCode will use its default providers."
+            ? "Removed Tunnel Agent providers. OpenCode will use its default providers."
             : $"Configuration written to {configPath}. {(modelCount > 0 ? $"{modelCount} model(s) registered. " : "")}Restart OpenCode for changes to take effect.";
         return AgentConfigApplyResult.Ok(msg, configPath, backupPath);
-    }
-
-    private static JsonObject BuildOpenCodeProvider(string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models)
-    {
-        var options = new JsonObject
-        {
-            ["baseURL"]     = proxyBaseUrl,
-            ["litellmProxy"] = true
-        };
-        options["apiKey"] = HasApiKey(apiKey) ? apiKey : "no-key";
-        var provider = new JsonObject
-        {
-            ["name"] = "Tunnel Agent",
-            ["npm"]  = "@ai-sdk/openai",
-            ["options"] = options
-        };
-
-        if (models is { Count: > 0 })
-        {
-            var modelsObj = new JsonObject();
-            foreach (var id in models)
-            {
-                var display = string.Join(" ",
-                    id.Split('-', '_').Select(w => w.Length > 0 ? char.ToUpper(w[0]) + w[1..] : w));
-                modelsObj[id] = new JsonObject { ["name"] = display };
-            }
-            provider["models"] = modelsObj;
-        }
-
-        return provider;
     }
 
     private static RawConfigPreview OpenCodeRaw(string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models)
     {
         var configPath = ExpandPath("~/.config/opencode/opencode.json");
-        var provider   = BuildOpenCodeProvider(proxyBaseUrl, apiKey, models);
         var preview    = new JsonObject
         {
             ["$schema"]  = "https://opencode.ai/config.json",
-            ["provider"] = new JsonObject { ["tunnel-agent"] = provider }
+            ["provider"] = new JsonObject
+            {
+                [OpenCodeCliProxyProviderKey] = new JsonObject
+                {
+                    ["name"]    = "Tunnel Agent",
+                    ["npm"]     = "@ai-sdk/openai-compatible",
+                    ["options"] = new JsonObject
+                    {
+                        ["baseURL"]      = proxyBaseUrl,
+                        ["litellmProxy"] = true,
+                        ["apiKey"]       = HasApiKey(apiKey) ? apiKey : "no-key"
+                    }
+                }
+            }
         };
         return new RawConfigPreview("opencode.json", configPath,
             preview.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
