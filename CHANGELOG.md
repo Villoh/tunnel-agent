@@ -9,11 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Perplexity models in agent config**: when the Perplexity engine is running, its models now appear in the agent configuration dialog under a separate "PERPLEXITY" section alongside the "CLIPROXYAPI" section.
+- **Perplexity models in agent config**: when the Perplexity engine is running, its models now appear in the agent configuration dialog alongside CLIProxy models.
 
 ### Changed
 
 - **Dual engine model fetch**: `ActiveEngine`/`ActiveEngineId` removed — each engine (`CliProxy`, `Perplexity`) now maintains its own independent model collection and fetch lifecycle. Both engines can be running and serving models simultaneously.
+- **Providers model list**: now shows only the models of the currently selected engine tab instead of a combined list.
+- Models expander label no longer uses an emdash (`Models N of N selected`).
+
+### Fixed
+
+- Models in agent config dialog were empty on open if engines were already running before the dialog was opened.
 
 ## [0.4.4] - 2026-06-01
 
