@@ -264,10 +264,19 @@ jobs:
           SEMVER: ${{ steps.version.outputs.semver }}
           REPO: ${{ github.repository }}
         run: |
+          # Find the previous tag to generate proper What's Changed
+          prev_tag=$(gh api repos/$REPO/releases --jq '[.[] | select(.tag_name != "'"$TAG"'") | .tag_name] | first')
           # Generate auto release notes via GitHub API
-          generated=$(gh api repos/$REPO/releases/generate-notes \
-            -f tag_name="$TAG" \
-            --jq .body)
+          if [ -n "$prev_tag" ]; then
+            generated=$(gh api repos/$REPO/releases/generate-notes \
+              -f tag_name="$TAG" \
+              -f previous_tag_name="$prev_tag" \
+              --jq .body)
+          else
+            generated=$(gh api repos/$REPO/releases/generate-notes \
+              -f tag_name="$TAG" \
+              --jq .body)
+          fi
           printf '## Installation\n\n**Fresh install:** download and run `TunnelAgent-%s-win-Setup.exe`.\n\n**Requirements:** Windows 10 or later.\n\n> Existing installations update automatically — no manual download needed.\n\n---\n\n%s' "$SEMVER" "$generated" > /tmp/release_body.md
           gh release edit "$TAG" --repo "$REPO" --notes-file /tmp/release_body.md
 
