@@ -250,7 +250,9 @@ jobs:
             artifacts/velopack/*.exe
             artifacts/velopack/*.nupkg
             artifacts/velopack/*.zip
-            artifacts/velopack/RELEASES-win
+            artifacts/velopack/RELEASES
+            artifacts/velopack/releases.win.json
+            artifacts/velopack/assets.win.json
             artifacts/velopack/latest.json
 
       # ── Prepend installation instructions to release body ────────────────
