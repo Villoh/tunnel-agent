@@ -283,7 +283,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool ShowSingleAgentSummary        => !IsAgentConfigBulkMode && AgentConfigTarget != null;
     public bool AgentConfigSupportsModelSelection =>
         IsAgentConfigBulkMode ||
-        AgentConfigTarget?.Id is not ("codex");
+        AgentConfigTarget?.Id is not ("codex" or "claude-code");
     public bool HasSelectableModels           => SelectableModels.Count > 0;
     public int VisibleSelectableModelCount    => SelectableModels.Count(m => m.IsVisible);
     public bool HasVisibleSelectableModels    => VisibleSelectableModelCount > 0;

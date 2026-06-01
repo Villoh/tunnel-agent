@@ -193,13 +193,14 @@ public sealed class AgentConfigurationService
             env.Remove("ANTHROPIC_DEFAULT_OPUS_MODEL");
             env.Remove("ANTHROPIC_DEFAULT_SONNET_MODEL");
             env.Remove("ANTHROPIC_DEFAULT_HAIKU_MODEL");
+            env.Remove("CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY");
             if (env.Count == 0) root.Remove("env");
         }
         else
         {
-            env["ANTHROPIC_BASE_URL"] = proxyBaseUrl;
-            if (HasApiKey(apiKey)) env["ANTHROPIC_AUTH_TOKEN"] = apiKey;
-            else env.Remove("ANTHROPIC_AUTH_TOKEN");
+            env["ANTHROPIC_BASE_URL"]                        = StripV1(proxyBaseUrl);
+            env["ANTHROPIC_AUTH_TOKEN"]                      = HasApiKey(apiKey) ? apiKey : "no-key";
+            env["CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY"] = "1";
         }
 
         // Write back with indented JSON
@@ -216,8 +217,12 @@ public sealed class AgentConfigurationService
     private static RawConfigPreview ClaudeCodeRaw(string proxyBaseUrl, string apiKey)
     {
         var configPath = ExpandPath("~/.claude/settings.json");
-        var env = new JsonObject { ["ANTHROPIC_BASE_URL"] = proxyBaseUrl };
-        if (HasApiKey(apiKey)) env["ANTHROPIC_AUTH_TOKEN"] = apiKey;
+        var env = new JsonObject
+        {
+            ["ANTHROPIC_BASE_URL"]                       = StripV1(proxyBaseUrl),
+            ["ANTHROPIC_AUTH_TOKEN"]                     = HasApiKey(apiKey) ? apiKey : "no-key",
+            ["CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY"] = "1"
+        };
         var content = new JsonObject { ["env"] = env }
             .ToJsonString(new JsonSerializerOptions { WriteIndented = true });
         return new RawConfigPreview("settings.json", configPath, content);

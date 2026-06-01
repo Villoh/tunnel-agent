@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.5] - 2026-06-01
+
 ### Added
 
 - **Factory Droid `displayName`**: resolved from OpenRouter `name` field (provider prefix stripped), with local formatting fallback. All models include `(Tunnel Agent)` suffix; Perplexity models include `(Tunnel Agent - Perplexity)`.
@@ -16,20 +18,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`TUNNEL_AGENT_PERPLEXITY_TOKEN` env var**: automatically set/updated/removed in user environment variables when a Perplexity account is added, set as default, or removed. Factory Droid config uses `${TUNNEL_AGENT_PERPLEXITY_TOKEN}` instead of the raw session token.
 - **`TUNNEL_AGENT_CLIPROXY_API_KEY` env var**: automatically set/updated/removed when the default CLIProxy API key changes. Factory Droid config uses `${TUNNEL_AGENT_CLIPROXY_API_KEY}` instead of the raw key.
 - On Windows, `WM_SETTINGCHANGE` is broadcast after env var changes so newly spawned processes pick up the new values without logoff.
+- **Claude Code**: `ANTHROPIC_AUTH_TOKEN` and `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` written to `~/.claude/settings.json` env block. `ANTHROPIC_BASE_URL` no longer includes `/v1`.
 
 ### Changed
 
 - **Dual engine model fetch**: `ActiveEngine`/`ActiveEngineId` removed — each engine (`CliProxy`, `Perplexity`) now maintains its own independent model collection and fetch lifecycle. Both engines can be running and serving models simultaneously.
 - **Providers model list**: now shows only the models of the currently selected engine tab instead of a combined list.
 - **Factory Droid Perplexity models**: now use the correct Perplexity engine endpoint (`http://127.0.0.1:8327/v1`) instead of the CLIProxy endpoint.
-- Models expander label no longer uses an emdash (`Models N of N selected`).
-
-### Changed
-
 - **Codex CLI config**: writes `config.toml` with `model_provider = "cliproxyapi"` and `wire_api = "responses"`, plus `auth.json` with `auth_mode: "apikey"` and `OPENAI_API_KEY`. Both files shown in the apply result.
 - **Codex CLI**: model selector hidden in agent config dialog (Codex only supports one model at a time, selected at runtime).
-- **Claude Code config**: writes `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` env vars to `~/.claude/settings.json`.
-- **OpenCode config**: split into `tunnel-agent-cliproxy` and `tunnel-agent-perplexity` providers using `@ai-sdk/openai-compatible`, `litellmProxy: true`, env var apiKey refs, and per-model `name`.
+- **Claude Code**: model selector hidden in agent config dialog (uses alias-based model selection at runtime).
+- Models expander label no longer uses an emdash (`Models N of N selected`).
 
 ### Fixed
 
