@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Factory Droid `displayName`**: resolved from OpenRouter `name` field (provider prefix stripped), with local formatting fallback. All models include `(Tunnel Agent)` suffix; Perplexity models include `(Tunnel Agent - Perplexity)`.
+- **Pi two-provider split**: `tunnel-agent-cliproxy` and `tunnel-agent-perplexity` providers written to `models.json` with correct `baseUrl`, `apiKey` (env var refs), and per-model `name`, `contextWindow`, and `input` fields.
 - **Perplexity models in agent config**: when the Perplexity engine is running, its models now appear in the agent configuration dialog alongside CLIProxy models.
 - **`TUNNEL_AGENT_PERPLEXITY_TOKEN` env var**: automatically set/updated/removed in user environment variables when a Perplexity account is added, set as default, or removed. Factory Droid config uses `${TUNNEL_AGENT_PERPLEXITY_TOKEN}` instead of the raw session token.
 - **`TUNNEL_AGENT_CLIPROXY_API_KEY` env var**: automatically set/updated/removed when the default CLIProxy API key changes. Factory Droid config uses `${TUNNEL_AGENT_CLIPROXY_API_KEY}` instead of the raw key.

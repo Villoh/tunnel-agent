@@ -17,7 +17,7 @@ public sealed class OpenRouterContextService
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(10) };
     private const string Url = "https://openrouter.ai/api/v1/models";
 
-    public sealed record ModelInfo(int ContextLength, bool SupportsImage);
+    public sealed record ModelInfo(int ContextLength, bool SupportsImage, string? Name = null);
 
     private Dictionary<string, ModelInfo>? _cache;
     private readonly SemaphoreSlim _lock = new(1, 1);
@@ -36,15 +36,25 @@ public sealed class OpenRouterContextService
         var map = await GetOrFetchAsync(ct).ConfigureAwait(false);
         if (map is null) return null;
 
-        foreach (var needle in new[] { Normalize(modelId), Normalize(StripDateSuffix(modelId)) })
+        var bare = modelId.Contains('/') ? modelId[(modelId.LastIndexOf('/') + 1)..] : modelId;
+
+        // Candidates: full id and bare name, each with and without date suffix, normalized dots->dashes
+        var candidates = new[]
         {
-            foreach (var (key, info) in map)
-            {
-                var bare = key.Contains('/') ? key[(key.IndexOf('/') + 1)..] : key;
-                if (bare.StartsWith('~')) continue;
-                if (Normalize(bare).Equals(needle, StringComparison.OrdinalIgnoreCase))
-                    return info;
-            }
+            Normalize(modelId),
+            Normalize(StripDateSuffix(modelId)),
+            Normalize(bare),
+            Normalize(StripDateSuffix(bare)),
+        };
+
+        foreach (var (key, info) in map)
+        {
+            if (key.StartsWith('~')) continue;
+            var keyNorm     = Normalize(key);
+            var keyBareNorm = key.Contains('/') ? Normalize(key[(key.LastIndexOf('/') + 1)..]) : keyNorm;
+            if (candidates.Any(c => c.Equals(keyNorm, StringComparison.OrdinalIgnoreCase) ||
+                                    c.Equals(keyBareNorm, StringComparison.OrdinalIgnoreCase)))
+                return info;
         }
 
         return null;
@@ -84,7 +94,8 @@ public sealed class OpenRouterContextService
                 if (id is null) continue;
                 var modalities  = item?["architecture"]?["input_modalities"]?.AsArray();
                 var supportsImg = modalities?.Any(m => m?.GetValue<string>() == "image") ?? false;
-                map[id] = new ModelInfo(ctx, supportsImg);
+                var name = item?["name"]?.GetValue<string>();
+                map[id] = new ModelInfo(ctx, supportsImg, name);
             }
 
             _cache = map;

@@ -1521,7 +1521,7 @@ public partial class MainWindowViewModel : ViewModelBase
         IsApplyingAgentConfig = true;
         AgentConfigResult = null;
         var models       = GetSelectedModels();
-        var modelEntries = GetSelectedModelEntries();
+        var modelEntries = await GetSelectedModelEntriesAsync().ConfigureAwait(false);
         var itemResults  = new List<AgentConfigItemResult>();
         try
         {
@@ -1567,16 +1567,53 @@ public partial class MainWindowViewModel : ViewModelBase
     private List<string> GetSelectedModels() =>
         SelectableModels.Where(m => m.IsSelected).Select(m => m.Name).ToList();
 
-    private List<TunnelAgent.Services.ModelEntry> GetSelectedModelEntries() =>
-        SelectableModels.Where(m => m.IsSelected).Select(m =>
+    private async Task<List<TunnelAgent.Services.ModelEntry>> GetSelectedModelEntriesAsync()
+    {
+        var selected = SelectableModels.Where(m => m.IsSelected).ToList();
+        var entries = new List<TunnelAgent.Services.ModelEntry>(selected.Count);
+        foreach (var m in selected)
         {
             var isPerplexity = string.Equals(m.EngineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase);
             var engineBaseUrl = isPerplexity ? PerplexityEndpointUrl + "/v1" : CliProxyEndpointUrl + "/v1";
             var apiKey = isPerplexity
                 ? $"${{{TunnelAgent.Services.PerplexityAccountCatalogService.EnvVarName}}}"
                 : "${TUNNEL_AGENT_CLIPROXY_API_KEY}";
-            return new TunnelAgent.Services.ModelEntry(m.Name, m.Provider, engineBaseUrl, apiKey);
-        }).ToList();
+            var displayName = await ResolveDisplayNameAsync(m.Name, isPerplexity);
+            entries.Add(new TunnelAgent.Services.ModelEntry(m.Name, m.Provider, engineBaseUrl, apiKey, displayName));
+        }
+        return entries;
+    }
+
+    private static async Task<string> ResolveDisplayNameAsync(string modelId, bool isPerplexity)
+    {
+        var info = await TunnelAgent.Services.OpenRouterContextService.Instance
+            .GetModelInfoAsync(modelId).ConfigureAwait(false);
+        var name = info?.Name is string n ? StripProviderPrefix(n) : FormatModelId(modelId);
+        return isPerplexity ? $"{name} (Tunnel Agent - Perplexity)" : $"{name} (Tunnel Agent)";
+    }
+
+    private static string StripProviderPrefix(string name)
+    {
+        var colon = name.IndexOf(':');
+        return colon >= 0 ? name[(colon + 1)..].TrimStart() : name;
+    }
+
+    private static readonly HashSet<string> _uppercaseWords =
+        new(StringComparer.OrdinalIgnoreCase) { "gpt", "ai" };
+
+    private static string FormatModelId(string modelId)
+    {
+        // Strip provider prefix (e.g. "anthropic/claude-opus-4.7" -> "claude-opus-4.7")
+        var bare = modelId.Contains('/') ? modelId[(modelId.LastIndexOf('/') + 1)..] : modelId;
+        // Strip 8-digit date suffix (e.g. "claude-3-5-haiku-20241022" -> "claude-3-5-haiku")
+        var idx = bare.Length - 8;
+        if (idx > 1 && bare[idx - 1] == '-' && bare[idx..].All(char.IsDigit))
+            bare = bare[..(idx - 1)];
+        // Preserve dots as version separators, split only on dashes, capitalize each word
+        var words = bare.Split('-', StringSplitOptions.RemoveEmptyEntries)
+            .Select(w => _uppercaseWords.Contains(w) ? w.ToUpperInvariant() : char.ToUpperInvariant(w[0]) + w[1..]);
+        return string.Join(' ', words);
+    }
 
     public IEnumerable<SelectableModelViewModel> CliProxySelectableModels  => SelectableModels.Where(m => m.EngineId == EngineCatalog.CliProxyApi.Id);
     public IEnumerable<SelectableModelViewModel> PerplexitySelectableModels => SelectableModels.Where(m => m.EngineId == EngineCatalog.PerplexityWebUiScraper.Id);
@@ -1638,7 +1675,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         var targets      = GetAgentConfigTargets();
         var models       = GetSelectedModels();
-        var modelEntries = GetSelectedModelEntries();
+        var modelEntries = await GetSelectedModelEntriesAsync().ConfigureAwait(false);
         var previews     = new List<RawConfigPreview>();
         foreach (var a in targets)
             previews.AddRange(await _agentConfiguration.PreviewAsync(FindDef(a.Id), AgentProxyBaseUrl, CurrentAgentApiKey, models, modelEntries).ConfigureAwait(false));

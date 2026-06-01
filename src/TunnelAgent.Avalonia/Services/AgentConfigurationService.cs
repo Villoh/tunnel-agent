@@ -36,7 +36,7 @@ public sealed record AgentConfigApplyResult(
         new(true, configPath, backupPath, null, instructions, raw ?? Array.Empty<RawConfigPreview>());
 }
 
-public sealed record ModelEntry(string Id, string OwnedBy, string EngineBaseUrl = "", string ApiKey = "");
+public sealed record ModelEntry(string Id, string OwnedBy, string EngineBaseUrl = "", string ApiKey = "", string DisplayName = "");
 
 // ── Service ───────────────────────────────────────────────────────────────────
 
@@ -56,18 +56,13 @@ public sealed class AgentConfigurationService
     /// <summary>Async preview — resolves context windows for Pi.</summary>
     public async Task<IReadOnlyList<RawConfigPreview>> PreviewAsync(AgentDefinition agent, string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models = null, IReadOnlyList<ModelEntry>? modelEntries = null, CancellationToken ct = default)
     {
-        if (agent.Id == "pi" && models is { Count: > 0 })
+        if (agent.Id == "pi" && modelEntries is { Count: > 0 })
         {
-            var modelInfoMap = new Dictionary<string, OpenRouterContextService.ModelInfo>(StringComparer.OrdinalIgnoreCase);
-            foreach (var id in models)
-            {
-                var info = await OpenRouterContextService.Instance.GetModelInfoAsync(id, ct).ConfigureAwait(false);
-                if (info is not null) modelInfoMap[id] = info;
-            }
+            var modelInfoMap = await BuildModelInfoMapAsync(modelEntries.Select(m => m.Id).ToList(), ct).ConfigureAwait(false);
             var configPath = ExpandPath("~/.pi/agent/models.json");
-            var preview = new System.Text.Json.Nodes.JsonObject
+            var preview = new JsonObject
             {
-                ["providers"] = new System.Text.Json.Nodes.JsonObject { ["tunnel-agent"] = BuildPiProviderBlock(proxyBaseUrl, apiKey, models, modelInfoMap) }
+                ["providers"] = BuildPiProvidersBlock(modelEntries, modelInfoMap)
             };
             return new[] { new RawConfigPreview("models.json", configPath, preview.ToJsonString(new JsonSerializerOptions { WriteIndented = true })) };
         }
@@ -80,7 +75,7 @@ public sealed class AgentConfigurationService
         try
         {
             if (agent.Id == "pi")
-                return await ApplyPiAsync(proxyBaseUrl, apiKey, remove: false, models, ct).ConfigureAwait(false);
+                return await ApplyPiAsync(remove: false, modelEntries, ct).ConfigureAwait(false);
             return WriteConfigSync(agent, proxyBaseUrl, apiKey, remove: false, models, modelEntries);
         }
         catch (Exception ex)
@@ -465,35 +460,69 @@ public sealed class AgentConfigurationService
 
     // ── Pi ──────────────────────────────────────────────────────────────
 
-    private static JsonObject BuildPiProviderBlock(string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models, Dictionary<string, OpenRouterContextService.ModelInfo>? modelInfoMap = null)
+    private const string PiCliProxyProviderKey   = "tunnel-agent-cliproxy";
+    private const string PiPerplexityProviderKey = "tunnel-agent-perplexity";
+
+    private static bool IsPerplexityEntry(ModelEntry m) =>
+        !string.IsNullOrEmpty(m.EngineBaseUrl) && m.EngineBaseUrl.Contains(":8327", StringComparison.Ordinal);
+
+    private static async Task<Dictionary<string, OpenRouterContextService.ModelInfo>> BuildModelInfoMapAsync(
+        IEnumerable<string> modelIds, CancellationToken ct)
     {
+        var map = new Dictionary<string, OpenRouterContextService.ModelInfo>(StringComparer.OrdinalIgnoreCase);
+        foreach (var id in modelIds)
+        {
+            var info = await OpenRouterContextService.Instance.GetModelInfoAsync(id, ct).ConfigureAwait(false);
+            if (info is not null) map[id] = info;
+        }
+        return map;
+    }
+
+    private static JsonObject BuildPiProvidersBlock(
+        IReadOnlyList<ModelEntry> entries,
+        Dictionary<string, OpenRouterContextService.ModelInfo> modelInfoMap)
+    {
+        var cliproxy   = entries.Where(m => !IsPerplexityEntry(m)).ToList();
+        var perplexity = entries.Where(IsPerplexityEntry).ToList();
+        var providers  = new JsonObject();
+        if (cliproxy.Count > 0)
+            providers[PiCliProxyProviderKey]   = BuildPiProviderBlock(cliproxy, modelInfoMap);
+        if (perplexity.Count > 0)
+            providers[PiPerplexityProviderKey] = BuildPiProviderBlock(perplexity, modelInfoMap);
+        return providers;
+    }
+
+    private static JsonObject BuildPiProviderBlock(
+        IReadOnlyList<ModelEntry> entries,
+        Dictionary<string, OpenRouterContextService.ModelInfo> modelInfoMap)
+    {
+        var first    = entries[0];
         var provider = new JsonObject
         {
-            ["baseUrl"] = proxyBaseUrl,
+            ["baseUrl"] = !string.IsNullOrEmpty(first.EngineBaseUrl) ? first.EngineBaseUrl : (string?)null,
             ["api"]     = "openai-completions"
         };
-        provider["apiKey"] = HasApiKey(apiKey) ? apiKey : "no-key";
-        if (models is { Count: > 0 })
-        {
-            provider["models"] = new JsonArray(
-                models.Select(id =>
+        provider["apiKey"] = HasApiKey(first.ApiKey) ? first.ApiKey : "no-key";
+        provider["models"] = new JsonArray(
+            entries.Select(m =>
+            {
+                var entry = new JsonObject { ["id"] = m.Id };
+                if (!string.IsNullOrEmpty(m.DisplayName))
+                    entry["name"] = m.DisplayName;
+                if (modelInfoMap.TryGetValue(m.Id, out var info))
                 {
-                    var entry = new JsonObject { ["id"] = id };
-                    if (modelInfoMap is not null && modelInfoMap.TryGetValue(id, out var info))
-                    {
-                        if (info.ContextLength > 0)
-                            entry["contextWindow"] = info.ContextLength;
-                        entry["input"] = new JsonArray(info.SupportsImage
-                            ? new JsonNode[] { "text", "image" }
-                            : new JsonNode[] { "text" });
-                    }
-                    return (JsonNode?)entry;
-                }).ToArray());
-        }
+                    if (info.ContextLength > 0)
+                        entry["contextWindow"] = info.ContextLength;
+                    entry["input"] = new JsonArray(info.SupportsImage
+                        ? new JsonNode[] { "text", "image" }
+                        : new JsonNode[] { "text" });
+                }
+                return (JsonNode?)entry;
+            }).ToArray());
         return provider;
     }
 
-    private static async Task<AgentConfigApplyResult> ApplyPiAsync(string proxyBaseUrl, string apiKey, bool remove, IReadOnlyList<string>? models, CancellationToken ct)
+    private static async Task<AgentConfigApplyResult> ApplyPiAsync(bool remove, IReadOnlyList<ModelEntry>? modelEntries, CancellationToken ct)
     {
         var configPath = ExpandPath("~/.pi/agent/models.json");
         var dir        = Path.GetDirectoryName(configPath)!;
@@ -518,30 +547,23 @@ public sealed class AgentConfigurationService
 
         if (remove)
         {
-            providers.Remove("tunnel-agent");
+            providers.Remove(PiCliProxyProviderKey);
+            providers.Remove(PiPerplexityProviderKey);
             if (providers.Count == 0) root.Remove("providers");
         }
-        else
+        else if (modelEntries is { Count: > 0 })
         {
-            Dictionary<string, OpenRouterContextService.ModelInfo>? modelInfoMap = null;
-            if (models is { Count: > 0 })
-            {
-                modelInfoMap = new Dictionary<string, OpenRouterContextService.ModelInfo>(StringComparer.OrdinalIgnoreCase);
-                foreach (var id in models)
-                {
-                    var info = await OpenRouterContextService.Instance.GetModelInfoAsync(id, ct).ConfigureAwait(false);
-                    if (info is not null) modelInfoMap[id] = info;
-                }
-            }
-            providers["tunnel-agent"] = BuildPiProviderBlock(proxyBaseUrl, apiKey, models, modelInfoMap);
+            var modelInfoMap = await BuildModelInfoMapAsync(modelEntries.Select(m => m.Id), ct).ConfigureAwait(false);
+            foreach (var kvp in BuildPiProvidersBlock(modelEntries, modelInfoMap))
+                providers[kvp.Key] = kvp.Value?.DeepClone();
         }
 
         File.WriteAllText(configPath,
             root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Utf8NoBom);
 
-        var modelCount = models?.Count ?? 0;
+        var modelCount = modelEntries?.Count ?? 0;
         var msg = remove
-            ? "Removed tunnel-agent provider from Pi models.json."
+            ? "Removed Tunnel Agent providers from Pi models.json."
             : $"Configuration written to {configPath}.{(modelCount > 0 ? $" {modelCount} model(s) registered." : "")} Restart Pi for changes to take effect.";
         return AgentConfigApplyResult.Ok(msg, configPath, backupPath);
     }
@@ -551,7 +573,12 @@ public sealed class AgentConfigurationService
         var configPath = ExpandPath("~/.pi/agent/models.json");
         var preview    = new JsonObject
         {
-            ["providers"] = new JsonObject { ["tunnel-agent"] = BuildPiProviderBlock(proxyBaseUrl, apiKey, models) }
+            ["providers"] = new JsonObject { [PiCliProxyProviderKey] = new JsonObject
+            {
+                ["baseUrl"] = proxyBaseUrl,
+                ["api"]     = "openai-completions",
+                ["apiKey"]  = HasApiKey(apiKey) ? apiKey : "no-key"
+            }}
         };
         return new RawConfigPreview("models.json", configPath,
             preview.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
@@ -628,7 +655,7 @@ public sealed class AgentConfigurationService
         var entry = new JsonObject
         {
             ["model"]       = model.Id,
-            ["displayName"] = model.Id,
+            ["displayName"] = !string.IsNullOrEmpty(model.DisplayName) ? model.DisplayName : model.Id,
             ["baseUrl"]     = baseUrl,
             ["provider"]    = provider
         };
