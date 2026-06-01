@@ -160,6 +160,10 @@ jobs:
             --outputDir artifacts/velopack `
             --noPortable
 
+      - name: List Velopack artifacts
+        shell: pwsh
+        run: Get-ChildItem artifacts/velopack | Select-Object Name, Length
+
       # ── Generate latest.json ──────────────────────────────────────────────
       - name: Generate latest.json
         shell: pwsh
