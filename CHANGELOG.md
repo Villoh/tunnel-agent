@@ -24,6 +24,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Factory Droid Perplexity models**: now use the correct Perplexity engine endpoint (`http://127.0.0.1:8327/v1`) instead of the CLIProxy endpoint.
 - Models expander label no longer uses an emdash (`Models N of N selected`).
 
+### Changed
+
+- **Codex CLI config**: writes `config.toml` with `model_provider = "cliproxyapi"` and `wire_api = "responses"`, plus `auth.json` with `auth_mode: "apikey"` and `OPENAI_API_KEY`. Both files shown in the apply result.
+- **Codex CLI**: model selector hidden in agent config dialog (Codex only supports one model at a time, selected at runtime).
+- **Claude Code config**: writes `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` env vars to `~/.claude/settings.json`.
+- **OpenCode config**: split into `tunnel-agent-cliproxy` and `tunnel-agent-perplexity` providers using `@ai-sdk/openai-compatible`, `litellmProxy: true`, env var apiKey refs, and per-model `name`.
+
 ### Fixed
 
 - Models in agent config dialog were empty on open if engines were already running before the dialog was opened.

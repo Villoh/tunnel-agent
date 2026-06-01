@@ -22,7 +22,7 @@ public sealed class AgentDetectionService : IAgentDetectionService
         var tasks = AgentCatalog.All.Select(async def =>
         {
             var binaryPath = await FindBinaryAsync(def.BinaryNames, ct).ConfigureAwait(false);
-            var configured = binaryPath != null && await CheckConfiguredAsync(def.ConfigPaths, ct).ConfigureAwait(false);
+            var configured = binaryPath != null && await IsConfiguredAsync(def, ct).ConfigureAwait(false);
             return new AgentDetectionResult(def.Id, binaryPath != null, configured, binaryPath, null);
         });
 
@@ -139,6 +139,15 @@ public sealed class AgentDetectionService : IAgentDetectionService
             if (File.Exists(full)) return full;
         }
         return null;
+    }
+
+    private static Task<bool> IsConfiguredAsync(AgentDefinition def, CancellationToken ct)
+    {
+        if (def.ConfiguredEnvVar is { } envVar)
+            return Task.FromResult(!string.IsNullOrEmpty(
+                Environment.GetEnvironmentVariable(envVar, EnvironmentVariableTarget.User) ??
+                Environment.GetEnvironmentVariable(envVar)));
+        return CheckConfiguredAsync(def.ConfigPaths, ct);
     }
 
     internal static async Task<bool> CheckConfiguredAsync(string[] configPaths, CancellationToken ct = default)

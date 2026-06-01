@@ -649,7 +649,7 @@
                                 </StackPanel>
 
                                 <!-- Models selector -->
-                                <StackPanel Spacing="4">
+                                <StackPanel Spacing="4" IsVisible="{Binding AgentConfigSupportsModelSelection}">
                                     <Button Classes="app" Command="{Binding ToggleModelsCommand}"
                                             HorizontalAlignment="Stretch" Padding="10,6">
                                         <Grid ColumnDefinitions="*,Auto">

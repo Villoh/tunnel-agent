@@ -230,11 +230,9 @@ public sealed class AgentConfigurationService
         var configPath = ExpandPath("~/.codex/config.toml");
         var authPath   = ExpandPath("~/.codex/auth.json");
         var dir        = Path.GetDirectoryName(configPath)!;
-
         if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
         var existing = File.Exists(configPath) ? File.ReadAllText(configPath) : string.Empty;
-
         string? backupPath = null;
         if (File.Exists(configPath))
         {
@@ -243,61 +241,55 @@ public sealed class AgentConfigurationService
         }
 
         var stripped = StripManagedBlock(existing);
-
         if (remove)
         {
             File.WriteAllText(configPath, stripped.Trim() + "\n", Utf8NoBom);
-        }
-        else
-        {
-            var block = BuildCodexManagedBlock(proxyBaseUrl, apiKey);
-            File.WriteAllText(configPath, stripped.Trim() + "\n\n" + block + "\n", Utf8NoBom);
-
-            if (HasApiKey(apiKey))
-            {
-                // auth.json stores the API key
-                var authJson = new JsonObject { ["OPENAI_API_KEY"] = apiKey }
-                    .ToJsonString(new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(authPath, authJson, Utf8NoBom);
-            }
+            return AgentConfigApplyResult.Ok($"Removed proxy configuration from {configPath}.", configPath, backupPath);
         }
 
-        var instructions = remove
-            ? $"Removed proxy configuration from {configPath}."
-            : $"Written {configPath} and {authPath}. Restart Codex CLI for changes to take effect.";
+        File.WriteAllText(configPath, stripped.Trim() + "\n\n" + BuildCodexManagedBlock(proxyBaseUrl) + "\n", Utf8NoBom);
 
-        return AgentConfigApplyResult.Ok(instructions, configPath, backupPath);
+        var auth = File.Exists(authPath)
+            ? JsonNode.Parse(File.ReadAllText(authPath))?.AsObject() ?? new JsonObject()
+            : new JsonObject();
+        auth["auth_mode"]      = "apikey";
+        auth["OPENAI_API_KEY"] = HasApiKey(apiKey) ? apiKey : "no-key";
+        File.WriteAllText(authPath, auth.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Utf8NoBom);
+
+        return AgentConfigApplyResult.Ok(
+            $"Written {configPath} and {authPath}. Restart Codex CLI for changes to take effect.",
+            configPath, backupPath,
+            raw: new[] { new RawConfigPreview("auth.json", authPath, auth.ToJsonString(new JsonSerializerOptions { WriteIndented = true })) });
     }
 
     private RawConfigPreview[] CodexRaw(string proxyBaseUrl, string apiKey)
     {
         var configPath = ExpandPath("~/.codex/config.toml");
         var authPath   = ExpandPath("~/.codex/auth.json");
-        var previews = new List<RawConfigPreview>
+        var authPreview = new JsonObject
         {
-            new("config.toml", configPath, BuildCodexManagedBlock(proxyBaseUrl, apiKey))
+            ["auth_mode"]      = "apikey",
+            ["OPENAI_API_KEY"] = HasApiKey(apiKey) ? apiKey : "no-key"
         };
-        if (HasApiKey(apiKey))
-            previews.Add(new RawConfigPreview("auth.json", authPath, $$"""
-{
-  "OPENAI_API_KEY": "{{apiKey}}"
-}
-"""));
-        return previews.ToArray();
+        return new[]
+        {
+            new RawConfigPreview("config.toml", configPath, BuildCodexManagedBlock(proxyBaseUrl)),
+            new RawConfigPreview("auth.json", authPath,
+                authPreview.ToJsonString(new JsonSerializerOptions { WriteIndented = true }))
+        };
     }
 
-    private string BuildCodexManagedBlock(string proxyBaseUrl, string apiKey)
+    private string BuildCodexManagedBlock(string proxyBaseUrl)
     {
         var lines = new[]
         {
             ManagedBanner,
-            "[inference]",
             "model_provider = \"cliproxyapi\"",
             string.Empty,
             "[model_providers.cliproxyapi]",
             "name = \"CLIProxyAPI (Tunnel Agent)\"",
             $"base_url = \"{EscapeToml(proxyBaseUrl)}\"",
-            HasApiKey(apiKey) ? "api" + $"_key = \"{EscapeToml(apiKey)}\"" : null,
+            "wire_api = \"responses\"",
             ManagedEnd,
         };
         return string.Join(Environment.NewLine, lines.Where(l => l is not null));

@@ -281,6 +281,9 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool ShowAgentConfigCopyButton     => !AgentConfigHasResult && IsAgentConfigManualMode;
     public bool ShowAgentConfigAgentPicker    => IsAgentConfigBulkMode;
     public bool ShowSingleAgentSummary        => !IsAgentConfigBulkMode && AgentConfigTarget != null;
+    public bool AgentConfigSupportsModelSelection =>
+        IsAgentConfigBulkMode ||
+        AgentConfigTarget?.Id is not ("codex");
     public bool HasSelectableModels           => SelectableModels.Count > 0;
     public int VisibleSelectableModelCount    => SelectableModels.Count(m => m.IsVisible);
     public bool HasVisibleSelectableModels    => VisibleSelectableModelCount > 0;
@@ -1437,6 +1440,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ShowAgentConfigDialog   = true;
         OnPropertyChanged(nameof(ShowAgentConfigAgentPicker));
         OnPropertyChanged(nameof(ShowSingleAgentSummary));
+        OnPropertyChanged(nameof(AgentConfigSupportsModelSelection));
         OnPropertyChanged(nameof(AgentConfigSelectedCount));
         OnPropertyChanged(nameof(AgentConfigApplyLabel));
         OnPropertyChanged(nameof(AgentConfigDialogTitle));
@@ -1531,7 +1535,14 @@ public partial class MainWindowViewModel : ViewModelBase
                 var r = IsAgentConfigDefaultMode
                     ? await Task.Run(() => _agentConfiguration.Revert(def)).ConfigureAwait(false)
                     : await _agentConfiguration.ApplyAsync(def, AgentProxyBaseUrl, CurrentAgentApiKey, models, modelEntries).ConfigureAwait(false);
-                itemResults.Add(new AgentConfigItemResult(target.Name, r.Success, r.Error, r.ConfigPath));
+                var displayPath = r.ConfigPath;
+                if (r.RawPreviews.Count > 0)
+                {
+                    var extraPaths = r.RawPreviews.Select(p => p.TargetPath).Where(p => p != r.ConfigPath && !string.IsNullOrEmpty(p));
+                    var joined = string.Join(" + ", new[] { r.ConfigPath }.Concat(extraPaths).Where(p => !string.IsNullOrEmpty(p)));
+                    if (!string.IsNullOrEmpty(joined)) displayPath = joined;
+                }
+                itemResults.Add(new AgentConfigItemResult(target.Name, r.Success, r.Error, displayPath));
             }
 
             await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>

@@ -11,7 +11,8 @@ public sealed record AgentDefinition(
     string[] ConfigPaths,
     string? DocsUrl,
     string AccentHex,
-    string? IconAssetPath = null);
+    string? IconAssetPath = null,
+    string? ConfiguredEnvVar = null);
 
 public static class AgentCatalog
 {
@@ -32,7 +33,7 @@ public static class AgentCatalog
             "codex", "Codex CLI",
             "OpenAI Codex command-line interface.",
             new[] { "codex", "codex.cmd", "codex.exe" },
-            new[] { "~/.codex/config.toml", "~/.codex/auth.json" },
+            new[] { "~/.codex/config.toml" },
             "https://github.com/openai/codex",
             "#10A37F",
             AssetsBase + "codex.svg"),
