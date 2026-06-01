@@ -8,7 +8,6 @@
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Resources>
         <cv:HexToBrushConverter        x:Key="HexBrush" />
-        <cv:SvgImageConverter          x:Key="SvgImage" />
         <cv:IntGreaterThanZeroConverter x:Key="IntGtZero" />
         <cv:StringNotEmptyConverter    x:Key="StringNotEmpty" />
         <cv:InvertBoolConverter        x:Key="InvertBool" />
@@ -65,7 +64,7 @@
 
                                 <!-- Agent icon: SVG or initials fallback -->
                                 <Panel Grid.Column="0" Width="40" Height="40" VerticalAlignment="Center">
-                                    <Image Source="{Binding IconAssetPath, Converter={StaticResource SvgImage}}"
+                                    <Image Source="{Binding Icon}"
                                            Width="32" Height="32"
                                            Stretch="Uniform"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -145,7 +144,7 @@
                             <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                 <!-- Icon: SVG or initials -->
                                 <Panel Width="20" Height="20">
-                                    <Image Source="{Binding IconAssetPath, Converter={StaticResource SvgImage}}"
+                                    <Image Source="{Binding Icon}"
                                            Width="16" Height="16"
                                            Stretch="Uniform"
                                            HorizontalAlignment="Center" VerticalAlignment="Center"

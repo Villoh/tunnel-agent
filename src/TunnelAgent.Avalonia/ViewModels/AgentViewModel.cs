@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+using Avalonia.Svg.Skia;
 using CommunityToolkit.Mvvm.ComponentModel;
 using TunnelAgent.Services;
 
@@ -12,7 +14,10 @@ public partial class AgentViewModel : ViewModelBase
     public string? DocsUrl { get; }
     public string AccentHex { get; }
     public string? IconAssetPath { get; }
-    public bool HasIcon => !string.IsNullOrEmpty(IconAssetPath);
+    public bool HasIcon => Icon is not null;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasIcon))]
+    private SvgImage? _icon;
     public string Initials => Name.Length >= 2 ? Name[..2] : Name;
 
     [ObservableProperty]
@@ -46,6 +51,18 @@ public partial class AgentViewModel : ViewModelBase
         DocsUrl = def.DocsUrl;
         AccentHex = def.AccentHex;
         IconAssetPath = def.IconAssetPath;
+        if (!string.IsNullOrEmpty(def.IconAssetPath))
+            _ = LoadIconAsync(def.IconAssetPath);
+    }
+
+    private async Task LoadIconAsync(string path)
+    {
+        var normalized = Converters.SvgImageConverter.NormalizeAssetPath(path);
+        await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            var source = SvgSource.Load(normalized, null);
+            Icon = source is null ? null : new SvgImage { Source = source };
+        }, Avalonia.Threading.DispatcherPriority.Background);
     }
 
     public void ApplyDetection(AgentDetectionResult result)

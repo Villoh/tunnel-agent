@@ -71,12 +71,17 @@ public sealed class HexToBrushConverter : IValueConverter
 
 public sealed class SvgImageConverter : IValueConverter
 {
+    private static readonly Dictionary<string, SvgImage?> _cache = new();
+
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is not string path || string.IsNullOrWhiteSpace(path)) return null;
         var normalized = NormalizeAssetPath(path);
+        if (_cache.TryGetValue(normalized, out var cached)) return cached;
         var source = SvgSource.Load(normalized, null);
-        return source is null ? null : new SvgImage { Source = source };
+        var image = source is null ? null : new SvgImage { Source = source };
+        _cache[normalized] = image;
+        return image;
     }
 
     public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();

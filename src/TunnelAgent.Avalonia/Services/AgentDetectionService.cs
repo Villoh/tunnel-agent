@@ -12,7 +12,9 @@ namespace TunnelAgent.Services;
 public sealed class AgentDetectionService : IAgentDetectionService
 {
     private readonly Dictionary<string, AgentDetectionResult> _cache = new();
-    private static readonly string[] PathDirs = (Environment.GetEnvironmentVariable("PATH") ?? "")
+    private static string[]? _pathDirs;
+    private static string[] PathDirs => _pathDirs ??=
+        (Environment.GetEnvironmentVariable("PATH") ?? "")
         .Split(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ';' : ':', StringSplitOptions.RemoveEmptyEntries);
 
     public async Task<IReadOnlyList<AgentDetectionResult>> DetectAllAsync(CancellationToken ct = default)
@@ -20,7 +22,7 @@ public sealed class AgentDetectionService : IAgentDetectionService
         var tasks = AgentCatalog.All.Select(async def =>
         {
             var binaryPath = await FindBinaryAsync(def.BinaryNames, ct).ConfigureAwait(false);
-            var configured = binaryPath != null && CheckConfigured(def.ConfigPaths);
+            var configured = binaryPath != null && await CheckConfiguredAsync(def.ConfigPaths, ct).ConfigureAwait(false);
             return new AgentDetectionResult(def.Id, binaryPath != null, configured, binaryPath, null);
         });
 
@@ -53,22 +55,23 @@ public sealed class AgentDetectionService : IAgentDetectionService
         return null;
     }
 
-    private static async Task<string?> FindSingleBinaryAsync(string name, CancellationToken ct)
-    {
-        // Step 1: PATH scan (instant — no subprocess)
-        var found = ScanPath(name);
-        if (found != null) return found;
-
-        // Step 2: Well-known dirs (instant — no subprocess)
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+    private static Task<string?> FindSingleBinaryAsync(string name, CancellationToken ct) =>
+        Task.Run(async () =>
         {
-            found = ScanWellKnownDirs(name);
+            // Step 1: PATH scan
+            var found = ScanPath(name);
             if (found != null) return found;
-        }
 
-        // Step 3: where.exe / which as fallback for exotic installs
-        return await WhichAsync(name, ct).ConfigureAwait(false);
-    }
+            // Step 2: Well-known dirs
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                found = ScanWellKnownDirs(name);
+                if (found != null) return found;
+            }
+
+            // Step 3: where.exe / which as fallback for exotic installs
+            return await WhichAsync(name, ct).ConfigureAwait(false);
+        }, ct);
 
     private static async Task<string?> WhichAsync(string name, CancellationToken ct)
     {
@@ -138,7 +141,7 @@ public sealed class AgentDetectionService : IAgentDetectionService
         return null;
     }
 
-    internal static bool CheckConfigured(string[] configPaths)
+    internal static async Task<bool> CheckConfiguredAsync(string[] configPaths, CancellationToken ct = default)
     {
         var profile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         foreach (var raw in configPaths)
@@ -150,7 +153,7 @@ public sealed class AgentDetectionService : IAgentDetectionService
             if (!File.Exists(expanded)) continue;
             try
             {
-                var text = File.ReadAllText(expanded);
+                var text = await File.ReadAllTextAsync(expanded, ct).ConfigureAwait(false);
                 if (text.Contains("127.0.0.1") || text.Contains("localhost") || text.Contains("cliproxyapi"))
                     return true;
             }
