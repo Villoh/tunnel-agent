@@ -1568,7 +1568,15 @@ public partial class MainWindowViewModel : ViewModelBase
         SelectableModels.Where(m => m.IsSelected).Select(m => m.Name).ToList();
 
     private List<TunnelAgent.Services.ModelEntry> GetSelectedModelEntries() =>
-        SelectableModels.Where(m => m.IsSelected).Select(m => new TunnelAgent.Services.ModelEntry(m.Name, m.Provider)).ToList();
+        SelectableModels.Where(m => m.IsSelected).Select(m =>
+        {
+            var isPerplexity = string.Equals(m.EngineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase);
+            var engineBaseUrl = isPerplexity ? PerplexityEndpointUrl + "/v1" : CliProxyEndpointUrl + "/v1";
+            var apiKey = isPerplexity
+                ? $"${{{TunnelAgent.Services.PerplexityAccountCatalogService.EnvVarName}}}"
+                : "${TUNNEL_AGENT_CLIPROXY_API_KEY}";
+            return new TunnelAgent.Services.ModelEntry(m.Name, m.Provider, engineBaseUrl, apiKey);
+        }).ToList();
 
     public IEnumerable<SelectableModelViewModel> CliProxySelectableModels  => SelectableModels.Where(m => m.EngineId == EngineCatalog.CliProxyApi.Id);
     public IEnumerable<SelectableModelViewModel> PerplexitySelectableModels => SelectableModels.Where(m => m.EngineId == EngineCatalog.PerplexityWebUiScraper.Id);
@@ -1716,7 +1724,17 @@ public partial class MainWindowViewModel : ViewModelBase
         NormalizeApiKeys();
         _settings.Save();
         RefreshApiKeyItems();
+        SyncCliProxyEnvVar();
         await CliProxyEngine.WriteConfigAsync();
+    }
+
+    private void SyncCliProxyEnvVar()
+    {
+        var key = _settings.Current.DefaultCliProxyApiKey;
+        if (!string.IsNullOrWhiteSpace(key))
+            TunnelAgent.Infrastructure.Services.UserEnvironmentService.Set("TUNNEL_AGENT_CLIPROXY_API_KEY", key);
+        else
+            TunnelAgent.Infrastructure.Services.UserEnvironmentService.Remove("TUNNEL_AGENT_CLIPROXY_API_KEY");
     }
 
     [RelayCommand] private void SelectConfiguration() => SelectedSection = SectionKey.ConfigGeneral;

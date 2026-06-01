@@ -10,16 +10,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Perplexity models in agent config**: when the Perplexity engine is running, its models now appear in the agent configuration dialog alongside CLIProxy models.
+- **`TUNNEL_AGENT_PERPLEXITY_TOKEN` env var**: automatically set/updated/removed in user environment variables when a Perplexity account is added, set as default, or removed. Factory Droid config uses `${TUNNEL_AGENT_PERPLEXITY_TOKEN}` instead of the raw session token.
+- **`TUNNEL_AGENT_CLIPROXY_API_KEY` env var**: automatically set/updated/removed when the default CLIProxy API key changes. Factory Droid config uses `${TUNNEL_AGENT_CLIPROXY_API_KEY}` instead of the raw key.
+- On Windows, `WM_SETTINGCHANGE` is broadcast after env var changes so newly spawned processes pick up the new values without logoff.
 
 ### Changed
 
 - **Dual engine model fetch**: `ActiveEngine`/`ActiveEngineId` removed — each engine (`CliProxy`, `Perplexity`) now maintains its own independent model collection and fetch lifecycle. Both engines can be running and serving models simultaneously.
 - **Providers model list**: now shows only the models of the currently selected engine tab instead of a combined list.
+- **Factory Droid Perplexity models**: now use the correct Perplexity engine endpoint (`http://127.0.0.1:8327/v1`) instead of the CLIProxy endpoint.
 - Models expander label no longer uses an emdash (`Models N of N selected`).
 
 ### Fixed
 
 - Models in agent config dialog were empty on open if engines were already running before the dialog was opened.
+- UI no longer freezes when adding, removing or changing the default CLIProxy API key or Perplexity account — env var writes and `WM_SETTINGCHANGE` broadcast now run on a background thread.
 
 ## [0.4.4] - 2026-06-01
 

@@ -36,7 +36,7 @@ public sealed record AgentConfigApplyResult(
         new(true, configPath, backupPath, null, instructions, raw ?? Array.Empty<RawConfigPreview>());
 }
 
-public sealed record ModelEntry(string Id, string OwnedBy);
+public sealed record ModelEntry(string Id, string OwnedBy, string EngineBaseUrl = "", string ApiKey = "");
 
 // ── Service ───────────────────────────────────────────────────────────────────
 
@@ -612,12 +612,14 @@ public sealed class AgentConfigurationService
 
     private static (string provider, string baseUrl) InferFactoryDroidProvider(ModelEntry model, string proxyBaseUrl)
     {
+        // Use the model's own engine base URL if provided (e.g. Perplexity endpoint)
+        var effectiveBase = !string.IsNullOrEmpty(model.EngineBaseUrl) ? model.EngineBaseUrl : proxyBaseUrl;
         var owner = model.OwnedBy.ToLowerInvariant();
         if (owner == "anthropic")
-            return ("anthropic", StripV1(proxyBaseUrl));
+            return ("anthropic", StripV1(effectiveBase));
         if (owner == "openai")
-            return ("openai", proxyBaseUrl);
-        return ("generic-chat-completion-api", proxyBaseUrl);
+            return ("openai", effectiveBase);
+        return ("generic-chat-completion-api", effectiveBase);
     }
 
     private static JsonObject BuildFactoryDroidEntry(ModelEntry model, string proxyBaseUrl, string apiKey)
@@ -630,7 +632,7 @@ public sealed class AgentConfigurationService
             ["baseUrl"]     = baseUrl,
             ["provider"]    = provider
         };
-        entry["apiKey"] = HasApiKey(apiKey) ? apiKey : "no-key";
+        entry["apiKey"] = HasApiKey(model.ApiKey) ? model.ApiKey : HasApiKey(apiKey) ? apiKey : "no-key";
         return entry;
     }
 
