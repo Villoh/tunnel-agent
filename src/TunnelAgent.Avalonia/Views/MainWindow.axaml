@@ -886,8 +886,11 @@
                             IsVisible="{Binding !AppUpdateDownloading}" />
                     <Button Classes="app primary" Content="Restart &amp; Install" Command="{Binding InstallAppUpdateAndRestartCommand}"
                             IsVisible="{Binding AppUpdateReady}" />
-                    <TextBlock Classes="row-desc" Text="Downloading…" VerticalAlignment="Center"
-                               IsVisible="{Binding AppUpdateDownloading}" />
+                    <StackPanel IsVisible="{Binding AppUpdateDownloading}" Spacing="4" VerticalAlignment="Center">
+                        <TextBlock Classes="row-desc" Text="Downloading…" />
+                        <ProgressBar Value="{Binding AppUpdateDownloadProgress}" Minimum="0" Maximum="100"
+                                     Width="80" Height="4" />
+                    </StackPanel>
                 </StackPanel>
             </Grid>
         </Border>

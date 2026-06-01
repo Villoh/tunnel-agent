@@ -1977,6 +1977,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool AppUpdateAvailable    => AppUpdateState == AppUpdateState.UpdateAvailable;
     public bool AppUpdateDownloading  => AppUpdateState == AppUpdateState.Downloading;
     public bool AppUpdateReady        => AppUpdateState == AppUpdateState.ReadyToInstall;
+    [ObservableProperty] private int _appUpdateDownloadProgress;
     public bool AppUpdateSupported    => _appUpdate.IsInstalled;
 
     public void InitAppUpdater()
@@ -1989,6 +1990,8 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(AppUpdateDownloading));
             OnPropertyChanged(nameof(AppUpdateReady));
         });
+        _appUpdate.DownloadProgressChanged += p => Dispatcher.UIThread.Post(() =>
+            AppUpdateDownloadProgress = p);
 
         if (_settings.Current.AutoCheckForAppUpdates)
             _ = _appUpdate.CheckAsync();

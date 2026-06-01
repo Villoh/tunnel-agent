@@ -19,6 +19,8 @@ public sealed class AppUpdateService
     public string?        NewVersion { get; private set; }
 
     public event Action? StateChanged;
+    public event Action<int>? DownloadProgressChanged;
+    public int DownloadProgress { get; private set; }
 
     public AppUpdateService(bool allowPrerelease = false)
     {
@@ -68,10 +70,15 @@ public sealed class AppUpdateService
     {
         if (_manager is null || !_manager.IsInstalled || _pendingUpdate is null) return;
 
+        DownloadProgress = 0;
         SetState(AppUpdateState.Downloading);
         try
         {
-            await _manager.DownloadUpdatesAsync(_pendingUpdate);
+            await _manager.DownloadUpdatesAsync(_pendingUpdate, p =>
+            {
+                DownloadProgress = p;
+                DownloadProgressChanged?.Invoke(p);
+            });
             SetState(AppUpdateState.ReadyToInstall);
         }
         catch
