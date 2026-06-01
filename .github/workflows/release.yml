@@ -243,21 +243,22 @@ jobs:
         env:
           TAG: ${{ steps.version.outputs.tag }}
           VERSION: ${{ steps.version.outputs.semver }}
-          REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
 
-          awk "/^## \\[$VERSION\\]/,/^## \\[/" CHANGELOG.md \
-            | sed '1d;$d' \
+          awk -v version="$VERSION" '
+            $0 ~ "^## \\[" version "\\]" { p=1; next }
+            p && $0 ~ "^## \\[" { exit }
+            p { print }
+          ' CHANGELOG.md \
             | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' > changelog_section.md
 
-          previous_tag=$(git tag --sort=-v:refname | grep -v "^${TAG}$" | head -n 1 || true)
-          range=""
-          if [ -n "$previous_tag" ]; then
-            range="$previous_tag..$TAG"
-          else
-            range="$TAG"
+          if [ ! -s changelog_section.md ]; then
+            echo "Failed to extract CHANGELOG section for $VERSION"
+            exit 1
           fi
+          echo "Extracted CHANGELOG section:"
+          cat changelog_section.md
 
           {
             echo "## Installation"
@@ -271,14 +272,6 @@ jobs:
             echo "---"
             echo ""
             cat changelog_section.md
-            echo ""
-            echo "### Contributors"
-            echo ""
-            git log --format='- %aN' "$range" | sort -u || true
-            echo ""
-            if [ -n "$previous_tag" ]; then
-              echo "**Full Changelog**: https://github.com/${REPO}/compare/${previous_tag}...${TAG}"
-            fi
           } > release_body.md
 
       # ── Publish GitHub Release ────────────────────────────────────────────
