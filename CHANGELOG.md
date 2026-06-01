@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Perplexity models in agent config**: when the Perplexity engine is running, its models now appear in the agent configuration dialog under a separate "PERPLEXITY" section alongside the "CLIPROXYAPI" section.
+
+### Changed
+
+- **Dual engine model fetch**: `ActiveEngine`/`ActiveEngineId` removed — each engine (`CliProxy`, `Perplexity`) now maintains its own independent model collection and fetch lifecycle. Both engines can be running and serving models simultaneously.
+
 ## [0.4.4] - 2026-06-01
 
 ### Added
