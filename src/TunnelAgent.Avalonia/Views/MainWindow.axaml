@@ -513,7 +513,7 @@
                 Padding="20" ZIndex="50"
                 KeyDown="OnAgentConfigDialogKeyDown" Focusable="True"
                 PointerPressed="OnAgentConfigOverlayPressed">
-            <Border Classes="card" Width="580" MaxHeight="520"
+            <Border Classes="card" Width="580" MaxHeight="680"
                     HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0"
                     PointerPressed="OnDialogCardPressed">
                 <Grid RowDefinitions="Auto,Auto,*,Auto,Auto">
@@ -669,7 +669,7 @@
                                     <StackPanel IsVisible="{Binding IsModelsExpanded}" Spacing="12">
                                         <!-- Empty state -->
                                         <TextBlock Classes="row-desc" Margin="2,0"
-                                                   Text="Start CLIProxyAPI to load available models."
+                                                   Text="Start an engine to load available models."
                                                    IsVisible="{Binding HasSelectableModels, Converter={StaticResource InvertBool}}" />
                                         <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasSelectableModels}">
                                             <TextBox Grid.Column="0" Classes="app" Watermark="Search models"
@@ -686,27 +686,52 @@
                                         <TextBlock Classes="row-desc" Margin="2,0"
                                                    Text="No models match your search."
                                                    IsVisible="{Binding ShowNoModelSearchResults}" />
-                                        <!-- Model list -->
-                                        <ItemsControl ItemsSource="{Binding SelectableModels}"
-                                                      IsVisible="{Binding HasSelectableModels}">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate x:DataType="vm:SelectableModelViewModel">
-                                                    <Grid ColumnDefinitions="Auto,*,Auto" Margin="2,3"
-                                                          IsVisible="{Binding IsVisible}">
-                                                        <CheckBox Grid.Column="0"
-                                                                  IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                                                  VerticalAlignment="Center" />
-                                                        <TextBlock Grid.Column="1" Text="{Binding Name}"
-                                                                   FontSize="12" VerticalAlignment="Center"
-                                                                   TextTrimming="CharacterEllipsis" />
-                                                        <TextBlock Grid.Column="2" Text="{Binding Provider}"
-                                                                   FontSize="10" VerticalAlignment="Center"
-                                                                   Foreground="{DynamicResource FgFaintBrush}"
-                                                                   Margin="8,0,0,0" />
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                        <!-- CLIProxy models -->
+                                        <StackPanel IsVisible="{Binding HasCliProxySelectableModels}" Spacing="4">
+                                            <TextBlock Classes="section-label" Text="CLIPROXYAPI" Margin="2,4,2,2" />
+                                            <ItemsControl ItemsSource="{Binding CliProxySelectableModels}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:SelectableModelViewModel">
+                                                        <Grid ColumnDefinitions="Auto,*,Auto" Margin="2,3"
+                                                              IsVisible="{Binding IsVisible}">
+                                                            <CheckBox Grid.Column="0"
+                                                                      IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                                      VerticalAlignment="Center" />
+                                                            <TextBlock Grid.Column="1" Text="{Binding Name}"
+                                                                       FontSize="12" VerticalAlignment="Center"
+                                                                       TextTrimming="CharacterEllipsis" />
+                                                            <TextBlock Grid.Column="2" Text="{Binding Provider}"
+                                                                       FontSize="10" VerticalAlignment="Center"
+                                                                       Foreground="{DynamicResource FgFaintBrush}"
+                                                                       Margin="8,0,0,0" />
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                        <!-- Perplexity models -->
+                                        <StackPanel IsVisible="{Binding HasPerplexitySelectableModels}" Spacing="4">
+                                            <TextBlock Classes="section-label" Text="PERPLEXITY" Margin="2,4,2,2" />
+                                            <ItemsControl ItemsSource="{Binding PerplexitySelectableModels}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:SelectableModelViewModel">
+                                                        <Grid ColumnDefinitions="Auto,*,Auto" Margin="2,3"
+                                                              IsVisible="{Binding IsVisible}">
+                                                            <CheckBox Grid.Column="0"
+                                                                      IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                                      VerticalAlignment="Center" />
+                                                            <TextBlock Grid.Column="1" Text="{Binding Name}"
+                                                                       FontSize="12" VerticalAlignment="Center"
+                                                                       TextTrimming="CharacterEllipsis" />
+                                                            <TextBlock Grid.Column="2" Text="{Binding Provider}"
+                                                                       FontSize="10" VerticalAlignment="Center"
+                                                                       Foreground="{DynamicResource FgFaintBrush}"
+                                                                       Margin="8,0,0,0" />
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
 

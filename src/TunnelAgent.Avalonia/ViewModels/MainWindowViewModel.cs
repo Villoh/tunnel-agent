@@ -55,7 +55,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly AgentConfigurationService _agentConfiguration = new AgentConfigurationService();
     private bool _agentsDetectedOnce;
 
-    private CancellationTokenSource? _modelFetchCts;
+    private CancellationTokenSource? _cliProxyModelFetchCts;
+    private CancellationTokenSource? _perplexityModelFetchCts;
     private bool _engineReleaseSelectionReady;
     private string? _suppressAutoUpdateForEngineId;
     private readonly AppUpdateService _appUpdate = new();
@@ -63,7 +64,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private SectionKey _selectedSection = SectionKey.Providers;
     [ObservableProperty] private bool _isSidebarCollapsed;
     [ObservableProperty] private bool _isDark;
-    [ObservableProperty] private string _activeEngineId = EngineCatalog.CliProxyApi.Id;
+    [ObservableProperty] private string _focusedConfigEngineId = EngineCatalog.CliProxyApi.Id;
     [ObservableProperty] private string _providersEngineId = EngineCatalog.CliProxyApi.Id;
     [ObservableProperty] private ProviderViewModel? _selectedQuotaProvider;
     [ObservableProperty] private bool _isRefreshingAllQuotaProviders;
@@ -153,6 +154,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public ObservableCollection<AgentViewModel> Agents { get; } = new();
     public ObservableCollection<EngineReleaseViewModel> EngineReleases { get; } = new();
     public ObservableCollection<AvailableModelGroupViewModel> AvailableModelGroups { get; }
+    public ObservableCollection<AvailableModelGroupViewModel> CliProxyModelGroups { get; }
+    public ObservableCollection<AvailableModelGroupViewModel> PerplexityModelGroups { get; }
     public ObservableCollection<EngineOptionViewModel> EngineOptions { get; } = new();
     public ObservableCollection<CliProxyApiKeyViewModel> CliProxyApiKeys { get; } = new();
     public ObservableCollection<SelectableModelViewModel> SelectableModels { get; } = new();
@@ -175,11 +178,21 @@ public partial class MainWindowViewModel : ViewModelBase
         _launchAtLogin = launchAtLogin ?? new LaunchAtLoginService();
         _folderOpen = folderOpen ?? new FolderOpenService();
 
+        CliProxyModelGroups = new ObservableCollection<AvailableModelGroupViewModel>();
+        PerplexityModelGroups = new ObservableCollection<AvailableModelGroupViewModel>();
         AvailableModelGroups = new ObservableCollection<AvailableModelGroupViewModel>();
+
+        void OnEngineModelsChanged(object? s, System.Collections.Specialized.NotifyCollectionChangedEventArgs _)
+        {
+            AvailableModelGroups.Clear();
+            foreach (var g in CliProxyModelGroups) AvailableModelGroups.Add(g);
+            foreach (var g in PerplexityModelGroups) AvailableModelGroups.Add(g);
+        }
+        CliProxyModelGroups.CollectionChanged += OnEngineModelsChanged;
+        PerplexityModelGroups.CollectionChanged += OnEngineModelsChanged;
         AvailableModelGroups.CollectionChanged += (_, _) =>
         {
             OnPropertyChanged(nameof(TotalAvailableModelCount));
-            // Repopulate selectable models if agent config dialog is open
             if (ShowAgentConfigDialog && !AgentConfigHasResult)
                 PopulateSelectableModels();
         };
@@ -229,8 +242,8 @@ public partial class MainWindowViewModel : ViewModelBase
         "trae"           => 6,
         _                => 0,
     };
-    public string ActiveEngineName => ActiveEngine.Definition.DisplayName;
-    public string ActiveEngineDescription => ActiveEngine.Definition.Description;
+    public string ActiveEngineName => FocusedConfigEngine.Definition.DisplayName;
+    public string ActiveEngineDescription => FocusedConfigEngine.Definition.Description;
     public string EndpointUrl => $"http://127.0.0.1:{Port}";
     public string AppVersion { get; } = TunnelAgent.AppVersion.Current;
     public bool IsLaunchAtLoginSupported => _launchAtLogin.IsSupported;
@@ -305,19 +318,19 @@ public partial class MainWindowViewModel : ViewModelBase
         ? "Perplexity session accounts are stored in app settings."
         : "OAuth tokens and custom provider keys are stored in the app auth folder.";
 
-    public IManagedEngine ActiveEngine => _engineRegistry.Get(ActiveEngineId);
+    private IManagedEngine FocusedConfigEngine => _engineRegistry.Get(FocusedConfigEngineId);
     private IManagedEngine CliProxyEngine => _engineRegistry.Get(EngineCatalog.CliProxyApi.Id);
     private IManagedEngine PerplexityEngine => _engineRegistry.Get(EngineCatalog.PerplexityWebUiScraper.Id);
 
     public int Port
     {
-        get => _settings.Current.GetOrAddEngine(ActiveEngineId, ActiveEngine.Definition.DefaultPort).Port;
+        get => _settings.Current.GetOrAddEngine(FocusedConfigEngineId, FocusedConfigEngine.Definition.DefaultPort).Port;
         set
         {
-            var runtime = _settings.Current.GetOrAddEngine(ActiveEngineId, ActiveEngine.Definition.DefaultPort);
+            var runtime = _settings.Current.GetOrAddEngine(FocusedConfigEngineId, FocusedConfigEngine.Definition.DefaultPort);
             if (runtime.Port == value) return;
             runtime.Port = value;
-            if (string.Equals(ActiveEngineId, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(FocusedConfigEngineId, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase))
                 _settings.Current.Port = value;
             _settings.Save();
             OnPropertyChanged();
@@ -438,15 +451,15 @@ public partial class MainWindowViewModel : ViewModelBase
         ? $"Choose {ActiveEngineName} release to install."
         : CanInstallSelectedEngine ? "Install selected release with SHA256 verification." : "Selected release is already installed.";
 
-    public string InstalledEngineHashLabel => ActiveEngine.InstalledArchiveSha256 is not null ? "Installed package SHA256" : "Local binary SHA256";
-    public string InstalledEngineHashShort => ShortHash(ActiveEngine.InstalledArchiveSha256 ?? ActiveEngine.InstalledBinarySha256);
-    public string InstalledEngineHashFull => ActiveEngine.InstalledArchiveSha256 ?? ActiveEngine.InstalledBinarySha256 ?? "Not available";
-    public string LatestEngineHashShort => ShortHash(ActiveEngine.LatestAssetSha256);
-    public string LatestEngineHashFull => ActiveEngine.LatestAssetSha256 ?? "Not available";
-    public bool HasEngineIntegrityError => ActiveEngine.IntegrityError is not null;
-    public string EngineIntegrityStatus => ActiveEngine.IntegrityError is not null ? "Checksum failed" : ActiveEngine.LatestAssetSha256 is null ? "Checksum pending" : "SHA256 ready";
-    public string EngineIntegrityMessage => ActiveEngine.IntegrityError ?? "";
-    public string LatestEngineAssetName => ActiveEngine.LatestAssetName ?? "Not available";
+    public string InstalledEngineHashLabel => FocusedConfigEngine.InstalledArchiveSha256 is not null ? "Installed package SHA256" : "Local binary SHA256";
+    public string InstalledEngineHashShort => ShortHash(FocusedConfigEngine.InstalledArchiveSha256 ?? FocusedConfigEngine.InstalledBinarySha256);
+    public string InstalledEngineHashFull => FocusedConfigEngine.InstalledArchiveSha256 ?? FocusedConfigEngine.InstalledBinarySha256 ?? "Not available";
+    public string LatestEngineHashShort => ShortHash(FocusedConfigEngine.LatestAssetSha256);
+    public string LatestEngineHashFull => FocusedConfigEngine.LatestAssetSha256 ?? "Not available";
+    public bool HasEngineIntegrityError => FocusedConfigEngine.IntegrityError is not null;
+    public string EngineIntegrityStatus => FocusedConfigEngine.IntegrityError is not null ? "Checksum failed" : FocusedConfigEngine.LatestAssetSha256 is null ? "Checksum pending" : "SHA256 ready";
+    public string EngineIntegrityMessage => FocusedConfigEngine.IntegrityError ?? "";
+    public string LatestEngineAssetName => FocusedConfigEngine.LatestAssetName ?? "Not available";
     public bool CanSelectEngineRelease => !IsLoadingEngineReleases && EngineState is not EngineState.Downloading and not EngineState.Installing;
     public bool CanInstallSelectedEngine => SelectedEngineRelease is not null && CanSelectEngineRelease && !VersionsEqual(SelectedEngineRelease.TagName, InstalledVersion);
 
@@ -472,12 +485,11 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(IsConfigSection));
         OnPropertyChanged(nameof(ConfigTabIndex));
-        // Drive ActiveEngineId from config tab so shared engine commands/properties resolve correctly.
-        // This does NOT affect ProvidersEngineId (sidebar highlight stays independent).
+        // Drive FocusedConfigEngineId from config tab so engine commands/properties resolve correctly.
         if (value == SectionKey.ConfigCliProxy)
-            ActiveEngineId = EngineCatalog.CliProxyApi.Id;
+            FocusedConfigEngineId = EngineCatalog.CliProxyApi.Id;
         else if (value == SectionKey.ConfigPerplexity)
-            ActiveEngineId = EngineCatalog.PerplexityWebUiScraper.Id;
+            FocusedConfigEngineId = EngineCatalog.PerplexityWebUiScraper.Id;
     }
 
     partial void OnProvidersEngineIdChanged(string value)
@@ -488,18 +500,11 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(ProvidersTabIndex));
     }
 
-    partial void OnActiveEngineIdChanged(string value)
+    partial void OnFocusedConfigEngineIdChanged(string value)
     {
         if (string.IsNullOrWhiteSpace(value)) return;
-        // Not persisted — ActiveEngineId is transient UI state, not a user preference
         RefreshFocusedEngineState();
         _ = LoadEngineReleasesAsync();
-        if (ActiveEngine.State == EngineState.Running)
-        {
-            _modelFetchCts?.Cancel();
-            _modelFetchCts = new CancellationTokenSource();
-            _ = _modelFetch.FetchAndApplyAsync(AvailableModelGroups, ActiveEngine.Port, ActiveEngineId, _modelFetchCts.Token);
-        }
         OnPropertyChanged(nameof(ActiveEngineName));
         OnPropertyChanged(nameof(ActiveEngineDescription));
         OnPropertyChanged(nameof(AuthFilesDescription));
@@ -522,10 +527,10 @@ public partial class MainWindowViewModel : ViewModelBase
         _ = PrepareSelectedEngineReleaseAsync(value.TagName);
         if (!_engineReleaseSelectionReady) return;
 
-        var runtime = _settings.Current.GetOrAddEngine(ActiveEngineId, ActiveEngine.Definition.DefaultPort);
-        var latestTag = ActiveEngine.LatestVersion ?? EngineReleases.FirstOrDefault(r => !r.IsPrerelease)?.TagName;
+        var runtime = _settings.Current.GetOrAddEngine(FocusedConfigEngineId, FocusedConfigEngine.Definition.DefaultPort);
+        var latestTag = FocusedConfigEngine.LatestVersion ?? EngineReleases.FirstOrDefault(r => !r.IsPrerelease)?.TagName;
         runtime.PreferredVersion = VersionsEqual(value.TagName, latestTag) ? string.Empty : value.TagName;
-        if (string.Equals(ActiveEngineId, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(FocusedConfigEngineId, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase))
             _settings.Current.PreferredEngineVersion = runtime.PreferredVersion;
         _settings.Save();
     }
@@ -581,10 +586,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void NormalizeActiveEngineSetting()
     {
-        // Providers page always starts on CLIProxy regardless of last session
         ProvidersEngineId = EngineCatalog.CliProxyApi.Id;
-        // ActiveEngineId follows Providers selection on startup
-        ActiveEngineId = EngineCatalog.CliProxyApi.Id;
+        FocusedConfigEngineId = EngineCatalog.CliProxyApi.Id;
     }
 
     private void ReloadPerplexityAccounts()
@@ -633,46 +636,48 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         Dispatcher.UIThread.Post(() =>
         {
-            if (sender is IManagedEngine engine && string.Equals(engine.Definition.Id, ActiveEngineId, StringComparison.OrdinalIgnoreCase))
+            if (sender is IManagedEngine engine)
             {
-                var wasAvailable = UpdateAvailable;
+                var isCliProxy = string.Equals(engine.Definition.Id, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase);
+                var modelGroups = isCliProxy ? CliProxyModelGroups : PerplexityModelGroups;
+                ref var cts = ref isCliProxy ? ref _cliProxyModelFetchCts : ref _perplexityModelFetchCts;
 
                 if (engine.State == EngineState.Running)
                 {
-                    // Only start a new fetch on actual transition to Running.
-                    // DownloadService fires StateChanged while the process is already Running
-                    // (e.g. update check), which previously cancelled in-progress retries.
-                    if (_modelFetchCts is null || _modelFetchCts.IsCancellationRequested)
+                    if (cts is null || cts.IsCancellationRequested)
                     {
-                        _modelFetchCts = new CancellationTokenSource();
-                        _ = _modelFetch.FetchAndApplyAsync(AvailableModelGroups, engine.Port, engine.Definition.Id, _modelFetchCts.Token);
+                        cts = new CancellationTokenSource();
+                        _ = _modelFetch.FetchAndApplyAsync(modelGroups, engine.Port, engine.Definition.Id, cts.Token);
                     }
                 }
                 else if (engine.State == EngineState.Stopped || engine.State == EngineState.Error)
                 {
-                    _modelFetchCts?.Cancel();
-                    _modelFetchCts = null;
-                    AvailableModelGroups.Clear();
+                    cts?.Cancel();
+                    cts = null;
+                    modelGroups.Clear();
                 }
 
-                RefreshFocusedEngineState();
-                if (UpdateAvailable && !wasAvailable && !_engineUpdateToastShown.GetValueOrDefault(ActiveEngineId))
+                // Only refresh focused state + toast for the currently focused config engine
+                if (string.Equals(engine.Definition.Id, FocusedConfigEngineId, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (string.Equals(_suppressAutoUpdateForEngineId, ActiveEngineId, StringComparison.OrdinalIgnoreCase))
+                    RefreshFocusedEngineState();
+                    var wasAvailable = UpdateAvailable;
+                    if (engine.UpdateAvailable && !wasAvailable && !_engineUpdateToastShown.GetValueOrDefault(engine.Definition.Id))
                     {
-                        _suppressAutoUpdateForEngineId = null;
-                    }
-                    else
-                    {
-                        _engineUpdateToastShown[ActiveEngineId] = true;
-                        if (AutoUpdate)
+                        if (string.Equals(_suppressAutoUpdateForEngineId, engine.Definition.Id, StringComparison.OrdinalIgnoreCase))
                         {
-                            _ = ActiveEngine.DownloadAndInstallAsync();
+                            _suppressAutoUpdateForEngineId = null;
                         }
                         else
                         {
-                            ShowUpdateToast = true;
-                            _ = Task.Delay(8000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowUpdateToast = false));
+                            _engineUpdateToastShown[engine.Definition.Id] = true;
+                            if (AutoUpdate)
+                                _ = FocusedConfigEngine.DownloadAndInstallAsync();
+                            else
+                            {
+                                ShowUpdateToast = true;
+                                _ = Task.Delay(8000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowUpdateToast = false));
+                            }
                         }
                     }
                 }
@@ -684,12 +689,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void RefreshFocusedEngineState()
     {
-        EngineState = ActiveEngine.State;
-        InstalledVersion = ActiveEngine.InstalledVersion;
-        LatestVersion = ActiveEngine.LatestVersion;
-        DownloadProgress = ActiveEngine.DownloadProgress;
-        UpdateAvailable = ActiveEngine.UpdateAvailable;
-        EngineStatusText = BuildEngineStatusText(ActiveEngine);
+        EngineState = FocusedConfigEngine.State;
+        InstalledVersion = FocusedConfigEngine.InstalledVersion;
+        LatestVersion = FocusedConfigEngine.LatestVersion;
+        DownloadProgress = FocusedConfigEngine.DownloadProgress;
+        UpdateAvailable = FocusedConfigEngine.UpdateAvailable;
+        EngineStatusText = BuildEngineStatusText(FocusedConfigEngine);
         UpdateBadgeState();
         RefreshEngineSectionProperties();
         OnPropertyChanged(nameof(ServerState));
@@ -752,7 +757,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _ => "Stopped"
     };
 
-    private void UpdateBadgeState() => ConfigHasBadge = ActiveEngine.UpdateAvailable && !AutoUpdate;
+    private void UpdateBadgeState() => ConfigHasBadge = FocusedConfigEngine.UpdateAvailable && !AutoUpdate;
 
     private void RefreshSettingsBindings()
     {
@@ -772,7 +777,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private async Task PrepareSelectedEngineReleaseAsync(string version)
     {
-        try { await ActiveEngine.PrepareVersionAsync(version); }
+        try { await FocusedConfigEngine.PrepareVersionAsync(version); }
         catch { }
     }
 
@@ -781,15 +786,15 @@ public partial class MainWindowViewModel : ViewModelBase
         IsLoadingEngineReleases = true;
         try
         {
-            var releases = await ActiveEngine.ListReleasesAsync();
+            var releases = await FocusedConfigEngine.ListReleasesAsync();
             EngineReleases.Clear();
             foreach (var release in releases)
                 EngineReleases.Add(new EngineReleaseViewModel(release));
 
-            var runtime = _settings.Current.GetOrAddEngine(ActiveEngineId, ActiveEngine.Definition.DefaultPort);
+            var runtime = _settings.Current.GetOrAddEngine(FocusedConfigEngineId, FocusedConfigEngine.Definition.DefaultPort);
             var preferred = runtime.PreferredVersion;
             var selected = EngineReleases.FirstOrDefault(r => VersionsEqual(r.TagName, preferred))
-                ?? EngineReleases.FirstOrDefault(r => VersionsEqual(r.TagName, ActiveEngine.LatestVersion))
+                ?? EngineReleases.FirstOrDefault(r => VersionsEqual(r.TagName, FocusedConfigEngine.LatestVersion))
                 ?? EngineReleases.FirstOrDefault();
 
             IsLoadingEngineReleases = false;
@@ -805,7 +810,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private async Task ApplyPortChangeAsync()
     {
-        var engine = ActiveEngine;
+        var engine = FocusedConfigEngine;
         var wasRunning = engine.IsRunning;
         if (wasRunning) await engine.StopAsync();
         await engine.WriteConfigAsync();
@@ -1201,20 +1206,20 @@ public partial class MainWindowViewModel : ViewModelBase
         DismissEditPerplexityLabelDialog();
     }
 
-    [RelayCommand] private void ResetPort() => Port = ActiveEngine.Definition.DefaultPort;
+    [RelayCommand] private void ResetPort() => Port = FocusedConfigEngine.Definition.DefaultPort;
 
     [RelayCommand]
     private void FocusCliProxy()
     {
         ProvidersEngineId = EngineCatalog.CliProxyApi.Id;
-        ActiveEngineId = EngineCatalog.CliProxyApi.Id;
+        FocusedConfigEngineId = EngineCatalog.CliProxyApi.Id;
     }
 
     [RelayCommand]
     private void FocusPerplexity()
     {
         ProvidersEngineId = EngineCatalog.PerplexityWebUiScraper.Id;
-        ActiveEngineId = EngineCatalog.PerplexityWebUiScraper.Id;
+        FocusedConfigEngineId = EngineCatalog.PerplexityWebUiScraper.Id;
     }
 
     [RelayCommand]
@@ -1222,7 +1227,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         ProvidersEngineId = "quota";
         SelectedSection   = SectionKey.Providers;
-        ActiveEngineId    = EngineCatalog.CliProxyApi.Id;
+        FocusedConfigEngineId    = EngineCatalog.CliProxyApi.Id;
     }
 
     [RelayCommand] private Task ScanQuotaProviders() => ScanQuotaProvidersAsync();
@@ -1351,14 +1356,14 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         SelectedSection = SectionKey.Providers;
         if (!IsQuotaProvidersTab)
-            ActiveEngineId = ProvidersEngineId;
+            FocusedConfigEngineId = ProvidersEngineId;
     }
 
     [RelayCommand]
     private void SelectQuota()
     {
         SelectedSection = SectionKey.Quota;
-        ActiveEngineId = EngineCatalog.CliProxyApi.Id;
+        FocusedConfigEngineId = EngineCatalog.CliProxyApi.Id;
         RefreshQuotaNavigation();
         _ = EnsureInitialQuotaLoadedAsync();
     }
@@ -1540,13 +1545,25 @@ public partial class MainWindowViewModel : ViewModelBase
     private List<TunnelAgent.Services.ModelEntry> GetSelectedModelEntries() =>
         SelectableModels.Where(m => m.IsSelected).Select(m => new TunnelAgent.Services.ModelEntry(m.Name, m.Provider)).ToList();
 
+    public IEnumerable<SelectableModelViewModel> CliProxySelectableModels  => SelectableModels.Where(m => m.EngineId == EngineCatalog.CliProxyApi.Id);
+    public IEnumerable<SelectableModelViewModel> PerplexitySelectableModels => SelectableModels.Where(m => m.EngineId == EngineCatalog.PerplexityWebUiScraper.Id);
+    public bool HasCliProxySelectableModels  => CliProxySelectableModels.Any();
+    public bool HasPerplexitySelectableModels => PerplexitySelectableModels.Any();
+
     private void PopulateSelectableModels()
     {
         ClearSelectableModels();
-        foreach (var group in AvailableModelGroups)
+        foreach (var group in CliProxyModelGroups)
             foreach (var model in group.Models)
             {
-                var vm = new SelectableModelViewModel(model.Name, group.ProviderName);
+                var vm = new SelectableModelViewModel(model.Name, group.ProviderName, EngineCatalog.CliProxyApi.Id);
+                vm.PropertyChanged += OnSelectableModelPropertyChanged;
+                SelectableModels.Add(vm);
+            }
+        foreach (var group in PerplexityModelGroups)
+            foreach (var model in group.Models)
+            {
+                var vm = new SelectableModelViewModel(model.Name, group.ProviderName, EngineCatalog.PerplexityWebUiScraper.Id);
                 vm.PropertyChanged += OnSelectableModelPropertyChanged;
                 SelectableModels.Add(vm);
             }
@@ -1725,8 +1742,8 @@ public partial class MainWindowViewModel : ViewModelBase
         TunnelAgent.Infrastructure.Engine.Perplexity.DownloadService.InvalidateCache();
         try
         {
-            await ActiveEngine.CheckForUpdateAsync();
-            if (!ActiveEngine.UpdateAvailable)
+            await FocusedConfigEngine.CheckForUpdateAsync();
+            if (!FocusedConfigEngine.UpdateAvailable)
             {
                 ShowNoUpdateToast = true;
                 _ = Task.Delay(4000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowNoUpdateToast = false));
@@ -1748,7 +1765,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task UpdateEngine()
     {
-        if (!ActiveEngine.UpdateAvailable) return;
+        if (!FocusedConfigEngine.UpdateAvailable) return;
         await InstallEngineVersionAsync(null);
     }
 
@@ -1762,17 +1779,17 @@ public partial class MainWindowViewModel : ViewModelBase
     private async Task InstallEngineVersionAsync(string? version)
     {
         // Stay on correct config section for the active engine
-        SelectedSection = string.Equals(ActiveEngineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase)
+        SelectedSection = string.Equals(FocusedConfigEngineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase)
             ? SectionKey.ConfigPerplexity
             : SectionKey.ConfigCliProxy;
         ShowUpdateToast = false;
-        var requestedVersion = string.IsNullOrWhiteSpace(version) ? ActiveEngine.LatestVersion : version;
-        if (!string.IsNullOrWhiteSpace(requestedVersion) && !VersionsEqual(requestedVersion, ActiveEngine.LatestVersion))
-            _suppressAutoUpdateForEngineId = ActiveEngineId;
-        try { await ActiveEngine.DownloadAndInstallAsync(requestedVersion); }
+        var requestedVersion = string.IsNullOrWhiteSpace(version) ? FocusedConfigEngine.LatestVersion : version;
+        if (!string.IsNullOrWhiteSpace(requestedVersion) && !VersionsEqual(requestedVersion, FocusedConfigEngine.LatestVersion))
+            _suppressAutoUpdateForEngineId = FocusedConfigEngineId;
+        try { await FocusedConfigEngine.DownloadAndInstallAsync(requestedVersion); }
         catch { return; }
         ConfigHasBadge = false;
-        _engineUpdateToastShown[ActiveEngineId] = false;
+        _engineUpdateToastShown[FocusedConfigEngineId] = false;
         ShowUpdateSuccess = true;
         _ = Task.Delay(4000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowUpdateSuccess = false));
     }
@@ -1780,22 +1797,22 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     public async Task RestartEngineAsync()
     {
-        await ActiveEngine.StopAsync();
-        await ActiveEngine.StartAsync();
+        await FocusedConfigEngine.StopAsync();
+        await FocusedConfigEngine.StartAsync();
     }
 
     [RelayCommand]
     public async Task StartServerAsync()
     {
-        if (ActiveEngine.State is EngineState.Stopped or EngineState.NotInstalled)
-            try { await ActiveEngine.StartAsync(); }
+        if (FocusedConfigEngine.State is EngineState.Stopped or EngineState.NotInstalled)
+            try { await FocusedConfigEngine.StartAsync(); }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[StartServer] {ex.Message}");
             }
     }
 
-    [RelayCommand] public async Task StopServerAsync() => await ActiveEngine.StopAsync();
+    [RelayCommand] public async Task StopServerAsync() => await FocusedConfigEngine.StopAsync();
 
     [RelayCommand]
     private void ToggleAgent(AgentViewModel a)

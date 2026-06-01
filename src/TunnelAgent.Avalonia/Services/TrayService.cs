@@ -205,15 +205,15 @@ public sealed class TrayService : IDisposable
 
     private async Task RunForEngineAsync(string engineId, Func<Task> action)
     {
-        var previousActive = _viewModel.ActiveEngineId;
+        var previousActive = _viewModel.FocusedConfigEngineId;
         try
         {
-            _viewModel.ActiveEngineId = engineId;
+            _viewModel.FocusedConfigEngineId = engineId;
             await action();
         }
         finally
         {
-            _viewModel.ActiveEngineId = previousActive;
+            _viewModel.FocusedConfigEngineId = previousActive;
         }
     }
 

@@ -6,14 +6,16 @@ public partial class SelectableModelViewModel : ViewModelBase
 {
     public string Name     { get; }
     public string Provider { get; }
+    public string EngineId { get; }
 
     [ObservableProperty] private bool _isSelected = true;
     [ObservableProperty] private bool _isVisible = true;
 
-    public SelectableModelViewModel(string name, string provider)
+    public SelectableModelViewModel(string name, string provider, string engineId = "")
     {
         Name     = name;
         Provider = provider;
+        EngineId = engineId;
     }
 
     public bool Matches(string query) =>
