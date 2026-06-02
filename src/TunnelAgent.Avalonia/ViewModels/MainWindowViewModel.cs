@@ -67,6 +67,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private string _focusedConfigEngineId = EngineCatalog.CliProxyApi.Id;
     [ObservableProperty] private string _providersEngineId = EngineCatalog.CliProxyApi.Id;
     [ObservableProperty] private ProviderViewModel? _selectedQuotaProvider;
+    [ObservableProperty] private QuotaProviderViewModel? _selectedQuotaAccount;
     [ObservableProperty] private bool _isRefreshingAllQuotaProviders;
 
     [ObservableProperty] private EngineState _engineState = EngineState.Stopped;
@@ -236,16 +237,17 @@ public partial class MainWindowViewModel : ViewModelBase
         SectionKey.ConfigPerplexity => 2,
         _ => 0
     };
-    public int QuotaTabIndex => SelectedQuotaProvider?.Id switch
-    {
-        "codex"          => 1,
-        "github-copilot" => 2,
-        "gemini-cli"     => 3,
-        "antigravity"    => 4,
-        "kiro"           => 5,
-        "trae"           => 6,
-        _                => 0,
-    };
+    public int QuotaTabIndex =>
+        (SelectedQuotaAccount?.Id ?? SelectedQuotaProvider?.Id) switch
+        {
+            "codex"          => 1,
+            "github-copilot" => 2,
+            "gemini-cli"     => 3,
+            "antigravity"    => 4,
+            "kiro"           => 5,
+            "trae"           => 6,
+            _                => 0,
+        };
     public string ActiveEngineName => FocusedConfigEngine.Definition.DisplayName;
     public string ActiveEngineDescription => FocusedConfigEngine.Definition.Description;
     public string EndpointUrl => $"http://127.0.0.1:{Port}";
@@ -644,7 +646,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private void RefreshQuotaNavigation()
     {
         var supportedProviders = QuotaProviders.ToList();
-        if (SelectedQuotaProvider is null || !supportedProviders.Contains(SelectedQuotaProvider))
+        if (SelectedQuotaAccount is null && (SelectedQuotaProvider is null || !supportedProviders.Contains(SelectedQuotaProvider)))
             SelectedQuotaProvider = supportedProviders.FirstOrDefault();
         else
             UpdateQuotaSelectionFlags();
@@ -1408,8 +1410,15 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         var provider = Providers.FirstOrDefault(p => string.Equals(p.Id, providerId, StringComparison.OrdinalIgnoreCase))
                     ?? StandaloneQuotaProviders.FirstOrDefault(p => string.Equals(p.Id, providerId, StringComparison.OrdinalIgnoreCase));
-        if (provider is null) return;
-        SelectQuotaProvider(provider);
+        if (provider is not null) { SelectQuotaProvider(provider); return; }
+
+        // Kiro/Trae not yet detected — add a placeholder so navigation works
+        var quotaAccount = QuotaAccounts.FirstOrDefault(q => string.Equals(q.Id, providerId, StringComparison.OrdinalIgnoreCase));
+        if (quotaAccount is null) return;
+        var icon = ProviderIconRegistry.Get(providerId);
+        var placeholder = new ProviderViewModel(quotaAccount.Id, quotaAccount.Name, icon.IconKind, icon.LogoColor, quotaAccount.Description, isOAuth: false, icon.CustomIconData);
+        StandaloneQuotaProviders.Add(placeholder);
+        SelectQuotaProvider(placeholder);
     }
 
     [RelayCommand] private Task RefreshAllQuotaProviders() => RefreshAllQuotaProvidersAsync();

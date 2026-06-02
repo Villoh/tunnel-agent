@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Quota tab navigation**: switching between any provider tab (including Kiro and Trae) now correctly updates the content view. Kiro/Trae are registered as `ProviderViewModel` placeholders when not yet detected, keeping navigation consistent with all other providers.
 - **Edit Perplexity label dialog**: Escape and Enter now work regardless of focus; clicking outside the dialog closes it.
 
 ### Changed
