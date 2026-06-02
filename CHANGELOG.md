@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Pi agent icon**: changed from white to black.
 - **Traffic-light buttons hover**: replaced the grey Avalonia default hover with a color-preserving style that keeps the circle color and fades in the icon.
 - **Gemini CLI proxy variables**: switched from `CODE_ASSIST_ENDPOINT` to `GOOGLE_GEMINI_BASE_URL` + `GEMINI_API_KEY` (API key mode), matching the CLIProxyAPI documentation.
 - **Gemini CLI**: model selector hidden in agent config dialog (Gemini CLI only supports Gemini models via the proxy).
