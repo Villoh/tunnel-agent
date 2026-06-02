@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Gemini CLI agent configuration**: apply now saves `GOOGLE_GEMINI_BASE_URL` and `GEMINI_API_KEY` as persistent user environment variables (instead of showing a manual shell export). Revert removes both variables. On Windows, `WM_SETTINGCHANGE` is broadcast so newly spawned processes pick up the change.
+- **Gemini CLI configured detection**: uses `GOOGLE_GEMINI_BASE_URL` env var presence to detect whether the agent is configured.
+
+### Changed
+
+- **Gemini CLI proxy variables**: switched from `CODE_ASSIST_ENDPOINT` to `GOOGLE_GEMINI_BASE_URL` + `GEMINI_API_KEY` (API key mode), matching the CLIProxyAPI documentation.
+- **Gemini CLI**: model selector hidden in agent config dialog (Gemini CLI only supports Gemini models via the proxy).
+
 ## [0.4.5] - 2026-06-01
 
 ### Added

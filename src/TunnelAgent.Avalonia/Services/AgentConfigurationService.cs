@@ -129,9 +129,7 @@ public sealed class AgentConfigurationService
             {
                 "claude-code"  => ApplyClaudeCode(proxyBaseUrl, apiKey, remove),
                 "codex"        => ApplyCodex(proxyBaseUrl, apiKey, remove),
-                "gemini-cli"   => AgentConfigApplyResult.Ok(
-                    "Gemini CLI uses environment variables. Copy the shell export and add it to your shell profile.",
-                    raw: new[] { EnvExportRaw("gemini-cli", GeminiEnv(proxyBaseUrl, apiKey)) }),
+                "gemini-cli"   => ApplyGeminiCli(proxyBaseUrl, apiKey, remove),
                 "amp"          => ApplyAmp(proxyBaseUrl, apiKey, remove),
                 "opencode"     => AgentConfigApplyResult.Failure("OpenCode requires async apply."),
                 "factory-droid"=> ApplyFactoryDroid(proxyBaseUrl, apiKey, remove, modelEntries),
@@ -302,10 +300,27 @@ public sealed class AgentConfigurationService
 
     // ── Gemini CLI ────────────────────────────────────────────────────────────
 
+    private static AgentConfigApplyResult ApplyGeminiCli(string proxyBaseUrl, string apiKey, bool remove)
+    {
+        if (remove)
+        {
+            TunnelAgent.Infrastructure.Services.UserEnvironmentService.Remove("GOOGLE_GEMINI_BASE_URL");
+            TunnelAgent.Infrastructure.Services.UserEnvironmentService.Remove("GEMINI_API_KEY");
+            return AgentConfigApplyResult.Ok(
+                "Removed Gemini CLI proxy configuration. Restart your terminal for changes to take effect.");
+        }
+
+        var baseUrl = proxyBaseUrl;
+        var key     = HasApiKey(apiKey) ? apiKey : "no-key";
+        TunnelAgent.Infrastructure.Services.UserEnvironmentService.Set("GOOGLE_GEMINI_BASE_URL", baseUrl);
+        TunnelAgent.Infrastructure.Services.UserEnvironmentService.Set("GEMINI_API_KEY", key);
+        return AgentConfigApplyResult.Ok(
+            "Saved to user environment",
+            configPath: "Saved to user environment");
+    }
+
     private static string[] GeminiEnv(string proxyBaseUrl, string apiKey) =>
-        HasApiKey(apiKey)
-            ? ["CODE_ASSIST_ENDPOINT" + "=" + proxyBaseUrl, "GEMINI" + "_API_KEY" + "=" + apiKey]
-            : ["CODE_ASSIST_ENDPOINT" + "=" + proxyBaseUrl];
+        ["GOOGLE_GEMINI_BASE_URL=" + proxyBaseUrl, "GEMINI_API_KEY=" + (HasApiKey(apiKey) ? apiKey : "no-key")];
 
     // ── Amp CLI ───────────────────────────────────────────────────────────────
 

@@ -45,7 +45,8 @@ public static class AgentCatalog
             Array.Empty<string>(),
             "https://github.com/google-gemini/gemini-cli",
             "#4285F4",
-            AssetsBase + "gemini-cli.svg"),
+            AssetsBase + "gemini-cli.svg",
+            ConfiguredEnvVar: "GOOGLE_GEMINI_BASE_URL"),
 
         new AgentDefinition(
             "amp", "Amp CLI",
