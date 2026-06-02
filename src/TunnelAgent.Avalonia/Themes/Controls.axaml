@@ -182,6 +182,29 @@
         <Setter Property="CornerRadius" Value="999" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <Ellipse Width="16" Height="16"
+                             Fill="{TemplateBinding Background}" />
+                    <Border x:Name="IconPresenter"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Opacity="0">
+                        <Border.Transitions>
+                            <Transitions>
+                                <DoubleTransition Property="Opacity" Duration="0:0:0.15" />
+                            </Transitions>
+                        </Border.Transitions>
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                    </Border>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
     </Style>
     <Style Selector="Button.traffic.minimize">
         <Setter Property="Background" Value="#F6D58A" />
@@ -192,8 +215,8 @@
     <Style Selector="Button.traffic.close">
         <Setter Property="Background" Value="#F17C9A" />
     </Style>
-    <Style Selector="Button.traffic:pointerover /template/ ContentPresenter">
-        <Setter Property="Opacity" Value="0.85" />
+    <Style Selector="Button.traffic:pointerover /template/ Border#IconPresenter">
+        <Setter Property="Opacity" Value="1" />
     </Style>
 
     <!-- Invisible link button (looks like hyperlink text) -->

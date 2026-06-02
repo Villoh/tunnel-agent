@@ -56,9 +56,15 @@
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8"
                             HorizontalAlignment="Right" VerticalAlignment="Center"
                             Margin="0,0,12,0">
-                    <Button Classes="traffic minimize" ToolTip.Tip="Minimize" Click="OnMinimize" />
-                    <Button Classes="traffic maximize" ToolTip.Tip="Maximize / Restore" Click="OnMaximizeRestore" />
-                    <Button Classes="traffic close" ToolTip.Tip="Close" Click="OnClose" />
+                    <Button Classes="traffic minimize" ToolTip.Tip="Minimize" Click="OnMinimize">
+                        <lucide:PackIconLucide Kind="Minus" Width="8" Height="8" Foreground="Black" />
+                    </Button>
+                    <Button Classes="traffic maximize" ToolTip.Tip="Maximize / Restore" Click="OnMaximizeRestore">
+                        <lucide:PackIconLucide Kind="Maximize2" Width="8" Height="8" Foreground="Black" />
+                    </Button>
+                    <Button Classes="traffic close" ToolTip.Tip="Close" Click="OnClose">
+                        <lucide:PackIconLucide Kind="X" Width="8" Height="8" Foreground="Black" />
+                    </Button>
                 </StackPanel>
             </Grid>
 
