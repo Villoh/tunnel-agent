@@ -479,8 +479,11 @@
 
         <!-- Edit Perplexity account label dialog -->
         <Border IsVisible="{Binding ShowEditPerplexityLabelDialog}" Background="#88000000"
-                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50">
-            <Border Classes="card" MaxWidth="420" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24">
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50"
+                PointerPressed="OnEditPerplexityLabelOverlayPressed"
+                KeyDown="OnEditPerplexityLabelKeyDown" Focusable="True">
+            <Border Classes="card" MaxWidth="420" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24"
+                    PointerPressed="OnDialogCardPressed">
                 <StackPanel Spacing="14">
                     <TextBlock Classes="row-label" FontSize="15" Text="Edit Perplexity account label" />
                     <StackPanel Spacing="4">

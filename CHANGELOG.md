@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Gemini CLI agent configuration**: apply now saves `GOOGLE_GEMINI_BASE_URL` and `GEMINI_API_KEY` as persistent user environment variables (instead of showing a manual shell export). Revert removes both variables. On Windows, `WM_SETTINGCHANGE` is broadcast so newly spawned processes pick up the change.
 - **Gemini CLI configured detection**: uses `GOOGLE_GEMINI_BASE_URL` env var presence to detect whether the agent is configured.
 
+### Fixed
+
+- **Edit Perplexity label dialog**: Escape and Enter now work regardless of focus; clicking outside the dialog closes it.
+
 ### Changed
 
 - **Pi agent icon**: changed from white to black.

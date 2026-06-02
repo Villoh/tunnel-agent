@@ -214,9 +214,22 @@ public partial class MainWindow : Window
 
     private async void OnEditPerplexityLabelKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.Key != Key.Enter || DataContext is not MainWindowViewModel vm) return;
-        e.Handled = true;
-        await vm.ConfirmEditPerplexityLabelAsync();
+        if (DataContext is not MainWindowViewModel vm) return;
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            vm.DismissEditPerplexityLabelDialogCommand.Execute(null);
+        }
+        else if (e.Key == Key.Enter)
+        {
+            e.Handled = true;
+            await vm.ConfirmEditPerplexityLabelAsync();
+        }
+    }
+
+    private void OnEditPerplexityLabelOverlayPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm) vm.DismissEditPerplexityLabelDialogCommand.Execute(null);
     }
 
     private static void OnDialogCardPressed(object? sender, PointerPressedEventArgs e) => e.Handled = true;
