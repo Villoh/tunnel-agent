@@ -334,6 +334,19 @@ public partial class MainWindowViewModel : ViewModelBase
     private IManagedEngine CliProxyEngine => _engineRegistry.Get(EngineCatalog.CliProxyApi.Id);
     private IManagedEngine PerplexityEngine => _engineRegistry.Get(EngineCatalog.PerplexityWebUiScraper.Id);
 
+    public bool EngineAutoStart
+    {
+        get => _settings.Current.GetOrAddEngine(FocusedConfigEngineId, FocusedConfigEngine.Definition.DefaultPort).AutoStart;
+        set
+        {
+            var runtime = _settings.Current.GetOrAddEngine(FocusedConfigEngineId, FocusedConfigEngine.Definition.DefaultPort);
+            if (runtime.AutoStart == value) return;
+            runtime.AutoStart = value;
+            _settings.Save();
+            OnPropertyChanged();
+        }
+    }
+
     public int Port
     {
         get => _settings.Current.GetOrAddEngine(FocusedConfigEngineId, FocusedConfigEngine.Definition.DefaultPort).Port;
@@ -589,6 +602,15 @@ public partial class MainWindowViewModel : ViewModelBase
             catch { }
         }
 
+        // AutoStart: start engines configured to launch automatically
+        foreach (var engine in _engineRegistry.Engines)
+        {
+            var runtime = _settings.Current.GetOrAddEngine(engine.Definition.Id, engine.Definition.DefaultPort);
+            if (!runtime.AutoStart || engine.State == EngineState.Running) continue;
+            try { await engine.StartAsync(); }
+            catch { }
+        }
+
         // Kick off model fetch for any engine already Running after init
         foreach (var engine in _engineRegistry.Engines)
         {
@@ -762,6 +784,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(EndpointUrl));
         OnPropertyChanged(nameof(Port));
         OnPropertyChanged(nameof(EditablePort));
+        OnPropertyChanged(nameof(EngineAutoStart));
     }
 
     private static string ShortHash(string? hash) => string.IsNullOrWhiteSpace(hash) ? "Not available" : hash[..Math.Min(12, hash.Length)];
@@ -801,6 +824,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(AutoCheckForUpdates));
         OnPropertyChanged(nameof(IsAutoUpdateEnabled));
         OnPropertyChanged(nameof(AutoUpdate));
+        OnPropertyChanged(nameof(EngineAutoStart));
         OnPropertyChanged(nameof(RoutingStrategy));
         OnPropertyChanged(nameof(MaskEmails));
         UpdateBadgeState();

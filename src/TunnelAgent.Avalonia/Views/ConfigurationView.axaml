@@ -209,6 +209,15 @@
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Auto-start"/>
+                                    <TextBlock Classes="row-desc" Text="Start this engine automatically when the app launches."/>
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                              IsChecked="{Binding EngineAutoStart, Mode=TwoWay}" />
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
                                     <TextBlock Classes="row-label" Text="Auto-check for updates"/>
                                     <TextBlock Classes="row-desc" Text="Check GitHub for a new engine version on startup."/>
                                 </StackPanel>
@@ -385,6 +394,16 @@
                                         VerticalAlignment="Center" ToolTip.Tip="{Binding LatestEngineAssetName}">
                                     <TextBlock Text="{Binding EngineIntegrityStatus}" Foreground="{DynamicResource AccentBrush}" />
                                 </Border>
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <!-- Auto-start -->
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Auto-start"/>
+                                    <TextBlock Classes="row-desc" Text="Start this engine automatically when the app launches."/>
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                              IsChecked="{Binding EngineAutoStart, Mode=TwoWay}" />
                             </Grid>
                             <Border Classes="row-divider"/>
                             <!-- Auto-check -->

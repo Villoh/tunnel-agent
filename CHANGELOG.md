@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Engine auto-start**: each engine (CLIProxyAPI and Perplexity WebUI Scraper) now has an "Auto-start" toggle in its ENGINE settings card. When enabled, the engine starts automatically on app launch. The setting is persisted per-engine in `settings.json` under `Engines[].AutoStart`.
+
 - **Amp CLI agent support**: full integration including binary detection (`~/.amp/bin/amp.exe` on Windows), automatic configuration of `~/.config/amp/settings.json` (`amp.url`) and `~/.local/share/amp/secrets.json` (`apiKey@url`), access token field with eye icon in the config dialog, and `ampcode` block written directly to `proxy-config.yaml` (`upstream-url` + `upstream-api-key`).
 - **Amp CLI model selector hidden**: Amp manages its own models internally; no model multiselect shown in the config dialog.
 - **Amp access token preserved on yaml regeneration**: `ConfigService` reads the existing `upstream-api-key` from `proxy-config.yaml` and preserves it whenever the config is regenerated, even if not stored in `settings.json`.
