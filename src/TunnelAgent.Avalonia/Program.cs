@@ -1,5 +1,6 @@
 using Avalonia;
 using System;
+using System.Threading;
 using Velopack;
 
 namespace TunnelAgent;
@@ -12,6 +13,10 @@ internal class Program
         // Must be the very first call — handles installer hooks (install/uninstall/update)
         // and exits early when launched by the Velopack installer, not by the user.
         VelopackApp.Build().Run();
+
+        using var mutex = new Mutex(true, "TunnelAgent-SingleInstance", out bool createdNew);
+        if (!createdNew)
+            return;
 
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
