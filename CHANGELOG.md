@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Update success banner scoped per engine**: updating or installing a specific version of one engine (CLIProxyAPI or Perplexity) no longer shows the "Successfully updated" banner on both configuration tabs simultaneously. Each tab now tracks its own success state independently.
+- **Engine update toast shown on startup for any engine**: the "update available" notification at the bottom of the screen now appears for both CLIProxyAPI and Perplexity regardless of which config tab is focused. Previously the toast was only triggered for the currently focused engine, so updates detected on the background engine were silently ignored.
 
 - **CLIProxy API keys and default key removed from `settings.json`**: keys are now stored exclusively in `proxy-config.yaml` (`api-keys:`) and the default key in the `TUNNEL_AGENT_CLIPROXY_API_KEY` user environment variable. One-time migration runs on startup to move legacy keys from `settings.json` to the yaml.
 - **`TUNNEL_AGENT_CLIPROXY_API_KEY` read from user environment registry**: `UserEnvironmentService.Get` now reads from `EnvironmentVariableTarget.User` first, so the variable is detected in the same session it was set without requiring a restart.

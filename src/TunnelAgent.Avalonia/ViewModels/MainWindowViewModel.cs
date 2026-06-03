@@ -712,27 +712,26 @@ public partial class MainWindowViewModel : ViewModelBase
                     modelGroups.Clear();
                 }
 
-                // Only refresh focused state + toast for the currently focused config engine
+                // Refresh focused state when the active config engine changes
                 if (string.Equals(engine.Definition.Id, FocusedConfigEngineId, StringComparison.OrdinalIgnoreCase))
-                {
                     RefreshFocusedEngineState();
-                    var wasAvailable = UpdateAvailable;
-                    if (engine.UpdateAvailable && !wasAvailable && !_engineUpdateToastShown.GetValueOrDefault(engine.Definition.Id))
+
+                // Show update toast for any engine as soon as an update is detected (once per session)
+                if (engine.UpdateAvailable && !_engineUpdateToastShown.GetValueOrDefault(engine.Definition.Id))
+                {
+                    if (string.Equals(_suppressAutoUpdateForEngineId, engine.Definition.Id, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (string.Equals(_suppressAutoUpdateForEngineId, engine.Definition.Id, StringComparison.OrdinalIgnoreCase))
-                        {
-                            _suppressAutoUpdateForEngineId = null;
-                        }
+                        _suppressAutoUpdateForEngineId = null;
+                    }
+                    else
+                    {
+                        _engineUpdateToastShown[engine.Definition.Id] = true;
+                        if (AutoUpdate)
+                            _ = _engineRegistry.Get(engine.Definition.Id).DownloadAndInstallAsync();
                         else
                         {
-                            _engineUpdateToastShown[engine.Definition.Id] = true;
-                            if (AutoUpdate)
-                                _ = FocusedConfigEngine.DownloadAndInstallAsync();
-                            else
-                            {
-                                ShowUpdateToast = true;
-                                _ = Task.Delay(8000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowUpdateToast = false));
-                            }
+                            ShowUpdateToast = true;
+                            _ = Task.Delay(8000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowUpdateToast = false));
                         }
                     }
                 }
