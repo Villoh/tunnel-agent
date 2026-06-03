@@ -94,13 +94,12 @@ public sealed class EngineService : IManagedEngine
         if (!DownloadService.IsBinaryInstalled()) return;
 
         await _config.WriteConfigAsync();
+        var defaultKey = TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get("TUNNEL_AGENT_CLIPROXY_API_KEY") ?? "";
         await _process.StartAsync(
             DownloadService.BinaryPath,
             _config.ConfigPath,
             _settings.Current.Port,
-            _settings.Current.CliProxyApiKeys.Contains(_settings.Current.DefaultCliProxyApiKey)
-                ? _settings.Current.DefaultCliProxyApiKey
-                : "",
+            defaultKey,
             ct);
     }
 

@@ -47,9 +47,7 @@ public sealed class ModelFetchService
             try
             {
                 using var request = new HttpRequestMessage(HttpMethod.Get, url);
-                var apiKey = _settings.Current.CliProxyApiKeys.Contains(_settings.Current.DefaultCliProxyApiKey)
-                    ? _settings.Current.DefaultCliProxyApiKey
-                    : "";
+                var apiKey = TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get("TUNNEL_AGENT_CLIPROXY_API_KEY") ?? "";
                 if (!string.IsNullOrWhiteSpace(apiKey))
                     request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {apiKey}");
                 using var resp = await Http.SendAsync(request, ct);

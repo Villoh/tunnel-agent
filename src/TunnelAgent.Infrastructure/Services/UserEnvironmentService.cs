@@ -10,6 +10,10 @@ namespace TunnelAgent.Infrastructure.Services;
 /// </summary>
 public static class UserEnvironmentService
 {
+    public static string? Get(string name) =>
+        Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.User)
+        ?? Environment.GetEnvironmentVariable(name);
+
     public static void Set(string name, string value) =>
         Task.Run(() =>
         {

@@ -16,6 +16,7 @@ public sealed class SettingsService
 
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
+    public string SettingsPath => _settingsPath;
     private readonly string _settingsPath;
     private CancellationTokenSource? _debounceCts;
 

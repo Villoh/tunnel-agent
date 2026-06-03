@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **CLIProxy API keys and default key removed from `settings.json`**: keys are now stored exclusively in `proxy-config.yaml` (`api-keys:`) and the default key in the `TUNNEL_AGENT_CLIPROXY_API_KEY` user environment variable. One-time migration runs on startup to move legacy keys from `settings.json` to the yaml.
+- **`TUNNEL_AGENT_CLIPROXY_API_KEY` read from user environment registry**: `UserEnvironmentService.Get` now reads from `EnvironmentVariableTarget.User` first, so the variable is detected in the same session it was set without requiring a restart.
+- **First CLIProxy API key automatically set as default**: adding the first key (or any key when no default is set) now automatically marks it as default and sets the env var.
+- **CLIProxy API key visible in popup on startup**: env var key missing from yaml is automatically added to keep both in sync.
+
 - **Amp `secrets.json` always written**: previously skipped when no CLIProxy API key was configured; now always written with `no-key` as fallback so Amp does not start the OAuth login flow.
 - **Amp access token not stored in `settings.json`**: the `upstream-api-key` is written and read directly from `proxy-config.yaml`, avoiding redundant storage of a sensitive value.
 

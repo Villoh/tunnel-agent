@@ -1,10 +1,13 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
+using TunnelAgent.Infrastructure.Services;
 using TunnelAgent.Services;
 
 namespace TunnelAgent.Infrastructure.Engine.CliProxy;
@@ -109,6 +112,43 @@ public sealed class ConfigService
         await File.WriteAllTextAsync(ConfigPath, yaml);
     }
 
+    /// <summary>
+    /// One-time migration: reads CliProxyApiKeys / DefaultCliProxyApiKey from the legacy
+    /// settings.json (before they were removed) and writes them to proxy-config.yaml.
+    /// Safe to call on every startup — no-ops if keys already exist in yaml or settings has none.
+    /// </summary>
+    public async Task MigrateApiKeysFromSettingsAsync(string settingsPath)
+    {
+        if (!File.Exists(settingsPath)) return;
+        try
+        {
+            var json = await File.ReadAllTextAsync(settingsPath);
+            var node = JsonNode.Parse(json);
+            if (node is not JsonObject obj) return;
+
+            var legacyKeys = obj["CliProxyApiKeys"]?.AsArray()
+                .Select(n => n?.GetValue<string>() ?? "")
+                .Where(k => !string.IsNullOrWhiteSpace(k))
+                .ToList() ?? [];
+            var legacyDefault = obj["DefaultCliProxyApiKey"]?.GetValue<string>() ?? "";
+
+            if (legacyKeys.Count == 0) return;
+
+            // Only migrate if yaml has no api-keys yet
+            var existing = ReadApiKeysFromConfig();
+            if (existing.Count == 0)
+                await WriteApiKeysToConfigAsync(legacyKeys);
+
+            // Migrate default key to env var if not already set
+            if (!string.IsNullOrWhiteSpace(legacyDefault) &&
+                string.IsNullOrWhiteSpace(TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get("TUNNEL_AGENT_CLIPROXY_API_KEY")))
+            {
+                UserEnvironmentService.Set("TUNNEL_AGENT_CLIPROXY_API_KEY", legacyDefault);
+            }
+        }
+        catch { /* migration is best-effort */ }
+    }
+
     // ── YAML builder ─────────────────────────────────────────────────────────
 
     private string BuildYaml(AppSettings s, string authDir)
@@ -125,7 +165,7 @@ public sealed class ConfigService
         sb.AppendLine($"port: {s.Port}");
         sb.AppendLine($"auth-dir: \"{authDir}\"");
 
-        AppendApiKeys(sb, s.CliProxyApiKeys);
+        AppendApiKeys(sb, ReadApiKeysFromConfig());
 
         sb.Append($"""
             debug: false
@@ -235,6 +275,59 @@ public sealed class ConfigService
     }
 
     // ── Existing config readers ─────────────────────────────────────────────
+
+    public List<string> ReadApiKeysFromConfig()
+    {
+        if (!File.Exists(ConfigPath)) return [];
+        var keys = new List<string>();
+        var lines = File.ReadAllLines(ConfigPath);
+        var inBlock = false;
+        foreach (var line in lines)
+        {
+            if (line.TrimEnd() == "api-keys:") { inBlock = true; continue; }
+            if (inBlock)
+            {
+                if (!line.StartsWith(" ") && !line.StartsWith("\t")) { inBlock = false; continue; }
+                var t = line.Trim();
+                if (t.StartsWith("- ")) keys.Add(Unyaml(t[2..].Trim()));
+            }
+        }
+        return keys.Where(k => !string.IsNullOrWhiteSpace(k)).Distinct(StringComparer.Ordinal).ToList();
+    }
+
+    public async Task WriteApiKeysToConfigAsync(IEnumerable<string> apiKeys)
+    {
+        if (!File.Exists(ConfigPath))
+        {
+            await WriteConfigAsync().ConfigureAwait(false);
+            return;
+        }
+
+        var lines = (await File.ReadAllLinesAsync(ConfigPath).ConfigureAwait(false)).ToList();
+
+        // Remove existing api-keys block
+        var start = lines.FindIndex(l => l.TrimEnd() == "api-keys:");
+        if (start >= 0)
+        {
+            var end = start + 1;
+            while (end < lines.Count && (lines[end].StartsWith(" ") || lines[end].StartsWith("\t")))
+                end++;
+            lines.RemoveRange(start, end - start);
+        }
+
+        var keys = GetApiKeys(apiKeys);
+        if (keys.Count > 0)
+        {
+            // Insert after auth-dir line
+            var authDirIdx = lines.FindIndex(l => l.TrimStart().StartsWith("auth-dir:", System.StringComparison.Ordinal));
+            var insertAt = authDirIdx >= 0 ? authDirIdx + 1 : 0;
+            var block = new List<string> { "api-keys:" };
+            block.AddRange(keys.Select(k => $"  - {YamlQuote(k)}"));
+            lines.InsertRange(insertAt, block);
+        }
+
+        await File.WriteAllLinesAsync(ConfigPath, lines).ConfigureAwait(false);
+    }
 
     public string GetAmpUpstreamApiKey() => ReadExistingAmpUpstreamApiKey() ?? "";
 

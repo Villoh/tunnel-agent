@@ -278,9 +278,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     // Proxy URL agents should point to (CLIProxy v1 endpoint)
     public string AgentProxyBaseUrl => CliProxyEndpointUrl + "/v1";
-    public string CurrentAgentApiKey => _settings.Current.CliProxyApiKeys.Contains(_settings.Current.DefaultCliProxyApiKey)
-        ? _settings.Current.DefaultCliProxyApiKey
-        : "";
+    public string CurrentAgentApiKey => TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get("TUNNEL_AGENT_CLIPROXY_API_KEY") ?? "";
     public bool AgentConfigHasResult         => AgentConfigResult != null;
     public bool AgentConfigSuccess            => AgentConfigResult?.Success == true;
     public bool ShowAgentConfigApplyButton    => !AgentConfigHasResult && !IsAgentConfigManualMode;
@@ -1718,34 +1716,34 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void InitApiKeysFromSettings()
     {
-        NormalizeApiKeys();
+        // One-time migration: move CliProxyApiKeys/DefaultCliProxyApiKey from legacy settings.json
+        _ = _configService.MigrateApiKeysFromSettingsAsync(_settings.SettingsPath)
+            .ContinueWith(_ => Avalonia.Threading.Dispatcher.UIThread.Post(RefreshApiKeyItems));
         RefreshApiKeyItems();
-    }
-
-    private void NormalizeApiKeys()
-    {
-        _settings.Current.CliProxyApiKeys = _settings.Current.CliProxyApiKeys
-            .Where(k => !string.IsNullOrWhiteSpace(k))
-            .Distinct(StringComparer.Ordinal)
-            .ToList();
-        if (!_settings.Current.CliProxyApiKeys.Contains(_settings.Current.DefaultCliProxyApiKey, StringComparer.Ordinal))
-            _settings.Current.DefaultCliProxyApiKey = _settings.Current.CliProxyApiKeys.FirstOrDefault() ?? "";
     }
 
     private void RefreshApiKeyItems()
     {
+        var keys   = _configService.ReadApiKeysFromConfig();
+        var defKey = TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get("TUNNEL_AGENT_CLIPROXY_API_KEY") ?? "";
+
+        // If env var has a key not in yaml, add it so both stay in sync
+        if (!string.IsNullOrWhiteSpace(defKey) && !keys.Contains(defKey, StringComparer.Ordinal))
+        {
+            keys.Add(defKey);
+            _ = _configService.WriteApiKeysToConfigAsync(keys);
+        }
+
         CliProxyApiKeys.Clear();
-        foreach (var key in _settings.Current.CliProxyApiKeys.Where(k => !string.IsNullOrWhiteSpace(k)).Distinct())
-            CliProxyApiKeys.Add(new CliProxyApiKeyViewModel(
-                key,
-                string.Equals(key, _settings.Current.DefaultCliProxyApiKey, StringComparison.Ordinal)));
+        foreach (var key in keys)
+            CliProxyApiKeys.Add(new CliProxyApiKeyViewModel(key,
+                string.Equals(key, defKey, StringComparison.Ordinal)));
         OnPropertyChanged(nameof(CurrentAgentApiKey));
     }
 
     [RelayCommand]
     private void OpenApiKeys()
     {
-        NormalizeApiKeys();
         RefreshApiKeyItems();
         ApiKeyDraft = "";
         ShowApiKeyDraft = false;
@@ -1765,43 +1763,48 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         var key = ApiKeyDraft.Trim();
         if (string.IsNullOrWhiteSpace(key)) return;
-        if (!_settings.Current.CliProxyApiKeys.Contains(key, StringComparer.Ordinal))
-            _settings.Current.CliProxyApiKeys.Add(key);
         ApiKeyDraft = "";
         ShowApiKeyDraft = false;
-        await PersistApiKeysAsync();
+        var isFirst = !CliProxyApiKeys.Any() || string.IsNullOrWhiteSpace(TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get("TUNNEL_AGENT_CLIPROXY_API_KEY"));
+        await PersistApiKeysAsync(key, setDefault: isFirst);
     }
 
     [RelayCommand]
     private async Task RemoveApiKeyAsync(CliProxyApiKeyViewModel? key)
     {
         if (key is null) return;
-        _settings.Current.CliProxyApiKeys.RemoveAll(k => string.Equals(k, key.Value, StringComparison.Ordinal));
-        if (string.Equals(_settings.Current.DefaultCliProxyApiKey, key.Value, StringComparison.Ordinal))
-            _settings.Current.DefaultCliProxyApiKey = _settings.Current.CliProxyApiKeys.FirstOrDefault() ?? "";
-        await PersistApiKeysAsync();
+        var keys = _configService.ReadApiKeysFromConfig();
+        keys.RemoveAll(k => string.Equals(k, key.Value, StringComparison.Ordinal));
+        await _configService.WriteApiKeysToConfigAsync(keys);
+        // Update default env var if removed key was the default
+        var defKey = TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get("TUNNEL_AGENT_CLIPROXY_API_KEY") ?? "";
+        if (string.Equals(defKey, key.Value, StringComparison.Ordinal))
+            SyncCliProxyEnvVar(keys.FirstOrDefault() ?? "");
+        RefreshApiKeyItems();
     }
 
     [RelayCommand]
     private async Task SetDefaultApiKeyAsync(CliProxyApiKeyViewModel? key)
     {
         if (key is null) return;
-        _settings.Current.DefaultCliProxyApiKey = key.Value;
-        await PersistApiKeysAsync();
+        SyncCliProxyEnvVar(key.Value);
+        RefreshApiKeyItems();
+        await Task.CompletedTask;
     }
 
-    private async Task PersistApiKeysAsync()
+    private async Task PersistApiKeysAsync(string newKey, bool setDefault)
     {
-        NormalizeApiKeys();
-        _settings.Save();
+        var keys = _configService.ReadApiKeysFromConfig();
+        if (!keys.Contains(newKey, StringComparer.Ordinal))
+            keys.Add(newKey);
+        await _configService.WriteApiKeysToConfigAsync(keys);
+        if (setDefault) SyncCliProxyEnvVar(newKey);
         RefreshApiKeyItems();
-        SyncCliProxyEnvVar();
         await CliProxyEngine.WriteConfigAsync();
     }
 
-    private void SyncCliProxyEnvVar()
+    private static void SyncCliProxyEnvVar(string key)
     {
-        var key = _settings.Current.DefaultCliProxyApiKey;
         if (!string.IsNullOrWhiteSpace(key))
             TunnelAgent.Infrastructure.Services.UserEnvironmentService.Set("TUNNEL_AGENT_CLIPROXY_API_KEY", key);
         else
