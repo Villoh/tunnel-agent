@@ -657,7 +657,31 @@
                                                Text="Preview the config and copy it manually to the target location." />
                                 </StackPanel>
 
+                                <!-- Amp upstream API key -->
+                                <StackPanel Spacing="4" IsVisible="{Binding ShowAmpUpstreamApiKeyField}">
+                                    <TextBlock Classes="row-desc" Text="Amp access token" />
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBox Grid.Column="0" Classes="app"
+                                                 Height="32" MinHeight="32" Padding="8,5"
+                                                 PasswordChar="{Binding ShowAmpUpstreamApiKey, Converter={StaticResource SecretPasswordChar}}"
+                                                 Watermark="your-amp-access-token"
+                                                 Text="{Binding AmpUpstreamApiKeyDraft, Mode=TwoWay}" />
+                                        <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0"
+                                                ToolTip.Tip="Show/hide key"
+                                                Command="{Binding ToggleAmpUpstreamApiKeyVisibilityCommand}">
+                                            <lucide:PackIconLucide Kind="{Binding ShowAmpUpstreamApiKey, Converter={StaticResource EyeIcon}}" Width="14" Height="14" />
+                                        </Button>
+                                    </Grid>
+                                    <Button Classes="link" HorizontalAlignment="Left" Padding="0"
+                                            Tag="https://ampcode.com/settings"
+                                            Click="OnOpenUrlClick">
+                                        <TextBlock Classes="row-desc" Text="Used to authenticate the Amp CLI. Get it from ampcode.com/settings"
+                                                   TextDecorations="Underline" />
+                                    </Button>
+                                </StackPanel>
+
                                 <!-- Models selector -->
+
                                 <StackPanel Spacing="4" IsVisible="{Binding AgentConfigSupportsModelSelection}">
                                     <Button Classes="app" Command="{Binding ToggleModelsCommand}"
                                             HorizontalAlignment="Stretch" Padding="10,6">
@@ -829,7 +853,7 @@
                                                         <TextBlock Text="{Binding ConfigPath, FallbackValue=''}"
                                                                    FontFamily="Cascadia Mono,Consolas,monospace" FontSize="10"
                                                                    Foreground="{DynamicResource FgFaintBrush}"
-                                                                   TextTrimming="CharacterEllipsis"
+                                                                   TextWrapping="Wrap"
                                                                    IsVisible="{Binding Success}" />
                                                         <TextBlock Text="{Binding Error, FallbackValue=''}"
                                                                    FontSize="11" Foreground="{DynamicResource ErrBrush}"

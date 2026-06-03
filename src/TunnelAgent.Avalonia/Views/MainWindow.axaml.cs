@@ -85,6 +85,12 @@ public partial class MainWindow : Window
 
     private void OnClose(object? sender, RoutedEventArgs e) => Close();
 
+    private void OnOpenUrlClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: string url } && !string.IsNullOrEmpty(url))
+            try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = url, UseShellExecute = true }); } catch { }
+    }
+
     private void ApplyNativeBorderColor()
     {
         if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000))

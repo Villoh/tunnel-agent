@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Amp CLI agent support**: full integration including binary detection (`~/.amp/bin/amp.exe` on Windows), automatic configuration of `~/.config/amp/settings.json` (`amp.url`) and `~/.local/share/amp/secrets.json` (`apiKey@url`), access token field with eye icon in the config dialog, and `ampcode` block written directly to `proxy-config.yaml` (`upstream-url` + `upstream-api-key`).
+- **Amp CLI model selector hidden**: Amp manages its own models internally; no model multiselect shown in the config dialog.
+- **Amp access token preserved on yaml regeneration**: `ConfigService` reads the existing `upstream-api-key` from `proxy-config.yaml` and preserves it whenever the config is regenerated, even if not stored in `settings.json`.
+- **Agent config confirmation paths on separate lines**: multiple config file paths now display one per line instead of joined with ` + `.
+
+### Fixed
+
+- **Amp `secrets.json` always written**: previously skipped when no CLIProxy API key was configured; now always written with `no-key` as fallback so Amp does not start the OAuth login flow.
+- **Amp access token not stored in `settings.json`**: the `upstream-api-key` is written and read directly from `proxy-config.yaml`, avoiding redundant storage of a sensitive value.
+
+### Changed
+
 - **Traffic-light buttons**: icons (−, ⤢, ×) now fade in on hover using a custom `ControlTemplate` with a `Border` opacity transition (150ms).
 - **Gemini CLI agent configuration**: apply now saves `GOOGLE_GEMINI_BASE_URL` and `GEMINI_API_KEY` as persistent user environment variables (instead of showing a manual shell export). Revert removes both variables. On Windows, `WM_SETTINGCHANGE` is broadcast so newly spawned processes pick up the change.
 - **Gemini CLI configured detection**: uses `GOOGLE_GEMINI_BASE_URL` env var presence to detect whether the agent is configured.

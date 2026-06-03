@@ -131,6 +131,7 @@ public sealed class AgentDetectionService : IAgentDetectionService
             Path.Combine(appData, "npm"),
             Path.Combine(profile, ".local", "bin"),
             Path.Combine(profile, ".cargo", "bin"),
+            Path.Combine(profile, ".amp", "bin"),
         };
 
         foreach (var dir in dirs)

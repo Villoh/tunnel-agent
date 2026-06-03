@@ -39,6 +39,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly ILaunchAtLoginService _launchAtLogin;
     private readonly IFolderOpenService _folderOpen;
     private readonly TunnelAgent.Services.ModelFetchService _modelFetch;
+    private ConfigService _configService = null!;
     private readonly TokenGeneratorService _perplexityTokenGenerator = new();
     private readonly Dictionary<string, bool> _engineUpdateToastShown = new(StringComparer.OrdinalIgnoreCase);
     private readonly QuotaFetchService _quota = new(IPlatformInfo.Current.AuthDirectory);
@@ -147,6 +148,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private AgentConfigApplyResult? _agentConfigResult;
     [ObservableProperty] private IReadOnlyList<RawConfigPreview> _agentConfigPreviews = Array.Empty<RawConfigPreview>();
     [ObservableProperty] private IReadOnlyList<AgentConfigItemResult> _agentConfigMultiResults = Array.Empty<AgentConfigItemResult>();
+    [ObservableProperty] private string _ampUpstreamApiKeyDraft = "";
+    [ObservableProperty] private bool _showAmpUpstreamApiKey;
 
     public ObservableCollection<ProviderViewModel> Providers { get; } = new();
     public ObservableCollection<ProviderViewModel> StandaloneQuotaProviders { get; } = new();
@@ -173,7 +176,8 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _settings = settings;
         _engineRegistry = engineRegistry ?? new EngineRegistryService(settings);
-        var engineConfig = new ConfigService(settings);
+        _configService = new ConfigService(settings);
+        var engineConfig = _configService;
         _catalog = catalog ?? new ProviderCatalogService(settings, engineConfig);
         _perplexityAccounts = perplexityAccounts ?? new PerplexityAccountCatalogService();
         _launchAtLogin = launchAtLogin ?? new LaunchAtLoginService();
@@ -285,11 +289,12 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool ShowSingleAgentSummary        => !IsAgentConfigBulkMode && AgentConfigTarget != null;
     public bool AgentConfigSupportsModelSelection =>
         IsAgentConfigBulkMode ||
-        AgentConfigTarget?.Id is not ("codex" or "claude-code" or "gemini-cli");
+        AgentConfigTarget?.Id is not ("codex" or "claude-code" or "gemini-cli" or "amp");
     public bool HasSelectableModels           => SelectableModels.Count > 0;
     public int VisibleSelectableModelCount    => SelectableModels.Count(m => m.IsVisible);
     public bool HasVisibleSelectableModels    => VisibleSelectableModelCount > 0;
     public bool ShowNoModelSearchResults      => HasSelectableModels && !HasVisibleSelectableModels;
+    public bool ShowAmpUpstreamApiKeyField    => AgentConfigTarget?.Id == "amp" && !IsAgentConfigDefaultMode;
     public bool? AllVisibleModelsSelected
     {
         get
@@ -1192,6 +1197,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand] private void ToggleApiKeyDraftVisibility() => ShowApiKeyDraft = !ShowApiKeyDraft;
     [RelayCommand] private void ToggleAddAccountApiKeyVisibility() => ShowAddAccountApiKey = !ShowAddAccountApiKey;
     [RelayCommand] private void TogglePerplexitySessionTokenVisibility() => ShowPerplexitySessionToken = !ShowPerplexitySessionToken;
+    [RelayCommand] private void ToggleAmpUpstreamApiKeyVisibility() => ShowAmpUpstreamApiKey = !ShowAmpUpstreamApiKey;
 
     [RelayCommand]
     public async Task RemoveAccountAsync(ProviderAccountViewModel account)
@@ -1438,6 +1444,8 @@ public partial class MainWindowViewModel : ViewModelBase
         IsAgentConfigBulkMode   = false;
         AgentConfigTarget       = vm;
         AgentConfigResult       = null;
+        AmpUpstreamApiKeyDraft  = vm.Id == "amp" ? _configService.GetAmpUpstreamApiKey() : "";
+        ShowAmpUpstreamApiKey   = false;
         AgentConfigMultiResults = Array.Empty<AgentConfigItemResult>();
         IsAgentConfigManualMode = false;
         IsAgentConfigDefaultMode = false;
@@ -1454,6 +1462,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(AgentConfigApplyLabel));
         OnPropertyChanged(nameof(AgentConfigDialogTitle));
         OnPropertyChanged(nameof(AgentConfigDialogDescription));
+        OnPropertyChanged(nameof(ShowAmpUpstreamApiKeyField));
     }
 
     [RelayCommand]
@@ -1533,6 +1542,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
         IsApplyingAgentConfig = true;
         AgentConfigResult = null;
+
+        // Write Amp upstream API key directly to proxy-config.yaml
+        if (AgentConfigTarget?.Id == "amp" || targets.Any(t => t.Id == "amp"))
+            await _configService.SetAmpUpstreamApiKeyAsync(AmpUpstreamApiKeyDraft.Trim()).ConfigureAwait(false);
+
         var models       = GetSelectedModels();
         var modelEntries = await GetSelectedModelEntriesAsync().ConfigureAwait(false);
         var itemResults  = new List<AgentConfigItemResult>();
@@ -1548,7 +1562,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 if (r.RawPreviews.Count > 0)
                 {
                     var extraPaths = r.RawPreviews.Select(p => p.TargetPath).Where(p => p != r.ConfigPath && !string.IsNullOrEmpty(p));
-                    var joined = string.Join(" + ", new[] { r.ConfigPath }.Concat(extraPaths).Where(p => !string.IsNullOrEmpty(p)));
+                    var joined = string.Join(Environment.NewLine, new[] { r.ConfigPath }.Concat(extraPaths).Where(p => !string.IsNullOrEmpty(p)));
                     if (!string.IsNullOrEmpty(joined)) displayPath = joined;
                 }
                 itemResults.Add(new AgentConfigItemResult(target.Name, r.Success, r.Error, displayPath));

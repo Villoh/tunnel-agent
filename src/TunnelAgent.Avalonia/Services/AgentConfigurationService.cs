@@ -355,8 +355,7 @@ public sealed class AgentConfigurationService
             var secrets = File.Exists(secretsPath)
                 ? JsonNode.Parse(File.ReadAllText(secretsPath))?.AsObject() ?? new JsonObject()
                 : new JsonObject();
-            if (HasApiKey(apiKey)) secrets[$"apiKey@{baseUrl}"] = apiKey;
-            else secrets.Remove($"apiKey@{baseUrl}");
+            secrets[$"apiKey@{baseUrl}"] = HasApiKey(apiKey) ? apiKey : "no-key";
             File.WriteAllText(secretsPath,
                 secrets.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Utf8NoBom);
         }
@@ -367,7 +366,8 @@ public sealed class AgentConfigurationService
         var msg = remove
             ? "Removed proxy config from Amp CLI settings."
             : $"Written {settingsPath} and {secretsPath}. Restart Amp CLI for changes to take effect.";
-        return AgentConfigApplyResult.Ok(msg, settingsPath, backupPath);
+        var raw = remove ? Array.Empty<RawConfigPreview>() : new[] { new RawConfigPreview("secrets.json", secretsPath, "") };
+        return AgentConfigApplyResult.Ok(msg, settingsPath, backupPath, raw);
     }
 
     private static RawConfigPreview[] AmpRaw(string proxyBaseUrl, string apiKey)
@@ -383,10 +383,9 @@ public sealed class AgentConfigurationService
 }
 """)
         };
-        if (HasApiKey(apiKey))
-            previews.Add(new RawConfigPreview("secrets.json", secretsPath, $$"""
+        previews.Add(new RawConfigPreview("secrets.json", secretsPath, $$"""
 {
-  "apiKey@{{baseUrl}}": "{{apiKey}}"
+  "apiKey@{{baseUrl}}": "{{(HasApiKey(apiKey) ? apiKey : "no-key")}}"
 }
 """));
         return previews.ToArray();

@@ -136,6 +136,16 @@ public sealed class ConfigService
 
             """);
 
+        // ── ampcode ──────────────────────────────────────────────────────────────
+        var ampKey = ReadExistingAmpUpstreamApiKey();
+        if (!string.IsNullOrWhiteSpace(ampKey))
+        {
+            sb.AppendLine("ampcode:");
+            sb.AppendLine("  upstream-url: \"https://ampcode.com\"");
+            sb.AppendLine($"  upstream-api-key: {YamlQuote(ampKey)}");
+            sb.AppendLine();
+        }
+
         // ── oauth-excluded-models ─────────────────────────────────────────────
         var disabledOAuth = s.Providers
             .Where(p => !p.Enabled && OAuthTokenDetector.KnownProviders.ContainsKey(p.Id))
@@ -222,6 +232,55 @@ public sealed class ConfigService
 
         var seen = new HashSet<string>();
         return activeKeys.Where(k => seen.Add(k)).ToList();
+    }
+
+    // ── Existing config readers ─────────────────────────────────────────────
+
+    public string GetAmpUpstreamApiKey() => ReadExistingAmpUpstreamApiKey() ?? "";
+
+    public async Task SetAmpUpstreamApiKeyAsync(string apiKey)
+    {
+        if (!File.Exists(ConfigPath))
+        {
+            await WriteConfigAsync().ConfigureAwait(false);
+            return;
+        }
+
+        var lines = (await File.ReadAllLinesAsync(ConfigPath).ConfigureAwait(false)).ToList();
+
+        // Remove existing ampcode block
+        var start = lines.FindIndex(l => l.TrimEnd() == "ampcode:");
+        if (start >= 0)
+        {
+            var end = start + 1;
+            while (end < lines.Count && (lines[end].StartsWith(" ") || lines[end].StartsWith("\t")))
+                end++;
+            lines.RemoveRange(start, end - start);
+            if (start > 0 && string.IsNullOrWhiteSpace(lines[start - 1]))
+                lines.RemoveAt(start - 1);
+        }
+
+        if (!string.IsNullOrWhiteSpace(apiKey))
+        {
+            lines.Add("");
+            lines.Add("ampcode:");
+            lines.Add("  upstream-url: \"https://ampcode.com\"");
+            lines.Add($"  upstream-api-key: {YamlQuote(apiKey)}");
+        }
+
+        await File.WriteAllLinesAsync(ConfigPath, lines).ConfigureAwait(false);
+    }
+
+    private string? ReadExistingAmpUpstreamApiKey()
+    {
+        if (!File.Exists(ConfigPath)) return null;
+        foreach (var line in File.ReadLines(ConfigPath))
+        {
+            var t = line.Trim();
+            if (t.StartsWith("upstream-api-key:", System.StringComparison.Ordinal))
+                return Unyaml(t["upstream-api-key:".Length..].Trim());
+        }
+        return null;
     }
 
     // ── YAML helpers ─────────────────────────────────────────────────────────
