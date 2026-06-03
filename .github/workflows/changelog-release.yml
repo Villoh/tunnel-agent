@@ -66,6 +66,7 @@ jobs:
           echo "should_release=true" >> "$GITHUB_OUTPUT"
 
       # Wait for the CI workflow to complete successfully on this exact commit.
+      # If no CI run exists for this SHA (e.g. changelog-only commits), skip immediately.
       # Polls every 30 s for up to 15 minutes before giving up.
       - name: Wait for CI to pass
         if: steps.check.outputs.should_release == 'true'
@@ -74,7 +75,21 @@ jobs:
           SHA: ${{ github.sha }}
           REPO: ${{ github.repository }}
         run: |
-          echo "Waiting for CI workflow to complete on $SHA..."
+          echo "Checking for CI workflow on $SHA..."
+
+          # Give GitHub a few seconds to register any triggered runs
+          sleep 10
+
+          run_count=$(gh api \
+            "repos/$REPO/actions/runs?head_sha=$SHA&name=CI&per_page=10" \
+            --jq '[.workflow_runs[] | select(.name == "CI")] | length')
+
+          if [[ "$run_count" -eq 0 ]]; then
+            echo "No CI run found for this commit — skipping CI wait."
+            exit 0
+          fi
+
+          echo "Found $run_count CI run(s) — waiting for completion..."
           deadline=$(( $(date +%s) + 900 ))
 
           while true; do
