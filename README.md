@@ -25,6 +25,9 @@
 
 ---
 
+> [!WARNING]
+> This app has only been tested on **Windows**. It may require changes to work correctly on Linux or macOS. Contributions to add full support for both platforms are very welcome.
+
 ## Features
 
 - 🖥️ **Native Windows Experience**: clean Avalonia UI that respects your system theme and keeps local engine management in one place
@@ -39,7 +42,7 @@
 
 ## Engine Overview
 
-### CLIProxyAPI
+### [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
 
 CLIProxyAPI remains the main unified OpenAI-compatible local proxy for OAuth and upstream providers. Tunnel Agent lets you:
 
@@ -48,7 +51,7 @@ CLIProxyAPI remains the main unified OpenAI-compatible local proxy for OAuth and
 - manage connected providers and custom OpenAI-compatible accounts
 - inspect provider quotas and available models exposed by the running proxy
 
-### Perplexity
+### [Perplexity WebUI Scraper](https://github.com/henrique-coder/perplexity-webui-scraper)
 
 Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper engine. You can:
 
@@ -114,16 +117,14 @@ scoop install tunnel-agent
 
 ## Usage
 
-1. **Install an engine**: go to Providers, select CLIProxyAPI or Perplexity, and click Install if no engine is detected.
-2. **Start the engine**: click the play button next to the endpoint. The status indicator turns green when the engine is running.
-3. **Connect providers**: open the Providers tab for CLIProxyAPI, connect OAuth providers (Claude, GitHub Copilot, Gemini CLI…) or add custom API key accounts.
-4. **Copy the endpoint**: the local endpoint (e.g. `http://127.0.0.1:8317/v1`) is shown in the Providers header. Copy it to use in any OpenAI-compatible client.
-5. **Configure agents**: open the Agents tab, detect installed agents, then use the gear icon to auto-write the proxy config for each agent. Select multiple agents at once for bulk setup.
-6. **Track quota**: open the Quota tab to see remaining quota for connected CLIProxyAPI providers and standalone IDE accounts (Kiro, Trae).
+1. **Start the engine**: click the play button next to the endpoint. The status indicator turns green when the engine is running.
+2. **Connect providers**: open the Providers tab for CLIProxyAPI, connect OAuth providers (Claude, GitHub Copilot, Gemini CLI…) or add custom API key accounts.
+3. **Configure your agents**: open the Agents tab to auto-write or manually copy the proxy config for each agent. For unsupported clients, copy the endpoint (e.g. `http://127.0.0.1:8317/v1`) from the Providers header and configure it manually.
+4. **Track quota**: open the Quota tab to see remaining quota for connected CLIProxyAPI providers and standalone IDE accounts (Kiro, Trae).
 
 ## Development
 
-**Requirements:** Windows 10 or later · [.NET SDK 10.0.203+](https://dotnet.microsoft.com/download)
+**Requirements:** [.NET SDK 10.0.203+](https://dotnet.microsoft.com/download)
 
 Clone and run:
 
