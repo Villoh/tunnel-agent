@@ -84,6 +84,8 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _showAppNoUpdateToast;
     [ObservableProperty] private bool _endpointCopied;
     [ObservableProperty] private bool _showUpdateSuccess;
+    [ObservableProperty] private bool _showCliProxyUpdateSuccess;
+    [ObservableProperty] private bool _showPerplexityUpdateSuccess;
     [ObservableProperty] private string _engineStatusText = "Stopped";
 
     [ObservableProperty] private bool _showAddAccountDialog;
@@ -1945,7 +1947,15 @@ public partial class MainWindowViewModel : ViewModelBase
         ConfigHasBadge = false;
         _engineUpdateToastShown[FocusedConfigEngineId] = false;
         ShowUpdateSuccess = true;
-        _ = Task.Delay(4000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowUpdateSuccess = false));
+        var isPerplexity = string.Equals(FocusedConfigEngineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase);
+        if (isPerplexity) ShowPerplexityUpdateSuccess = true;
+        else ShowCliProxyUpdateSuccess = true;
+        _ = Task.Delay(4000).ContinueWith(_ => Dispatcher.UIThread.Post(() =>
+        {
+            ShowUpdateSuccess = false;
+            ShowCliProxyUpdateSuccess = false;
+            ShowPerplexityUpdateSuccess = false;
+        }));
     }
 
     [RelayCommand]
