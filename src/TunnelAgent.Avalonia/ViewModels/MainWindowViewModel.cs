@@ -1860,6 +1860,17 @@ public partial class MainWindowViewModel : ViewModelBase
             provider.IsQuotaSelected = ReferenceEquals(provider, SelectedQuotaProvider);
     }
     [RelayCommand] private void ToggleSidebar() => IsSidebarCollapsed = !IsSidebarCollapsed;
+
+    partial void OnIsSidebarCollapsedChanged(bool value)
+    {
+        SidebarWidth = value ? 56.0 : 176.0;
+        SidebarContentOpacity = value ? 0.0 : 1.0;
+        SidebarToggleIconScaleX = value ? -1.0 : 1.0;
+    }
+
+    [ObservableProperty] private double _sidebarWidth = 176.0;
+    [ObservableProperty] private double _sidebarContentOpacity = 1.0;
+    [ObservableProperty] private double _sidebarToggleIconScaleX = 1.0;
     [RelayCommand] private void ToggleTheme() => ThemeMode = IsDark ? "light" : "dark";
     [RelayCommand] private void DismissToast() => ShowUpdateToast = false;
 

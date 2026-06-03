@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Sidebar collapse/expand animations**: smooth width transition (220ms `CubicEaseInOut`) when toggling the sidebar, with a fade out/in effect (180ms) on all text labels, badges, and status indicators. The toggle button icon flips horizontally with a 220ms scale transition instead of swapping between two separate icons.
+
 - **Dark theme**: Vercel-inspired pure black backgrounds (`#000000` window, `#0A0A0A` sidebar, `#111111` cards) with subtle `#1A1A1A` borders, replacing the previous blue-grey palette.
 - **Agent icon theme-aware rendering**: OpenCode, Pi, Factory Droid, and Cursor Agent SVG icons (which have black fills) now automatically invert to white in dark mode and revert to black in light mode via CSS injection (`path { fill: ... }`). Updates live when the theme is switched without restarting.
 
