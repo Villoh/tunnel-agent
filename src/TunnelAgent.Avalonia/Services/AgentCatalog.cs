@@ -12,7 +12,8 @@ public sealed record AgentDefinition(
     string? DocsUrl,
     string AccentHex,
     string? IconAssetPath = null,
-    string? ConfiguredEnvVar = null);
+    string? ConfiguredEnvVar = null,
+    bool IconNeedsDarkBg = false);
 
 public static class AgentCatalog
 {
@@ -64,7 +65,8 @@ public static class AgentCatalog
             new[] { "~/.config/opencode/opencode.json" },
             "https://opencode.ai",
             "#8B5CF6",
-            AssetsBase + "opencode.svg"),
+            AssetsBase + "opencode.svg",
+            IconNeedsDarkBg: true),
 
         new AgentDefinition(
             "cursor-agent", "Cursor Agent",
@@ -73,7 +75,8 @@ public static class AgentCatalog
             Array.Empty<string>(),
             "https://cursor.sh",
             "#1D9BF0",
-            AssetsBase + "cursor-agent.svg"),
+            AssetsBase + "cursor-agent.svg",
+            IconNeedsDarkBg: true),
 
         new AgentDefinition(
             "aider", "Aider",
@@ -90,7 +93,8 @@ public static class AgentCatalog
             new[] { "~/.pi/agent/models.json" },
             "https://pi.dev/docs/latest/models",
             "#FFFFFF",
-            AssetsBase + "pi.svg"),
+            AssetsBase + "pi.svg",
+            IconNeedsDarkBg: true),
 
         new AgentDefinition(
             "factory-droid", "Factory Droid",
@@ -99,6 +103,7 @@ public static class AgentCatalog
             new[] { "~/.factory/settings.json" },
             "https://docs.factory.ai",
             "#238636",
-            AssetsBase + "factory-droid.svg"),
+            AssetsBase + "factory-droid.svg",
+            IconNeedsDarkBg: true),
     };
 }

@@ -1,5 +1,7 @@
+using System;
 using System.Threading.Tasks;
 using Avalonia.Svg.Skia;
+using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using TunnelAgent.Services;
 
@@ -14,6 +16,7 @@ public partial class AgentViewModel : ViewModelBase
     public string? DocsUrl { get; }
     public string AccentHex { get; }
     public string? IconAssetPath { get; }
+    public bool IconNeedsDarkBg { get; }
     public bool HasIcon => Icon is not null;
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasIcon))]
@@ -51,18 +54,38 @@ public partial class AgentViewModel : ViewModelBase
         DocsUrl = def.DocsUrl;
         AccentHex = def.AccentHex;
         IconAssetPath = def.IconAssetPath;
+        IconNeedsDarkBg = def.IconNeedsDarkBg;
         if (!string.IsNullOrEmpty(def.IconAssetPath))
+        {
             _ = LoadIconAsync(def.IconAssetPath);
+            if (def.IconNeedsDarkBg)
+                SubscribeToThemeChanges(def.IconAssetPath);
+        }
+    }
+
+    private void SubscribeToThemeChanges(string path)
+    {
+        if (Avalonia.Application.Current is null) return;
+        Avalonia.Application.Current.ActualThemeVariantChanged += (_, _) => _ = LoadIconAsync(path);
     }
 
     private async Task LoadIconAsync(string path)
     {
         var normalized = Converters.SvgImageConverter.NormalizeAssetPath(path);
+        var css = GetThemeCss();
         await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
         {
             var source = SvgSource.Load(normalized, null);
-            Icon = source is null ? null : new SvgImage { Source = source };
+            Icon = source is null ? null : new SvgImage { Source = source, Css = css };
         }, Avalonia.Threading.DispatcherPriority.Background);
+    }
+
+    private string? GetThemeCss()
+    {
+        if (!IconNeedsDarkBg) return null;
+        var isDark = Avalonia.Application.Current?.ActualThemeVariant == ThemeVariant.Dark
+                  || Avalonia.Application.Current?.RequestedThemeVariant == ThemeVariant.Dark;
+        return isDark ? "path { fill: #ffffff; }" : "path { fill: #000000; }";
     }
 
     public void ApplyDetection(AgentDetectionResult result)

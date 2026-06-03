@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Dark theme**: Vercel-inspired pure black backgrounds (`#000000` window, `#0A0A0A` sidebar, `#111111` cards) with subtle `#1A1A1A` borders, replacing the previous blue-grey palette.
+- **Agent icon theme-aware rendering**: OpenCode, Pi, Factory Droid, and Cursor Agent SVG icons (which have black fills) now automatically invert to white in dark mode and revert to black in light mode via CSS injection (`path { fill: ... }`). Updates live when the theme is switched without restarting.
+
 - **Engine auto-start**: each engine (CLIProxyAPI and Perplexity WebUI Scraper) now has an "Auto-start" toggle in its ENGINE settings card. When enabled, the engine starts automatically on app launch. The setting is persisted per-engine in `settings.json` under `Engines[].AutoStart`.
 
 - **Amp CLI agent support**: full integration including binary detection (`~/.amp/bin/amp.exe` on Windows), automatic configuration of `~/.config/amp/settings.json` (`amp.url`) and `~/.local/share/amp/secrets.json` (`apiKey@url`), access token field with eye icon in the config dialog, and `ampcode` block written directly to `proxy-config.yaml` (`upstream-url` + `upstream-api-key`).
