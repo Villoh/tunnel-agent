@@ -13,7 +13,6 @@ public sealed class ProviderIconRegistryTests
     [InlineData("openai", PackIconSimpleIconsKind.OpenAi, "#23262E")]
     [InlineData("gemini-cli", PackIconSimpleIconsKind.GoogleGemini, "#4285F4")]
     [InlineData("google", PackIconSimpleIconsKind.GoogleGemini, "#4285F4")]
-    [InlineData("github-copilot", PackIconSimpleIconsKind.GitHub, "#24292E")]
     [InlineData("antigravity", PackIconSimpleIconsKind.OpenAi, "#7C3AED")]
     [InlineData("alibaba", PackIconSimpleIconsKind.AlibabaCloud, "#FF6A00")]
     [InlineData("moonshot", PackIconSimpleIconsKind.OpenAi, "#000000")]

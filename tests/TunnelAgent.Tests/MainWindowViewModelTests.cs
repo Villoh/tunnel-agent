@@ -152,7 +152,6 @@ public sealed class MainWindowViewModelTests
         {
             ("claude",         "Claude",         PackIconSimpleIconsKind.Claude),
             ("codex",          "Codex",          PackIconSimpleIconsKind.OpenAi),
-            ("github-copilot", "GitHub Copilot", PackIconSimpleIconsKind.GitHub),
             ("gemini-cli",     "Gemini CLI",     PackIconSimpleIconsKind.OpenAi),
             ("antigravity",    "Antigravity",    PackIconSimpleIconsKind.OpenAi),
         })
@@ -169,7 +168,7 @@ public sealed class MainWindowViewModelTests
             vm.StandaloneQuotaProviders.Add(p);
         }
 
-        Assert.Equal(7, vm.QuotaProviderCount);
+        Assert.Equal(6, vm.QuotaProviderCount);
     }
 
     [Fact]

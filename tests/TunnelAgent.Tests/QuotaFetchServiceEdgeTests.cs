@@ -69,37 +69,22 @@ public sealed class QuotaFetchServiceEdgeTests
     }
 
     [Fact]
-    public async Task FetchAndApplyAsync_GitHubCopilot_WithoutTokenFile_CompletesWithoutError()
-    {
-        using var temp = new TestTempDirectory();
-        var service = new QuotaFetchService(temp.Path);
-        var provider = new ProviderViewModel("github-copilot", "GitHub Copilot", PackIconSimpleIconsKind.GitHub, "#24292E", "");
-        var account = new ProviderAccountViewModel("github-copilot", "", "test@example.com", isDisabled: false);
-        provider.Accounts.Add(account);
-
-        await service.FetchAndApplyAsync(provider);
-
-        Assert.Empty(account.QuotaBars);
-    }
-
-    [Fact]
     public void QuotaProviderCount_FiveProvidersInVm_CountsCorrectly()
     {
         var vm = new MainWindowViewModel();
         var claude   = new ProviderViewModel("claude",         "Claude",         PackIconSimpleIconsKind.Claude,  "#000000", "");
         var codex    = new ProviderViewModel("codex",          "Codex",          PackIconSimpleIconsKind.OpenAi,  "#000000", "");
-        var copilot  = new ProviderViewModel("github-copilot", "GitHub Copilot", PackIconSimpleIconsKind.GitHub,  "#000000", "");
         var gemini   = new ProviderViewModel("gemini-cli",     "Gemini CLI",     PackIconSimpleIconsKind.OpenAi,  "#000000", "");
         var anti     = new ProviderViewModel("antigravity",    "Antigravity",    PackIconSimpleIconsKind.OpenAi,  "#000000", "");
         var local    = new ProviderViewModel("local-ai",       "Local",          PackIconSimpleIconsKind.OpenAi,  "#000000", "");
         // QuotaProviderCount counts providers that have at least one active account.
-        foreach (var p in new[] { claude, codex, copilot, gemini, anti })
+        foreach (var p in new[] { claude, codex, gemini, anti })
             p.Accounts.Add(new ProviderAccountViewModel(p.Id, "", "Account", isDisabled: false));
 
-        foreach (var p in new[] { claude, codex, copilot, gemini, anti, local })
+        foreach (var p in new[] { claude, codex, gemini, anti, local })
             vm.Providers.Add(p);
 
-        Assert.Equal(5, vm.QuotaProviderCount);
+        Assert.Equal(4, vm.QuotaProviderCount);
     }
 
     [Fact]

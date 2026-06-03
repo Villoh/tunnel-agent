@@ -11,7 +11,6 @@ public sealed class OAuthServiceTests
     [InlineData("codex", true)]
     [InlineData("gemini-cli", true)]
     [InlineData("kimi", true)]
-    [InlineData("github-copilot", true)]
     [InlineData("antigravity", true)]
     [InlineData("local-ai", false)]
     [InlineData("unknown", false)]
