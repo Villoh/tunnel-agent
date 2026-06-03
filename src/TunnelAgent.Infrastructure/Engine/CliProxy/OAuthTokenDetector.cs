@@ -34,7 +34,6 @@ public sealed class OAuthTokenDetector
             ["codex"]           = "codex",
             ["gemini-cli"]      = "gemini",
             ["kimi"]            = "kimi",
-            ["github-copilot"]  = "github-copilot",
             ["antigravity"]     = "antigravity",
         };
 
@@ -120,11 +119,7 @@ public sealed class OAuthTokenDetector
                        || doc.Count > 2;
             if (!hasAuth) return null;
 
-            // Email: prefer JSON field; Copilot files use "username" instead of "email"
             var email = doc["email"]?.GetValue<string>() ?? "";
-            if (string.IsNullOrEmpty(email) &&
-                providerId.Equals("github-copilot", StringComparison.OrdinalIgnoreCase))
-                email = doc["username"]?.GetValue<string>() ?? "";
             if (string.IsNullOrEmpty(email))
                 email = EmailFromFilename(filePath, prefix);
 

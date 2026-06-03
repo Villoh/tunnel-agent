@@ -38,7 +38,6 @@ public static class ProviderIconRegistry
             "perplexity"                     => new(PackIconSimpleIconsKind.Perplexity,   "#1FB8CD"),
             "codex"  or "openai"            => new(PackIconSimpleIconsKind.OpenAi,       "#23262E"),
             "gemini-cli" or "google"        => new(PackIconSimpleIconsKind.GoogleGemini, "#4285F4"),
-            "github-copilot"                => new(PackIconSimpleIconsKind.GitHub,       "#24292E"),
             "antigravity"                   => new(PackIconSimpleIconsKind.OpenAi,       "#7C3AED", AntigravityIconData),
             "alibaba"                       => new(PackIconSimpleIconsKind.AlibabaCloud, "#FF6A00"),
             "kimi"  or "moonshot"           => new(PackIconSimpleIconsKind.OpenAi,       "#000000", KimiIconData),

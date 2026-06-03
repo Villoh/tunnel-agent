@@ -34,7 +34,7 @@
 - 🔀 **Multi-Engine Control**: run and manage both CLIProxyAPI and Perplexity from the same desktop app, with per-engine configuration, endpoint controls, and status
 - 🚀 **One-Click Server Management**: start and stop each local engine directly from the Providers view
 - 🔐 **Credential Storage**: secure handling for OAuth tokens, custom provider API keys, and file-based Perplexity session accounts stored under Tunnel Agent settings
-- 👥 **Provider Management**: connect Claude Code, OpenAI Codex, Gemini CLI, Kimi, GitHub Copilot, Antigravity, and custom OpenAI-compatible providers
+- 👥 **Provider Management**: connect Claude Code, OpenAI Codex, Gemini CLI, Kimi, Antigravity, and custom OpenAI-compatible providers
 - 🧠 **Perplexity WebUI Sessions**: add multiple Perplexity accounts, set a default session, reset accounts safely, and auto-install the Perplexity engine when needed
 - 🎚️ **Model Visibility**: browse available models grouped by connected provider or engine source, including Perplexity-backed model listings
 - 📊 **Live Status**: see sidebar engine health plus focused engine state, endpoint, and release info
@@ -71,10 +71,9 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 | ------------------------ | ------------------- |
 | Claude (Anthropic)       | OAuth               |
 | Gemini CLI (Google)      | OAuth               |
-| GitHub Copilot           | OAuth               |
-| OpenAI Codex             | API key             |
-| Kimi (Moonshot)          | API key             |
-| Antigravity              | API key             |
+| OpenAI Codex             | OAuth               |
+| Kimi (Moonshot)          | OAuth               |
+| Antigravity              | OAuth               |
 | Perplexity               | WebUI session token |
 | Custom OpenAI-compatible | API key + base URL  |
 
@@ -92,12 +91,12 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 | Agent           | Config method                  |
 | --------------- | ------------------------------ |
 | Claude Code     | `~/.claude/settings.json`      |
-| Codex CLI       | `~/.codex/config.toml`         |
+| Codex CLI       | `~/.codex/config.toml` + `auth.json` |
 | Gemini CLI      | Environment variables          |
-| Amp             | `settings.json` + `secrets.json` |
+| Amp             | `~/.config/amp/settings.json` + `~/.local/share/amp/secrets.json` |
 | OpenCode        | `~/.config/opencode/opencode.json` |
 | Pi              | `~/.pi/agent/models.json`      |
-| Factory Droid   | `~/.factory/config.json`       |
+| Factory Droid   | `~/.factory/settings.json`     |
 | Cursor Agent    | Environment variables          |
 | Aider           | Environment variables          |
 
@@ -118,7 +117,7 @@ scoop install tunnel-agent
 ## Usage
 
 1. **Start the engine**: click the play button next to the endpoint. The status indicator turns green when the engine is running.
-2. **Connect providers**: open the Providers tab for CLIProxyAPI, connect OAuth providers (Claude, GitHub Copilot, Gemini CLI…) or add custom API key accounts.
+2. **Connect providers**: open the Providers tab for CLIProxyAPI, connect OAuth providers (Claude, Gemini CLI, Kimi…) or add custom API key accounts.
 3. **Configure your agents**: open the Agents tab to auto-write or manually copy the proxy config for each agent. For unsupported clients, copy the endpoint (e.g. `http://127.0.0.1:8317/v1`) from the Providers header and configure it manually.
 4. **Track quota**: open the Quota tab to see remaining quota for connected CLIProxyAPI providers and standalone IDE accounts (Kiro, Trae).
 

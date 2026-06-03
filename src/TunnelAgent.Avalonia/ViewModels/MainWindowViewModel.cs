@@ -48,7 +48,6 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         "claude",
         "codex",
-        "github-copilot",
         "gemini-cli",
         "antigravity",
     };
@@ -245,11 +244,10 @@ public partial class MainWindowViewModel : ViewModelBase
         (SelectedQuotaAccount?.Id ?? SelectedQuotaProvider?.Id) switch
         {
             "codex"          => 1,
-            "github-copilot" => 2,
-            "gemini-cli"     => 3,
-            "antigravity"    => 4,
-            "kiro"           => 5,
-            "trae"           => 6,
+            "gemini-cli"     => 2,
+            "antigravity"    => 3,
+            "kiro"           => 4,
+            "trae"           => 5,
             _                => 0,
         };
     public string ActiveEngineName => FocusedConfigEngine.Definition.DisplayName;
@@ -268,7 +266,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool ShowQuotaAccountEmptyState => HasQuotaProviders && !HasSelectedQuotaAccounts;
     public string QuotaEmptyStateText => HasQuotaProviders
         ? "Select a supported provider with connected accounts, then refresh quota for an account."
-        : "Quota tracking is available for Claude, OpenAI Codex, and GitHub Copilot after accounts are connected.";
+        : "Quota tracking is available for Claude, OpenAI Codex, Gemini CLI, and Antigravity after accounts are connected.";
     public int EnabledAgentCount    => Agents.Count(a => a.Installed && a.Enabled);
     public int InstalledAgentCount   => Agents.Count(a => a.Installed);
     public int ConfiguredAgentCount  => Agents.Count(a => a.Configured);

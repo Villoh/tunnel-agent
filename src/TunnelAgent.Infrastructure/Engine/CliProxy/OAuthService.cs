@@ -23,7 +23,6 @@ public sealed class OAuthService : IDisposable
             ["codex"]           = "codex-login",
             ["gemini-cli"]      = "login",            // gemini uses just -login
             ["kimi"]            = "kimi-login",
-            ["github-copilot"]  = "github-copilot-login",
             ["antigravity"]     = "antigravity-login",
         };
 
@@ -77,7 +76,6 @@ public sealed class OAuthService : IDisposable
 
         var process = new Process { StartInfo = psi, EnableRaisingEvents = true };
 
-        // Capture output for Copilot device-code extraction
         var outputBuilder = new StringBuilder();
         process.OutputDataReceived += (_, e) =>
         {
@@ -109,22 +107,10 @@ public sealed class OAuthService : IDisposable
             _ = SendDelayedNewlineAsync(process, CodexKeepaliveDelay);
 
         // Wait up to 2s to check the process is alive and capture initial output
-        var waitMs = providerId == "github-copilot" ? 2000 : 1000;
-        await Task.Delay(waitMs);
+        await Task.Delay(1000);
 
         if (!process.HasExited)
-        {
-            // For GitHub Copilot, try to extract device code from output
-            if (providerId == "github-copilot")
-            {
-                var output = outputBuilder.ToString();
-                var code = ExtractCopilotCode(output);
-                if (code is not null)
-                    return (true, $"Browser opened for GitHub authentication.\n\nDevice code (copied to clipboard):\n{code}\n\nPaste it in the browser. The app will detect when you're authenticated.");
-            }
-
             return (true, "Browser opened for authentication.\n\nComplete the login in your browser. The app will detect when you're authenticated automatically.");
-        }
 
         // Process exited quickly — check output
         var earlyOutput = outputBuilder.ToString();
@@ -166,7 +152,6 @@ public sealed class OAuthService : IDisposable
         "codex"          => "OpenAI Codex",
         "gemini-cli"     => "Gemini CLI",
         "kimi"           => "Kimi",
-        "github-copilot" => "GitHub Copilot",
         "antigravity"    => "Antigravity",
         _                => providerId,
     };
@@ -180,17 +165,5 @@ public sealed class OAuthService : IDisposable
                 await process.StandardInput.WriteLineAsync();
         }
         catch { /* ignore — process may have exited */ }
-    }
-
-    private static string? ExtractCopilotCode(string output)
-    {
-        // Look for "enter the code: XXXX-XXXX"
-        const string marker = "enter the code:";
-        var idx = output.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
-        if (idx < 0) return null;
-
-        var rest = output[(idx + marker.Length)..].TrimStart();
-        var end  = rest.IndexOfAny(['\n', '\r', ' ', '\t']);
-        return end > 0 ? rest[..end].Trim() : rest.Trim();
     }
 }

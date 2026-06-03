@@ -20,8 +20,6 @@
                                  Command="{Binding SelectQuotaProviderByIdCommand}" CommandParameter="claude" />
                 <ctrl:SlidingTab Header="Codex" HasIcon="True" IconKind="OpenAi"
                                  Command="{Binding SelectQuotaProviderByIdCommand}" CommandParameter="codex" />
-                <ctrl:SlidingTab Header="Copilot" HasIcon="True" IconKind="GitHub"
-                                 Command="{Binding SelectQuotaProviderByIdCommand}" CommandParameter="github-copilot" />
                 <ctrl:SlidingTab Header="Gemini"  HasIcon="True" IconKind="GoogleGemini"
                                  Command="{Binding SelectQuotaProviderByIdCommand}" CommandParameter="gemini-cli" />
                 <ctrl:SlidingTab Header="Antigravity" HasIcon="True"

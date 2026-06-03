@@ -25,7 +25,6 @@ public sealed class ProviderCatalogService : IDisposable
         new("codex",          "OpenAI Codex",   "OpenAI Codex via ChatGPT plan."),
         new("gemini-cli",     "Gemini CLI",     "Google Gemini via OAuth."),
         new("kimi",           "Kimi",           "Moonshot AI via OAuth."),
-        new("github-copilot", "GitHub Copilot", "GitHub Copilot via OAuth."),
         new("antigravity",    "Antigravity",    "Antigravity AI via OAuth."),
     ];
 

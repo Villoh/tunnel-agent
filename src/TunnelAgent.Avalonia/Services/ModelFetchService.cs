@@ -114,7 +114,6 @@ public sealed class ModelFetchService
         "anthropic"      => "Anthropic",
         "openai"         => "OpenAI",
         "google"         => "Google",
-        "github-copilot" => "GitHub Copilot",
         "moonshot"       => "Kimi",
         "alibaba"        => "Qwen",
         _                => Titlecase(ownedBy),
@@ -125,7 +124,6 @@ public sealed class ModelFetchService
         "anthropic"      => "OAuth",
         "openai"         => "OAuth",
         "google"         => "OAuth",
-        "github-copilot" => "OAuth",
         _                => "API Key",
     };
 
