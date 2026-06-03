@@ -812,7 +812,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _ => "Stopped"
     };
 
-    private void UpdateBadgeState() => ConfigHasBadge = FocusedConfigEngine.UpdateAvailable && !AutoUpdate;
+    private void UpdateBadgeState() => ConfigHasBadge = (FocusedConfigEngine.UpdateAvailable && !AutoUpdate) || AppUpdateAvailable;
 
     private void RefreshSettingsBindings()
     {
@@ -2057,6 +2057,7 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(AppUpdateAvailable));
             OnPropertyChanged(nameof(AppUpdateDownloading));
             OnPropertyChanged(nameof(AppUpdateReady));
+            UpdateBadgeState();
         });
         _appUpdate.DownloadProgressChanged += p => Dispatcher.UIThread.Post(() =>
             AppUpdateDownloadProgress = p);
@@ -2085,7 +2086,9 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task DownloadAppUpdate()
     {
+        SelectedSection = SectionKey.ConfigGeneral;
         await _appUpdate.DownloadAsync();
+        _appUpdate.ApplyAndRestart();
     }
 
     [RelayCommand]

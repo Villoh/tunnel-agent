@@ -65,13 +65,18 @@
                                             IsVisible="{Binding !AppUpdateAvailable}" />
                                     <Button Classes="app primary" Content="Download"
                                             Command="{Binding DownloadAppUpdateCommand}"
-                                            IsVisible="{Binding AppUpdateAvailable}"
-                                            IsEnabled="{Binding !AppUpdateDownloading}" />
-                                    <Button Classes="app primary" Content="Restart &amp; Install"
-                                            Command="{Binding InstallAppUpdateAndRestartCommand}"
-                                            IsVisible="{Binding AppUpdateReady}" />
+                                            IsVisible="{Binding AppUpdateAvailable}" />
                                 </StackPanel>
                             </Grid>
+                            <StackPanel Margin="14,0,14,11"
+                                        IsVisible="{Binding AppUpdateDownloading}">
+                                <ProgressBar Value="{Binding AppUpdateDownloadProgress}" Minimum="0" Maximum="100"
+                                             Height="4" CornerRadius="2"
+                                             Foreground="{DynamicResource AccentBrush}"
+                                             Background="{DynamicResource RowDividerBrush}" />
+                                <TextBlock Classes="row-desc" Margin="0,4,0,0"
+                                           Text="{Binding AppUpdateDownloadProgress, StringFormat='Downloading… {0}%'}" />
+                            </StackPanel>
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>

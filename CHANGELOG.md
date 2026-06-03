@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-06-03
+
+### Fixed
+
+- **App update download progress**: clicking "Download" in the app update toast now navigates to the General settings section and shows a progress bar while downloading. Previously there was no feedback and the download happened silently in the background.
+- **App update applies automatically**: once the download completes the update is applied and the app restarts without requiring a second button press.
+- **Configuration badge on app update**: the orange dot on the Configuration sidebar item now also appears when a Tunnel Agent app update is available, not only when an engine update is pending.
+
 ## [0.5.0] - 2026-06-03
 
 ### Added
@@ -537,7 +545,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.4.5...HEAD
+[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/Villoh/tunnel-agent/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/Villoh/tunnel-agent/compare/v0.4.5...v0.5.0
 [0.4.5]: https://github.com/Villoh/tunnel-agent/compare/v0.4.4...v0.4.5
 [0.4.4]: https://github.com/Villoh/tunnel-agent/compare/v0.4.3...v0.4.4
 [0.4.3]: https://github.com/Villoh/tunnel-agent/compare/v0.4.2...v0.4.3
@@ -553,4 +563,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.2.1]: https://github.com/Villoh/tunnel-agent/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Villoh/tunnel-agent/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Villoh/tunnel-agent/releases/tag/v0.1.0
-

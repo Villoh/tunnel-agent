@@ -997,15 +997,7 @@
                                Text="{Binding AppUpdateNewVersion, StringFormat='Version {0} is ready to download.'}" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="12,0,0,0" VerticalAlignment="Center">
-                    <Button Classes="app primary" Content="Download" Command="{Binding DownloadAppUpdateCommand}"
-                            IsVisible="{Binding !AppUpdateDownloading}" />
-                    <Button Classes="app primary" Content="Restart &amp; Install" Command="{Binding InstallAppUpdateAndRestartCommand}"
-                            IsVisible="{Binding AppUpdateReady}" />
-                    <StackPanel IsVisible="{Binding AppUpdateDownloading}" Spacing="4" VerticalAlignment="Center">
-                        <TextBlock Classes="row-desc" Text="Downloading…" />
-                        <ProgressBar Value="{Binding AppUpdateDownloadProgress}" Minimum="0" Maximum="100"
-                                     Width="80" Height="4" />
-                    </StackPanel>
+                    <Button Classes="app primary" Content="Download" Command="{Binding DownloadAppUpdateCommand}" />
                 </StackPanel>
             </Grid>
         </Border>
