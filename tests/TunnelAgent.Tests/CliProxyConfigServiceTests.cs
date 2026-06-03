@@ -34,10 +34,9 @@ public sealed class ConfigServiceTests
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
         await settings.LoadAsync();
-        settings.Current.CliProxyApiKeys = ["sk-one", "sk-two", "sk-one"];
         var config = new ConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
-
         await config.WriteConfigAsync();
+        await config.WriteApiKeysToConfigAsync(["sk-one", "sk-two", "sk-one"]);
 
         var yaml = await File.ReadAllTextAsync(config.ConfigPath);
         Assert.Contains("api-keys:", yaml);
