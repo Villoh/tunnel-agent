@@ -212,10 +212,12 @@
                                         </Panel.Transitions>
                                         <TextBlock Text="Configuration" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
                                                    IsVisible="{Binding !IsSidebarCollapsed}"/>
-                                        <Ellipse HorizontalAlignment="Right" Width="7" Height="7"
-                                                 Fill="{DynamicResource AccentBrush}"
-                                                 Margin="4,0,0,0"
-                                                 IsVisible="{Binding ConfigHasBadge}" />
+                                        <Grid Classes="status-indicator" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                              Margin="0,0,1,0"
+                                              IsVisible="{Binding ConfigHasBadge}">
+                                            <Ellipse Classes="status-pulse" Fill="{DynamicResource WarnBrush}" />
+                                            <Ellipse Classes="status-dot" Fill="{DynamicResource WarnBrush}" />
+                                        </Grid>
                                     </Panel>
                                 </Grid>
                             </Button>
