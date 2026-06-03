@@ -1,6 +1,6 @@
 using Avalonia;
 using System;
-using System.Threading;
+using TunnelAgent.Services;
 using Velopack;
 
 namespace TunnelAgent;
@@ -14,15 +14,17 @@ internal class Program
         // and exits early when launched by the Velopack installer, not by the user.
         VelopackApp.Build().Run();
 
-        using var mutex = new Mutex(true, "TunnelAgent-SingleInstance", out bool createdNew);
-        if (!createdNew)
+        using var singleInstance = new SingleInstanceService();
+        if (!singleInstance.TryClaimInstance())
             return;
 
-        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        singleInstance.StartListening();
+        BuildAvaloniaApp(singleInstance).StartWithClassicDesktopLifetime(args);
     }
 
-    public static AppBuilder BuildAvaloniaApp()
+    public static AppBuilder BuildAvaloniaApp(SingleInstanceService? singleInstance = null)
     {
+        App.SingleInstance = singleInstance;
         GC.KeepAlive(typeof(Avalonia.Svg.Skia.Svg).Assembly);
         GC.KeepAlive(typeof(Avalonia.Svg.Skia.SvgImageExtension).Assembly);
 

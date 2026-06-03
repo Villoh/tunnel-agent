@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Single instance enforcement**: launching a second instance of the app while one is already running now exits immediately instead of opening a duplicate window.
+- **Single instance enforcement**: launching a second instance of the app while one is already running now brings the existing window to the front (restoring it if minimized or hidden to tray) instead of opening a duplicate window.
 
 ## [0.5.1] - 2026-06-03
 

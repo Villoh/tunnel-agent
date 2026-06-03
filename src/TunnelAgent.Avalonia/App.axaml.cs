@@ -14,6 +14,8 @@ namespace TunnelAgent;
 
 public partial class App : Application
 {
+    internal static SingleInstanceService? SingleInstance { get; set; }
+
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
     public override void OnFrameworkInitializationCompleted()
@@ -34,6 +36,16 @@ public partial class App : Application
             desktop.MainWindow = mainWindow;
             var tray = new TrayService(desktop, mainWindow, vm);
             desktop.Exit += (_, _) => tray.Dispose();
+
+            if (SingleInstance != null)
+                SingleInstance.ActivationRequested += () =>
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        if (mainWindow.WindowState == Avalonia.Controls.WindowState.Minimized)
+                            mainWindow.WindowState = Avalonia.Controls.WindowState.Normal;
+                        mainWindow.Show();
+                        mainWindow.Activate();
+                    });
 
             if (Array.Exists(desktop.Args ?? [], arg => string.Equals(arg, "--start-in-tray", StringComparison.OrdinalIgnoreCase)))
                 Dispatcher.UIThread.Post(mainWindow.Hide, DispatcherPriority.Background);
