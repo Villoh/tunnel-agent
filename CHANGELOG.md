@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Logs dashboard**: added a dedicated Logs section with Requests and Proxy Logs tabs, toolbar actions, search, provider filtering, CSV/log export, and Quotio-inspired dark UI styling.
+- **Requests history**: Requests now show parsed CLIProxyAPI traffic with full timestamps (`yyyy-MM-dd HH:mm:ss`), newest-first ordering, provider labels, status badges, latency, search, provider filtering, and 25-entry pagination over the full in-memory history.
+- **Proxy Logs view**: raw CLIProxyAPI logs are shown in a dedicated tab with search and a 100-line cap for performance.
+- **Management API + file fallback for logs**: Logs use `GET /v0/management/logs` while CLIProxyAPI is running and fall back to reading local `main.log` when the server is stopped; manual refresh works in both modes.
+- **Log actions**: refresh triggers a manual poll with a spin animation, the eraser clears the in-memory view, downloads export Requests as CSV and Proxy Logs as `.log`, and the trash action deletes the underlying log file with a global confirmation dialog.
+- **Logs auto-refresh settings**: added CLIProxy configuration controls for enabling/disabling logs auto-refresh and selecting the polling interval; auto-refresh is disabled by default.
+- **CLIProxy management key support**: generated and persisted a UUID-style management key and wrote `remote-management.secret-key` plus `logging-to-file: true` into the CLIProxy config.
+
 ### Fixed
 
 - **Model selector always shown in bulk agent config**: opening the multi-agent configuration dialog no longer inherits the hidden model selector state from a previously opened single-agent dialog (Claude Code, Codex, Gemini CLI, Amp).

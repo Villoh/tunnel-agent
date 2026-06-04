@@ -308,6 +308,39 @@
                             </Grid>
                         </StackPanel>
                     </Border>
+
+                    <TextBlock Classes="section-label" Text="LOGS"/>
+                    <Border Classes="card" Margin="0,0,0,16">
+                        <StackPanel>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Auto-refresh"/>
+                                    <TextBlock Classes="row-desc" Text="Automatically poll for new log entries in the Logs screen."/>
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                              IsChecked="{Binding LogsAutoRefresh, Mode=TwoWay}" />
+                            </Grid>
+                            <Border Classes="row-divider"
+                                    IsVisible="{Binding LogsAutoRefresh}" />
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto"
+                                  IsVisible="{Binding LogsAutoRefresh}">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="Refresh interval"/>
+                                    <TextBlock Classes="row-desc" Text="How often to check for new entries."/>
+                                </StackPanel>
+                                <ComboBox Grid.Column="1"
+                                          ItemsSource="{Binding LogsRefreshIntervalOptions}"
+                                          SelectedItem="{Binding LogsRefreshIntervalSeconds, Mode=TwoWay}"
+                                          FontSize="12" MinWidth="110">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="x:Int32">
+                                            <TextBlock Text="{Binding StringFormat='{}{0} seconds'}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
 
                 <!-- ══ PERPLEXITY ══════════════════════════════════════════ -->

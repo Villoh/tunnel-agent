@@ -167,12 +167,19 @@ public sealed class ConfigService
 
         AppendApiKeys(sb, ReadApiKeysFromConfig());
 
+        // Preserve existing secret-key from config (CLIProxyAPI bcrypt-hashes it on startup).
+        // Only write the plain key from settings if the config has no key yet — same as Quotio.
+        var existingSecretKey = ReadSecretKeyFromConfig();
+        var secretKey = string.IsNullOrWhiteSpace(existingSecretKey) ? s.ManagementKey : existingSecretKey;
+
         sb.Append($"""
             debug: false
+            logging-to-file: true
             routing:
               strategy: "{routingStrategy}"
             remote-management:
               disable-control-panel: true
+              secret-key: "{secretKey}"
 
             """);
 
@@ -362,6 +369,18 @@ public sealed class ConfigService
         }
 
         await File.WriteAllLinesAsync(ConfigPath, lines).ConfigureAwait(false);
+    }
+
+    private string? ReadSecretKeyFromConfig()
+    {
+        if (!File.Exists(ConfigPath)) return null;
+        foreach (var line in File.ReadLines(ConfigPath))
+        {
+            var t = line.Trim();
+            if (t.StartsWith("secret-key:", System.StringComparison.Ordinal))
+                return Unyaml(t["secret-key:".Length..].Trim());
+        }
+        return null;
     }
 
     private string? ReadExistingAmpUpstreamApiKey()

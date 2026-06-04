@@ -71,6 +71,11 @@ public sealed class EngineService : IManagedEngine
     {
         await _download.InitializeAsync();
 
+        // Always write config on startup so secret-key and logging-to-file are current.
+        // CLIProxyAPI's file watcher will hot-reload if it is already running.
+        if (DownloadService.IsBinaryInstalled())
+            await _config.WriteConfigAsync();
+
         if (!DownloadService.IsBinaryInstalled())
         {
             await _download.CheckForUpdateAsync();

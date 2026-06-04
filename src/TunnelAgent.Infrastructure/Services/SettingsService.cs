@@ -77,6 +77,13 @@ public sealed class SettingsService
     {
         var changed = false;
 
+        // Generate management key once if missing
+        if (string.IsNullOrWhiteSpace(settings.ManagementKey))
+        {
+            settings.ManagementKey = Guid.NewGuid().ToString();
+            changed = true;
+        }
+
         var cliDefaultPort = settings.Port == 0 ? EngineCatalog.CliProxyApi.DefaultPort : settings.Port;
         var cli = settings.GetOrAddEngine(EngineCatalog.CliProxyApi.Id, cliDefaultPort);
         if (cli.Port != settings.Port && settings.Port != 0)

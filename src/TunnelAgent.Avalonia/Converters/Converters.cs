@@ -198,11 +198,50 @@ public sealed class EngineStateToTextConverter : IValueConverter
     public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
 }
 
-/// <summary>Returns true when the bound integer is greater than zero. Used to show/hide sections.</summary>
+/// <summary>Returns true when the bound integer is greater than zero. Pass ConverterParameter="invert" to negate.</summary>
 public sealed class IntGreaterThanZeroConverter : IValueConverter
 {
     public static readonly IntGreaterThanZeroConverter Instance = new();
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
-        value is int i && i > 0;
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var result = value is int i && i > 0;
+        if (parameter is string p && p.Equals("invert", StringComparison.OrdinalIgnoreCase))
+            return !result;
+        return result;
+    }
+    public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
+}
+
+/// <summary>Maps bool IsSuccess to chip background brush: green-tinted for success, red-tinted for failure.</summary>
+public sealed class StatusChipBrushConverter : IValueConverter
+{
+    public static readonly StatusChipBrushConverter Instance = new();
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var isDark = Application.Current?.ActualThemeVariant == ThemeVariant.Dark ||
+                     Application.Current?.RequestedThemeVariant == ThemeVariant.Dark;
+        var success = value is true;
+        var color = success
+            ? (isDark ? Color.Parse("#141F8A5B") : Color.Parse("#141F8A5B"))
+            : (isDark ? Color.Parse("#20E96B57") : Color.Parse("#20C84B36"));
+        return new SolidColorBrush(color);
+    }
+    public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
+}
+
+/// <summary>Maps bool IsSuccess to chip foreground brush.</summary>
+public sealed class StatusChipFgConverter : IValueConverter
+{
+    public static readonly StatusChipFgConverter Instance = new();
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var isDark = Application.Current?.ActualThemeVariant == ThemeVariant.Dark ||
+                     Application.Current?.RequestedThemeVariant == ThemeVariant.Dark;
+        var success = value is true;
+        var color = success
+            ? (isDark ? Color.Parse("#46C788") : Color.Parse("#1F8A5B"))
+            : (isDark ? Color.Parse("#E96B57") : Color.Parse("#C84B36"));
+        return new SolidColorBrush(color);
+    }
     public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
 }

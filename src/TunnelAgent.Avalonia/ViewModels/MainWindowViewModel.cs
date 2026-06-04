@@ -60,6 +60,41 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool _engineReleaseSelectionReady;
     private string? _suppressAutoUpdateForEngineId;
     private readonly AppUpdateService _appUpdate = new();
+    private readonly LogsService _logs = new(IPlatformInfo.Current.AuthDirectory);
+    public LogsViewModel Logs { get; } = new();
+    private bool _logsInitialLoadPending;
+
+    public static IReadOnlyList<int> LogsRefreshIntervalOptions { get; } = [2, 5, 10, 30];
+
+    private void ConfigureLogsService(int? portOverride = null)
+    {
+        var runtime = _settings.Current.GetOrAddEngine(EngineCatalog.CliProxyApi.Id, EngineCatalog.CliProxyApi.DefaultPort);
+        _logs.Configure(portOverride ?? runtime.Port, _settings.Current.ManagementKey);
+    }
+
+    public bool LogsAutoRefresh
+    {
+        get => _settings.Current.LogsAutoRefresh;
+        set
+        {
+            _settings.Current.LogsAutoRefresh = value;
+            _settings.Save();
+            _logs.SetAutoRefresh(value, _settings.Current.LogsRefreshIntervalSeconds);
+            OnPropertyChanged();
+        }
+    }
+
+    public int LogsRefreshIntervalSeconds
+    {
+        get => _settings.Current.LogsRefreshIntervalSeconds;
+        set
+        {
+            _settings.Current.LogsRefreshIntervalSeconds = value;
+            _settings.Save();
+            _logs.SetAutoRefresh(_settings.Current.LogsAutoRefresh, value);
+            OnPropertyChanged();
+        }
+    }
 
     [ObservableProperty] private SectionKey _selectedSection = SectionKey.Providers;
     [ObservableProperty] private bool _isSidebarCollapsed;
@@ -207,6 +242,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 PopulateSelectableModels();
         };
         _modelFetch = new TunnelAgent.Services.ModelFetchService(settings);
+        ConfigureLogsService();
 
         foreach (var engine in _engineRegistry.Engines)
             engine.StateChanged += OnAnyEngineStateChanged;
@@ -227,6 +263,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
         InitApiKeysFromSettings();
         InitAgentsFromCatalog();
+
+        _logs.EntriesLoaded  += (entries, isInitial) => Logs.OnEntriesLoaded(entries, isInitial);
+        _logs.RawLinesLoaded += (lines, isInitial)   => Logs.OnRawLinesLoaded(lines, isInitial);
+        _logs.Cleared        += () => Logs.OnCleared();
+        _logs.SetAutoRefresh(_settings.Current.LogsAutoRefresh, _settings.Current.LogsRefreshIntervalSeconds);
+        _logsInitialLoadPending = true;
     }
 
     // Providers submenu highlight — independent from Config section
@@ -358,7 +400,10 @@ public partial class MainWindowViewModel : ViewModelBase
             if (runtime.Port == value) return;
             runtime.Port = value;
             if (string.Equals(FocusedConfigEngineId, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase))
+            {
                 _settings.Current.Port = value;
+                ConfigureLogsService(value);
+            }
             _settings.Save();
             OnPropertyChanged();
             OnPropertyChanged(nameof(EditablePort));
@@ -622,6 +667,14 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 _cliProxyModelFetchCts = new CancellationTokenSource();
                 _ = _modelFetch.FetchAndApplyAsync(CliProxyModelGroups, engine.Port, engine.Definition.Id, _cliProxyModelFetchCts.Token);
+                // Engine already running at startup — configure management API and start log polling if needed
+                ConfigureLogsService(engine.Port);
+                _logs.SetManagementApiAvailable(true);
+                if (_logsInitialLoadPending)
+                {
+                    _logsInitialLoadPending = false;
+                    _logs.Start();
+                }
             }
             else
             {
@@ -704,12 +757,27 @@ public partial class MainWindowViewModel : ViewModelBase
                         cts = new CancellationTokenSource();
                         _ = _modelFetch.FetchAndApplyAsync(modelGroups, engine.Port, engine.Definition.Id, cts.Token);
                     }
+                    if (isCliProxy)
+                    {
+                        ConfigureLogsService(engine.Port);
+                        _logs.SetManagementApiAvailable(true);
+                        if (_logsInitialLoadPending)
+                        {
+                            _logsInitialLoadPending = false;
+                            _logs.Start();
+                        }
+                    }
                 }
                 else if (engine.State == EngineState.Stopped || engine.State == EngineState.Error)
                 {
                     cts?.Cancel();
                     cts = null;
                     modelGroups.Clear();
+                    if (isCliProxy)
+                    {
+                        _logs.SetManagementApiAvailable(false);
+                        _logs.Stop();
+                    }
                 }
 
                 // Refresh focused state when the active config engine changes
@@ -1456,6 +1524,30 @@ public partial class MainWindowViewModel : ViewModelBase
         SelectedSection = SectionKey.Agents;
         if (!_agentsDetectedOnce)
             _ = DetectAgentsAsync();
+    }
+
+    [RelayCommand]
+    private void SelectLogs()
+    {
+        SelectedSection = SectionKey.Logs;
+        if (_logsInitialLoadPending)
+        {
+            _logsInitialLoadPending = false;
+            ConfigureLogsService(CliProxyEngine.Port);
+            _logs.Start();
+        }
+    }
+
+    [RelayCommand] private void ClearLogs()  => _logs.Clear();
+    [RelayCommand] private Task RefreshLogsAsync() => Logs.RefreshWithSpinAsync(() => _logs.TriggerManualRefresh());
+    [RelayCommand] private void ShowDeleteLogsConfirm()    => Logs.ShowClearConfirm = true;
+    [RelayCommand] private void DismissDeleteLogsConfirm() => Logs.ShowClearConfirm = false;
+    [RelayCommand]
+    private async Task ConfirmDeleteLogsAsync()
+    {
+        Logs.ShowClearConfirm = false;
+        var deleted = await _logs.DeleteLogFileAsync();
+        if (deleted) _logs.ResetAndClear();
     }
 
     [RelayCommand]

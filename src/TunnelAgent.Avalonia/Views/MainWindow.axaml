@@ -198,6 +198,25 @@
                                 </Grid>
                             </Button>
 
+                            <Button Classes="side"
+                                    Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Logs}"
+                                    Command="{Binding SelectLogsCommand}">
+                                <Grid ColumnDefinitions="20,*">
+                                    <lucide:PackIconLucide Grid.Column="0" Kind="ScrollText" Width="15" Height="15"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    <Panel Grid.Column="1"
+                                           Opacity="{Binding SidebarContentOpacity}">
+                                        <Panel.Transitions>
+                                            <Transitions>
+                                                <DoubleTransition Property="Opacity" Duration="0:0:0.18" Easing="CubicEaseInOut" />
+                                            </Transitions>
+                                        </Panel.Transitions>
+                                        <TextBlock Text="Logs" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
+                                                   IsVisible="{Binding !IsSidebarCollapsed}"/>
+                                    </Panel>
+                                </Grid>
+                            </Button>
+
                             <Button Classes="side" Classes.selected="{Binding IsConfigSection}"
                                     Command="{Binding SelectConfigurationCommand}">
                                 <Grid ColumnDefinitions="20,*,Auto">
@@ -344,6 +363,7 @@
                                 <v:ProvidersView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Providers}" />
                                 <v:QuotaView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Quota}" />
                                 <v:AgentsView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Agents}" />
+                                <v:LogsView IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Logs}" />
                                 <v:ConfigurationView IsVisible="{Binding IsConfigSection}" />
                             </Grid>
                         </ContentControl.Content>
@@ -351,6 +371,31 @@
                 </ScrollViewer>
             </Grid>
         </Grid>
+
+        <!-- Delete log file confirmation dialog -->
+        <Border IsVisible="{Binding Logs.ShowClearConfirm}"
+                Background="#88000000"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                ZIndex="50">
+            <Border Classes="card"
+                    MaxWidth="440"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Padding="24">
+                <StackPanel Spacing="14">
+                    <TextBlock Classes="row-label" FontSize="15" Text="Delete log file?" />
+                    <TextBlock Classes="row-desc" TextWrapping="Wrap"
+                               Text="This permanently deletes the CLIProxyAPI log file on disk. The view will be cleared and new entries will appear as the proxy runs." />
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
+                        <Button Classes="app" Content="Cancel"
+                                Command="{Binding DismissDeleteLogsConfirmCommand}" />
+                        <Button Classes="app danger" Content="Delete log file"
+                                Command="{Binding ConfirmDeleteLogsCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
 
         <!-- Reset credentials confirmation dialog -->
         <Border IsVisible="{Binding ShowResetCredentialsDialog}"

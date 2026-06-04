@@ -58,6 +58,15 @@ public sealed class AppSettings
     public bool AutoUpdate { get; set; } = false;
     public bool MaskEmails { get; set; } = false;
     public string PreferredEngineVersion { get; set; } = "";
+
+    /// <summary>Auto-generated key for the CLIProxyAPI management API (enables /v0/management/* and logging).</summary>
+    public string ManagementKey { get; set; } = "";
+
+    /// <summary>Whether the Logs screen polls automatically for new entries.</summary>
+    public bool LogsAutoRefresh { get; set; } = false;
+
+    /// <summary>Polling interval in seconds for the Logs screen (2, 5, 10, 30).</summary>
+    public int LogsRefreshIntervalSeconds { get; set; } = 5;
     public List<EngineRuntimeSettings> Engines { get; set; } = [];
     public List<PerplexityAccountSettings> PerplexityAccounts { get; set; } = [];
 
