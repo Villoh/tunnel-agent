@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Agent icons in config popup follow theme**: the configuration popup (single-agent summary and bulk agent picker) now uses the theme-aware `Icon` property instead of the static `SvgImageConverter`, so OpenCode, Pi, Factory Droid, and Cursor Agent icons correctly switch between dark and light fills when the theme changes.
+- **Single instance: debug and release no longer share mutex**: the mutex and named pipe used for single-instance enforcement now use distinct names in debug builds (`-Debug` suffix), preventing a debug session from activating the release instance and vice versa.
 
 ## [0.5.2] - 2026-06-04
 

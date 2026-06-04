@@ -14,10 +14,16 @@ namespace TunnelAgent.Services;
 /// </summary>
 public sealed class SingleInstanceService : IDisposable
 {
+#if DEBUG
+    private const string MutexName = "TunnelAgent-SingleInstance-Debug";
+    private const string PipeName  = "TunnelAgent-Activate-Debug";
+#else
     private const string MutexName = "TunnelAgent-SingleInstance";
     private const string PipeName  = "TunnelAgent-Activate";
+#endif
 
     private Mutex? _mutex;
+    private bool _mutexOwned;
     private CancellationTokenSource? _cts;
 
     public event Action? ActivationRequested;
@@ -29,7 +35,10 @@ public sealed class SingleInstanceService : IDisposable
     {
         _mutex = new Mutex(initiallyOwned: true, MutexName, out bool createdNew);
         if (createdNew)
+        {
+            _mutexOwned = true;
             return true;
+        }
 
         // Another instance owns the mutex — signal it and surrender.
         try
@@ -76,7 +85,8 @@ public sealed class SingleInstanceService : IDisposable
     {
         _cts?.Cancel();
         _cts?.Dispose();
-        _mutex?.ReleaseMutex();
+        if (_mutexOwned)
+            _mutex?.ReleaseMutex();
         _mutex?.Dispose();
     }
 }
