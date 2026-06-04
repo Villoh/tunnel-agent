@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Model selector always shown in bulk agent config**: opening the multi-agent configuration dialog no longer inherits the hidden model selector state from a previously opened single-agent dialog (Claude Code, Codex, Gemini CLI, Amp).
+
 ## [0.5.3] - 2026-06-05
 
 ### Fixed

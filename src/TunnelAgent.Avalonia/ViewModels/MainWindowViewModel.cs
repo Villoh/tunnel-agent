@@ -1504,6 +1504,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ShowAgentConfigDialog   = true;
         OnPropertyChanged(nameof(ShowAgentConfigAgentPicker));
         OnPropertyChanged(nameof(ShowSingleAgentSummary));
+        OnPropertyChanged(nameof(AgentConfigSupportsModelSelection));
         OnPropertyChanged(nameof(AgentConfigSelectedCount));
         OnPropertyChanged(nameof(AgentConfigApplyLabel));
         OnPropertyChanged(nameof(AgentConfigDialogTitle));
