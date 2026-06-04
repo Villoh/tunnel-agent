@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using IconPacks.Avalonia.SimpleIcons;
 using TunnelAgent.Services;
 using TunnelAgent.ViewModels;
-using Xunit;
 
 using TunnelAgent.Core.Engine;
 using TunnelAgent.Infrastructure.Engine.CliProxy;
@@ -91,6 +90,26 @@ public sealed class ServiceSmokeTests
         await service.FetchAndApplyAsync(provider);
 
         Assert.Empty(account.QuotaBars);
+    }
+
+    [Fact]
+    public void UserEnvironmentService_Remove_ClearsStaleProcessFallback()
+    {
+        var name = $"TUNNEL_AGENT_TEST_{Guid.NewGuid():N}";
+        try
+        {
+            Environment.SetEnvironmentVariable(name, "stale", EnvironmentVariableTarget.Process);
+            TunnelAgent.Infrastructure.Services.UserEnvironmentService.Set(name, "value");
+            Assert.Equal("value", TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get(name));
+
+            TunnelAgent.Infrastructure.Services.UserEnvironmentService.Remove(name);
+
+            Assert.Null(TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get(name));
+        }
+        finally
+        {
+            TunnelAgent.Infrastructure.Services.UserEnvironmentService.Remove(name);
+        }
     }
 
     [Fact]

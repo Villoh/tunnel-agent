@@ -1,6 +1,5 @@
 using System;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 namespace TunnelAgent.Infrastructure.Services;
 
@@ -14,19 +13,19 @@ public static class UserEnvironmentService
         Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.User)
         ?? Environment.GetEnvironmentVariable(name);
 
-    public static void Set(string name, string value) =>
-        Task.Run(() =>
-        {
-            Environment.SetEnvironmentVariable(name, value, EnvironmentVariableTarget.User);
-            BroadcastSettingChange();
-        });
+    public static void Set(string name, string value)
+    {
+        Environment.SetEnvironmentVariable(name, value, EnvironmentVariableTarget.User);
+        Environment.SetEnvironmentVariable(name, value, EnvironmentVariableTarget.Process);
+        BroadcastSettingChange();
+    }
 
-    public static void Remove(string name) =>
-        Task.Run(() =>
-        {
-            Environment.SetEnvironmentVariable(name, null, EnvironmentVariableTarget.User);
-            BroadcastSettingChange();
-        });
+    public static void Remove(string name)
+    {
+        Environment.SetEnvironmentVariable(name, null, EnvironmentVariableTarget.User);
+        Environment.SetEnvironmentVariable(name, null, EnvironmentVariableTarget.Process);
+        BroadcastSettingChange();
+    }
 
     private static void BroadcastSettingChange()
     {

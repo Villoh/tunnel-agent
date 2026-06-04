@@ -35,34 +35,33 @@ public sealed class PerplexityAccountCatalogService
             .Select(a => new PerplexityAccountViewModel(a.Id, a.Label, a.SessionToken, a.IsDefault))
             .ToList();
 
-    public Task AddAsync(string? label, string sessionToken)
+    public async Task AddAsync(string? label, string sessionToken)
     {
         _accounts.Add(label ?? string.Empty, sessionToken);
-        SyncEnvVar();
+        await SyncEnvVarAsync();
         AccountsChanged?.Invoke(this, EventArgs.Empty);
-        return Task.CompletedTask;
     }
 
-    public Task<bool> RemoveAsync(string accountId)
+    public async Task<bool> RemoveAsync(string accountId)
     {
         var removed = _accounts.Remove(accountId);
         if (removed)
         {
-            SyncEnvVar();
+            await SyncEnvVarAsync();
             AccountsChanged?.Invoke(this, EventArgs.Empty);
         }
-        return Task.FromResult(removed);
+        return removed;
     }
 
-    public Task<bool> SetDefaultAsync(string accountId)
+    public async Task<bool> SetDefaultAsync(string accountId)
     {
         var changed = _accounts.SetDefault(accountId);
         if (changed)
         {
-            SyncEnvVar();
+            await SyncEnvVarAsync();
             AccountsChanged?.Invoke(this, EventArgs.Empty);
         }
-        return Task.FromResult(changed);
+        return changed;
     }
 
     public Task<bool> UpdateLabelAsync(string accountId, string label)
@@ -73,19 +72,19 @@ public sealed class PerplexityAccountCatalogService
         return Task.FromResult(changed);
     }
 
-    public void RemoveAll()
+    public async Task RemoveAllAsync()
     {
         _accounts.RemoveAll();
-        UserEnvironmentService.Remove(EnvVarName);
+        await SyncEnvVarAsync();
         AccountsChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    private void SyncEnvVar()
+    private Task SyncEnvVarAsync() => Task.Run(() =>
     {
         var token = _accounts.GetDefault()?.SessionToken;
         if (!string.IsNullOrEmpty(token))
             UserEnvironmentService.Set(EnvVarName, token);
         else
             UserEnvironmentService.Remove(EnvVarName);
-    }
+    });
 }

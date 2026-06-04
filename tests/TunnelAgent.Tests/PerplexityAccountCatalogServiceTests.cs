@@ -1,8 +1,5 @@
-using System.Linq;
-using System.Threading.Tasks;
 using TunnelAgent.Infrastructure.Engine.Perplexity;
 using TunnelAgent.Services;
-using Xunit;
 
 namespace TunnelAgent.Tests;
 
@@ -71,6 +68,29 @@ public sealed class PerplexityAccountCatalogServiceTests
         var remaining = service.List();
         var single = Assert.Single(remaining);
         Assert.True(single.IsDefault);
+    }
+
+    [Fact]
+    public async Task RemoveAllAsync_ClearsStaleProcessEnvironmentToken()
+    {
+        using var temp = new TestTempDirectory();
+        var service = CreateService(temp);
+        var envName = PerplexityAccountCatalogService.EnvVarName;
+        try
+        {
+            Environment.SetEnvironmentVariable(envName, "stale-token", EnvironmentVariableTarget.Process);
+            await service.AddAsync("Primary", "token-1");
+            Assert.Equal("token-1", TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get(envName));
+
+            await service.RemoveAllAsync();
+
+            Assert.Null(TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get(envName));
+            Assert.Empty(service.List());
+        }
+        finally
+        {
+            TunnelAgent.Infrastructure.Services.UserEnvironmentService.Remove(envName);
+        }
     }
 
     [Fact]

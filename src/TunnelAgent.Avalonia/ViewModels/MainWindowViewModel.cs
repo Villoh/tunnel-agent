@@ -1451,14 +1451,13 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand] private void DismissResetPerplexityDialog() => ShowResetPerplexityDialog = false;
 
     [RelayCommand]
-    public Task ConfirmResetPerplexityAccountsAsync()
+    public async Task ConfirmResetPerplexityAccountsAsync()
     {
         ShowResetPerplexityDialog = false;
-        _perplexityAccounts.RemoveAll();
+        await _perplexityAccounts.RemoveAllAsync();
         ConfigurationStatusIsError = false;
         ConfigurationStatusMessage = "Perplexity session accounts removed.";
         ShowConfigurationStatus = true;
-        return Task.CompletedTask;
     }
 
     [RelayCommand] private void ResetAllCredentials() => ShowResetCredentialsDialog = true;
@@ -1895,7 +1894,7 @@ public partial class MainWindowViewModel : ViewModelBase
         // Update default env var if removed key was the default
         var defKey = TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get("TUNNEL_AGENT_CLIPROXY_API_KEY") ?? "";
         if (string.Equals(defKey, key.Value, StringComparison.Ordinal))
-            SyncCliProxyEnvVar(keys.FirstOrDefault() ?? "");
+            await SyncCliProxyEnvVarAsync(keys.FirstOrDefault() ?? "");
         RefreshApiKeyItems();
     }
 
@@ -1903,9 +1902,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private async Task SetDefaultApiKeyAsync(CliProxyApiKeyViewModel? key)
     {
         if (key is null) return;
-        SyncCliProxyEnvVar(key.Value);
+        await SyncCliProxyEnvVarAsync(key.Value);
         RefreshApiKeyItems();
-        await Task.CompletedTask;
     }
 
     private async Task PersistApiKeysAsync(string newKey, bool setDefault)
@@ -1914,18 +1912,18 @@ public partial class MainWindowViewModel : ViewModelBase
         if (!keys.Contains(newKey, StringComparer.Ordinal))
             keys.Add(newKey);
         await _configService.WriteApiKeysToConfigAsync(keys);
-        if (setDefault) SyncCliProxyEnvVar(newKey);
+        if (setDefault) await SyncCliProxyEnvVarAsync(newKey);
         RefreshApiKeyItems();
         await CliProxyEngine.WriteConfigAsync();
     }
 
-    private static void SyncCliProxyEnvVar(string key)
+    private static Task SyncCliProxyEnvVarAsync(string key) => Task.Run(() =>
     {
         if (!string.IsNullOrWhiteSpace(key))
             TunnelAgent.Infrastructure.Services.UserEnvironmentService.Set("TUNNEL_AGENT_CLIPROXY_API_KEY", key);
         else
             TunnelAgent.Infrastructure.Services.UserEnvironmentService.Remove("TUNNEL_AGENT_CLIPROXY_API_KEY");
-    }
+    });
 
     [RelayCommand] private void SelectConfiguration() => SelectedSection = SectionKey.ConfigGeneral;
     [RelayCommand] private void SelectConfigGeneral() => SelectedSection = SectionKey.ConfigGeneral;
