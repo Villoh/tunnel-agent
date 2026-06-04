@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **OpenCode apiKey env placeholders**: OpenCode provider configuration now writes API keys with `{env:ENV_VARIABLE}` placeholders instead of shell-style `${ENV_VARIABLE}` placeholders.
 - **Model selector always shown in bulk agent config**: opening the multi-agent configuration dialog no longer inherits the hidden model selector state from a previously opened single-agent dialog (Claude Code, Codex, Gemini CLI, Amp).
 
 ## [0.5.3] - 2026-06-05
