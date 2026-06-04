@@ -644,7 +644,7 @@
                                         IsVisible="{Binding ShowSingleAgentSummary}">
                                     <Grid ColumnDefinitions="Auto,*">
                                         <Panel Grid.Column="0" Width="28" Height="28" VerticalAlignment="Center">
-                                            <Image Source="{Binding AgentConfigTarget.IconAssetPath, Converter={StaticResource SvgImage}}"
+                                            <Image Source="{Binding AgentConfigTarget.Icon}"
                                                    Width="22" Height="22"
                                                    Stretch="Uniform"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -683,7 +683,7 @@
                                                         <CheckBox IsChecked="{Binding IsSelectedForConfig, Mode=TwoWay}"
                                                                   VerticalAlignment="Center" />
                                                         <Panel Width="22" Height="22">
-                                                            <Image Source="{Binding IconAssetPath, Converter={StaticResource SvgImage}}"
+                                                            <Image Source="{Binding Icon}"
                                                                    Width="18" Height="18"
                                                                    Stretch="Uniform"
                                                                    HorizontalAlignment="Center" VerticalAlignment="Center"
