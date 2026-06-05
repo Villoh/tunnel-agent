@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`ModelEntry.ApiKey` stores raw env var name**: API key references in `ModelEntry` are now stored as plain variable names (e.g. `TUNNEL_AGENT_CLIPROXY_API_KEY`) and each agent's config builder applies its own format — OpenCode wraps with `{env:VAR}`, Droid and Pi wrap with `${VAR}`. Previously, the OpenCode format was applied at creation time and incorrectly propagated to all agents.
+- **Fallback preview shows env var reference instead of raw key**: when the engine is not running and no models are selected, the manual config preview for OpenCode, Pi, and Factory Droid now shows the environment variable placeholder (`{env:TUNNEL_AGENT_CLIPROXY_API_KEY}` / `${TUNNEL_AGENT_CLIPROXY_API_KEY}`) instead of the raw API key value.
+
 ## [0.5.4] - 2026-06-05
 
 ### Added

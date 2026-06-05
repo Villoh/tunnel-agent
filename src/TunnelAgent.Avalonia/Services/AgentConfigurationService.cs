@@ -420,7 +420,7 @@ public sealed class AgentConfigurationService
             ["baseURL"]      = !string.IsNullOrEmpty(first.EngineBaseUrl) ? first.EngineBaseUrl : (string?)null,
             ["litellmProxy"] = true
         };
-        options["apiKey"] = HasApiKey(first.ApiKey) ? first.ApiKey : "no-key";
+        options["apiKey"] = HasApiKey(first.ApiKey) ? $"{{env:{first.ApiKey}}}" : "no-key";
 
         var modelsObj = new JsonObject();
         foreach (var m in entries)
@@ -506,7 +506,7 @@ public sealed class AgentConfigurationService
                     {
                         ["baseURL"]      = proxyBaseUrl,
                         ["litellmProxy"] = true,
-                        ["apiKey"]       = HasApiKey(apiKey) ? apiKey : "no-key"
+                        ["apiKey"]       = HasApiKey(apiKey) ? "{env:TUNNEL_AGENT_CLIPROXY_API_KEY}" : "no-key"
                     }
                 }
             }
@@ -559,7 +559,7 @@ public sealed class AgentConfigurationService
             ["baseUrl"] = !string.IsNullOrEmpty(first.EngineBaseUrl) ? first.EngineBaseUrl : (string?)null,
             ["api"]     = "openai-completions"
         };
-        provider["apiKey"] = HasApiKey(first.ApiKey) ? first.ApiKey : "no-key";
+        provider["apiKey"] = HasApiKey(first.ApiKey) ? $"${{{first.ApiKey}}}" : "no-key";
         provider["models"] = new JsonArray(
             entries.Select(m =>
             {
@@ -634,7 +634,7 @@ public sealed class AgentConfigurationService
             {
                 ["baseUrl"] = proxyBaseUrl,
                 ["api"]     = "openai-completions",
-                ["apiKey"]  = HasApiKey(apiKey) ? apiKey : "no-key"
+                ["apiKey"]  = HasApiKey(apiKey) ? "${TUNNEL_AGENT_CLIPROXY_API_KEY}" : "no-key"
             }}
         };
         return new RawConfigPreview("models.json", configPath,
@@ -679,7 +679,7 @@ public sealed class AgentConfigurationService
         {
             var modelEntries2 = models?.Count > 0
                 ? models
-                : (IEnumerable<ModelEntry>)new[] { new ModelEntry("tunnel-agent", "") };
+                : (IEnumerable<ModelEntry>)new[] { new ModelEntry("tunnel-agent", "", "", "TUNNEL_AGENT_CLIPROXY_API_KEY") };
             foreach (var m in modelEntries2)
                 existing.Add(BuildFactoryDroidEntry(m, proxyBaseUrl, apiKey));
         }
@@ -716,14 +716,14 @@ public sealed class AgentConfigurationService
             ["baseUrl"]     = baseUrl,
             ["provider"]    = provider
         };
-        entry["apiKey"] = HasApiKey(model.ApiKey) ? model.ApiKey : HasApiKey(apiKey) ? apiKey : "no-key";
+        entry["apiKey"] = HasApiKey(model.ApiKey) ? $"${{{model.ApiKey}}}" : HasApiKey(apiKey) ? apiKey : "no-key";
         return entry;
     }
 
     private static RawConfigPreview FactoryDroidRaw(string proxyBaseUrl, string apiKey, IReadOnlyList<ModelEntry>? models)
     {
         var configPath = ExpandPath("~/.factory/settings.json");
-        var modelEntries = models?.Count > 0 ? models : (IEnumerable<ModelEntry>)new[] { new ModelEntry("tunnel-agent", "") };
+        var modelEntries = models?.Count > 0 ? models : (IEnumerable<ModelEntry>)new[] { new ModelEntry("tunnel-agent", "", "", "TUNNEL_AGENT_CLIPROXY_API_KEY") };
         var entries    = new JsonArray(modelEntries
             .Select(m => (JsonNode?)BuildFactoryDroidEntry(m, proxyBaseUrl, apiKey))
             .ToArray());

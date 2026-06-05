@@ -1723,8 +1723,8 @@ public partial class MainWindowViewModel : ViewModelBase
             var isPerplexity = string.Equals(m.EngineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase);
             var engineBaseUrl = isPerplexity ? PerplexityEndpointUrl + "/v1" : CliProxyEndpointUrl + "/v1";
             var apiKey = isPerplexity
-                ? $"{{env:{TunnelAgent.Services.PerplexityAccountCatalogService.EnvVarName}}}"
-                : "{env:TUNNEL_AGENT_CLIPROXY_API_KEY}";
+                ? TunnelAgent.Services.PerplexityAccountCatalogService.EnvVarName
+                : "TUNNEL_AGENT_CLIPROXY_API_KEY";
             var displayName = await ResolveDisplayNameAsync(m.Name, isPerplexity);
             entries.Add(new TunnelAgent.Services.ModelEntry(m.Name, m.Provider, engineBaseUrl, apiKey, displayName));
         }
