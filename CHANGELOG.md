@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- **Quota tab removed from Providers**: the "Quota" tab and embedded Quota Providers panel (Cursor, Kiro, Trae) have been removed from the Providers section. Cursor, Kiro, and Trae remain exclusively in the Quota window.
+
 ### Added
 
 - **Cursor in Providers → Quota**: Cursor is now detected via `%APPDATA%\Cursor\User\globalStorage\state.vscdb` (SQLite) and shown alongside Kiro and Trae in the Quota section. Quota usage (plan requests and on-demand) is fetched from `POST https://api2.cursor.sh/aiserver.v1.DashboardService/GetCurrentPeriodUsage` using the stored bearer token, with automatic token refresh via the OAuth refresh token.

@@ -276,10 +276,9 @@ public partial class MainWindowViewModel : ViewModelBase
     // Providers submenu highlight — independent from Config section
     public bool IsCliProxyEngineSelected => string.Equals(ProvidersEngineId, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase);
     public bool IsPerplexityEngineSelected => string.Equals(ProvidersEngineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase);
-    public bool IsQuotaProvidersTab => string.Equals(ProvidersEngineId, "quota", StringComparison.OrdinalIgnoreCase);
 
     // Tab indices for SlidingTabBar
-    public int ProvidersTabIndex => IsQuotaProvidersTab ? 2 : (IsPerplexityEngineSelected ? 1 : 0);
+    public int ProvidersTabIndex => IsPerplexityEngineSelected ? 1 : 0;
     public int ConfigTabIndex => SelectedSection switch
     {
         SectionKey.ConfigCliProxy => 1,
@@ -571,7 +570,6 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(IsCliProxyEngineSelected));
         OnPropertyChanged(nameof(IsPerplexityEngineSelected));
-        OnPropertyChanged(nameof(IsQuotaProvidersTab));
         OnPropertyChanged(nameof(ProvidersTabIndex));
         OnPropertyChanged(nameof(FocusedModelGroups));
         OnPropertyChanged(nameof(TotalAvailableModelCount));
@@ -1350,15 +1348,10 @@ public partial class MainWindowViewModel : ViewModelBase
         FocusedConfigEngineId = EngineCatalog.PerplexityWebUiScraper.Id;
     }
 
-    [RelayCommand]
-    private void FocusQuotaProviders()
-    {
-        ProvidersEngineId = "quota";
-        SelectedSection   = SectionKey.Providers;
-        FocusedConfigEngineId    = EngineCatalog.CliProxyApi.Id;
-    }
 
-    [RelayCommand] private Task ScanQuotaProviders() => ScanQuotaProvidersAsync();
+
+    [RelayCommand]
+    private Task ScanQuotaProviders() => ScanQuotaProvidersAsync();
 
     public async Task ScanQuotaProvidersAsync()
     {
@@ -1483,8 +1476,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private void SelectProviders()
     {
         SelectedSection = SectionKey.Providers;
-        if (!IsQuotaProvidersTab)
-            FocusedConfigEngineId = ProvidersEngineId;
+        FocusedConfigEngineId = ProvidersEngineId;
     }
 
     [RelayCommand]

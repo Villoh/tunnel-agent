@@ -147,7 +147,7 @@ public sealed class MainWindowViewModelTests
     public void QuotaProviderCount_SevenProviders_CountsAll()
     {
         var vm = new MainWindowViewModel();
-        // 5 standard providers, each with one active account
+        // 4 standard providers, each with one active account
         foreach (var (id, name, icon) in new[]
         {
             ("claude",         "Claude",         PackIconSimpleIconsKind.Claude),

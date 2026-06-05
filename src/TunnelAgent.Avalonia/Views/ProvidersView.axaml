@@ -5,7 +5,6 @@
              xmlns:si="using:IconPacks.Avalonia.SimpleIcons"
              xmlns:lucide="using:IconPacks.Avalonia.Lucide"
              xmlns:ctrl="using:TunnelAgent.Controls"
-             xmlns:v="using:TunnelAgent.Views"
              x:Class="TunnelAgent.Views.ProvidersView"
              x:Name="Root"
              x:DataType="vm:MainWindowViewModel">
@@ -30,14 +29,10 @@
                     <ctrl:SlidingTabBar.Tabs>
                         <ctrl:SlidingTab Header="CLIProxyAPI" Command="{Binding FocusCliProxyCommand}" />
                         <ctrl:SlidingTab Header="Perplexity"  Command="{Binding FocusPerplexityCommand}" />
-                        <ctrl:SlidingTab Header="Quota"       Command="{Binding FocusQuotaProvidersCommand}" />
                     </ctrl:SlidingTabBar.Tabs>
                 </ctrl:SlidingTabBar>
 
-                <v:QuotaProvidersView IsVisible="{Binding IsQuotaProvidersTab}" />
-
-                <Grid Margin="0,0,0,14"
-                      IsVisible="{Binding IsQuotaProvidersTab, Converter={StaticResource InvertBool}}">
+                <Grid Margin="0,0,0,14">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -81,8 +76,7 @@
                     </StackPanel>
                 </Grid>
 
-                <Border Classes="card" Margin="0,0,0,6"
-                        IsVisible="{Binding IsQuotaProvidersTab, Converter={StaticResource InvertBool}}">
+                <Border Classes="card" Margin="0,0,0,6">
                     <Grid Margin="16,12" ColumnDefinitions="22,*,Auto">
                         <Grid Classes="status-indicator">
                             <Ellipse Classes="status-pulse"
@@ -287,10 +281,8 @@
 
                 </StackPanel>
 
-                <TextBlock Classes="section-label" Text="AVAILABLE MODELS"
-                           IsVisible="{Binding IsQuotaProvidersTab, Converter={StaticResource InvertBool}}" />
-                <Border Classes="card"
-                        IsVisible="{Binding IsQuotaProvidersTab, Converter={StaticResource InvertBool}}">
+                <TextBlock Classes="section-label" Text="AVAILABLE MODELS" />
+                <Border Classes="card">
                     <StackPanel>
                         <Grid Margin="16,12" ColumnDefinitions="30,*,Auto">
                             <Border Grid.Column="0" Classes="provider-logo" Background="{DynamicResource AccentSoftBrush}">
