@@ -391,9 +391,8 @@ public sealed class QuotaFetchService
             var dbPath  = Path.Combine(appData, "Cursor", "User", "globalStorage", "state.vscdb");
             if (!File.Exists(dbPath)) return;
 
-            // immutable=True avoids WAL file requirement when Cursor is not running
             string? accessToken = null, refreshToken = null;
-            using (var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={dbPath};Mode=ReadOnly;Immutable=True"))
+            using (var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={dbPath};Mode=ReadOnly"))
             {
                 conn.Open();
                 using var cmd = conn.CreateCommand();
@@ -486,13 +485,13 @@ public sealed class QuotaFetchService
         try
         {
             var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            var path = Path.Combine(userProfile, ".aws", "sso", "cache", "kiro-auth-token.json");
-            if (!File.Exists(path)) return;
+            var tokenPath = Path.Combine(userProfile, ".aws", "sso", "cache", "kiro-auth-token.json");
+            if (!File.Exists(tokenPath)) return;
 
-            var doc = JsonNode.Parse(File.ReadAllText(path))?.AsObject();
+            var doc = JsonNode.Parse(File.ReadAllText(tokenPath))?.AsObject();
             if (doc is null) return;
 
-            var refreshToken = doc["refresh_token"]?.GetValue<string>();
+            var refreshToken = doc["refreshToken"]?.GetValue<string>();
             var expiresAt    = doc["expiresAt"]?.GetValue<string>();
             var authMethod   = doc["authMethod"]?.GetValue<string>() ?? "";
             var profileArn   = doc["profileArn"]?.GetValue<string>();
@@ -500,7 +499,7 @@ public sealed class QuotaFetchService
             var clientIdHash = doc["clientIdHash"]?.GetValue<string>();
             var clientId     = doc["client_id"]?.GetValue<string>();
             var clientSecret = doc["client_secret"]?.GetValue<string>();
-            var accessToken  = doc["access_token"]?.GetValue<string>();
+            var accessToken  = doc["accessToken"]?.GetValue<string>();
 
             if ((clientId is null || clientSecret is null) && clientIdHash is not null)
             {
@@ -517,78 +516,113 @@ public sealed class QuotaFetchService
                 }
             }
 
+            // profileArn fallback: kiro.kiroagent/profile.json
+            if (profileArn is null)
+            {
+                var profilePath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "Kiro", "User", "globalStorage", "kiro.kiroagent", "profile.json");
+                if (File.Exists(profilePath))
+                {
+                    try
+                    {
+                        var pd = JsonNode.Parse(File.ReadAllText(profilePath))?.AsObject();
+                        profileArn = pd?["arn"]?.GetValue<string>();
+                    }
+                    catch { }
+                }
+            }
+
             if (refreshToken is null) return;
 
-            // Machine ID: SHA256(clientId ?? refreshToken) → lowercase hex
-            var seed      = clientId ?? refreshToken;
-            var machineId = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(seed))).ToLowerInvariant();
+            // ── 1. Try local SQLite cache ────────────────────────────────────
+            var (localBars, localPlanTitle, localOverage, localTimestamp) =
+                ReadKiroLocalCache();
 
-            // Refresh token if expired (within 5 minutes)
-            var isExpired = DateTimeOffset.TryParse(expiresAt, out var expiryDt)
-                && expiryDt - DateTimeOffset.UtcNow <= TimeSpan.FromMinutes(5);
+            // ── 2. Enrich plan/overage metadata from q-client.log ───────────
+            var (logPlanTitle, logOverage) = ReadKiroLogMetadata();
+            var planTitle  = logPlanTitle  ?? localPlanTitle;
+            var overageStr = logOverage    ?? localOverage;
 
-            if (isExpired || accessToken is null)
+            // Staleness: if local data is < 10 minutes old, skip live fetch
+            var localAgeMs = localTimestamp.HasValue
+                ? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - localTimestamp.Value
+                : long.MaxValue;
+            var useLocal = localBars.Count > 0 && localAgeMs < 10 * 60 * 1000;
+
+            List<(string title, double used, double total, string? resetAt)>? bars = null;
+
+            if (!useLocal)
             {
-                accessToken = await RefreshKiroTokenAsync(authMethod, region, clientId, clientSecret, refreshToken, ct);
-                if (accessToken is null) return;
-            }
+                // ── 3. Live API fetch ────────────────────────────────────────
+                var seed      = clientId ?? refreshToken;
+                var machineId = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(seed))).ToLowerInvariant();
 
-            // Build URL
-            var url = $"https://q.{region}.amazonaws.com/getUsageLimits?origin=AI_EDITOR&resourceType=AGENTIC_REQUEST";
-            if (!string.IsNullOrEmpty(profileArn))
-                url += $"&profileArn={Uri.EscapeDataString(profileArn)}";
+                var isExpired = DateTimeOffset.TryParse(expiresAt, out var expiryDt)
+                    && expiryDt - DateTimeOffset.UtcNow <= TimeSpan.FromMinutes(5);
 
-            using var req = new HttpRequestMessage(HttpMethod.Get, url);
-            req.Headers.Add("Authorization", $"Bearer {accessToken}");
-            req.Headers.Add("Host", $"q.{region}.amazonaws.com");
-            req.Headers.Add("User-Agent", $"aws-sdk-js/1.0.0 ua/2.1 os/windows#10.0 lang/js md/nodejs#22.21.1 api/codewhispererruntime#1.0.0 m/N,E KiroIDE-0.10.32-{machineId}");
-            req.Headers.Add("x-amz-user-agent", $"aws-sdk-js/1.0.0 KiroIDE-0.10.32-{machineId}");
-            req.Headers.Add("amz-sdk-invocation-id", Guid.NewGuid().ToString().ToLower());
-            req.Headers.Add("amz-sdk-request", "attempt=1; max=1");
-
-            using var resp = await Http.SendAsync(req, ct);
-            if (!resp.IsSuccessStatusCode) return;
-
-            var body = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
-            if (body is null) return;
-
-            var breakdowns = body["usageBreakdownList"]?.AsArray();
-            if (breakdowns is null) return;
-
-            var bars = new List<(string title, double used, double total, long? resetAt)>();
-
-            foreach (var item in breakdowns)
-            {
-                if (item is null) continue;
-                var displayName  = item["displayName"]?.GetValue<string>() ?? "Usage";
-                var currentUsage = item["currentUsage"]?.GetValue<double>() ?? 0;
-                var usageLimit   = item["usageLimit"]?.GetValue<double>() ?? 0;
-                var nextReset    = item["nextDateReset"] is not null ? (long?)((long)item["nextDateReset"]!.GetValue<double>()) : null;
-
-                var trialInfo = item["freeTrialInfo"]?.AsObject();
-                var trialStatus = trialInfo?["freeTrialStatus"]?.GetValue<string>() ?? "";
-
-                if (string.Equals(trialStatus, "ACTIVE", StringComparison.OrdinalIgnoreCase) && trialInfo is not null)
+                if (isExpired || accessToken is null)
                 {
-                    var trialCurrent = trialInfo["currentUsage"]?.GetValue<double>() ?? 0;
-                    var trialLimit   = trialInfo["usageLimit"]?.GetValue<double>() ?? 1;
-                    var trialExpiry  = trialInfo["freeTrialExpiry"] is not null
-                        ? (long?)((long)trialInfo["freeTrialExpiry"]!.GetValue<double>())
-                        : null;
-                    bars.Add(($"Bonus {displayName}", trialCurrent, trialLimit, trialExpiry));
+                    accessToken = await RefreshKiroTokenAsync(authMethod, region, clientId, clientSecret, refreshToken, ct);
+                    if (accessToken is null)
+                    {
+                        // Live refresh failed — fall back to local snapshot if present
+                        if (localBars.Count > 0) bars = localBars;
+                        else return;
+                    }
                 }
 
-                if (usageLimit > 0)
+                if (bars is null && accessToken is not null)
                 {
-                    var title = string.Equals(trialStatus, "ACTIVE", StringComparison.OrdinalIgnoreCase)
-                        ? $"{displayName} (Base)"
-                        : displayName;
-                    bars.Add((title, currentUsage, usageLimit, nextReset));
+                    var url = $"https://q.{region}.amazonaws.com/getUsageLimits?origin=AI_EDITOR&resourceType=AGENTIC_REQUEST";
+                    if (!string.IsNullOrEmpty(profileArn))
+                        url += $"&profileArn={Uri.EscapeDataString(profileArn)}";
+
+                    using var req = new HttpRequestMessage(HttpMethod.Get, url);
+                    req.Headers.Add("Authorization", $"Bearer {accessToken}");
+                    req.Headers.Add("Host", $"q.{region}.amazonaws.com");
+                    req.Headers.Add("User-Agent", $"aws-sdk-js/1.0.0 ua/2.1 os/windows#10.0 lang/js md/nodejs#22.21.1 api/codewhispererruntime#1.0.0 m/N,E KiroIDE-0.10.32-{machineId}");
+                    req.Headers.Add("x-amz-user-agent", $"aws-sdk-js/1.0.0 KiroIDE-0.10.32-{machineId}");
+                    req.Headers.Add("amz-sdk-invocation-id", Guid.NewGuid().ToString().ToLower());
+                    req.Headers.Add("amz-sdk-request", "attempt=1; max=1");
+
+                    if (string.Equals(authMethod, "external_idp", StringComparison.OrdinalIgnoreCase))
+                        req.Headers.Add("TokenType", "EXTERNAL_IDP");
+                    else if (string.Equals(authMethod, "internal", StringComparison.OrdinalIgnoreCase))
+                        req.Headers.Add("redirect-for-internal", "true");
+
+                    using var resp = await Http.SendAsync(req, ct);
+                    if (resp.IsSuccessStatusCode)
+                    {
+                        var body = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
+                        if (body is not null)
+                        {
+                            planTitle  ??= body["subscriptionInfo"]?["subscriptionTitle"]?.GetValue<string>();
+                            overageStr ??= body["overageConfiguration"]?["overageStatus"]?.GetValue<string>();
+                            bars = ParseKiroBreakdownList(body["usageBreakdownList"]?.AsArray(), isLiveApi: true);
+                        }
+                    }
+
+                    // If live fetch failed, fall back to local snapshot
+                    bars ??= localBars.Count > 0 ? localBars : null;
                 }
             }
+            else
+            {
+                bars = localBars;
+            }
+
+            if (bars is null || bars.Count == 0) return;
+
+            var planBadge = planTitle ?? "";
+            if (!string.IsNullOrEmpty(overageStr))
+                planBadge = string.IsNullOrEmpty(planBadge)
+                    ? $"Overage: {overageStr}"
+                    : $"{planBadge} · Overage: {overageStr}";
 
             Avalonia.Threading.Dispatcher.UIThread.Post(() =>
             {
+                if (!string.IsNullOrEmpty(planBadge)) account.PlanBadge = planBadge;
                 account.QuotaBars.Clear();
                 foreach (var (title, used, total, resetAt) in bars)
                 {
@@ -596,13 +630,171 @@ public sealed class QuotaFetchService
                     {
                         Title   = title,
                         Used    = total > 0 ? Math.Clamp(used / total, 0, 1) : 0,
-                        ResetIn = FormatResetAtUnix(resetAt),
+                        ResetIn = FormatResetAtIso(resetAt),
                     });
                 }
             });
         }
         catch (OperationCanceledException) { throw; }
         catch { }
+    }
+
+    /// <summary>
+    /// Reads the normalized usage cache from Kiro's SQLite state.vscdb.
+    /// Returns (bars, planTitle, overageStatus, timestampMs).
+    /// </summary>
+    private static (
+        List<(string title, double used, double total, string? resetAt)> bars,
+        string? planTitle,
+        string? overageStatus,
+        long? timestampMs)
+    ReadKiroLocalCache()
+    {
+        var empty = (new List<(string, double, double, string?)>(), (string?)null, (string?)null, (long?)null);
+        try
+        {
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var dbPath  = Path.Combine(appData, "Kiro", "User", "globalStorage", "state.vscdb");
+            if (!File.Exists(dbPath)) return empty;
+
+            string? rawJson = null;
+            using var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={dbPath};Mode=ReadOnly");
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT value FROM ItemTable WHERE key = 'kiro.kiroAgent'";
+            using var reader = cmd.ExecuteReader();
+            if (reader.Read()) rawJson = reader.GetString(0);
+            if (rawJson is null) return empty;
+
+            var root      = JsonNode.Parse(rawJson)?.AsObject();
+            var stateNode = root?["kiro.resourceNotifications.usageState"];
+            // The value may be a nested JSON object or a double-serialized string
+            JsonNode? usageState = stateNode is System.Text.Json.Nodes.JsonObject
+                ? stateNode
+                : JsonNode.Parse(stateNode?.GetValue<string>() ?? "");
+            if (usageState is null) return empty;
+
+            var timestamp  = usageState["timestamp"]?.GetValue<long>();
+            var breakdowns = usageState["usageBreakdowns"]?.AsArray();
+            if (breakdowns is null) return empty;
+
+            var bars = ParseKiroBreakdownList(breakdowns, isLiveApi: false);
+            return (bars, null, null, timestamp);
+        }
+        catch { return empty; }
+    }
+
+    /// <summary>
+    /// Scans the latest Kiro q-client.log for a GetUsageLimitsCommand response
+    /// and extracts subscriptionTitle + overageStatus.
+    /// </summary>
+    private static (string? planTitle, string? overageStatus) ReadKiroLogMetadata()
+    {
+        try
+        {
+            var appData  = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var logsRoot = Path.Combine(appData, "Kiro", "logs");
+            if (!Directory.Exists(logsRoot)) return (null, null);
+
+            // Find the most recently written q-client.log
+            string? latestLog = null;
+            DateTime latestWrite = DateTime.MinValue;
+            foreach (var session in Directory.GetDirectories(logsRoot))
+            foreach (var window in Directory.GetDirectories(session, "window*"))
+            {
+                var candidate = Path.Combine(window, "exthost", "kiro.kiroAgent", "q-client.log");
+                if (!File.Exists(candidate)) continue;
+                var w = File.GetLastWriteTimeUtc(candidate);
+                if (w > latestWrite) { latestWrite = w; latestLog = candidate; }
+            }
+            if (latestLog is null) return (null, null);
+
+            // Read last 256 KB to find the latest GetUsageLimitsCommand response
+            const int ReadTail = 256 * 1024;
+            string tail;
+            using (var fs = new FileStream(latestLog, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                var offset = Math.Max(0, fs.Length - ReadTail);
+                fs.Seek(offset, SeekOrigin.Begin);
+                using var sr = new StreamReader(fs);
+                tail = sr.ReadToEnd();
+            }
+
+            // Find last occurrence of GetUsageLimitsCommand response JSON block
+            const string Marker = "GetUsageLimitsCommand";
+            var lastIdx = tail.LastIndexOf(Marker, StringComparison.Ordinal);
+            if (lastIdx < 0) return (null, null);
+
+            var jsonStart = tail.IndexOf('{', lastIdx);
+            if (jsonStart < 0) return (null, null);
+
+            var segment = tail.AsSpan(jsonStart);
+            // Find the matching closing brace
+            int depth = 0, end = -1;
+            for (var i = 0; i < segment.Length; i++)
+            {
+                if (segment[i] == '{') depth++;
+                else if (segment[i] == '}') { depth--; if (depth == 0) { end = i + 1; break; } }
+            }
+            if (end < 0) return (null, null);
+
+            var node = JsonNode.Parse(segment[..end].ToString());
+            var planTitle  = node?["subscriptionInfo"]?["subscriptionTitle"]?.GetValue<string>();
+            var overage    = node?["overageConfiguration"]?["overageStatus"]?.GetValue<string>();
+            return (planTitle, overage);
+        }
+        catch { return (null, null); }
+    }
+
+    /// <summary>
+    /// Parses a usageBreakdowns (local) or usageBreakdownList (live API) array
+    /// into the common bar tuple format.
+    /// </summary>
+    private static List<(string title, double used, double total, string? resetAt)>
+        ParseKiroBreakdownList(System.Text.Json.Nodes.JsonArray? items, bool isLiveApi)
+    {
+        var bars = new List<(string, double, double, string?)>();
+        if (items is null) return bars;
+
+        foreach (var item in items)
+        {
+            if (item is null) continue;
+
+            var displayName  = item["displayName"]?.GetValue<string>() ?? "Usage";
+            var currentUsage = item["currentUsage"]?.GetValue<double>() ?? 0;
+            var usageLimit   = item["usageLimit"]?.GetValue<double>() ?? 0;
+
+            // resetDate (local) or nextDateReset (live) — both ISO 8601
+            var resetAt = isLiveApi
+                ? item["nextDateReset"]?.GetValue<string>()
+                : item["resetDate"]?.GetValue<string>();
+
+            // freeTrialUsage (local) or freeTrialInfo (live)
+            var trialNode   = isLiveApi ? item["freeTrialInfo"] : item["freeTrialUsage"];
+            var trialStatus = isLiveApi
+                ? trialNode?["freeTrialStatus"]?.GetValue<string>() ?? ""
+                : (trialNode is not null ? "ACTIVE" : "");  // local: presence implies active
+
+            if (string.Equals(trialStatus, "ACTIVE", StringComparison.OrdinalIgnoreCase)
+                && trialNode is not null)
+            {
+                var trialCurrent = trialNode["currentUsage"]?.GetValue<double>() ?? 0;
+                var trialLimit   = trialNode["usageLimit"]?.GetValue<double>() ?? 1;
+                var trialExpiry  = isLiveApi
+                    ? trialNode["freeTrialExpiry"]?.GetValue<string>()
+                    : trialNode["expiryDate"]?.GetValue<string>();
+                bars.Add(($"Bonus {displayName}", trialCurrent, trialLimit, trialExpiry));
+            }
+
+            if (usageLimit > 0)
+            {
+                var title = string.Equals(trialStatus, "ACTIVE", StringComparison.OrdinalIgnoreCase)
+                    ? $"{displayName} (Base)"
+                    : displayName;
+                bars.Add((title, currentUsage, usageLimit, resetAt));
+            }
+        }
+        return bars;
     }
 
     private static async Task<string?> RefreshKiroTokenAsync(
@@ -614,7 +806,7 @@ public sealed class QuotaFetchService
         {
             if (string.Equals(authMethod, "social", StringComparison.OrdinalIgnoreCase))
             {
-                var url  = $"https://prod.{region}.auth.desktop.kiro.dev/refreshToken";
+                var url  = "https://prod.us-east-1.auth.desktop.kiro.dev/refreshToken";
                 var body = $"{{\"refreshToken\":\"{refreshToken}\"}}"; 
                 using var req  = new HttpRequestMessage(HttpMethod.Post, url);
                 req.Content    = new StringContent(body, Encoding.UTF8, "application/json");
@@ -656,19 +848,29 @@ public sealed class QuotaFetchService
             var doc = JsonNode.Parse(File.ReadAllText(path))?.AsObject();
             if (doc is null) return;
 
+            string? token = null, email = null;
+            var host = "https://api-sg-central.trae.ai";
+
+            // storage.json is Electron safeStorage-encrypted on Windows; try plain JSON first.
             var authInfoRaw = doc["iCubeAuthInfo://icube.cloudide"]?.GetValue<string>();
-            if (string.IsNullOrEmpty(authInfoRaw)) return;
+            if (!string.IsNullOrEmpty(authInfoRaw))
+            {
+                try
+                {
+                    var authDoc = JsonNode.Parse(authInfoRaw)?.AsObject();
+                    token = authDoc?["token"]?.GetValue<string>();
+                    host  = authDoc?["host"]?.GetValue<string>() ?? host;
+                    email = authDoc?["account"]?["email"]?.GetValue<string>();
+                }
+                catch { }
+            }
 
-            var authDoc = JsonNode.Parse(authInfoRaw)?.AsObject();
-            if (authDoc is null) return;
-
-            var token   = authDoc["token"]?.GetValue<string>();
-            var host    = authDoc["host"]?.GetValue<string>() ?? "https://api-sg-central.trae.ai";
-            var acctDoc = authDoc["account"]?.AsObject();
-            var email   = acctDoc?["email"]?.GetValue<string>() ?? "";
+            // Fallback: extract token from the most recent completion.log
+            if (token is null)
+                token = QuotaProviderService.ReadTraeTokenFromLogs(appData);
 
             // Match account by email if set
-            if (!string.IsNullOrEmpty(account.Email) &&
+            if (!string.IsNullOrEmpty(account.Email) && !string.IsNullOrEmpty(email) &&
                 !string.Equals(account.Email, email, StringComparison.OrdinalIgnoreCase))
                 return;
 
@@ -697,6 +899,8 @@ public sealed class QuotaFetchService
             {
                 if (p?["status"]?.GetValue<int>() == 1) { pack = p; break; }
             }
+            // Fallback to first entitlement if none is status=1
+            pack ??= packs.Count > 0 ? packs[0] : null;
             if (pack is null) return;
 
             var baseInfo = pack["entitlement_base_info"];
@@ -707,13 +911,15 @@ public sealed class QuotaFetchService
 
             var plan = prodType switch
             {
-                1 => "PRO",
-                2 => "TEAM",
-                3 => "BUILDER",
-                _ => "FREE",
+                0 => "Free",
+                1 => "Pro",
+                2 => "Team",
+                3 => "Builder",
+                _ => "",
             };
 
-            Avalonia.Threading.Dispatcher.UIThread.Post(() => account.PlanBadge = plan);
+            if (!string.IsNullOrEmpty(plan))
+                Avalonia.Threading.Dispatcher.UIThread.Post(() => account.PlanBadge = plan);
 
             var fastLimit  = quota?["premium_model_fast_request_limit"]?.GetValue<double>() ?? 0;
             var slowLimit  = quota?["premium_model_slow_request_limit"]?.GetValue<double>() ?? 0;
@@ -905,4 +1111,5 @@ public sealed class QuotaFetchService
         if (diff.TotalHours >= 1) return $"Resets in {(int)diff.TotalHours}h {diff.Minutes}m";
         return $"Resets in {diff.Minutes}m";
     }
+
 }

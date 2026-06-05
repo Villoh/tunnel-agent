@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Kiro quota aligned with OpenUsage spec**: auth token field names corrected to camelCase (`accessToken`, `refreshToken`) matching the observed `kiro-auth-token.json` shape. Added `profile.json` fallback for `profileArn`. `ScanKiro` and `FetchKiroAsync` now read Kiro's SQLite usage cache (`state.vscdb` → `kiro.resourceNotifications.usageState`) first, enrich plan title and overage status from the latest `q-client.log` `GetUsageLimitsCommand` response, and only fall back to the live API when the local snapshot is missing or stale (>10 min). `subscriptionInfo.subscriptionTitle` is applied as the plan badge; `overageConfiguration.overageStatus` is appended. Auth-mode headers (`TokenType: EXTERNAL_IDP`, `redirect-for-internal`) are sent for non-social accounts. Social token refresh URL fixed to always use `us-east-1`. Local and live API breakdown shapes unified in `ParseKiroBreakdownList`.
+- **Trae quota aligned with Quotio**: entitlement fallback now uses the first item in `user_entitlement_pack_list` when none has `status == 1`. `product_type` mapping corrected (`0`→`"Free"`, `1`→`"Pro"`, `2`→`"Team"`, `3`→`"Builder"`); unknown types no longer show a misleading `"FREE"` badge.
+- **Trae auth on Windows**: `storage.json` values are Electron `safeStorage`-encrypted on Windows and cannot be decrypted outside the Electron process. `ScanTrae` and `FetchTraeAsync` now try plain JSON parse first (works on macOS) and fall back to scanning the most recent `completion.log` for a `Cloud-IDE-JWT` bearer token when the value is encrypted.
+- **Cursor quota not detected**: `Immutable=True` is not supported by `Microsoft.Data.Sqlite` and was silently throwing an exception inside the `catch {}` block, causing `ScanCursor` and `FetchCursorAsync` to always return not-detected. Replaced with `Mode=ReadOnly`.
+
 ### Removed
 
 - **Quota tab removed from Providers**: the "Quota" tab and embedded Quota Providers panel (Cursor, Kiro, Trae) have been removed from the Providers section. Cursor, Kiro, and Trae remain exclusively in the Quota window.
