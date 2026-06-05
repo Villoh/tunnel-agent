@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Cursor in Providers → Quota**: Cursor is now detected via `%APPDATA%\Cursor\User\globalStorage\state.vscdb` (SQLite) and shown alongside Kiro and Trae in the Quota section. Quota usage (plan requests and on-demand) is fetched from `POST https://api2.cursor.sh/aiserver.v1.DashboardService/GetCurrentPeriodUsage` using the stored bearer token, with automatic token refresh via the OAuth refresh token.
+- **Kiro added to IDE Quota Tracking**: Kiro now appears in the Quota SlidingTabBar alongside Cursor and Trae.
+
+### Removed
+
+- **Cursor Agent removed from agent configuration**: Cursor is an IDE, not a CLI agent. It has been removed from the agents catalog and all related shell-export configuration logic. It is now correctly placed in Providers → Quota (monitor-only).
+
 ### Fixed
 
 - **`ModelEntry.ApiKey` stores raw env var name**: API key references in `ModelEntry` are now stored as plain variable names (e.g. `TUNNEL_AGENT_CLIPROXY_API_KEY`) and each agent's config builder applies its own format — OpenCode wraps with `{env:VAR}`, Droid and Pi wrap with `${VAR}`. Previously, the OpenCode format was applied at creation time and incorrectly propagated to all agents.

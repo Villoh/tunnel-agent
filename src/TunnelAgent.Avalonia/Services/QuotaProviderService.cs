@@ -2,10 +2,12 @@ using System;
 using System.IO;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using Microsoft.Data.Sqlite;
 
 namespace TunnelAgent.Services;
 
 public sealed record QuotaScanResult(
+    QuotaProviderInfo Cursor,
     QuotaProviderInfo Kiro,
     QuotaProviderInfo Trae);
 
@@ -32,7 +34,56 @@ public sealed class QuotaProviderService
         new(false, "", "", null, null, null, null, null, null, null, "us-east-1", null);
 
     public Task<QuotaScanResult> ScanAsync() =>
-        Task.FromResult(new QuotaScanResult(ScanKiro(), ScanTrae()));
+        Task.FromResult(new QuotaScanResult(ScanCursor(), ScanKiro(), ScanTrae()));
+
+    private static QuotaProviderInfo ScanCursor()
+    {
+        try
+        {
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var dbPath  = Path.Combine(appData, "Cursor", "User", "globalStorage", "state.vscdb");
+            if (!File.Exists(dbPath)) return NotDetected;
+
+            // Copy to temp so we don't lock Cursor's live DB
+            // Use immutable=1 to avoid WAL file requirement when Cursor is not running
+            string? accessToken = null, refreshToken = null, email = null, planType = null;
+            using var conn = new SqliteConnection($"Data Source={dbPath};Mode=ReadOnly;Immutable=True");
+            conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT key, value FROM ItemTable WHERE key LIKE 'cursorAuth/%'";
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                switch (reader.GetString(0))
+                {
+                    case "cursorAuth/accessToken":          accessToken  = reader.GetString(1); break;
+                    case "cursorAuth/refreshToken":         refreshToken = reader.GetString(1); break;
+                    case "cursorAuth/cachedEmail":          email        = reader.GetString(1); break;
+                    case "cursorAuth/stripeMembershipType": planType     = reader.GetString(1); break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(accessToken)) return NotDetected;
+
+            return new QuotaProviderInfo(
+                IsDetected:   true,
+                Email:        email        ?? "",
+                PlanType:     planType     ?? "",
+                AccessToken:  accessToken,
+                RefreshToken: refreshToken,
+                ExpiresAt:    null,
+                ClientId:     "KbZUR41cY7W6zRSdpSUJ7I7mLYBKOCmB",
+                ClientSecret: null,
+                AuthMethod:   null,
+                ProfileArn:   null,
+                Region:       "",
+                ApiHost:      "https://api2.cursor.sh");
+        }
+        catch
+        {
+            return NotDetected;
+        }
+    }
 
     private static QuotaProviderInfo ScanKiro()
     {

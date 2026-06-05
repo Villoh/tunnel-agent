@@ -15,6 +15,9 @@ public static class ProviderIconRegistry
     private static readonly string AntigravityIconData =
         "M21.751 22.607c1.34 1.005 3.35.335 1.508-1.508C17.73 15.74 18.904 1 12.037 1 5.17 1 6.342 15.74.815 21.1c-2.01 2.009.167 2.511 1.507 1.506 5.192-3.517 4.857-9.714 9.715-9.714 4.857 0 4.522 6.197 9.714 9.715z";
 
+    private static readonly string CursorIconData =
+        "M22.106 5.68L12.5.135a.998.998 0 00-.998 0L1.893 5.68a.84.84 0 00-.419.726v11.186c0 .3.16.577.42.727l9.607 5.547a.999.999 0 00.998 0l9.608-5.547a.84.84 0 00.42-.727V6.407a.84.84 0 00-.42-.726zm-.603 1.176L12.228 22.92c-.063.108-.228.064-.228-.061V12.34a.59.59 0 00-.295-.51l-9.11-5.26c-.107-.062-.063-.228.062-.228h18.55c.264 0 .428.286.296.514z";
+
     private static readonly string KiroIconData =
         "M7.97 16.376c-1.644 3.642 1.86 4.556 4.443 2.424.76 2.39 3.608.607 4.631-1.247 2.251-4.084 1.342-8.249 1.108-9.108-1.6-5.859-9.6-5.869-10.976.03-.323 1.033-.328 2.206-.507 3.423-.09.617-.16 1.009-.393 1.655-.139.373-.323.7-.62 1.257-.458.865-.264 2.53 2.101 1.665l.224-.1h-.01l-.001.001z";
 
@@ -41,6 +44,7 @@ public static class ProviderIconRegistry
             "antigravity"                   => new(PackIconSimpleIconsKind.OpenAi,       "#7C3AED", AntigravityIconData),
             "alibaba"                       => new(PackIconSimpleIconsKind.AlibabaCloud, "#FF6A00"),
             "kimi"  or "moonshot"           => new(PackIconSimpleIconsKind.OpenAi,       "#000000", KimiIconData),
+            "cursor"                        => new(PackIconSimpleIconsKind.OpenAi,        "#1D9BF0", CursorIconData),
             "kiro"                          => new(PackIconSimpleIconsKind.OpenAi,       "#9046FF", KiroIconData),
             "trae"                          => new(PackIconSimpleIconsKind.OpenAi,       "#32F08C", TraeIconData),
             _                               => new(PackIconSimpleIconsKind.OpenAi,       "#555555"),

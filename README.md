@@ -82,6 +82,7 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 | IDE    | Description                                        |
 | ------ | -------------------------------------------------- |
 | Cursor | Auto-detected when installed and logged in         |
+| Kiro   | Auto-detected when installed and logged in         |
 | Trae   | Auto-detected when installed and logged in         |
 
 > These IDEs are only used for quota usage monitoring. They cannot be used as providers for the proxy.
@@ -97,7 +98,6 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 | OpenCode        | `~/.config/opencode/opencode.json` |
 | Pi              | `~/.pi/agent/models.json`      |
 | Factory Droid   | `~/.factory/settings.json`     |
-| Cursor Agent    | Environment variables          |
 | Aider           | Environment variables          |
 
 ## Installation

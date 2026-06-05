@@ -69,16 +69,6 @@ public static class AgentCatalog
             IconNeedsDarkBg: true),
 
         new AgentDefinition(
-            "cursor-agent", "Cursor Agent",
-            "Cursor's AI agent mode for code editing.",
-            new[] { "cursor-agent", "cursor" },
-            Array.Empty<string>(),
-            "https://cursor.sh",
-            "#1D9BF0",
-            AssetsBase + "cursor-agent.svg",
-            IconNeedsDarkBg: true),
-
-        new AgentDefinition(
             "aider", "Aider",
             "AI pair programming in the terminal. Install via pip.",
             new[] { "aider", "aider.cmd", "aider.exe" },

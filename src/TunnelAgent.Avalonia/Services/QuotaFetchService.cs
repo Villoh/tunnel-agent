@@ -42,6 +42,7 @@ public sealed class QuotaFetchService
             "codex"          => FetchCodexAsync(account, ct),
             "gemini-cli"     => FetchGeminiAsync(account, ct),
             "antigravity"    => FetchAntigravityAsync(account, ct),
+            "cursor"         => FetchCursorAsync(account, ct),
             "kiro"           => FetchKiroAsync(account, ct),
             "trae"           => FetchTraeAsync(account, ct),
             _                => Task.CompletedTask,
@@ -378,6 +379,104 @@ public sealed class QuotaFetchService
             catch { }
         }
         return null;
+    }
+
+    // ── Cursor ─────────────────────────────────────────────────────────────────
+
+    private static async Task FetchCursorAsync(ProviderAccountViewModel account, CancellationToken ct)
+    {
+        try
+        {
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var dbPath  = Path.Combine(appData, "Cursor", "User", "globalStorage", "state.vscdb");
+            if (!File.Exists(dbPath)) return;
+
+            // immutable=True avoids WAL file requirement when Cursor is not running
+            string? accessToken = null, refreshToken = null;
+            using (var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={dbPath};Mode=ReadOnly;Immutable=True"))
+            {
+                conn.Open();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "SELECT key, value FROM ItemTable WHERE key IN ('cursorAuth/accessToken','cursorAuth/refreshToken')";
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    if (reader.GetString(0) == "cursorAuth/accessToken")  accessToken  = reader.GetString(1);
+                    if (reader.GetString(0) == "cursorAuth/refreshToken") refreshToken = reader.GetString(1);
+                }
+            }
+
+            if (string.IsNullOrEmpty(accessToken)) return;
+
+            // Try fetch; if unauthorized, refresh token and retry once
+            var body = await CallCursorPeriodUsageAsync(accessToken, ct);
+            if (body is null && !string.IsNullOrEmpty(refreshToken))
+            {
+                accessToken = await RefreshCursorTokenAsync(refreshToken, ct);
+                if (string.IsNullOrEmpty(accessToken)) return;
+                body = await CallCursorPeriodUsageAsync(accessToken, ct);
+            }
+            if (body is null) return;
+
+            var doc  = JsonNode.Parse(body);
+            var bars = new List<(string title, double fraction, string resetIn)>();
+
+            // billingCycleEnd is unix ms as string
+            var cycleEndMs = doc?["billingCycleEnd"]?.GetValue<string>();
+            var resetIn    = cycleEndMs is not null && long.TryParse(cycleEndMs, out var ms)
+                ? FormatResetAtUnix(ms / 1000)
+                : "";
+
+            // planUsage.{includedSpend, limit, totalPercentUsed}
+            var planUsage = doc?["planUsage"];
+            var used      = planUsage?["includedSpend"]?.GetValue<double>() ?? 0;
+            var limit     = planUsage?["limit"]?.GetValue<double>()         ?? 0;
+            if (limit > 0)
+                bars.Add(("Plan usage", Math.Clamp(used / limit, 0, 1), resetIn));
+            else if (planUsage?["totalPercentUsed"]?.GetValue<double>() is double pct && double.IsFinite(pct))
+                bars.Add(("Plan usage", Math.Clamp(pct / 100.0, 0, 1), resetIn));
+
+            // spendLimitUsage — on-demand budget
+            var spend = doc?["spendLimitUsage"];
+            var indLimit = spend?["individualLimit"]?.GetValue<double>() ?? 0;
+            var indUsed  = spend?["individualUsed"]?.GetValue<double>()  ?? 0;
+            if (indLimit > 0)
+                bars.Add(($"On-demand (${indUsed / 100:0.00}/${indLimit / 100:0.00})",
+                    Math.Clamp(indUsed / indLimit, 0, 1), ""));
+
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                account.QuotaBars.Clear();
+                foreach (var (title, fraction, ri) in bars)
+                    account.QuotaBars.Add(new QuotaBarViewModel { Title = title, Used = fraction, ResetIn = ri });
+            });
+        }
+        catch { }
+    }
+
+    private static async Task<string?> CallCursorPeriodUsageAsync(string token, CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Post,
+            "https://api2.cursor.sh/aiserver.v1.DashboardService/GetCurrentPeriodUsage");
+        req.Headers.Add("Authorization", $"Bearer {token}");
+        req.Headers.Add("Connect-Protocol-Version", "1");
+        req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+        using var resp = await Http.SendAsync(req, ct);
+        if (!resp.IsSuccessStatusCode) return null;
+        return await resp.Content.ReadAsStringAsync(ct);
+    }
+
+    private static async Task<string?> RefreshCursorTokenAsync(string refreshToken, CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Post, "https://api2.cursor.sh/oauth/token");
+        req.Content = new StringContent(
+            $"{{\"grant_type\":\"refresh_token\",\"client_id\":\"KbZUR41cY7W6zRSdpSUJ7I7mLYBKOCmB\",\"refresh_token\":\"{refreshToken}\"}}",
+            System.Text.Encoding.UTF8, "application/json");
+        using var resp = await Http.SendAsync(req, ct);
+        if (!resp.IsSuccessStatusCode) return null;
+        var doc = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
+        if (doc?["shouldLogout"]?.GetValue<bool>() == true) return null;
+        return doc?["access_token"]?.GetValue<string>();
     }
 
     // ── Kiro (Amazon) ─────────────────────────────────────────────────────────

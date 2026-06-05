@@ -256,6 +256,8 @@ public partial class MainWindowViewModel : ViewModelBase
         Providers.CollectionChanged += (_, _) => RefreshQuotaNavigation();
         StandaloneQuotaProviders.CollectionChanged += (_, _) => RefreshQuotaNavigation();
 
+        var cursorIcon = ProviderIconRegistry.Get("cursor");
+        QuotaAccounts.Add(new QuotaProviderViewModel("cursor", "Cursor", cursorIcon.IconKind, cursorIcon.LogoColor, "Cursor AI IDE.", cursorIcon.CustomIconData));
         var kiroIcon = ProviderIconRegistry.Get("kiro");
         QuotaAccounts.Add(new QuotaProviderViewModel("kiro", "Kiro", kiroIcon.IconKind, kiroIcon.LogoColor, "Amazon Kiro AI editor.", kiroIcon.CustomIconData));
         var traeIcon = ProviderIconRegistry.Get("trae");
@@ -290,8 +292,9 @@ public partial class MainWindowViewModel : ViewModelBase
             "codex"          => 1,
             "gemini-cli"     => 2,
             "antigravity"    => 3,
-            "kiro"           => 4,
-            "trae"           => 5,
+            "cursor"         => 4,
+            "kiro"           => 5,
+            "trae"           => 6,
             _                => 0,
         };
     public string ActiveEngineName => FocusedConfigEngine.Definition.DisplayName;
@@ -1373,6 +1376,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void ApplyQuotaScanResult(QuotaScanResult result)
     {
+        ApplySingleQuotaProvider("cursor", "Cursor", result.Cursor);
         ApplySingleQuotaProvider("kiro", "Kiro", result.Kiro);
         ApplySingleQuotaProvider("trae", "Trae", result.Trae);
         RefreshQuotaNavigation();
@@ -1506,7 +1510,7 @@ public partial class MainWindowViewModel : ViewModelBase
                     ?? StandaloneQuotaProviders.FirstOrDefault(p => string.Equals(p.Id, providerId, StringComparison.OrdinalIgnoreCase));
         if (provider is not null) { SelectQuotaProvider(provider); return; }
 
-        // Kiro/Trae not yet detected — add a placeholder so navigation works
+        // Cursor/Kiro/Trae not yet detected — add a placeholder so navigation works
         var quotaAccount = QuotaAccounts.FirstOrDefault(q => string.Equals(q.Id, providerId, StringComparison.OrdinalIgnoreCase));
         if (quotaAccount is null) return;
         var icon = ProviderIconRegistry.Get(providerId);

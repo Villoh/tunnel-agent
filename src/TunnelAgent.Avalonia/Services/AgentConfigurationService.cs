@@ -113,7 +113,6 @@ public sealed class AgentConfigurationService
             "opencode"       => new[] { OpenCodeRaw(proxyBaseUrl, apiKey, models) },
             "pi"             => new[] { PiRaw(proxyBaseUrl, apiKey, models) },
             "factory-droid"  => new[] { FactoryDroidRaw(proxyBaseUrl, apiKey, modelEntries) },
-            "cursor-agent"   => new[] { EnvExportRaw("cursor-agent", CursorEnv(proxyBaseUrl, apiKey)) },
             "aider"          => new[] { EnvExportRaw("aider", AiderEnv(proxyBaseUrl, apiKey)) },
             _                => Array.Empty<RawConfigPreview>()
         };
@@ -133,9 +132,6 @@ public sealed class AgentConfigurationService
                 "amp"          => ApplyAmp(proxyBaseUrl, apiKey, remove),
                 "opencode"     => AgentConfigApplyResult.Failure("OpenCode requires async apply."),
                 "factory-droid"=> ApplyFactoryDroid(proxyBaseUrl, apiKey, remove, modelEntries),
-                "cursor-agent" => AgentConfigApplyResult.Ok(
-                    "Cursor Agent uses environment variables. Copy the shell export and add it to your shell profile.",
-                    raw: new[] { EnvExportRaw("cursor-agent", CursorEnv(proxyBaseUrl, apiKey)) }),
                 "aider"        => AgentConfigApplyResult.Ok(
                     "Aider uses environment variables. Copy the shell export and add it to your shell profile.",
                     raw: new[] { EnvExportRaw("aider", AiderEnv(proxyBaseUrl, apiKey)) }),
@@ -732,12 +728,7 @@ public sealed class AgentConfigurationService
         return new RawConfigPreview("config.json", configPath, content);
     }
 
-    // ── Env-var agents (Cursor / Aider) ──────────────────────────────────────
-
-    private static string[] CursorEnv(string proxyBaseUrl, string apiKey) =>
-        HasApiKey(apiKey)
-            ? ["ANTHROPIC_BASE_URL" + "=" + proxyBaseUrl, "ANTHROPIC_AUTH_TOKEN" + "=" + apiKey]
-            : ["ANTHROPIC_BASE_URL" + "=" + proxyBaseUrl];
+    // ── Env-var agents (Aider) ──────────────────────────────────────────────
 
     private static string[] AiderEnv(string proxyBaseUrl, string apiKey) =>
         HasApiKey(apiKey)
