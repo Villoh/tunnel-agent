@@ -887,9 +887,16 @@ public sealed class QuotaFetchService
                 catch { }
             }
 
-            // Fallback: extract token from the most recent completion.log
+            // Fallback: extract token + userName from the most recent completion.log
             if (token is null)
-                token = QuotaProviderService.ReadTraeTokenFromLogs(appData);
+            {
+                var (logToken, logUser) = QuotaProviderService.ReadTraeTokenFromLogs(appData);
+                token = logToken;
+                email ??= logUser;
+            }
+
+            if (!string.IsNullOrEmpty(email))
+                Avalonia.Threading.Dispatcher.UIThread.Post(() => account.Email = email);
 
             // Match account by email if set
             if (!string.IsNullOrEmpty(account.Email) && !string.IsNullOrEmpty(email) &&
@@ -925,11 +932,12 @@ public sealed class QuotaFetchService
             pack ??= packs.Count > 0 ? packs[0] : null;
             if (pack is null) return;
 
-            var baseInfo = pack["entitlement_base_info"];
-            var usage    = pack["usage"];
-            var quota    = baseInfo?["quota"];
-            var endTime  = baseInfo?["end_time"]?.GetValue<long>();
-            var prodType = baseInfo?["product_type"]?.GetValue<int>() ?? 0;
+            var baseInfo      = pack["entitlement_base_info"];
+            var usage         = pack["usage"];
+            var quota         = baseInfo?["quota"];
+            var endTime       = baseInfo?["end_time"]?.GetValue<long>();
+            var prodType      = baseInfo?["product_type"]?.GetValue<int>() ?? 0;
+            var isDollarBased = body["is_dollar_usage_billing"]?.GetValue<bool>() ?? false;
 
             var plan = prodType switch
             {
@@ -943,21 +951,35 @@ public sealed class QuotaFetchService
             if (!string.IsNullOrEmpty(plan))
                 Avalonia.Threading.Dispatcher.UIThread.Post(() => account.PlanBadge = plan);
 
-            var fastLimit  = quota?["premium_model_fast_request_limit"]?.GetValue<double>() ?? 0;
-            var slowLimit  = quota?["premium_model_slow_request_limit"]?.GetValue<double>() ?? 0;
-            var advLimit   = quota?["advanced_model_request_limit"]?.GetValue<double>() ?? 0;
-            var autoLimit  = quota?["auto_completion_limit"]?.GetValue<double>() ?? 0;
-
-            var fastUsed   = usage?["premium_model_fast_amount"]?.GetValue<double>() ?? 0;
-            var slowUsed   = usage?["premium_model_slow_amount"]?.GetValue<double>() ?? 0;
-            var advUsed    = usage?["advanced_model_amount"]?.GetValue<double>() ?? 0;
-            var autoUsed   = usage?["auto_completion_amount"]?.GetValue<double>() ?? 0;
-
             var bars = new List<(string title, double used, double total)>();
-            if (fastLimit > 0) bars.Add(("Premium Fast",   fastUsed, fastLimit));
-            if (slowLimit > 0) bars.Add(("Premium Slow",   slowUsed, slowLimit));
-            if (advLimit  > 0) bars.Add(("Advanced Models", advUsed,  advLimit));
-            if (autoLimit > 0) bars.Add(("Auto Completion", autoUsed, autoLimit));
+
+            if (isDollarBased)
+            {
+                var basicLimit = quota?["basic_usage_limit"]?.GetValue<double>() ?? 0;
+                var basicUsed  = usage?["basic_usage_amount"]?.GetValue<double>() ?? 0;
+                if (basicLimit > 0) bars.Add(($"Free plan (${basicUsed:0.00}/${basicLimit:0.00})", basicUsed, basicLimit));
+
+                var autoLimit = quota?["auto_completion_limit"]?.GetValue<double>() ?? 0;
+                var autoUsed  = usage?["auto_completion_amount"]?.GetValue<double>() ?? 0;
+                if (autoLimit > 0) bars.Add(("Autocomplete", autoUsed, autoLimit));
+            }
+            else
+            {
+                var fastLimit = quota?["premium_model_fast_request_limit"]?.GetValue<double>() ?? 0;
+                var slowLimit = quota?["premium_model_slow_request_limit"]?.GetValue<double>() ?? 0;
+                var advLimit  = quota?["advanced_model_request_limit"]?.GetValue<double>() ?? 0;
+                var autoLimit = quota?["auto_completion_limit"]?.GetValue<double>() ?? 0;
+
+                var fastUsed = usage?["premium_model_fast_amount"]?.GetValue<double>() ?? 0;
+                var slowUsed = usage?["premium_model_slow_amount"]?.GetValue<double>() ?? 0;
+                var advUsed  = usage?["advanced_model_amount"]?.GetValue<double>() ?? 0;
+                var autoUsed = usage?["auto_completion_amount"]?.GetValue<double>() ?? 0;
+
+                if (fastLimit > 0) bars.Add(("Premium Fast",    fastUsed, fastLimit));
+                if (slowLimit > 0) bars.Add(("Premium Slow",    slowUsed, slowLimit));
+                if (advLimit  > 0) bars.Add(("Advanced Models", advUsed,  advLimit));
+                if (autoLimit > 0) bars.Add(("Auto Completion", autoUsed, autoLimit));
+            }
 
             Avalonia.Threading.Dispatcher.UIThread.Post(() =>
             {

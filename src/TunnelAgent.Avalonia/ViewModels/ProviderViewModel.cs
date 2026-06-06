@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -80,10 +81,15 @@ public partial class ProviderAccountViewModel : ViewModelBase
     private static string MaskEmailAddress(string email)
     {
         var at = email.IndexOf('@');
-        if (at <= 0) return email;
-        var maskedLocal  = new string('•', at);
-        var maskedDomain = new string('•', email.Length - at - 1);
-        return $"{maskedLocal}@{maskedDomain}";
+        if (at > 0)
+        {
+            var maskedLocal  = new string('•', at);
+            var maskedDomain = new string('•', email.Length - at - 1);
+            return $"{maskedLocal}@{maskedDomain}";
+        }
+        // Non-email identifier (e.g. userId): show first 4 chars then bullets
+        var keep = Math.Min(4, email.Length);
+        return email[..keep] + new string('•', Math.Max(0, email.Length - keep));
     }
 
 }

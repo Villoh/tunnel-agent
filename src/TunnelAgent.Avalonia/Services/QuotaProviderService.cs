@@ -191,9 +191,13 @@ public sealed class QuotaProviderService
                 catch { }
             }
 
-            // Fallback: extract token from the most recent completion.log
+            // Fallback: extract token + userName from the most recent completion.log
             if (token is null)
-                token = ReadTraeTokenFromLogs(appData);
+            {
+                var (logToken, logUser) = ReadTraeTokenFromLogs(appData);
+                token = logToken;
+                email ??= logUser;
+            }
 
             if (token is null) return NotDetected;
 
@@ -221,14 +225,13 @@ public sealed class QuotaProviderService
     /// Scans the most recent Trae completion.log for a Cloud-IDE-JWT bearer token.
     /// Used as fallback when storage.json values are Electron safeStorage-encrypted (Windows).
     /// </summary>
-    internal static string? ReadTraeTokenFromLogs(string appData)
+    internal static (string? token, string? userName) ReadTraeTokenFromLogs(string appData)
     {
         try
         {
             var logsRoot = Path.Combine(appData, "Trae", "logs");
-            if (!Directory.Exists(logsRoot)) return null;
+            if (!Directory.Exists(logsRoot)) return (null, null);
 
-            // Find the latest session directory (format: yyyyMMddTHHmmss)
             string? latestLog = null;
             DateTime latestWrite = DateTime.MinValue;
             foreach (var session in Directory.GetDirectories(logsRoot))
@@ -240,9 +243,8 @@ public sealed class QuotaProviderService
                 var w = File.GetLastWriteTimeUtc(candidate);
                 if (w > latestWrite) { latestWrite = w; latestLog = candidate; }
             }
-            if (latestLog is null) return null;
+            if (latestLog is null) return (null, null);
 
-            // Read last 64 KB and find the most recent Cloud-IDE-JWT occurrence
             const int ReadTail = 64 * 1024;
             string tail;
             using (var fs = new FileStream(latestLog, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -252,16 +254,31 @@ public sealed class QuotaProviderService
                 tail = sr.ReadToEnd();
             }
 
-            // Extract last occurrence of Cloud-IDE-JWT <token>
-            const string Marker = "Cloud-IDE-JWT ";
-            var lastIdx = tail.LastIndexOf(Marker, StringComparison.Ordinal);
-            if (lastIdx < 0) return null;
+            // Extract token
+            const string TokenMarker = "Cloud-IDE-JWT ";
+            var tokenIdx = tail.LastIndexOf(TokenMarker, StringComparison.Ordinal);
+            string? token = null;
+            if (tokenIdx >= 0)
+            {
+                var s = tokenIdx + TokenMarker.Length;
+                var e = tail.IndexOfAny(new[] { '"', ' ', '\n', '\r' }, s);
+                token = e < 0 ? tail[s..] : tail[s..e];
+            }
 
-            var start = lastIdx + Marker.Length;
-            var end   = tail.IndexOfAny(new[] { '"', ' ', '\n', '\r' }, start);
-            return end < 0 ? tail[start..] : tail[start..end];
+            // Extract userName: "userName: user12345"
+            const string UserMarker = "userName: ";
+            var userIdx = tail.LastIndexOf(UserMarker, StringComparison.Ordinal);
+            string? userName = null;
+            if (userIdx >= 0)
+            {
+                var s = userIdx + UserMarker.Length;
+                var e = tail.IndexOfAny(new[] { '\n', '\r', ',' , '"', '}' }, s);
+                userName = (e < 0 ? tail[s..] : tail[s..e]).Trim();
+            }
+
+            return (token, userName);
         }
-        catch { return null; }
+        catch { return (null, null); }
     }
 
 }
