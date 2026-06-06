@@ -581,8 +581,10 @@ public sealed class QuotaFetchService
                     using var req = new HttpRequestMessage(HttpMethod.Get, url);
                     req.Headers.Add("Authorization", $"Bearer {accessToken}");
                     req.Headers.Add("Host", $"q.{region}.amazonaws.com");
-                    req.Headers.Add("User-Agent", $"aws-sdk-js/1.0.0 ua/2.1 os/windows#10.0 lang/js md/nodejs#22.21.1 api/codewhispererruntime#1.0.0 m/N,E KiroIDE-0.10.32-{machineId}");
-                    req.Headers.Add("x-amz-user-agent", $"aws-sdk-js/1.0.0 KiroIDE-0.10.32-{machineId}");
+                    // User-Agent contains commas which are invalid per RFC 7230 strict parsing;
+                    // TryAddWithoutValidation bypasses that check.
+                    req.Headers.TryAddWithoutValidation("User-Agent", $"aws-sdk-js/1.0.0 ua/2.1 os/windows#10.0 lang/js md/nodejs#22.21.1 api/codewhispererruntime#1.0.0 m/N,E KiroIDE-0.10.32-{machineId}");
+                    req.Headers.TryAddWithoutValidation("x-amz-user-agent", $"aws-sdk-js/1.0.0 KiroIDE-0.10.32-{machineId}");
                     req.Headers.Add("amz-sdk-invocation-id", Guid.NewGuid().ToString().ToLower());
                     req.Headers.Add("amz-sdk-request", "attempt=1; max=1");
 
@@ -600,6 +602,12 @@ public sealed class QuotaFetchService
                             planTitle  ??= body["subscriptionInfo"]?["subscriptionTitle"]?.GetValue<string>();
                             overageStr ??= body["overageConfiguration"]?["overageStatus"]?.GetValue<string>();
                             bars = ParseKiroBreakdownList(body["usageBreakdownList"]?.AsArray(), isLiveApi: true);
+                            // email is null in the API response for social accounts; fall back to userId
+                            var apiEmail  = body["userInfo"]?["email"]?.GetValue<string>();
+                            var apiUserId = body["userInfo"]?["userId"]?.GetValue<string>();
+                            var identifier = apiEmail ?? apiUserId;
+                            if (!string.IsNullOrEmpty(identifier))
+                                Avalonia.Threading.Dispatcher.UIThread.Post(() => account.Email = identifier);
                         }
                     }
 
@@ -615,10 +623,11 @@ public sealed class QuotaFetchService
             if (bars is null || bars.Count == 0) return;
 
             var planBadge = planTitle ?? "";
-            if (!string.IsNullOrEmpty(overageStr))
+            // Only surface overage status when it's actionable (i.e. enabled)
+            if (string.Equals(overageStr, "ENABLED", StringComparison.OrdinalIgnoreCase))
                 planBadge = string.IsNullOrEmpty(planBadge)
-                    ? $"Overage: {overageStr}"
-                    : $"{planBadge} · Overage: {overageStr}";
+                    ? "Overage: Enabled"
+                    : $"{planBadge} · Overage: Enabled";
 
             Avalonia.Threading.Dispatcher.UIThread.Post(() =>
             {
@@ -761,13 +770,26 @@ public sealed class QuotaFetchService
             if (item is null) continue;
 
             var displayName  = item["displayName"]?.GetValue<string>() ?? "Usage";
-            var currentUsage = item["currentUsage"]?.GetValue<double>() ?? 0;
-            var usageLimit   = item["usageLimit"]?.GetValue<double>() ?? 0;
+            // Prefer *WithPrecision fields when available (live API returns truncated int + precise double)
+            var currentUsage = item["currentUsageWithPrecision"]?.GetValue<double>()
+                            ?? item["currentUsage"]?.GetValue<double>() ?? 0;
+            var usageLimit   = item["usageLimitWithPrecision"]?.GetValue<double>()
+                            ?? item["usageLimit"]?.GetValue<double>() ?? 0;
 
-            // resetDate (local) or nextDateReset (live) — both ISO 8601
-            var resetAt = isLiveApi
-                ? item["nextDateReset"]?.GetValue<string>()
-                : item["resetDate"]?.GetValue<string>();
+            // resetDate (local, ISO string) or nextDateReset (live, unix seconds as float)
+            string? resetAt;
+            if (isLiveApi)
+            {
+                // nextDateReset arrives as a JSON number (e.g. 1.782864E9), not a string
+                var resetNum = item["nextDateReset"]?.GetValue<double>();
+                resetAt = resetNum.HasValue
+                    ? DateTimeOffset.FromUnixTimeSeconds((long)resetNum.Value).ToString("o")
+                    : null;
+            }
+            else
+            {
+                resetAt = item["resetDate"]?.GetValue<string>();
+            }
 
             // freeTrialUsage (local) or freeTrialInfo (live)
             var trialNode   = isLiveApi ? item["freeTrialInfo"] : item["freeTrialUsage"];
