@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Versioning;
+using System.Security;
 using System.Text;
 using TunnelAgent.Services;
 
@@ -13,38 +14,41 @@ namespace TunnelAgent.Infrastructure.Services;
 /// <para>
 /// On Unix, <see cref="EnvironmentVariableTarget.User"/> has no persistent
 /// backing store — it is silently equivalent to <see cref="EnvironmentVariableTarget.Process"/>.
-/// This service persists variables through two complementary mechanisms:
+/// This service persists variables through two complementary mechanisms per OS:
 /// </para>
 /// <list type="bullet">
 ///   <item>
-///     <b>App-owned store</b> ($XDG_CONFIG_HOME/tunnelagent/environment):
-///     a shell-sourceable file with <c>export KEY=VALUE</c> lines, read at
-///     startup to seed the process environment.
+///     <b>App-owned store</b> (always, both OS): a shell-sourceable file with
+///     <c>export KEY=VALUE</c> lines at <c>$XDG_CONFIG_HOME/tunnelagent/environment</c>
+///     (Linux) or <c>~/Library/Application Support/tunnelagent/environment</c> (macOS).
+///     Read at startup via <see cref="SeedProcessEnvironment"/> to seed the process env.
 ///   </item>
 ///   <item>
-///     <b>Linux – ~/.profile source hook</b>: a single line
-///     <c>[ -f "..." ] &amp;&amp; . "..."</c> is written once to ~/.profile so
-///     that all login sessions (terminals, GUI apps) inherit the variables
-///     after the next login — without modifying ~/.profile on every change.
+///     <b>Linux – ~/.profile source hook</b>: a guarded block written once to
+///     <c>~/.profile</c> that sources the app-owned store. Visible to all login
+///     sessions (terminals, GUI apps) after the next login.
 ///   </item>
 ///   <item>
-///     <b>macOS – launchctl setenv</b>: propagates the variable to the current
-///     macOS GUI session immediately (visible to all apps launched from the
-///     Dock/Spotlight without needing a logout).
+///     <b>macOS – LaunchAgent plist</b>: <c>~/Library/LaunchAgents/com.tunnelagent.environment.plist</c>
+///     runs <c>launchctl setenv</c> for every stored variable at each login
+///     (<c>RunAtLoad: true</c>). Combined with a direct <c>launchctl setenv</c> call
+///     for immediate effect in the current GUI session.
 ///   </item>
 /// </list>
 /// </summary>
 [UnsupportedOSPlatform("windows")]
 internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
 {
-    private const string ProfileBlockBegin = "# BEGIN TunnelAgent";
-    private const string ProfileBlockEnd   = "# END TunnelAgent";
+    private const string ProfileBlockBegin  = "# BEGIN TunnelAgent";
+    private const string ProfileBlockEnd    = "# END TunnelAgent";
+    private const string LaunchAgentLabel   = "com.tunnelagent.environment";
 
     private readonly string _appEnvFile;
     private readonly string _profile;
+    private readonly string _launchAgentPlist;
     private readonly object _fileLock = new();
 
-    // Production constructor — uses real XDG/home paths.
+    // Production constructor — uses real OS paths.
     internal UnixUserEnvironmentService()
         : this(
             appEnvFile: Path.Combine(
@@ -52,14 +56,18 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
                 "tunnelagent", "environment"),
             profile: Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                ".profile"))
+                ".profile"),
+            launchAgentPlist: Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                "Library", "LaunchAgents", $"{LaunchAgentLabel}.plist"))
     { }
 
     // Testable constructor — caller supplies isolated temp paths.
-    internal UnixUserEnvironmentService(string appEnvFile, string profile)
+    internal UnixUserEnvironmentService(string appEnvFile, string profile, string launchAgentPlist)
     {
-        _appEnvFile = appEnvFile;
-        _profile    = profile;
+        _appEnvFile       = appEnvFile;
+        _profile          = profile;
+        _launchAgentPlist = launchAgentPlist;
     }
 
     // ── Startup seeding ───────────────────────────────────────────────────────
@@ -89,7 +97,10 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
         if (OperatingSystem.IsLinux())
             EnsureProfileHook();
         else if (OperatingSystem.IsMacOS())
+        {
+            WriteLaunchAgent();
             TryLaunchctlSetenv(name, value);
+        }
     }
 
     public void Remove(string name)
@@ -100,7 +111,10 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
         if (OperatingSystem.IsLinux())
             CleanProfileHookIfEmpty();
         else if (OperatingSystem.IsMacOS())
+        {
+            CleanLaunchAgentIfEmpty();
             TryLaunchctlUnsetenv(name);
+        }
     }
 
     // ── App-owned store ───────────────────────────────────────────────────────
@@ -166,17 +180,12 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
 
     // ── Linux: ~/.profile source hook ────────────────────────────────────────
 
-    /// <summary>
-    /// Writes a guarded block into ~/.profile that sources the app-owned store.
-    /// If the block already exists it is left untouched (idempotent).
-    /// </summary>
     [SupportedOSPlatform("linux")]
     private void EnsureProfileHook() => EnsureProfileHookCore();
 
     [SupportedOSPlatform("linux")]
     private void CleanProfileHookIfEmpty() => CleanProfileHookIfEmptyCore();
 
-    // Platform-attribute-free implementations so tests can call them directly.
     internal void EnsureProfileHookCore()
     {
         lock (_fileLock)
@@ -209,7 +218,7 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
 
             foreach (var line in lines)
             {
-                if (line.TrimEnd() == ProfileBlockBegin) { inBlock = true; continue; }
+                if (line.TrimEnd() == ProfileBlockBegin) { inBlock = true;  continue; }
                 if (line.TrimEnd() == ProfileBlockEnd)   { inBlock = false; continue; }
                 if (!inBlock) filtered.Add(line);
             }
@@ -222,7 +231,87 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
         }
     }
 
-    // ── macOS: launchctl ──────────────────────────────────────────────────────
+    // ── macOS: LaunchAgent plist ──────────────────────────────────────────────
+
+    [SupportedOSPlatform("macos")]
+    private void WriteLaunchAgent() => WriteLaunchAgentCore();
+
+    [SupportedOSPlatform("macos")]
+    private void CleanLaunchAgentIfEmpty() => CleanLaunchAgentIfEmptyCore();
+
+    /// <summary>
+    /// Rewrites the LaunchAgent plist from the current store state.
+    /// The plist runs <c>launchctl setenv</c> for every variable at each login
+    /// (<c>RunAtLoad: true</c>), providing persistence across reboots.
+    /// </summary>
+    internal void WriteLaunchAgentCore()
+    {
+        lock (_fileLock)
+        {
+            var vars = ReadAppStoreUnlocked();
+            Directory.CreateDirectory(Path.GetDirectoryName(_launchAgentPlist)!);
+
+            if (vars.Count == 0)
+            {
+                if (File.Exists(_launchAgentPlist)) File.Delete(_launchAgentPlist);
+                return;
+            }
+
+            File.WriteAllText(_launchAgentPlist, BuildLaunchAgentPlist(vars),
+                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        }
+    }
+
+    /// <summary>
+    /// Removes the LaunchAgent plist when the store is empty.
+    /// </summary>
+    internal void CleanLaunchAgentIfEmptyCore()
+    {
+        lock (_fileLock)
+        {
+            if (ReadAppStoreUnlocked().Count > 0) return;
+            if (File.Exists(_launchAgentPlist)) File.Delete(_launchAgentPlist);
+        }
+    }
+
+    /// <summary>
+    /// Builds the plist XML. Each variable becomes a <c>launchctl setenv KEY VALUE</c>
+    /// argument in the shell command executed at login.
+    /// </summary>
+    internal static string BuildLaunchAgentPlist(Dictionary<string, string> vars)
+    {
+        // Build the shell command: launchctl setenv K1 V1; launchctl setenv K2 V2; ...
+        var cmd = new StringBuilder();
+        foreach (var (k, v) in vars)
+        {
+            if (cmd.Length > 0) cmd.Append("; ");
+            cmd.Append("launchctl setenv ")
+               .Append(EscapeShell(k))
+               .Append(' ')
+               .Append(EscapeShell(v));
+        }
+
+        return $"""
+            <?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+            <plist version="1.0">
+            <dict>
+                <key>Label</key>
+                <string>{LaunchAgentLabel}</string>
+                <key>ProgramArguments</key>
+                <array>
+                    <string>/bin/sh</string>
+                    <string>-c</string>
+                    <string>{EscapeXml(cmd.ToString())}</string>
+                </array>
+                <key>RunAtLoad</key>
+                <true/>
+            </dict>
+            </plist>
+            """.TrimStart();
+    }
+
+    // ── macOS: launchctl immediate session effect ─────────────────────────────
 
     [SupportedOSPlatform("macos")]
     private static void TryLaunchctlSetenv(string name, string value)
@@ -257,6 +346,16 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private static string EscapeXml(string value) =>
+        SecurityElement.Escape(value) ?? value;
+
+    /// <summary>
+    /// Wraps a shell token in single quotes and escapes any embedded single
+    /// quotes using the standard <c>'</c> → <c>'\''</c> technique.
+    /// </summary>
+    private static string EscapeShell(string value) =>
+        $"'{value.Replace("'", "'\\''")}'";
 
     private static void TryChmod600(string path)
     {

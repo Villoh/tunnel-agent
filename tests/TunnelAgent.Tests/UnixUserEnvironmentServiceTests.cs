@@ -6,18 +6,20 @@ namespace TunnelAgent.Tests;
 
 /// <summary>
 /// Tests for UnixUserEnvironmentService.
-/// All file I/O uses isolated temp directories — no real ~/.profile or
-/// XDG paths are touched. Platform-guarded methods are exercised via
-/// their *Core() counterparts which carry no OS attribute.
+/// All file I/O uses isolated temp directories - no real ~/.profile,
+/// XDG paths, or LaunchAgent directories are touched.
+/// Platform-guarded methods are exercised via their *Core() counterparts.
 /// </summary>
 public sealed class UnixUserEnvironmentServiceTests : IDisposable
 {
     private readonly TestTempDirectory _tmp = new();
-    private string EnvFile   => _tmp.File("config/tunnelagent/environment");
-    private string ProfileFile => _tmp.File(".profile");
+
+    private string EnvFile      => _tmp.File("config/tunnelagent/environment");
+    private string ProfileFile  => _tmp.File(".profile");
+    private string PlistFile    => _tmp.File("LaunchAgents/com.tunnelagent.environment.plist");
 
     private UnixUserEnvironmentService Build() =>
-        new(appEnvFile: EnvFile, profile: ProfileFile);
+        new(appEnvFile: EnvFile, profile: ProfileFile, launchAgentPlist: PlistFile);
 
     public void Dispose() => _tmp.Dispose();
 
@@ -36,8 +38,7 @@ public sealed class UnixUserEnvironmentServiceTests : IDisposable
         var svc = Build();
         svc.Set("MY_KEY", "hello");
 
-        var content = File.ReadAllText(EnvFile);
-        Assert.Contains("export MY_KEY=hello", content);
+        Assert.Contains("export MY_KEY=hello", File.ReadAllText(EnvFile));
     }
 
     [Fact]
@@ -77,8 +78,7 @@ public sealed class UnixUserEnvironmentServiceTests : IDisposable
         svc.Set("MY_KEY", "second");
 
         Assert.Equal("second", svc.Get("MY_KEY"));
-        var lines = File.ReadAllLines(EnvFile);
-        Assert.Single(lines, l => l.StartsWith("export MY_KEY="));
+        Assert.Single(File.ReadAllLines(EnvFile), l => l.StartsWith("export MY_KEY="));
     }
 
     [Fact]
@@ -89,52 +89,42 @@ public sealed class UnixUserEnvironmentServiceTests : IDisposable
         svc.Remove("MY_KEY");
 
         Assert.Null(svc.Get("MY_KEY"));
-        var content = File.ReadAllText(EnvFile);
-        Assert.DoesNotContain("MY_KEY", content);
+        Assert.DoesNotContain("MY_KEY", File.ReadAllText(EnvFile));
     }
 
     [Fact]
     public void Remove_NonExistentKey_DoesNotThrow()
     {
-        var svc = Build();
-        var ex = Record.Exception(() => svc.Remove("GHOST"));
+        var ex = Record.Exception(() => Build().Remove("GHOST"));
         Assert.Null(ex);
     }
 
     [Fact]
     public void SeedProcessEnvironment_SeedsFromStore()
     {
-        var svc = Build();
-        svc.Set("SEED_TEST_VAR", "seeded");
+        Build().Set("SEED_TEST_VAR", "seeded");
 
-        // Create a fresh instance that hasn't set anything in-process,
-        // then seed and verify the process env was updated.
-        var svc2 = new UnixUserEnvironmentService(EnvFile, ProfileFile);
-        svc2.SeedProcessEnvironment();
+        new UnixUserEnvironmentService(EnvFile, ProfileFile, PlistFile)
+            .SeedProcessEnvironment();
 
         Assert.Equal("seeded", Environment.GetEnvironmentVariable("SEED_TEST_VAR"));
-        Environment.SetEnvironmentVariable("SEED_TEST_VAR", null); // cleanup
+        Environment.SetEnvironmentVariable("SEED_TEST_VAR", null);
     }
 
     [Fact]
     public void StoreFormat_HasCommentHeader()
     {
-        var svc = Build();
-        svc.Set("X", "1");
-
-        var first = File.ReadLines(EnvFile).First();
-        Assert.StartsWith("#", first);
+        Build().Set("X", "1");
+        Assert.StartsWith("#", File.ReadLines(EnvFile).First());
     }
 
-    // ── ~/.profile hook ───────────────────────────────────────────────────────
+    // ── Linux: ~/.profile hook ────────────────────────────────────────────────
 
     [Fact]
     public void EnsureProfileHook_WhenProfileMissing_CreatesFileWithBlock()
     {
-        var svc = Build();
-        svc.EnsureProfileHookCore();
+        Build().EnsureProfileHookCore();
 
-        Assert.True(File.Exists(ProfileFile));
         var content = File.ReadAllText(ProfileFile);
         Assert.Contains("# BEGIN TunnelAgent", content);
         Assert.Contains("# END TunnelAgent", content);
@@ -145,8 +135,7 @@ public sealed class UnixUserEnvironmentServiceTests : IDisposable
     public void EnsureProfileHook_WhenProfileExists_AppendsBlock()
     {
         File.WriteAllText(ProfileFile, "# existing content\n");
-        var svc = Build();
-        svc.EnsureProfileHookCore();
+        Build().EnsureProfileHookCore();
 
         var content = File.ReadAllText(ProfileFile);
         Assert.StartsWith("# existing content", content);
@@ -161,19 +150,16 @@ public sealed class UnixUserEnvironmentServiceTests : IDisposable
         svc.EnsureProfileHookCore();
         svc.EnsureProfileHookCore();
 
-        var content = File.ReadAllText(ProfileFile);
-        Assert.Equal(1, CountOccurrences(content, "# BEGIN TunnelAgent"));
+        Assert.Equal(1, CountOccurrences(File.ReadAllText(ProfileFile), "# BEGIN TunnelAgent"));
     }
 
     [Fact]
     public void EnsureProfileHook_WhenProfileHasNoTrailingNewline_InsertsNewlineFirst()
     {
         File.WriteAllText(ProfileFile, "# no newline at end");
-        var svc = Build();
-        svc.EnsureProfileHookCore();
+        Build().EnsureProfileHookCore();
 
         var content = File.ReadAllText(ProfileFile);
-        // The block must not be glued onto the last line
         Assert.DoesNotContain("end# BEGIN", content);
         Assert.Contains("\n# BEGIN TunnelAgent", content);
     }
@@ -181,19 +167,15 @@ public sealed class UnixUserEnvironmentServiceTests : IDisposable
     [Fact]
     public void EnsureProfileHook_SourceLineReferencesAppEnvFile()
     {
-        var svc = Build();
-        svc.EnsureProfileHookCore();
-
-        var content = File.ReadAllText(ProfileFile);
-        Assert.Contains($"[ -f \"{EnvFile}\" ] && . \"{EnvFile}\"", content);
+        Build().EnsureProfileHookCore();
+        Assert.Contains($"[ -f \"{EnvFile}\" ] && . \"{EnvFile}\"", File.ReadAllText(ProfileFile));
     }
 
     [Fact]
     public void CleanProfileHook_WhenStoreEmpty_RemovesBlock()
     {
         var svc = Build();
-        svc.EnsureProfileHookCore();  // add hook
-        // store is empty — hook should be removed
+        svc.EnsureProfileHookCore();
         svc.CleanProfileHookIfEmptyCore();
 
         var content = File.ReadAllText(ProfileFile);
@@ -209,8 +191,7 @@ public sealed class UnixUserEnvironmentServiceTests : IDisposable
         svc.EnsureProfileHookCore();
         svc.CleanProfileHookIfEmptyCore();
 
-        var content = File.ReadAllText(ProfileFile);
-        Assert.Contains("# BEGIN TunnelAgent", content);
+        Assert.Contains("# BEGIN TunnelAgent", File.ReadAllText(ProfileFile));
     }
 
     [Fact]
@@ -229,9 +210,7 @@ public sealed class UnixUserEnvironmentServiceTests : IDisposable
     [Fact]
     public void CleanProfileHook_WhenProfileMissing_DoesNotThrow()
     {
-        var svc = Build();
-        var ex = Record.Exception(() => svc.CleanProfileHookIfEmptyCore());
-        Assert.Null(ex);
+        Assert.Null(Record.Exception(() => Build().CleanProfileHookIfEmptyCore()));
     }
 
     [Fact]
@@ -248,27 +227,168 @@ public sealed class UnixUserEnvironmentServiceTests : IDisposable
     }
 
     [Fact]
-    public void FullFlow_SetThenRemoveAll_CleansProfileAndStore()
+    public void FullFlow_Linux_SetThenRemoveAll_CleansProfileAndStore()
     {
         var svc = Build();
-
         svc.Set("KEY_A", "1");
         svc.EnsureProfileHookCore();
         svc.Set("KEY_B", "2");
-
         svc.Remove("KEY_A");
         svc.Remove("KEY_B");
         svc.CleanProfileHookIfEmptyCore();
 
-        // Store should be empty (only header comment)
-        var storeLines = File.ReadAllLines(EnvFile)
+        var storeVarLines = File.ReadAllLines(EnvFile)
             .Where(l => !string.IsNullOrWhiteSpace(l) && !l.StartsWith('#'))
             .ToList();
-        Assert.Empty(storeLines);
+        Assert.Empty(storeVarLines);
 
-        // Profile hook should be gone
         if (File.Exists(ProfileFile))
             Assert.DoesNotContain("# BEGIN TunnelAgent", File.ReadAllText(ProfileFile));
+    }
+
+    // ── macOS: LaunchAgent plist ──────────────────────────────────────────────
+
+    [Fact]
+    public void WriteLaunchAgent_CreatesPlistWithAllVars()
+    {
+        var svc = Build();
+        svc.Set("KEY_A", "val_a");
+        svc.Set("KEY_B", "val_b");
+        svc.WriteLaunchAgentCore();
+
+        Assert.True(File.Exists(PlistFile));
+        var content = File.ReadAllText(PlistFile);
+        Assert.Contains("launchctl setenv", content);
+        Assert.Contains("KEY_A", content);
+        Assert.Contains("val_a", content);
+        Assert.Contains("KEY_B", content);
+        Assert.Contains("val_b", content);
+    }
+
+    [Fact]
+    public void WriteLaunchAgent_WhenStoreEmpty_DeletesPlist()
+    {
+        var svc = Build();
+        svc.Set("K", "v");
+        svc.WriteLaunchAgentCore(); // creates it
+        svc.Remove("K");
+        svc.WriteLaunchAgentCore(); // should delete it
+
+        Assert.False(File.Exists(PlistFile));
+    }
+
+    [Fact]
+    public void WriteLaunchAgent_WhenPlistMissing_DoesNotThrow()
+    {
+        Assert.Null(Record.Exception(() => Build().WriteLaunchAgentCore()));
+    }
+
+    [Fact]
+    public void WriteLaunchAgent_PlistIsValidXml()
+    {
+        var svc = Build();
+        svc.Set("MY_KEY", "my_value");
+        svc.WriteLaunchAgentCore();
+
+        var content = File.ReadAllText(PlistFile);
+        Assert.StartsWith("<?xml", content);
+        Assert.Contains("<plist", content);
+        Assert.Contains("</plist>", content);
+        Assert.Contains("<key>RunAtLoad</key>", content);
+        Assert.Contains("<true/>", content);
+    }
+
+    [Fact]
+    public void WriteLaunchAgent_PlistContainsCorrectLabel()
+    {
+        var svc = Build();
+        svc.Set("K", "v");
+        svc.WriteLaunchAgentCore();
+
+        Assert.Contains("com.tunnelagent.environment", File.ReadAllText(PlistFile));
+    }
+
+    [Fact]
+    public void WriteLaunchAgent_UpdatesOnSubsequentSet()
+    {
+        var svc = Build();
+        svc.Set("KEY_A", "v1");
+        svc.WriteLaunchAgentCore();
+        svc.Set("KEY_B", "v2");
+        svc.WriteLaunchAgentCore();
+
+        var content = File.ReadAllText(PlistFile);
+        Assert.Contains("KEY_A", content);
+        Assert.Contains("KEY_B", content);
+    }
+
+    [Fact]
+    public void CleanLaunchAgent_WhenStoreEmpty_DeletesPlist()
+    {
+        var svc = Build();
+        svc.Set("K", "v");
+        svc.WriteLaunchAgentCore();
+        svc.Remove("K");
+        svc.CleanLaunchAgentIfEmptyCore();
+
+        Assert.False(File.Exists(PlistFile));
+    }
+
+    [Fact]
+    public void CleanLaunchAgent_WhenStoreHasVars_LeavesFileIntact()
+    {
+        var svc = Build();
+        svc.Set("K", "v");
+        svc.WriteLaunchAgentCore();
+        svc.CleanLaunchAgentIfEmptyCore();
+
+        Assert.True(File.Exists(PlistFile));
+    }
+
+    [Fact]
+    public void CleanLaunchAgent_WhenPlistMissing_DoesNotThrow()
+    {
+        Assert.Null(Record.Exception(() => Build().CleanLaunchAgentIfEmptyCore()));
+    }
+
+    [Fact]
+    public void BuildLaunchAgentPlist_EscapesXmlSpecialChars()
+    {
+        var vars = new Dictionary<string, string> { ["KEY"] = "val<>&\"" };
+        var plist = UnixUserEnvironmentService.BuildLaunchAgentPlist(vars);
+
+        Assert.DoesNotContain("val<>", plist);
+        Assert.Contains("val&lt;&gt;&amp;", plist);
+    }
+
+    [Fact]
+    public void BuildLaunchAgentPlist_EscapesSingleQuotesInShell()
+    {
+        var vars = new Dictionary<string, string> { ["KEY"] = "it's a value" };
+        var plist = UnixUserEnvironmentService.BuildLaunchAgentPlist(vars);
+
+        // Shell escaping: ' → '\'' which after XML escaping (' → &apos;) becomes &apos;\&apos;&apos;
+        Assert.Contains("it&apos;\\&apos;&apos;s a value", plist);
+    }
+
+    [Fact]
+    public void FullFlow_macOS_SetThenRemoveAll_CleansPlistAndStore()
+    {
+        var svc = Build();
+        svc.Set("KEY_A", "1");
+        svc.WriteLaunchAgentCore();
+        svc.Set("KEY_B", "2");
+        svc.WriteLaunchAgentCore();
+
+        svc.Remove("KEY_A");
+        svc.Remove("KEY_B");
+        svc.CleanLaunchAgentIfEmptyCore();
+
+        var storeVarLines = File.ReadAllLines(EnvFile)
+            .Where(l => !string.IsNullOrWhiteSpace(l) && !l.StartsWith('#'))
+            .ToList();
+        Assert.Empty(storeVarLines);
+        Assert.False(File.Exists(PlistFile));
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
