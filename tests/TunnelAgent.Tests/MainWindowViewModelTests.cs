@@ -126,8 +126,10 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
-    public void SelectedQuotaAccounts_ExcludesDisabledAccounts()
+    public void SelectedQuotaAccounts_IncludesDisabledAccounts()
     {
+        // Disabled in Providers means disabled for CLIProxy routing only,
+        // not for quota visibility. Both accounts should appear in Quota.
         var vm = new MainWindowViewModel();
         var claude = new ProviderViewModel("claude", "Claude", PackIconSimpleIconsKind.Claude, "#000000", "Claude", isOAuth: true);
         var enabled = new ProviderAccountViewModel("claude", "", "Enabled", isDisabled: false);
@@ -139,7 +141,7 @@ public sealed class MainWindowViewModelTests
         vm.SelectQuotaCommand.Execute(null);
 
         Assert.Contains(enabled, vm.SelectedQuotaAccounts);
-        Assert.DoesNotContain(disabled, vm.SelectedQuotaAccounts);
+        Assert.Contains(disabled, vm.SelectedQuotaAccounts);
         Assert.True(vm.HasQuotaAccounts);
     }
 

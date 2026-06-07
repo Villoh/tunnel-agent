@@ -51,7 +51,7 @@ public sealed class OAuthTokenDetectorEdgeTests
 
         var account = Assert.Single(accounts["codex"]);
         Assert.Equal("name-with-dashes@example.com", account.Email);
-        Assert.Equal("PRO", account.Plan);
+        Assert.Equal("Pro", account.Plan);
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public sealed class OAuthTokenDetectorEdgeTests
         var detector = new OAuthTokenDetector(temp.Path);
 
         var account = Assert.Single(detector.GetAccounts()["codex"]);
-        Assert.Equal("PLUS", account.Plan);
+        Assert.Equal("Plus", account.Plan);
     }
 
     [Fact]

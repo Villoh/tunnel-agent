@@ -23,7 +23,7 @@ public sealed class OAuthTokenDetectorTests
 
         Assert.Equal("codex", account.ProviderId);
         Assert.Equal("json@example.com", account.Email);
-        Assert.Equal("PRO", account.Plan);
+        Assert.Equal("Pro", account.Plan);
         Assert.False(account.IsDisabled);
     }
 
@@ -40,7 +40,7 @@ public sealed class OAuthTokenDetectorTests
         var account = Assert.Single(detector.GetAccounts()["codex"]);
 
         Assert.Equal("user@example.com", account.Email);
-        Assert.Equal("PLUS", account.Plan);
+        Assert.Equal("Plus", account.Plan);
     }
 
     [Fact]
