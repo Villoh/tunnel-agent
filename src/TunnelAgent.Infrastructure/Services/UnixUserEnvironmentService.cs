@@ -17,15 +17,15 @@ namespace TunnelAgent.Infrastructure.Services;
 /// </para>
 /// <list type="bullet">
 ///   <item>
-///     <b>App-owned store</b> ($XDG_CONFIG_HOME/tunnelagent/environment, default ~/.config/tunnelagent/environment): a simple
-///     KEY=VALUE file read at startup. Ensures the app sees saved variables on next launch.
+///     <b>App-owned store</b> ($XDG_CONFIG_HOME/tunnelagent/environment):
+///     a shell-sourceable file with <c>export KEY=VALUE</c> lines, read at
+///     startup to seed the process environment.
 ///   </item>
 ///   <item>
-///     <b>Linux – systemd environment.d</b>
-///     ($XDG_CONFIG_HOME/environment.d/tunnelagent.conf): picked up automatically by
-///     systemd ≥ 233 user sessions and by PAM on most modern distros, so the
-///     variables are available to all graphical and login sessions after the
-///     next login.
+///     <b>Linux – ~/.profile source hook</b>: a single line
+///     <c>[ -f "..." ] &amp;&amp; . "..."</c> is written once to ~/.profile so
+///     that all login sessions (terminals, GUI apps) inherit the variables
+///     after the next login — without modifying ~/.profile on every change.
 ///   </item>
 ///   <item>
 ///     <b>macOS – launchctl setenv</b>: propagates the variable to the current
@@ -37,18 +37,24 @@ namespace TunnelAgent.Infrastructure.Services;
 [UnsupportedOSPlatform("windows")]
 internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
 {
-    // App-owned persistent store — always written on every OS.
-    // SpecialFolder.ApplicationData on Linux resolves $XDG_CONFIG_HOME (fallback ~/.config),
-    // honouring the XDG Base Directory spec instead of hardcoding ~/.config.
+    private static readonly string Profile = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+        ".profile");
+
+    // App-owned store — shell-sourceable, managed entirely by TunnelAgent.
+    // SpecialFolder.ApplicationData on Linux resolves $XDG_CONFIG_HOME
+    // (fallback ~/.config), honouring the XDG Base Directory spec.
     private static readonly string AppEnvFile = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "tunnelagent", "environment");
 
-    // Linux: systemd/PAM environment.d drop-in.
-    // environment.d must live under the real XDG config dir, not a custom one.
-    private static readonly string LinuxEnvDFile = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "environment.d", "tunnelagent.conf");
+    // The single source hook line we inject into ~/.profile (Linux only).
+    private static readonly string ProfileSourceLine =
+        $". \"{AppEnvFile}\"";
+
+    // Guard comment that brackets our block so we can detect it.
+    private const string ProfileBlockBegin = "# BEGIN TunnelAgent";
+    private const string ProfileBlockEnd   = "# END TunnelAgent";
 
     private readonly object _fileLock = new();
 
@@ -56,7 +62,7 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
 
     /// <summary>
     /// Called once at startup: seeds the current process environment from the
-    /// app-owned store so that child processes inherit persisted variables.
+    /// app-owned store so that the app itself sees persisted variables.
     /// </summary>
     internal void SeedProcessEnvironment()
     {
@@ -77,7 +83,7 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
         Environment.SetEnvironmentVariable(name, value, EnvironmentVariableTarget.Process);
 
         if (OperatingSystem.IsLinux())
-            WriteLinuxEnvD();
+            EnsureProfileHook();
 
         if (OperatingSystem.IsMacOS())
             TryLaunchctlSetenv(name, value);
@@ -89,7 +95,7 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
         Environment.SetEnvironmentVariable(name, null, EnvironmentVariableTarget.Process);
 
         if (OperatingSystem.IsLinux())
-            WriteLinuxEnvD();
+            CleanProfileHookIfEmpty();
 
         if (OperatingSystem.IsMacOS())
             TryLaunchctlUnsetenv(name);
@@ -97,24 +103,10 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
 
     // ── App-owned store ───────────────────────────────────────────────────────
 
-    /// <summary>Reads the entire app-owned env file as a dictionary.</summary>
     private Dictionary<string, string> ReadAppStore()
     {
         lock (_fileLock)
-        {
-            var result = new Dictionary<string, string>(StringComparer.Ordinal);
-            if (!File.Exists(AppEnvFile)) return result;
-
-            foreach (var line in File.ReadLines(AppEnvFile))
-            {
-                if (string.IsNullOrWhiteSpace(line) || line.StartsWith('#')) continue;
-                var eq = line.IndexOf('=');
-                if (eq <= 0) continue;
-                result[line[..eq].Trim()] = line[(eq + 1)..];
-            }
-
-            return result;
-        }
+            return ReadAppStoreUnlocked();
     }
 
     private void UpdateAppStore(string name, string value)
@@ -137,7 +129,6 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
         }
     }
 
-    /// <remarks>Must be called with <see cref="_fileLock"/> held.</remarks>
     private Dictionary<string, string> ReadAppStoreUnlocked()
     {
         var result = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -146,15 +137,18 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
         foreach (var line in File.ReadLines(AppEnvFile))
         {
             if (string.IsNullOrWhiteSpace(line) || line.StartsWith('#')) continue;
-            var eq = line.IndexOf('=');
+            // Strip leading "export " if present
+            var entry = line.StartsWith("export ", StringComparison.Ordinal)
+                ? line["export ".Length..]
+                : line;
+            var eq = entry.IndexOf('=');
             if (eq <= 0) continue;
-            result[line[..eq].Trim()] = line[(eq + 1)..];
+            result[entry[..eq].Trim()] = entry[(eq + 1)..];
         }
 
         return result;
     }
 
-    /// <remarks>Must be called with <see cref="_fileLock"/> held.</remarks>
     private static void WriteAppStoreUnlocked(Dictionary<string, string> vars)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(AppEnvFile)!);
@@ -162,57 +156,73 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
         var sb = new StringBuilder();
         sb.AppendLine("# Managed by Tunnel Agent — do not edit manually.");
         foreach (var (k, v) in vars)
-            sb.Append(k).Append('=').AppendLine(v);
+            sb.Append("export ").Append(k).Append('=').AppendLine(v);
 
-        File.WriteAllText(AppEnvFile, sb.ToString(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        File.WriteAllText(AppEnvFile, sb.ToString(),
+            new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
         TryChmod600(AppEnvFile);
     }
 
-    // ── Linux: environment.d ──────────────────────────────────────────────────
+    // ── Linux: ~/.profile source hook ────────────────────────────────────────
 
     /// <summary>
-    /// Rewrites ~/.config/environment.d/tunnelagent.conf from the current
-    /// app store state.  The format follows the systemd.environment(7)
-    /// spec: one KEY=VALUE per line, no export keyword, no quoting needed
-    /// for simple values, but we quote values that contain whitespace.
+    /// Writes a guarded block into ~/.profile that sources the app-owned store.
+    /// If the block already exists it is left untouched (idempotent).
     /// </summary>
     [SupportedOSPlatform("linux")]
-    private void WriteLinuxEnvD()
+    private void EnsureProfileHook()
     {
         lock (_fileLock)
         {
-            var vars = ReadAppStoreUnlocked();
-            Directory.CreateDirectory(Path.GetDirectoryName(LinuxEnvDFile)!);
+            var content = File.Exists(Profile) ? File.ReadAllText(Profile) : string.Empty;
+            if (content.Contains(ProfileBlockBegin)) return; // already installed
 
-            if (vars.Count == 0)
+            var hook = new StringBuilder();
+            if (content.Length > 0 && !content.EndsWith('\n'))
+                hook.AppendLine();
+            hook.AppendLine(ProfileBlockBegin);
+            hook.AppendLine($"[ -f \"{AppEnvFile}\" ] && . \"{AppEnvFile}\"");
+            hook.AppendLine(ProfileBlockEnd);
+
+            File.AppendAllText(Profile, hook.ToString(),
+                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        }
+    }
+
+    /// <summary>
+    /// Removes the guarded block from ~/.profile when the store becomes empty
+    /// (no variables left to export — no point keeping the source hook).
+    /// </summary>
+    [SupportedOSPlatform("linux")]
+    private void CleanProfileHookIfEmpty()
+    {
+        lock (_fileLock)
+        {
+            if (ReadAppStoreUnlocked().Count > 0) return; // still has variables
+            if (!File.Exists(Profile)) return;
+
+            var lines = File.ReadAllLines(Profile);
+            var filtered = new List<string>();
+            bool inBlock = false;
+
+            foreach (var line in lines)
             {
-                if (File.Exists(LinuxEnvDFile)) File.Delete(LinuxEnvDFile);
-                return;
+                if (line.TrimEnd() == ProfileBlockBegin) { inBlock = true; continue; }
+                if (line.TrimEnd() == ProfileBlockEnd)   { inBlock = false; continue; }
+                if (!inBlock) filtered.Add(line);
             }
 
-            var sb = new StringBuilder();
-            sb.AppendLine("# Managed by Tunnel Agent — do not edit manually.");
-            foreach (var (k, v) in vars)
-            {
-                // systemd environment.d: quote values that contain spaces or special chars.
-                var needsQuotes = v.IndexOfAny([' ', '\t', '"', '\'', '\\', '#']) >= 0;
-                if (needsQuotes)
-                    sb.Append(k).Append("=\"").Append(v.Replace("\\", "\\\\").Replace("\"", "\\\"")).AppendLine("\"");
-                else
-                    sb.Append(k).Append('=').AppendLine(v);
-            }
+            // Trim trailing blank lines left by the removed block
+            while (filtered.Count > 0 && string.IsNullOrWhiteSpace(filtered[^1]))
+                filtered.RemoveAt(filtered.Count - 1);
 
-            File.WriteAllText(LinuxEnvDFile, sb.ToString(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            File.WriteAllLines(Profile, filtered,
+                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
         }
     }
 
     // ── macOS: launchctl ──────────────────────────────────────────────────────
 
-    /// <summary>
-    /// Sets a variable in the macOS GUI environment via <c>launchctl setenv</c>.
-    /// This makes the variable visible to apps launched after this call within
-    /// the current login session (no logout required).
-    /// </summary>
     [SupportedOSPlatform("macos")]
     private static void TryLaunchctlSetenv(string name, string value)
     {
@@ -226,10 +236,9 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
             });
             p?.WaitForExit(2000);
         }
-        catch { /* launchctl not found or denied — app store is still written */ }
+        catch { }
     }
 
-    /// <summary>Removes a variable from the macOS GUI environment.</summary>
     [SupportedOSPlatform("macos")]
     private static void TryLaunchctlUnsetenv(string name)
     {
