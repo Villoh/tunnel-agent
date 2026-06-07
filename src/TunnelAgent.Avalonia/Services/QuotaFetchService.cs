@@ -405,6 +405,14 @@ public sealed class QuotaFetchService
     // POST https://cloudcode-pa.googleapis.com/v1internal:retrieveUserQuota
     // { "buckets": [ { "modelId": "gemini-2.5-flash", "remainingFraction": 0.93, "resetTime": "..." } ] }
 
+    // Gemini CLI quota groups aligned with Quotio spec
+    private static readonly (string label, string[] modelIds)[] GeminiQuotaGroups =
+    {
+        ("Gemini Flash Lite", new[] { "gemini-2.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.1-flash-lite-preview" }),
+        ("Gemini Flash",      new[] { "gemini-3-flash-preview", "gemini-2.5-flash" }),
+        ("Gemini Pro",        new[] { "gemini-3.1-pro-preview", "gemini-3-pro-preview", "gemini-2.5-pro" }),
+    };
+
     private async Task FetchGeminiAsync(ProviderAccountViewModel account, CancellationToken ct)
     {
         var (token, projectId) = await ReadGeminiTokenAsync(account.Email, ct);
@@ -412,6 +420,34 @@ public sealed class QuotaFetchService
 
         try
         {
+            // Plan badge via loadCodeAssist
+            var loadPayload = $"{{\"cloudaicompanionProject\":\"{projectId}\",\"metadata\":{{\"ideType\":\"IDE_UNSPECIFIED\",\"platform\":\"PLATFORM_UNSPECIFIED\",\"pluginType\":\"GEMINI\",\"duetProject\":\"{projectId}\"}}}}";
+            using (var loadReq = new HttpRequestMessage(HttpMethod.Post,
+                "https://cloudcode-pa.googleapis.com/v1internal:loadCodeAssist"))
+            {
+                loadReq.Headers.Add("Authorization", $"Bearer {token}");
+                loadReq.Content = new StringContent(loadPayload, System.Text.Encoding.UTF8, "application/json");
+                using var loadResp = await Http.SendAsync(loadReq, ct);
+                if (loadResp.IsSuccessStatusCode)
+                {
+                    var lb = JsonNode.Parse(await loadResp.Content.ReadAsStringAsync(ct));
+                    // paidTier takes priority over currentTier
+                    var rawId = lb?["paidTier"]?["id"]?.GetValue<string>()
+                             ?? lb?["currentTier"]?["id"]?.GetValue<string>() ?? "";
+                    var badge = rawId.ToLowerInvariant() switch
+                    {
+                        var s when s.Contains("free")     => "Free",
+                        var s when s.Contains("pro")      => "Pro",
+                        var s when s.Contains("ultra")    => "Ultra",
+                        var s when s.Contains("standard") => "Standard",
+                        var s when s.Contains("legacy")   => "Legacy",
+                        _ => ""
+                    };
+                    if (!string.IsNullOrEmpty(badge))
+                        Avalonia.Threading.Dispatcher.UIThread.Post(() => account.PlanBadge = badge);
+                }
+            }
+
             using var req = new HttpRequestMessage(HttpMethod.Post,
                 "https://cloudcode-pa.googleapis.com/v1internal:retrieveUserQuota");
             req.Headers.Add("Authorization", $"Bearer {token}");
@@ -427,37 +463,48 @@ public sealed class QuotaFetchService
             var buckets = body["buckets"]?.AsArray();
             if (buckets is null) return;
 
-            double flashFraction = double.MaxValue;
-            string? flashReset = null;
-            double proFraction = double.MaxValue;
-            string? proReset = null;
-
+            // Build lookup: modelId -> (remainingFraction, resetTime)
+            var bucketMap = new Dictionary<string, (double remaining, string? resetTime)>(StringComparer.OrdinalIgnoreCase);
             foreach (var bucket in buckets)
             {
                 if (bucket is null) continue;
-                var modelId   = bucket["modelId"]?.GetValue<string>() ?? "";
-                var remaining = bucket["remainingFraction"]?.GetValue<double>() ?? 1.0;
-                var resetTime = bucket["resetTime"]?.GetValue<string>();
+                var modelId = bucket["modelId"]?.GetValue<string>() ?? bucket["model_id"]?.GetValue<string>() ?? "";
+                if (string.IsNullOrEmpty(modelId)) continue;
+                // Strip _vertex suffix
+                if (modelId.EndsWith("_vertex", StringComparison.OrdinalIgnoreCase))
+                    modelId = modelId[..^"_vertex".Length];
+                // Skip gemini-2.0-flash variants
+                if (modelId.StartsWith("gemini-2.0-flash", StringComparison.OrdinalIgnoreCase)) continue;
 
-                if (modelId.Contains("flash", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (modelId.StartsWith("gemini-2.0-flash", StringComparison.OrdinalIgnoreCase))
-                        continue;
-                    if (remaining < flashFraction) flashFraction = remaining;
-                    flashReset = EarliestIso(flashReset, resetTime);
-                }
-                else if (modelId.Contains("pro", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (remaining < proFraction) proFraction = remaining;
-                    proReset = EarliestIso(proReset, resetTime);
-                }
+                var remaining = bucket["remainingFraction"]?.GetValue<double>() ?? bucket["remaining_fraction"]?.GetValue<double>();
+                var resetRaw  = bucket["resetTime"]?.GetValue<string>() ?? bucket["reset_time"]?.GetValue<string>();
+                // Treat epoch resetTime as no data
+                var resetTime = resetRaw == "1970-01-01T00:00:00Z" ? null : resetRaw;
+
+                if (remaining is null) continue;
+
+                if (!bucketMap.TryGetValue(modelId, out var existing) || remaining.Value < existing.remaining)
+                    bucketMap[modelId] = (remaining.Value, resetTime);
             }
 
+            // Build bars from groups
             var bars = new List<(string title, double used, string? resetTime)>();
-            if (flashFraction != double.MaxValue)
-                bars.Add(("Gemini Flash", 1.0 - flashFraction, flashReset));
-            if (proFraction != double.MaxValue)
-                bars.Add(("Gemini Pro", 1.0 - proFraction, proReset));
+            foreach (var (label, modelIds) in GeminiQuotaGroups)
+            {
+                double? bestRemaining = null;
+                string? bestReset = null;
+                foreach (var id in modelIds)
+                {
+                    if (!bucketMap.TryGetValue(id, out var entry)) continue;
+                    if (bestRemaining is null || entry.remaining < bestRemaining)
+                    {
+                        bestRemaining = entry.remaining;
+                        bestReset     = entry.resetTime;
+                    }
+                }
+                if (bestRemaining is not null)
+                    bars.Add((label, 1.0 - bestRemaining.Value, bestReset));
+            }
 
             if (bars.Count == 0) return;
             ApplyBarsFromFraction(account, bars);
