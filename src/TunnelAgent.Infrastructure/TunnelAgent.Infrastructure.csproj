@@ -6,7 +6,7 @@
     <RootNamespace>TunnelAgent</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.8" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TunnelAgent.Abstractions\TunnelAgent.Abstractions.csproj" />
