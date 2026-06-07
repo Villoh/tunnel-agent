@@ -227,51 +227,177 @@ public sealed class QuotaFetchService
 
     private async Task FetchCodexAsync(ProviderAccountViewModel account, CancellationToken ct)
     {
-        var token = ReadAccessToken("codex", account.Email);
+        var (token, accountId, lastRefresh) = ReadCodexToken(account.Email);
         if (token is null) return;
 
         try
         {
+            token = await RefreshCodexTokenIfNeededAsync(account.Email, token, lastRefresh, ct) ?? token;
+
             using var req = new HttpRequestMessage(HttpMethod.Get,
                 "https://chatgpt.com/backend-api/wham/usage");
             req.Headers.Add("Authorization", $"Bearer {token}");
             req.Headers.Add("Accept", "application/json");
             req.Headers.Add("User-Agent", "TunnelAgent/1.0");
+            if (!string.IsNullOrEmpty(accountId))
+                req.Headers.Add("ChatGPT-Account-Id", accountId);
 
             using var resp = await Http.SendAsync(req, ct);
-            if (!resp.IsSuccessStatusCode) return;
 
-            var body = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
-            if (body is null) return;
-
-            var plan = body["plan_type"]?.GetValue<string>() ?? "";
-            if (!string.IsNullOrEmpty(plan))
+            // Reactive refresh on 401/403
+            if (resp.StatusCode is System.Net.HttpStatusCode.Unauthorized
+                                or System.Net.HttpStatusCode.Forbidden)
             {
-                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-                    account.PlanBadge = plan.ToUpperInvariant());
+                var refreshed = await RefreshCodexTokenIfNeededAsync(account.Email, token, DateTimeOffset.MinValue, ct);
+                if (refreshed is null) return;
+                token = refreshed;
+                using var req2 = new HttpRequestMessage(HttpMethod.Get,
+                    "https://chatgpt.com/backend-api/wham/usage");
+                req2.Headers.Add("Authorization", $"Bearer {token}");
+                req2.Headers.Add("Accept", "application/json");
+                req2.Headers.Add("User-Agent", "TunnelAgent/1.0");
+                if (!string.IsNullOrEmpty(accountId))
+                    req2.Headers.Add("ChatGPT-Account-Id", accountId);
+                using var resp2 = await Http.SendAsync(req2, ct);
+                if (!resp2.IsSuccessStatusCode) return;
+                await ParseCodexUsageAsync(account, resp2, ct);
+                return;
             }
 
-            var rl        = body["rate_limit"];
-            var primary   = rl?["primary_window"];
-            var secondary = rl?["secondary_window"];
-
-            // primary_window = 5h (18000s), secondary_window = weekly (604800s)
-            var bars = new List<(string title, double usedPct, long? resetAt)>();
-
-            if (primary is not null)
-                bars.Add(("Primary Limit (5h)",
-                    primary["used_percent"]?.GetValue<double>() ?? 0,
-                    primary["reset_at"]?.GetValue<long>()));
-
-            if (secondary is not null)
-                bars.Add(("Weekly Limit",
-                    secondary["used_percent"]?.GetValue<double>() ?? 0,
-                    secondary["reset_at"]?.GetValue<long>()));
-
-            ApplyBarsFromPercent(account, bars);
+            if (!resp.IsSuccessStatusCode) return;
+            await ParseCodexUsageAsync(account, resp, ct);
         }
         catch (OperationCanceledException) { throw; }
         catch { }
+    }
+
+    private async Task ParseCodexUsageAsync(
+        ProviderAccountViewModel account,
+        HttpResponseMessage resp,
+        CancellationToken ct)
+    {
+        var body = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
+        if (body is null) return;
+
+        var plan = body["plan_type"]?.GetValue<string>() ?? "";
+        var apiEmail = body["email"]?.GetValue<string>() ?? "";
+
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            if (!string.IsNullOrEmpty(plan)) account.PlanBadge = plan.ToUpperInvariant();
+            if (!string.IsNullOrEmpty(apiEmail)) account.Email = apiEmail;
+        });
+
+        var rl         = body["rate_limit"];
+        var primary    = rl?["primary_window"];
+        var secondary  = rl?["secondary_window"];
+        var codeReview = body["code_review_rate_limit"]?["primary_window"];
+
+        var bars = new List<(string title, double usedPct, long? resetAt)>();
+
+        if (primary is not null)
+            bars.Add(("Primary (5h)",
+                primary["used_percent"]?.GetValue<double>() ?? 0,
+                primary["reset_at"]?.GetValue<long>()));
+
+        if (secondary is not null)
+            bars.Add(("Weekly",
+                secondary["used_percent"]?.GetValue<double>() ?? 0,
+                secondary["reset_at"]?.GetValue<long>()));
+
+        if (codeReview is not null)
+            bars.Add(("Code Review",
+                codeReview["used_percent"]?.GetValue<double>() ?? 0,
+                codeReview["reset_at"]?.GetValue<long>()));
+
+        // Credits balance in badge when available
+        var credits = body["credits"];
+        if (credits?["has_credits"]?.GetValue<bool>() == true)
+        {
+            var unlimited = credits["unlimited"]?.GetValue<bool>() ?? false;
+            var balanceStr = unlimited ? "unlimited" : $"${credits["balance"]?.GetValue<string>() ?? "0"}"; 
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                account.PlanBadge = string.IsNullOrEmpty(account.PlanBadge)
+                    ? $"Credits: {balanceStr}"
+                    : $"{account.PlanBadge} · Credits: {balanceStr}");
+        }
+
+        ApplyBarsFromPercent(account, bars);
+    }
+
+    private (string? token, string? accountId, DateTimeOffset lastRefresh) ReadCodexToken(string email)
+    {
+        if (!Directory.Exists(_authDir)) return (null, null, DateTimeOffset.MinValue);
+        foreach (var file in Directory.GetFiles(_authDir, "codex-*.json"))
+        {
+            try
+            {
+                var doc = JsonNode.Parse(File.ReadAllText(file))?.AsObject();
+                if (doc is null || doc["disabled"]?.GetValue<bool>() == true) continue;
+                var fileEmail = doc["email"]?.GetValue<string>() ?? "";
+                if (!string.IsNullOrEmpty(email) &&
+                    !string.Equals(fileEmail, email, StringComparison.OrdinalIgnoreCase))
+                    continue;
+                var token     = doc["access_token"]?.GetValue<string>();
+                if (token is null) continue;
+                var accountId = doc["account_id"]?.GetValue<string>();
+                DateTimeOffset.TryParse(doc["last_refresh"]?.GetValue<string>(), out var lastRefresh);
+                return (token, accountId, lastRefresh);
+            }
+            catch { }
+        }
+        return (null, null, DateTimeOffset.MinValue);
+    }
+
+    private async Task<string?> RefreshCodexTokenIfNeededAsync(
+        string email, string currentToken, DateTimeOffset lastRefresh, CancellationToken ct)
+    {
+        const string ClientId   = "app_EMoamEEZ73f0CkXaXp7hrann";
+        const string RefreshUrl = "https://auth.openai.com/oauth/token";
+
+        if (!Directory.Exists(_authDir)) return null;
+        foreach (var file in Directory.GetFiles(_authDir, $"codex-{email}*.json"))
+        {
+            try
+            {
+                var doc = JsonNode.Parse(File.ReadAllText(file))?.AsObject();
+                if (doc is null) continue;
+                var refreshToken = doc["refresh_token"]?.GetValue<string>();
+                if (refreshToken is null) return null;
+
+                var expired = doc["expired"]?.GetValue<string>();
+                var nearExpiry = DateTimeOffset.TryParse(expired, out var expDt)
+                    && DateTimeOffset.UtcNow >= expDt.AddMinutes(-5);
+                var staleRefresh = (DateTimeOffset.UtcNow - lastRefresh).TotalDays > 8;
+
+                if (!nearExpiry && !staleRefresh) return null;
+
+                using var req = new HttpRequestMessage(HttpMethod.Post, RefreshUrl);
+                req.Content = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("grant_type",    "refresh_token"),
+                    new KeyValuePair<string, string>("client_id",     ClientId),
+                    new KeyValuePair<string, string>("refresh_token", refreshToken),
+                });
+                using var resp = await Http.SendAsync(req, ct);
+                if (!resp.IsSuccessStatusCode) return null;
+
+                var rDoc = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
+                var newToken = rDoc?["access_token"]?.GetValue<string>();
+                if (newToken is null) return null;
+
+                var expiresIn = rDoc?["expires_in"]?.GetValue<int>() ?? 3600;
+                doc["access_token"]  = newToken;
+                doc["refresh_token"] = rDoc?["refresh_token"]?.GetValue<string>() ?? refreshToken;
+                doc["id_token"]      = rDoc?["id_token"]?.GetValue<string>() ?? doc["id_token"]?.GetValue<string>();
+                doc["expired"]       = DateTimeOffset.UtcNow.AddSeconds(expiresIn).ToString("o");
+                doc["last_refresh"]  = DateTimeOffset.UtcNow.ToString("o");
+                File.WriteAllText(file, doc.ToJsonString());
+                return newToken;
+            }
+            catch { }
+        }
+        return null;
     }
 
     // ── Gemini CLI ────────────────────────────────────────────────────────────
