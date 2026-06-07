@@ -34,7 +34,7 @@
 - 🔀 **Multi-Engine Control**: run and manage both CLIProxyAPI and Perplexity from the same desktop app, with per-engine configuration, endpoint controls, and status
 - 🚀 **One-Click Server Management**: start and stop each local engine directly from the Providers view
 - 🔐 **Credential Storage**: secure handling for OAuth tokens, custom provider API keys, and file-based Perplexity session accounts stored under Tunnel Agent settings
-- 👥 **Provider Management**: connect Claude Code, OpenAI Codex, Gemini CLI, Kimi, Antigravity, and custom OpenAI-compatible providers
+- 👥 **Provider Management**: connect Claude Code, OpenAI Codex, Gemini CLI, Kimi, Antigravity, xAI (Grok), and custom OpenAI-compatible providers
 - 🧠 **Perplexity WebUI Sessions**: add multiple Perplexity accounts, set a default session, reset accounts safely, and auto-install the Perplexity engine when needed
 - 🎚️ **Model Visibility**: browse available models grouped by connected provider or engine source, including Perplexity-backed model listings
 - 📊 **Live Status**: see sidebar engine health plus focused engine state, endpoint, and release info
@@ -74,6 +74,7 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 | OpenAI Codex             | OAuth               |
 | Kimi (Moonshot)          | OAuth               |
 | Antigravity              | OAuth               |
+| xAI (Grok)               | OAuth               |
 | Perplexity               | WebUI session token |
 | Custom OpenAI-compatible | API key + base URL  |
 
