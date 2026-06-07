@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography;
@@ -512,8 +513,15 @@ public sealed class QuotaFetchService
     }
 
     // ── Antigravity ──────────────────────────────────────────────────────────
-    // POST https://cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels
-    // { "models": { "claude-3-5-sonnet": { "quotaInfo": { "remainingFraction": 0.85, "resetTime": "..." } } } }
+    // POST https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels  (primary)
+    // POST https://cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels         (fallback)
+
+    // Models to exclude: Gemini 2.x variants and placeholders that duplicate newer entries
+    private static readonly HashSet<string> _antigravityModelBlacklist = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-thinking",
+        "gemini-2.5-flash-lite", "gemini-3.1-flash-lite",
+    };
 
     private async Task FetchAntigravityAsync(ProviderAccountViewModel account, CancellationToken ct)
     {
@@ -522,62 +530,53 @@ public sealed class QuotaFetchService
 
         try
         {
-            using var req = new HttpRequestMessage(HttpMethod.Post,
-                "https://cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels");
-            req.Headers.Add("Authorization", $"Bearer {token}");
-            req.Headers.Add("User-Agent", "antigravity/1.11.3");
-            req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
-
-            using var resp = await Http.SendAsync(req, ct);
-            if (!resp.IsSuccessStatusCode) return;
-
-            var body = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
+            JsonNode? body = null;
+            foreach (var baseUrl in new[]
+            {
+                "https://daily-cloudcode-pa.googleapis.com",
+                "https://cloudcode-pa.googleapis.com",
+            })
+            {
+                using var req = new HttpRequestMessage(HttpMethod.Post,
+                    $"{baseUrl}/v1internal:fetchAvailableModels");
+                req.Headers.Add("Authorization", $"Bearer {token}");
+                req.Headers.Add("User-Agent", "antigravity/1.11.3");
+                req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+                using var resp = await Http.SendAsync(req, ct);
+                if (!resp.IsSuccessStatusCode) continue;
+                body = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
+                if (body is not null) break;
+            }
             if (body is null) return;
 
             var models = body["models"]?.AsObject();
             if (models is null) return;
 
-            double claudeFraction = double.MaxValue;
-            string? claudeReset = null;
-            double geminiProFraction = double.MaxValue;
-            string? geminiProReset = null;
-            double geminiFlashFraction = double.MaxValue;
-            string? geminiFlashReset = null;
+            // Deduplicate by displayName: keep the entry with the lowest remainingFraction
+            var seen = new Dictionary<string, (double remaining, string? resetTime)>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var kvp in models)
             {
-                var modelName = kvp.Key;
-                var quotaInfo = kvp.Value?["quotaInfo"];
-                if (quotaInfo is null) continue;
+                var m           = kvp.Value;
+                var displayName = m?["displayName"]?.GetValue<string>() ?? "";
+                var isInternal  = m?["isInternal"]?.GetValue<bool>() ?? false;
 
-                var remaining = quotaInfo["remainingFraction"]?.GetValue<double>() ?? 1.0;
-                var resetTime = quotaInfo["resetTime"]?.GetValue<string>();
+                // Filter: internal models, empty display names, blacklisted IDs
+                if (isInternal || string.IsNullOrEmpty(displayName)) continue;
+                if (_antigravityModelBlacklist.Contains(kvp.Key)) continue;
 
-                var nameL = modelName.ToLowerInvariant();
-                if (nameL.Contains("claude") || nameL.Contains("gpt") || nameL.Contains("oss"))
-                {
-                    if (remaining < claudeFraction) claudeFraction = remaining;
-                    claudeReset = EarliestIso(claudeReset, resetTime);
-                }
-                else if (nameL.Contains("gemini") && nameL.Contains("pro"))
-                {
-                    if (remaining < geminiProFraction) geminiProFraction = remaining;
-                    geminiProReset = EarliestIso(geminiProReset, resetTime);
-                }
-                else if (nameL.Contains("gemini") && nameL.Contains("flash"))
-                {
-                    if (remaining < geminiFlashFraction) geminiFlashFraction = remaining;
-                    geminiFlashReset = EarliestIso(geminiFlashReset, resetTime);
-                }
+                var qi        = m?["quotaInfo"];
+                var remaining = qi?["remainingFraction"]?.GetValue<double>() ?? 1.0;
+                var resetTime = qi?["resetTime"]?.GetValue<string>();
+
+                if (!seen.TryGetValue(displayName, out var existing) || remaining < existing.remaining)
+                    seen[displayName] = (remaining, resetTime);
             }
 
-            var bars = new List<(string title, double used, string? resetTime)>();
-            if (claudeFraction != double.MaxValue)
-                bars.Add(("Claude", 1.0 - claudeFraction, claudeReset));
-            if (geminiProFraction != double.MaxValue)
-                bars.Add(("Gemini Pro", 1.0 - geminiProFraction, geminiProReset));
-            if (geminiFlashFraction != double.MaxValue)
-                bars.Add(("Gemini Flash", 1.0 - geminiFlashFraction, geminiFlashReset));
+            var bars = seen
+                .Select(kv => (title: kv.Key, used: 1.0 - kv.Value.remaining, resetTime: kv.Value.resetTime))
+                .OrderBy(b => b.title)
+                .ToList();
 
             if (bars.Count == 0) return;
             ApplyBarsFromFraction(account, bars);
