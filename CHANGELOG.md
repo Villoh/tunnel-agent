@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Refresh buttons show grey background on press**: quota, agents, and logs refresh buttons now use `Click` handler instead of `Command` binding, preventing the automatic disable state that caused a grey square to appear during execution. The spin icon already provides visual feedback. All three buttons now use the `icon` style for consistent appearance.
+- **Plan badge inconsistent casing**: all providers now use title-case for plan badges (e.g. `PRO` → `Pro`, `PLUS` → `Plus`). A `ToPlanBadge` helper normalises any API string word-by-word. Kiro's `KIRO FREE` / `KIRO PRO` prefix is stripped since the provider name is already shown in the UI, leaving just `Free` / `Pro`.
+- **Cursor plan badge missing**: `FetchCursorAsync` now calls `GetPlanInfo` to retrieve `planName` (e.g. `Pro`, `Ultra`) and sets it as the plan badge on each refresh.
+- **Gemini CLI hides quota groups not included in plan**: groups with `remainingFraction=0` and no reset date (epoch `1970-01-01` treated as null) are now hidden — this indicates the plan does not include the model tier, not that the quota is exhausted.
+
 ## [0.5.5] - 2026-06-07
 
 ### Fixed

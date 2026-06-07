@@ -9,6 +9,12 @@ public partial class QuotaView : UserControl
 {
     public QuotaView() => InitializeComponent();
 
+    private async void OnRefreshAllQuota(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        await vm.RefreshAllQuotaProvidersAsync();
+    }
+
     private async void OnRefreshQuota(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not MainWindowViewModel vm) return;

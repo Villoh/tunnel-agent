@@ -44,7 +44,7 @@
                 </Button>
 
                 <!-- Refresh: spin icon on click -->
-                <Button Classes="icon-btn" ToolTip.Tip="Refresh" Command="{Binding RefreshLogsCommand}">
+                <Button Classes="icon" ToolTip.Tip="Refresh" Click="OnRefreshLogs">
                     <lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14"
                                            Foreground="{DynamicResource FgMutedBrush}"
                                            Classes.spin="{Binding Logs.IsRefreshing}" />

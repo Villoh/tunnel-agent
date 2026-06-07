@@ -15,6 +15,12 @@ public partial class LogsView : UserControl
         InitializeComponent();
     }
 
+    private void OnRefreshLogs(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm)
+            vm.RefreshLogsCommand.Execute(null);
+    }
+
     private void OnExportClick(object? sender, RoutedEventArgs e)
         => _ = ExportAsync();
 

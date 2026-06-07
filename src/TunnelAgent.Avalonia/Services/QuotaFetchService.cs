@@ -118,7 +118,7 @@ public sealed class QuotaFetchService
                 var subType = credDoc?["claudeAiOauth"]?["subscriptionType"]?.GetValue<string>();
                 if (!string.IsNullOrEmpty(subType))
                     Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-                        account.PlanBadge = subType.ToUpperInvariant());
+                        account.PlanBadge = ToPlanBadge(subType));
             }
             catch { }
         }
@@ -285,7 +285,7 @@ public sealed class QuotaFetchService
 
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
-            if (!string.IsNullOrEmpty(plan)) account.PlanBadge = plan.ToUpperInvariant();
+            if (!string.IsNullOrEmpty(plan)) account.PlanBadge = ToPlanBadge(plan);
             if (!string.IsNullOrEmpty(apiEmail)) account.Email = apiEmail;
         });
 
@@ -502,7 +502,8 @@ public sealed class QuotaFetchService
                         bestReset     = entry.resetTime;
                     }
                 }
-                if (bestRemaining is not null)
+                // Skip groups that are fully exhausted with no reset date — plan doesn't include them
+                if (bestRemaining is not null && !(bestRemaining.Value == 0 && bestReset is null))
                     bars.Add((label, 1.0 - bestRemaining.Value, bestReset));
             }
 
@@ -740,6 +741,14 @@ public sealed class QuotaFetchService
             if (string.IsNullOrEmpty(accessToken)) return;
 
             // Try fetch; if unauthorized, refresh token and retry once
+            var planBody = await CallCursorApiAsync("GetPlanInfo", accessToken, ct);
+            if (planBody is not null)
+            {
+                var planName = JsonNode.Parse(planBody)?["planInfo"]?["planName"]?.GetValue<string>();
+                if (!string.IsNullOrEmpty(planName))
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() => account.PlanBadge = planName);
+            }
+
             var body = await CallCursorPeriodUsageAsync(accessToken, ct);
             if (body is null && !string.IsNullOrEmpty(refreshToken))
             {
@@ -786,9 +795,12 @@ public sealed class QuotaFetchService
     }
 
     private static async Task<string?> CallCursorPeriodUsageAsync(string token, CancellationToken ct)
+        => await CallCursorApiAsync("GetCurrentPeriodUsage", token, ct);
+
+    private static async Task<string?> CallCursorApiAsync(string method, string token, CancellationToken ct)
     {
         using var req = new HttpRequestMessage(HttpMethod.Post,
-            "https://api2.cursor.sh/aiserver.v1.DashboardService/GetCurrentPeriodUsage");
+            $"https://api2.cursor.sh/aiserver.v1.DashboardService/{method}");
         req.Headers.Add("Authorization", $"Bearer {token}");
         req.Headers.Add("Connect-Protocol-Version", "1");
         req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
@@ -954,7 +966,9 @@ public sealed class QuotaFetchService
 
             if (bars is null || bars.Count == 0) return;
 
-            var planBadge = planTitle ?? "";
+            var normalizedTitle = planTitle?.StartsWith("KIRO ", StringComparison.OrdinalIgnoreCase) == true
+                ? planTitle[5..] : planTitle;
+            var planBadge = normalizedTitle is not null ? ToPlanBadge(normalizedTitle) : "";
             // Only surface overage status when it's actionable (i.e. enabled)
             if (string.Equals(overageStr, "ENABLED", StringComparison.OrdinalIgnoreCase))
                 planBadge = string.IsNullOrEmpty(planBadge)
@@ -1465,6 +1479,14 @@ public sealed class QuotaFetchService
     }
 
     // ── Format helpers ────────────────────────────────────────────────────────
+
+    /// <summary>Normalises an API plan string to title-case badge text (e.g. "pro" → "Pro", "KIRO FREE" → "Kiro Free").</summary>
+    private static string ToPlanBadge(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return raw;
+        return string.Join(" ", raw.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Select(w => char.ToUpperInvariant(w[0]) + w[1..].ToLowerInvariant()));
+    }
 
     private static string FormatResetAtUnix(long? unixSeconds)
     {

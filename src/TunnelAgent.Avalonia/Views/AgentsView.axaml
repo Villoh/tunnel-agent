@@ -28,7 +28,7 @@
             </Button>
             <Button Grid.Column="2" Classes="icon" VerticalAlignment="Bottom"
                     ToolTip.Tip="Detect agents"
-                    Command="{Binding DetectAgentsCommand}">
+                    Click="OnDetectAgents">
                 <lucide:PackIconLucide Kind="RefreshCw" Width="15" Height="15"
                                        Classes.spin="{Binding IsDetectingAgents}" />
             </Button>

@@ -43,11 +43,11 @@
                 <TextBlock Classes="page-sub" Text="Track quota usage for supported CLIProxyAPI accounts." />
             </StackPanel>
             <Button Grid.Column="1"
-                    Classes="icon-btn"
+                    Classes="icon"
                     ToolTip.Tip="Refresh all quota providers"
                     VerticalAlignment="Bottom"
                     IsEnabled="{Binding HasQuotaAccounts}"
-                    Command="{Binding RefreshAllQuotaProvidersCommand}">
+                    Click="OnRefreshAllQuota">
                 <lucide:PackIconLucide Kind="RefreshCw"
                                        Width="14"
                                        Height="14"
@@ -125,7 +125,7 @@
 
                                 <Button Grid.Column="1"
                                         Grid.Row="0"
-                                        Classes="icon-btn"
+                                        Classes="icon"
                                         ToolTip.Tip="Refresh quota"
                                         Click="OnRefreshQuota"
                                         Tag="{Binding}">

@@ -9,6 +9,12 @@ public partial class AgentsView : UserControl
 {
     public AgentsView() => InitializeComponent();
 
+    private void OnDetectAgents(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm)
+            vm.DetectAgentsCommand.Execute(null);
+    }
+
     private void OnDocsClick(object? sender, RoutedEventArgs e)
     {
         if (sender is Button { Tag: string url } && !string.IsNullOrEmpty(url))
