@@ -25,6 +25,12 @@
 
 ---
 
+<p align="center">
+  <video src="assets/preview.mp4" autoplay loop muted playsinline width="100%"></video>
+</p>
+
+---
+
 > [!WARNING]
 > This app has only been tested on **Windows**. It may require changes to work correctly on Linux or macOS. Contributions to add full support for both platforms are very welcome.
 
