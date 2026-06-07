@@ -11,6 +11,7 @@ namespace TunnelAgent.Infrastructure.Engine.Perplexity;
 /// <summary>Starts and monitors Perplexity WebUI Scraper local API process.</summary>
 public sealed class ProcessService
 {
+    private const int MaxStderrBufferChars = 64 * 1024;
     private static readonly HttpClient HealthClient = new() { Timeout = TimeSpan.FromSeconds(1) };
 
     public bool IsRunning => State == EngineState.Running;
@@ -56,7 +57,7 @@ public sealed class ProcessService
         _process.ErrorDataReceived += (_, e) =>
         {
             if (!string.IsNullOrEmpty(e.Data))
-                stderrLines.AppendLine(e.Data);
+                AppendCapped(stderrLines, e.Data);
         };
 
         _process.Exited += (_, _) =>
@@ -84,6 +85,7 @@ public sealed class ProcessService
                 return;
             }
             LastError = "Engine did not respond in time.";
+            StopProcess();
             SetState(EngineState.Error);
             return;
         }
@@ -94,19 +96,31 @@ public sealed class ProcessService
 
     public Task StopAsync()
     {
+        StopProcess();
+        SetState(EngineState.Stopped);
+        return Task.CompletedTask;
+    }
+
+    private void StopProcess()
+    {
         try
         {
             if (_process is { HasExited: false })
-            {
                 _process.Kill(entireProcessTree: true);
-                _process.Dispose();
-                _process = null;
-            }
         }
         catch { }
+        finally
+        {
+            _process?.Dispose();
+            _process = null;
+        }
+    }
 
-        SetState(EngineState.Stopped);
-        return Task.CompletedTask;
+    private static void AppendCapped(System.Text.StringBuilder buffer, string line)
+    {
+        buffer.AppendLine(line);
+        if (buffer.Length > MaxStderrBufferChars)
+            buffer.Remove(0, buffer.Length - MaxStderrBufferChars);
     }
 
     private static async Task<bool> WaitForHealthAsync(int port, CancellationToken ct)

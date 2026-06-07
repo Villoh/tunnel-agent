@@ -15,9 +15,10 @@ public enum LogsTab { Requests, ProxyLogs }
 public partial class LogsViewModel : ViewModelBase
 {
     private const int PageSize     = 25;
+    private const int MaxRequestLogs = 5000;
     private const int ProxyLogsCap = 100;
 
-    // Full backing store — newest first, no limit
+    // Full backing store — newest first, capped to avoid unbounded memory growth.
     private readonly List<RequestLogEntry> _allEntries = new();
     // Filtered results (search + provider) before pagination
     private List<RequestLogEntry> _filteredAll = new();
@@ -105,6 +106,7 @@ public partial class LogsViewModel : ViewModelBase
                 _allEntries.Insert(0, e);
         }
 
+        TrimRequestEntries();
         RebuildProviderOptions();
         CurrentPage = 1;
         ApplyFilter();
@@ -146,6 +148,12 @@ public partial class LogsViewModel : ViewModelBase
     }
 
     // ── Provider filter ──────────────────────────────────────────────────
+
+    private void TrimRequestEntries()
+    {
+        if (_allEntries.Count <= MaxRequestLogs) return;
+        _allEntries.RemoveRange(MaxRequestLogs, _allEntries.Count - MaxRequestLogs);
+    }
 
     [RelayCommand]
     private void SelectProvider(string provider) => SelectedProvider = provider;

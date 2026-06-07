@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Memory growth and lifecycle cleanup** (`LogsViewModel`, `LogsService`, `MainWindowViewModel`, `TrayService`, engine process services): request logs are now capped in memory (pagination no longer hides an unbounded backing list), log polling only runs when the Logs section is visible, view/control event subscriptions are cleaned up on lifecycle changes, root services are disposed on exit, unhealthy engine processes are killed after failed health checks, Perplexity stderr/token buffers are bounded, and CA1416 platform analyzer warnings are resolved.
 - **CS8826 warning in `ProviderViewModel`**: `OnQuotaFetchedEmptyChanged` partial method signature used `bool _` while the CommunityToolkit.Mvvm source generator emits `bool value`, causing a harmless but noisy signature-mismatch warning. Parameter renamed to match.
 
 ### Infrastructure

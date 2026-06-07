@@ -22,6 +22,8 @@ public sealed record TokenFlowUpdate(TokenFlowStage Stage, string Prompt, string
 /// <summary>Runs `perplexity-webui-scraper token` with redirected stdin/stdout.</summary>
 public sealed class TokenGeneratorService : IAsyncDisposable
 {
+    private const int MaxBufferChars = 128 * 1024;
+
     private Process? _process;
     private Task? _pumpTask;
     private readonly StringBuilder _buffer = new();
@@ -177,8 +179,18 @@ public sealed class TokenGeneratorService : IAsyncDisposable
         {
             var read = await reader.ReadAsync(buffer.AsMemory(0, buffer.Length), ct);
             if (read <= 0) break;
-            lock (_buffer) _buffer.Append(buffer, 0, read);
+            lock (_buffer) AppendCapped(buffer, read);
         }
+    }
+
+    private void AppendCapped(char[] buffer, int read)
+    {
+        _buffer.Append(buffer, 0, read);
+        if (_buffer.Length <= MaxBufferChars) return;
+
+        var removeCount = _buffer.Length - MaxBufferChars;
+        _buffer.Remove(0, removeCount);
+        _readIndex = Math.Max(0, _readIndex - removeCount);
     }
 
     private static string LastLines(string text)

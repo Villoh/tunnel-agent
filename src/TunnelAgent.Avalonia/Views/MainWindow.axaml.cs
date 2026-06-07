@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace TunnelAgent.Views;
 public partial class MainWindow : Window
 {
     private const int DwmwaBorderColor = 34;
+    private MainWindowViewModel? _currentViewModel;
 
     public MainWindow()
     {
@@ -35,21 +37,30 @@ public partial class MainWindow : Window
 
     private void OnDataContextChanged(object? sender, System.EventArgs e)
     {
-        if (DataContext is MainWindowViewModel vm)
-            vm.PropertyChanged += (_, args) =>
-            {
-                if (args.PropertyName == nameof(MainWindowViewModel.ThemeMode))
-                {
-                    ApplyThemeMode(vm);
-                    Dispatcher.UIThread.Post(ApplyNativeBorderColor, DispatcherPriority.Background);
-                }
-                else if (args.PropertyName == nameof(MainWindowViewModel.ShowApiKeysDialog) && vm.ShowApiKeysDialog)
-                    Dispatcher.UIThread.Post(() => ApiKeysOverlay.Focus(), DispatcherPriority.Input);
-                else if (args.PropertyName == nameof(MainWindowViewModel.ShowPerplexityAccountDialog) && vm.ShowPerplexityAccountDialog)
-                    Dispatcher.UIThread.Post(() => PerplexityAccountOverlay.Focus(), DispatcherPriority.Input);
-                else if (args.PropertyName == nameof(MainWindowViewModel.ShowAgentConfigDialog) && vm.ShowAgentConfigDialog)
-                    Dispatcher.UIThread.Post(() => AgentConfigOverlay.Focus(), DispatcherPriority.Input);
-            };
+        if (_currentViewModel is not null)
+            _currentViewModel.PropertyChanged -= OnViewModelPropertyChanged;
+
+        _currentViewModel = DataContext as MainWindowViewModel;
+        if (_currentViewModel is null) return;
+
+        _currentViewModel.PropertyChanged += OnViewModelPropertyChanged;
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
+    {
+        if (sender is not MainWindowViewModel vm) return;
+
+        if (args.PropertyName == nameof(MainWindowViewModel.ThemeMode))
+        {
+            ApplyThemeMode(vm);
+            Dispatcher.UIThread.Post(ApplyNativeBorderColor, DispatcherPriority.Background);
+        }
+        else if (args.PropertyName == nameof(MainWindowViewModel.ShowApiKeysDialog) && vm.ShowApiKeysDialog)
+            Dispatcher.UIThread.Post(() => ApiKeysOverlay.Focus(), DispatcherPriority.Input);
+        else if (args.PropertyName == nameof(MainWindowViewModel.ShowPerplexityAccountDialog) && vm.ShowPerplexityAccountDialog)
+            Dispatcher.UIThread.Post(() => PerplexityAccountOverlay.Focus(), DispatcherPriority.Input);
+        else if (args.PropertyName == nameof(MainWindowViewModel.ShowAgentConfigDialog) && vm.ShowAgentConfigDialog)
+            Dispatcher.UIThread.Post(() => AgentConfigOverlay.Focus(), DispatcherPriority.Input);
     }
 
 

@@ -30,7 +30,7 @@ public sealed record CliProxyApiKeyViewModel(string Value, bool IsDefault)
     public bool CanSetDefault => !IsDefault;
 }
 
-public partial class MainWindowViewModel : ViewModelBase
+public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
 {
     private readonly SettingsService _settings;
     private readonly EngineRegistryService _engineRegistry;
@@ -64,6 +64,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly LogsService _logs = new(IPlatformInfo.Current.AuthDirectory);
     public LogsViewModel Logs { get; } = new();
     private bool _logsInitialLoadPending;
+    private bool _isWindowVisibleForLogs = true;
+    private bool _disposed;
 
     public static IReadOnlyList<int> LogsRefreshIntervalOptions { get; } = [2, 5, 10, 30];
 
@@ -73,6 +75,25 @@ public partial class MainWindowViewModel : ViewModelBase
         _logs.Configure(portOverride ?? runtime.Port, _settings.Current.ManagementKey);
     }
 
+    public void SetWindowVisibleForLogs(bool visible)
+    {
+        if (_isWindowVisibleForLogs == visible) return;
+        _isWindowVisibleForLogs = visible;
+        UpdateLogsPollingState();
+    }
+
+    private bool AreLogsActive => _isWindowVisibleForLogs && SelectedSection == SectionKey.Logs;
+
+    private void UpdateLogsPollingState()
+    {
+        var effectiveAutoRefresh = _settings.Current.LogsAutoRefresh && AreLogsActive;
+        _logs.SetAutoRefresh(effectiveAutoRefresh, _settings.Current.LogsRefreshIntervalSeconds);
+    }
+
+    private void OnLogEntriesLoaded(IReadOnlyList<RequestLogEntry> entries, bool isInitial) => Logs.OnEntriesLoaded(entries, isInitial);
+    private void OnRawLogLinesLoaded(IReadOnlyList<string> lines, bool isInitial) => Logs.OnRawLinesLoaded(lines, isInitial);
+    private void OnLogsCleared() => Logs.OnCleared();
+
     public bool LogsAutoRefresh
     {
         get => _settings.Current.LogsAutoRefresh;
@@ -80,7 +101,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             _settings.Current.LogsAutoRefresh = value;
             _settings.Save();
-            _logs.SetAutoRefresh(value, _settings.Current.LogsRefreshIntervalSeconds);
+            UpdateLogsPollingState();
             OnPropertyChanged();
         }
     }
@@ -92,7 +113,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             _settings.Current.LogsRefreshIntervalSeconds = value;
             _settings.Save();
-            _logs.SetAutoRefresh(_settings.Current.LogsAutoRefresh, value);
+            UpdateLogsPollingState();
             OnPropertyChanged();
         }
     }
@@ -267,10 +288,10 @@ public partial class MainWindowViewModel : ViewModelBase
         InitApiKeysFromSettings();
         InitAgentsFromCatalog();
 
-        _logs.EntriesLoaded  += (entries, isInitial) => Logs.OnEntriesLoaded(entries, isInitial);
-        _logs.RawLinesLoaded += (lines, isInitial)   => Logs.OnRawLinesLoaded(lines, isInitial);
-        _logs.Cleared        += () => Logs.OnCleared();
-        _logs.SetAutoRefresh(_settings.Current.LogsAutoRefresh, _settings.Current.LogsRefreshIntervalSeconds);
+        _logs.EntriesLoaded  += OnLogEntriesLoaded;
+        _logs.RawLinesLoaded += OnRawLogLinesLoaded;
+        _logs.Cleared        += OnLogsCleared;
+        UpdateLogsPollingState();
         _logsInitialLoadPending = true;
     }
 
@@ -561,6 +582,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(IsConfigSection));
         OnPropertyChanged(nameof(ConfigTabIndex));
+        UpdateLogsPollingState();
         // Drive FocusedConfigEngineId from config tab so engine commands/properties resolve correctly.
         if (value == SectionKey.ConfigCliProxy)
             FocusedConfigEngineId = EngineCatalog.CliProxyApi.Id;
@@ -673,10 +695,14 @@ public partial class MainWindowViewModel : ViewModelBase
                 // Engine already running at startup — configure management API and start log polling if needed
                 ConfigureLogsService(engine.Port);
                 _logs.SetManagementApiAvailable(true);
-                if (_logsInitialLoadPending)
+                if (_logsInitialLoadPending && AreLogsActive)
                 {
                     _logsInitialLoadPending = false;
                     _logs.Start();
+                }
+                else
+                {
+                    UpdateLogsPollingState();
                 }
             }
             else
@@ -764,10 +790,14 @@ public partial class MainWindowViewModel : ViewModelBase
                     {
                         ConfigureLogsService(engine.Port);
                         _logs.SetManagementApiAvailable(true);
-                        if (_logsInitialLoadPending)
+                        if (_logsInitialLoadPending && AreLogsActive)
                         {
                             _logsInitialLoadPending = false;
                             _logs.Start();
+                        }
+                        else
+                        {
+                            UpdateLogsPollingState();
                         }
                     }
                 }
@@ -780,6 +810,7 @@ public partial class MainWindowViewModel : ViewModelBase
                     {
                         _logs.SetManagementApiAvailable(false);
                         _logs.Stop();
+                        _logsInitialLoadPending = true;
                     }
                 }
 
@@ -1530,11 +1561,15 @@ public partial class MainWindowViewModel : ViewModelBase
     private void SelectLogs()
     {
         SelectedSection = SectionKey.Logs;
-        if (_logsInitialLoadPending)
+        if (_logsInitialLoadPending && AreLogsActive)
         {
             _logsInitialLoadPending = false;
             ConfigureLogsService(CliProxyEngine.Port);
             _logs.Start();
+        }
+        else
+        {
+            UpdateLogsPollingState();
         }
     }
 
@@ -2187,5 +2222,32 @@ public partial class MainWindowViewModel : ViewModelBase
     private void InstallAppUpdateAndRestart()
     {
         _appUpdate.ApplyAndRestart();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_disposed) return;
+        _disposed = true;
+
+        _cliProxyModelFetchCts?.Cancel();
+        _cliProxyModelFetchCts?.Dispose();
+        _cliProxyModelFetchCts = null;
+
+        _perplexityModelFetchCts?.Cancel();
+        _perplexityModelFetchCts?.Dispose();
+        _perplexityModelFetchCts = null;
+
+        foreach (var engine in _engineRegistry.Engines)
+            engine.StateChanged -= OnAnyEngineStateChanged;
+
+        _catalog.ProvidersRefreshed -= OnProvidersRefreshed;
+        _perplexityAccounts.AccountsChanged -= OnPerplexityAccountsChanged;
+        _logs.EntriesLoaded -= OnLogEntriesLoaded;
+        _logs.RawLinesLoaded -= OnRawLogLinesLoaded;
+        _logs.Cleared -= OnLogsCleared;
+
+        _logs.Dispose();
+        _catalog.Dispose();
+        await _perplexityTokenGenerator.DisposeAsync();
     }
 }

@@ -35,6 +35,7 @@ public class SlidingTabBar : Panel
     private readonly Grid _buttonGrid;
     private readonly List<IDisposable> _resourceSubscriptions = new();
     private bool _initialised;
+    private bool _isSizeChangedSubscribed;
 
     static SlidingTabBar()
     {
@@ -87,7 +88,11 @@ public class SlidingTabBar : Panel
         BindThemeResources();
 
         _initialised = true;
-        SizeChanged += (_, _) => MovePill(animate: false);
+        if (!_isSizeChangedSubscribed)
+        {
+            SizeChanged += OnSizeChanged;
+            _isSizeChangedSubscribed = true;
+        }
 
         // Post pill positioning after first layout pass so bounds are available
         Avalonia.Threading.Dispatcher.UIThread.Post(
@@ -95,11 +100,25 @@ public class SlidingTabBar : Panel
             Avalonia.Threading.DispatcherPriority.Loaded);
     }
 
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+
+        if (_isSizeChangedSubscribed)
+        {
+            SizeChanged -= OnSizeChanged;
+            _isSizeChangedSubscribed = false;
+        }
+
+        DisposeResourceSubscriptions();
+        _initialised = false;
+    }
+
+    private void OnSizeChanged(object? sender, SizeChangedEventArgs e) => MovePill(animate: false);
+
     private void BindThemeResources()
     {
-        foreach (var subscription in _resourceSubscriptions)
-            subscription.Dispose();
-        _resourceSubscriptions.Clear();
+        DisposeResourceSubscriptions();
 
         _resourceSubscriptions.Add(this.GetResourceObservable("AccentBrush").Subscribe(new ResourceObserver(value =>
         {
@@ -115,6 +134,13 @@ public class SlidingTabBar : Panel
         })));
         _resourceSubscriptions.Add(this.GetResourceObservable("FgBrush").Subscribe(new ResourceObserver(_ => UpdateForegrounds())));
         UpdateForegrounds();
+    }
+
+    private void DisposeResourceSubscriptions()
+    {
+        foreach (var subscription in _resourceSubscriptions)
+            subscription.Dispose();
+        _resourceSubscriptions.Clear();
     }
 
     private void BuildButtons()

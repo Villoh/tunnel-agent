@@ -36,7 +36,6 @@ namespace TunnelAgent.Infrastructure.Services;
 ///   </item>
 /// </list>
 /// </summary>
-[UnsupportedOSPlatform("windows")]
 internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
 {
     private const string ProfileBlockBegin  = "# BEGIN TunnelAgent";
@@ -359,6 +358,8 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
 
     private static void TryChmod600(string path)
     {
+        if (OperatingSystem.IsWindows()) return;
+
         try { File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite); }
         catch { }
     }

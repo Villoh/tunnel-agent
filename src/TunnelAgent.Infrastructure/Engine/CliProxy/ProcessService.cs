@@ -65,6 +65,7 @@ public sealed class ProcessService
         if (!healthy)
         {
             LastError = "Engine did not respond in time.";
+            StopProcess();
             SetState(EngineState.Error);
             return;
         }
@@ -75,19 +76,24 @@ public sealed class ProcessService
 
     public Task StopAsync()
     {
+        StopProcess();
+        SetState(EngineState.Stopped);
+        return Task.CompletedTask;
+    }
+
+    private void StopProcess()
+    {
         try
         {
             if (_process is { HasExited: false })
-            {
                 _process.Kill(entireProcessTree: true);
-                _process.Dispose();
-                _process = null;
-            }
         }
         catch { }
-
-        SetState(EngineState.Stopped);
-        return Task.CompletedTask;
+        finally
+        {
+            _process?.Dispose();
+            _process = null;
+        }
     }
 
     private static async Task<bool> WaitForHealthAsync(int port, string? apiKey, CancellationToken ct)

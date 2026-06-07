@@ -106,6 +106,7 @@ public sealed class TrayService : IDisposable
         _desktop.ShutdownRequested += OnShutdownRequested;
 
         RefreshMenu();
+        UpdateLogVisibility();
     }
 
     public bool IsQuitting => _isQuitting;
@@ -140,6 +141,7 @@ public sealed class TrayService : IDisposable
         e.Cancel = true;
         _window.Hide();
         RefreshMenu();
+        UpdateLogVisibility();
     }
 
     private void OnShutdownRequested(object? sender, ShutdownRequestedEventArgs e)
@@ -154,7 +156,10 @@ public sealed class TrayService : IDisposable
     private void OnWindowPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
         if (e.Property.Name == nameof(Window.IsVisible) || e.Property.Name == nameof(Window.WindowState))
+        {
             RefreshMenu();
+            UpdateLogVisibility();
+        }
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -172,6 +177,7 @@ public sealed class TrayService : IDisposable
             ShowWindow();
 
         RefreshMenu();
+        UpdateLogVisibility();
     }
 
     private void ShowWindow()
@@ -181,6 +187,13 @@ public sealed class TrayService : IDisposable
             _window.WindowState = WindowState.Normal;
         _window.Activate();
         RefreshMenu();
+        UpdateLogVisibility();
+    }
+
+    private void UpdateLogVisibility()
+    {
+        var visible = _window.IsVisible && _window.WindowState != WindowState.Minimized;
+        _viewModel.SetWindowVisibleForLogs(visible);
     }
 
     private void ShowConfiguration()

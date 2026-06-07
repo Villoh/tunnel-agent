@@ -65,13 +65,17 @@ public sealed class LogsService : IDisposable
         _autoRefresh    = enabled;
         _pollIntervalMs = Math.Max(2, intervalSeconds) * 1000;
 
-        // Restart loop so new interval/state takes effect immediately
-        if (_cts is { IsCancellationRequested: false })
-        {
-            _cts.Cancel();
-            _cts = new CancellationTokenSource();
-            _ = PollLoopAsync(_cts.Token);
-        }
+        // Restart loop so new interval/state takes effect immediately. If disabled,
+        // stop polling without doing an extra initial poll.
+        var oldCts = _cts;
+        oldCts?.Cancel();
+        oldCts?.Dispose();
+
+        _cts = null;
+        if (!enabled) return;
+
+        _cts = new CancellationTokenSource();
+        _ = PollLoopAsync(_cts.Token);
     }
 
     public void Start()
@@ -121,7 +125,9 @@ public sealed class LogsService : IDisposable
 
     public void Stop()
     {
-        _cts?.Cancel();
+        var oldCts = _cts;
+        oldCts?.Cancel();
+        oldCts?.Dispose();
         _cts             = null;
         _lastLogTimestamp = null;
         _lastFileSize    = 0;

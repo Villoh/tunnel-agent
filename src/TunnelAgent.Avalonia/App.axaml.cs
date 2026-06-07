@@ -35,7 +35,15 @@ public partial class App : Application
             var mainWindow = new MainWindow { DataContext = vm };
             desktop.MainWindow = mainWindow;
             var tray = new TrayService(desktop, mainWindow, vm);
-            desktop.Exit += (_, _) => tray.Dispose();
+            desktop.Exit += async (_, _) =>
+            {
+                try
+                {
+                    tray.Dispose();
+                    await vm.DisposeAsync();
+                }
+                catch { }
+            };
 
             if (SingleInstance != null)
                 SingleInstance.ActivationRequested += () =>
