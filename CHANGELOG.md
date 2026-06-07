@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.6] - 2026-06-10
+
 ### Added
 
 - **xAI provider support**: xAI (Grok) is now available as an OAuth provider alongside the rest. Includes login via `--xai-login`, token file detection, custom Grok logo, and correct "OAuth" auth kind label in Available Models.
@@ -625,7 +627,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.5.5...HEAD
+[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.5.6...HEAD
+[0.5.6]: https://github.com/Villoh/tunnel-agent/compare/v0.5.5...v0.5.6
 [0.5.5]: https://github.com/Villoh/tunnel-agent/compare/v0.5.4...v0.5.5
 [0.5.4]: https://github.com/Villoh/tunnel-agent/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/Villoh/tunnel-agent/compare/v0.5.2...v0.5.3
