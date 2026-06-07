@@ -37,26 +37,30 @@ namespace TunnelAgent.Infrastructure.Services;
 [UnsupportedOSPlatform("windows")]
 internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
 {
-    private static readonly string Profile = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-        ".profile");
-
-    // App-owned store — shell-sourceable, managed entirely by TunnelAgent.
-    // SpecialFolder.ApplicationData on Linux resolves $XDG_CONFIG_HOME
-    // (fallback ~/.config), honouring the XDG Base Directory spec.
-    private static readonly string AppEnvFile = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "tunnelagent", "environment");
-
-    // The single source hook line we inject into ~/.profile (Linux only).
-    private static readonly string ProfileSourceLine =
-        $". \"{AppEnvFile}\"";
-
-    // Guard comment that brackets our block so we can detect it.
     private const string ProfileBlockBegin = "# BEGIN TunnelAgent";
     private const string ProfileBlockEnd   = "# END TunnelAgent";
 
+    private readonly string _appEnvFile;
+    private readonly string _profile;
     private readonly object _fileLock = new();
+
+    // Production constructor — uses real XDG/home paths.
+    internal UnixUserEnvironmentService()
+        : this(
+            appEnvFile: Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "tunnelagent", "environment"),
+            profile: Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                ".profile"))
+    { }
+
+    // Testable constructor — caller supplies isolated temp paths.
+    internal UnixUserEnvironmentService(string appEnvFile, string profile)
+    {
+        _appEnvFile = appEnvFile;
+        _profile    = profile;
+    }
 
     // ── Startup seeding ───────────────────────────────────────────────────────
 
@@ -84,8 +88,7 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
 
         if (OperatingSystem.IsLinux())
             EnsureProfileHook();
-
-        if (OperatingSystem.IsMacOS())
+        else if (OperatingSystem.IsMacOS())
             TryLaunchctlSetenv(name, value);
     }
 
@@ -96,8 +99,7 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
 
         if (OperatingSystem.IsLinux())
             CleanProfileHookIfEmpty();
-
-        if (OperatingSystem.IsMacOS())
+        else if (OperatingSystem.IsMacOS())
             TryLaunchctlUnsetenv(name);
     }
 
@@ -132,12 +134,11 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
     private Dictionary<string, string> ReadAppStoreUnlocked()
     {
         var result = new Dictionary<string, string>(StringComparer.Ordinal);
-        if (!File.Exists(AppEnvFile)) return result;
+        if (!File.Exists(_appEnvFile)) return result;
 
-        foreach (var line in File.ReadLines(AppEnvFile))
+        foreach (var line in File.ReadLines(_appEnvFile))
         {
             if (string.IsNullOrWhiteSpace(line) || line.StartsWith('#')) continue;
-            // Strip leading "export " if present
             var entry = line.StartsWith("export ", StringComparison.Ordinal)
                 ? line["export ".Length..]
                 : line;
@@ -149,18 +150,18 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
         return result;
     }
 
-    private static void WriteAppStoreUnlocked(Dictionary<string, string> vars)
+    private void WriteAppStoreUnlocked(Dictionary<string, string> vars)
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(AppEnvFile)!);
+        Directory.CreateDirectory(Path.GetDirectoryName(_appEnvFile)!);
 
         var sb = new StringBuilder();
         sb.AppendLine("# Managed by Tunnel Agent — do not edit manually.");
         foreach (var (k, v) in vars)
             sb.Append("export ").Append(k).Append('=').AppendLine(v);
 
-        File.WriteAllText(AppEnvFile, sb.ToString(),
+        File.WriteAllText(_appEnvFile, sb.ToString(),
             new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-        TryChmod600(AppEnvFile);
+        TryChmod600(_appEnvFile);
     }
 
     // ── Linux: ~/.profile source hook ────────────────────────────────────────
@@ -170,38 +171,39 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
     /// If the block already exists it is left untouched (idempotent).
     /// </summary>
     [SupportedOSPlatform("linux")]
-    private void EnsureProfileHook()
+    private void EnsureProfileHook() => EnsureProfileHookCore();
+
+    [SupportedOSPlatform("linux")]
+    private void CleanProfileHookIfEmpty() => CleanProfileHookIfEmptyCore();
+
+    // Platform-attribute-free implementations so tests can call them directly.
+    internal void EnsureProfileHookCore()
     {
         lock (_fileLock)
         {
-            var content = File.Exists(Profile) ? File.ReadAllText(Profile) : string.Empty;
-            if (content.Contains(ProfileBlockBegin)) return; // already installed
+            var content = File.Exists(_profile) ? File.ReadAllText(_profile) : string.Empty;
+            if (content.Contains(ProfileBlockBegin)) return;
 
             var hook = new StringBuilder();
             if (content.Length > 0 && !content.EndsWith('\n'))
                 hook.AppendLine();
             hook.AppendLine(ProfileBlockBegin);
-            hook.AppendLine($"[ -f \"{AppEnvFile}\" ] && . \"{AppEnvFile}\"");
+            hook.AppendLine($"[ -f \"{_appEnvFile}\" ] && . \"{_appEnvFile}\"");
             hook.AppendLine(ProfileBlockEnd);
 
-            File.AppendAllText(Profile, hook.ToString(),
+            File.AppendAllText(_profile, hook.ToString(),
                 new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
         }
     }
 
-    /// <summary>
-    /// Removes the guarded block from ~/.profile when the store becomes empty
-    /// (no variables left to export — no point keeping the source hook).
-    /// </summary>
-    [SupportedOSPlatform("linux")]
-    private void CleanProfileHookIfEmpty()
+    internal void CleanProfileHookIfEmptyCore()
     {
         lock (_fileLock)
         {
-            if (ReadAppStoreUnlocked().Count > 0) return; // still has variables
-            if (!File.Exists(Profile)) return;
+            if (ReadAppStoreUnlocked().Count > 0) return;
+            if (!File.Exists(_profile)) return;
 
-            var lines = File.ReadAllLines(Profile);
+            var lines = File.ReadAllLines(_profile);
             var filtered = new List<string>();
             bool inBlock = false;
 
@@ -212,11 +214,10 @@ internal sealed class UnixUserEnvironmentService : IUserEnvironmentService
                 if (!inBlock) filtered.Add(line);
             }
 
-            // Trim trailing blank lines left by the removed block
             while (filtered.Count > 0 && string.IsNullOrWhiteSpace(filtered[^1]))
                 filtered.RemoveAt(filtered.Count - 1);
 
-            File.WriteAllLines(Profile, filtered,
+            File.WriteAllLines(_profile, filtered,
                 new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
         }
     }
