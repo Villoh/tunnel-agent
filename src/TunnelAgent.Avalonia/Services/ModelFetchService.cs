@@ -116,6 +116,7 @@ public sealed class ModelFetchService
         "google"         => "Google",
         "moonshot"       => "Kimi",
         "alibaba"        => "Qwen",
+        "xai"            => "xAI",
         _                => Titlecase(ownedBy),
     };
 
@@ -124,6 +125,8 @@ public sealed class ModelFetchService
         "anthropic"      => "OAuth",
         "openai"         => "OAuth",
         "google"         => "OAuth",
+        "antigravity"    => "OAuth",
+        "xai"            => "OAuth",
         _                => "API Key",
     };
 

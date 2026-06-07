@@ -35,6 +35,7 @@ public sealed class OAuthTokenDetector
             ["gemini-cli"]      = "gemini",
             ["kimi"]            = "kimi",
             ["antigravity"]     = "antigravity",
+            ["xai"]             = "xai",
         };
 
     private readonly string _directory;

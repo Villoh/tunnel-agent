@@ -21,6 +21,12 @@ public static class ProviderIconRegistry
     private static readonly string KiroIconData =
         "M7.97 16.376c-1.644 3.642 1.86 4.556 4.443 2.424.76 2.39 3.608.607 4.631-1.247 2.251-4.084 1.342-8.249 1.108-9.108-1.6-5.859-9.6-5.869-10.976.03-.323 1.033-.328 2.206-.507 3.423-.09.617-.16 1.009-.393 1.655-.139.373-.323.7-.62 1.257-.458.865-.264 2.53 2.101 1.665l.224-.1h-.01l-.001.001z";
 
+    private static readonly string XaiIconData =
+        "M6.469 8.776L16.512 23h-4.464L2.005 8.776H6.47z" +
+        "M6.465 16.676l2.233 3.164L6.467 23H2l4.465-6.324z" +
+        "M22 2.582V23h-3.659V7.764L22 2.582z" +
+        "M22 1l-9.952 14.095-2.233-3.163L17.533 1H22z";
+
     private static readonly string TraeIconData =
         "M24 20.541H3.428v-3.426H0V3.4h24V20.54z" +
         "M3.428 17.115h17.144V6.827H3.428v10.288z" +
@@ -47,6 +53,7 @@ public static class ProviderIconRegistry
             "cursor"                        => new(PackIconSimpleIconsKind.OpenAi,        "#1D9BF0", CursorIconData),
             "kiro"                          => new(PackIconSimpleIconsKind.OpenAi,       "#9046FF", KiroIconData),
             "trae"                          => new(PackIconSimpleIconsKind.OpenAi,       "#32F08C", TraeIconData),
+            "xai"  or "grok"               => new(PackIconSimpleIconsKind.OpenAi,       "#000000", XaiIconData),
             _                               => new(PackIconSimpleIconsKind.OpenAi,       "#555555"),
         };
 }

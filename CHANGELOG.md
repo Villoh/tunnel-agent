@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **xAI provider support**: xAI (Grok) is now available as an OAuth provider alongside the rest. Includes login via `--xai-login`, token file detection, custom Grok logo, and correct "OAuth" auth kind label in Available Models.
+- **Removed unused SVG assets**: `cursor-agent.svg` (leftover from when Cursor was an agent) and `kimi.svg` (Kimi uses an inline path in `ProviderIconRegistry`) have been deleted.
+
 ### Fixed
 
 - **Refresh buttons show grey background on press**: quota, agents, and logs refresh buttons now use `Click` handler instead of `Command` binding, preventing the automatic disable state that caused a grey square to appear during execution. The spin icon already provides visual feedback. All three buttons now use the `icon` style for consistent appearance.

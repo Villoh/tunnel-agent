@@ -26,6 +26,7 @@ public sealed class ProviderCatalogService : IDisposable
         new("gemini-cli",     "Gemini CLI",     "Google Gemini via OAuth."),
         new("kimi",           "Kimi",           "Moonshot AI via OAuth."),
         new("antigravity",    "Antigravity",    "Antigravity AI via OAuth."),
+        new("xai",            "xAI",            "Grok models via xAI OAuth."),
     ];
 
     private readonly record struct ProviderMeta(string Id, string Name, string Description);

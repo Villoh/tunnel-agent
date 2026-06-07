@@ -24,6 +24,7 @@ public sealed class OAuthService : IDisposable
             ["gemini-cli"]      = "login",            // gemini uses just -login
             ["kimi"]            = "kimi-login",
             ["antigravity"]     = "antigravity-login",
+            ["xai"]             = "xai-login",
         };
 
     public static bool IsOAuthProvider(string providerId) =>
@@ -153,6 +154,7 @@ public sealed class OAuthService : IDisposable
         "gemini-cli"     => "Gemini CLI",
         "kimi"           => "Kimi",
         "antigravity"    => "Antigravity",
+        "xai"            => "xAI",
         _                => providerId,
     };
 
