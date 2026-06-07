@@ -50,6 +50,15 @@ public partial class ProviderAccountViewModel : ViewModelBase
 
     public bool HasQuota => QuotaBars.Count > 0;
 
+    /// <summary>Set to true after a successful quota fetch that returned no bars (e.g. no active plan).</summary>
+    [ObservableProperty] private bool _quotaFetchedEmpty;
+    partial void OnQuotaFetchedEmptyChanged(bool _) { OnPropertyChanged(nameof(QuotaEmptyLabel)); OnPropertyChanged(nameof(QuotaEmptyDescription)); }
+
+    public string QuotaEmptyLabel => QuotaFetchedEmpty ? "No quota data available" : "Quota not loaded";
+    public string QuotaEmptyDescription => QuotaFetchedEmpty
+        ? "No active plan or no usage data returned by the provider."
+        : "Refresh this account to fetch available quota windows.";
+
     [ObservableProperty] private bool _isRefreshing;
     [ObservableProperty] private bool _isProviderEnabled = true;
 

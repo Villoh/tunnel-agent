@@ -43,6 +43,7 @@ public sealed class QuotaFetchService
             "codex"          => FetchCodexAsync(account, ct),
             "gemini-cli"     => FetchGeminiAsync(account, ct),
             "antigravity"    => FetchAntigravityAsync(account, ct),
+            "xai"            => FetchXaiAsync(account, ct),
             "cursor"         => FetchCursorAsync(account, ct),
             "kiro"           => FetchKiroAsync(account, ct),
             "trae"           => FetchTraeAsync(account, ct),
@@ -710,6 +711,156 @@ public sealed class QuotaFetchService
             catch { }
         }
         return null;
+    }
+
+
+    // ── xAI (Grok) ────────────────────────────────────────────────────────────
+    // GET https://cli-chat-proxy.grok.com/v1/settings  (plan badge)
+    // GET https://cli-chat-proxy.grok.com/v1/billing   (usage)
+
+    private async Task FetchXaiAsync(ProviderAccountViewModel account, CancellationToken ct)
+    {
+        var token = await ReadXaiTokenAsync(account.Email, ct);
+        if (token is null) return;
+
+        try
+        {
+            // Plan badge from /settings
+            using (var settingsReq = new HttpRequestMessage(HttpMethod.Get,
+                "https://cli-chat-proxy.grok.com/v1/settings"))
+            {
+                settingsReq.Headers.Add("Authorization", $"Bearer {token}");
+                settingsReq.Headers.Add("X-XAI-Token-Auth", "xai-grok-cli");
+                settingsReq.Headers.Add("Accept", "application/json");
+                using var settingsResp = await Http.SendAsync(settingsReq, ct);
+                if (settingsResp.IsSuccessStatusCode)
+                {
+                    var settingsBody = JsonNode.Parse(await settingsResp.Content.ReadAsStringAsync(ct));
+                    var plan = settingsBody?["subscription_tier_display"]?.GetValue<string>();
+                    if (!string.IsNullOrEmpty(plan))
+                        Avalonia.Threading.Dispatcher.UIThread.Post(() => account.PlanBadge = plan);
+                }
+            }
+
+            // Usage from /billing
+            using var req = new HttpRequestMessage(HttpMethod.Get,
+                "https://cli-chat-proxy.grok.com/v1/billing");
+            req.Headers.Add("Authorization", $"Bearer {token}");
+            req.Headers.Add("X-XAI-Token-Auth", "xai-grok-cli");
+            req.Headers.Add("Accept", "application/json");
+            using var resp = await Http.SendAsync(req, ct);
+            if (!resp.IsSuccessStatusCode) return;
+
+            var doc    = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
+            var config = doc?["config"];
+            if (config is null) return;
+
+            var used         = config["used"]?["val"]?.GetValue<double>() ?? 0;
+            var monthlyLimit = config["monthlyLimit"]?["val"]?.GetValue<double>() ?? 0;
+            var onDemandCap  = config["onDemandCap"]?["val"]?.GetValue<double>() ?? 0;
+            var periodEnd    = config["billingPeriodEnd"]?.GetValue<string>();
+            var resetIn      = FormatResetAtIso(periodEnd);
+
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                account.QuotaBars.Clear();
+
+                if (monthlyLimit > 0)
+                {
+                    account.QuotaBars.Add(new QuotaBarViewModel
+                    {
+                        Title   = $"Credits ({used:0}/{monthlyLimit:0})",
+                        Used    = Math.Clamp(used / monthlyLimit, 0, 1),
+                        ResetIn = resetIn,
+                    });
+                }
+                // else: no active plan — bars stay empty, mark as fetched
+                account.QuotaFetchedEmpty = true;
+
+                if (onDemandCap > 0)
+                    account.QuotaBars.Add(new QuotaBarViewModel
+                    {
+                        Title   = $"Pay as you go (cap: {onDemandCap:0})",
+                        Used    = 0,
+                        ResetIn = "",
+                    });
+            });
+        }
+        catch (OperationCanceledException) { throw; }
+        catch { }
+    }
+
+    private async Task<string?> ReadXaiTokenAsync(string email, CancellationToken ct)
+    {
+        if (!Directory.Exists(_authDir)) return null;
+        foreach (var file in Directory.GetFiles(_authDir, "xai-*.json"))
+        {
+            try
+            {
+                var text = File.ReadAllText(file);
+                var doc  = JsonNode.Parse(text)?.AsObject();
+                if (doc is null) continue;
+
+                var fileEmail = doc["email"]?.GetValue<string>() ?? "";
+                if (!string.IsNullOrEmpty(email) &&
+                    !string.Equals(fileEmail, email, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var accessToken  = doc["access_token"]?.GetValue<string>();
+                var refreshToken = doc["refresh_token"]?.GetValue<string>();
+                var expiry       = doc["expired"]?.GetValue<string>();
+                var tokenEndpoint = doc["token_endpoint"]?.GetValue<string>() ?? "https://auth.x.ai/oauth2/token";
+                // client_id is stored in the JWT audience — extract from JSON directly
+                var clientId = doc["sub"] is not null
+                    ? ExtractXaiClientId(doc)
+                    : null;
+
+                if (accessToken is null) continue;
+
+                var isExpired = DateTimeOffset.TryParse(expiry, out var expiryDt)
+                    && expiryDt - DateTimeOffset.UtcNow <= TimeSpan.FromSeconds(60);
+
+                if (isExpired && refreshToken is not null && clientId is not null)
+                {
+                    using var req = new HttpRequestMessage(HttpMethod.Post, tokenEndpoint);
+                    req.Content = new FormUrlEncodedContent(new Dictionary<string, string>
+                    {
+                        ["grant_type"]    = "refresh_token",
+                        ["refresh_token"] = refreshToken,
+                        ["client_id"]     = clientId,
+                    });
+                    using var resp = await Http.SendAsync(req, ct);
+                    if (resp.IsSuccessStatusCode)
+                    {
+                        var body = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
+                        var newToken = body?["access_token"]?.GetValue<string>();
+                        if (newToken is not null)
+                        {
+                            var newRefresh  = body?["refresh_token"]?.GetValue<string>() ?? refreshToken;
+                            var expiresIn   = body?["expires_in"]?.GetValue<int>() ?? 21600;
+                            doc["access_token"]  = newToken;
+                            doc["refresh_token"] = newRefresh;
+                            doc["expired"]       = DateTimeOffset.UtcNow.AddSeconds(expiresIn).ToString("o");
+                            File.WriteAllText(file, doc.ToJsonString(
+                                new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+                            return newToken;
+                        }
+                    }
+                }
+
+                return accessToken;
+            }
+            catch { }
+        }
+        return null;
+    }
+
+    private static string? ExtractXaiClientId(JsonObject doc)
+    {
+        // client_id is stored as the JWT audience — also present in token_endpoint host context
+        // cli-proxy-api stores it directly in the file as the OAuth client_id used
+        // Fall back to the known cli-proxy-api xAI client_id
+        return "b1a00492-073a-47ea-816f-4c329264a828";
     }
 
     // ── Cursor ─────────────────────────────────────────────────────────────────

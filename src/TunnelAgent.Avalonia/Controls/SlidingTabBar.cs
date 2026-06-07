@@ -130,7 +130,7 @@ public class SlidingTabBar : Panel
             var tab = Tabs[i];
             var idx = i;
 
-            var label = new TextBlock { Text = tab.Header, VerticalAlignment = VerticalAlignment.Center };
+            var label = new TextBlock { Text = tab.Header, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis };
             Control content = label;
             PackIconSimpleIcons? icon = null;
             Path? customPath = null;
@@ -141,8 +141,8 @@ public class SlidingTabBar : Panel
                     customPath = new Path
                     {
                         Data    = Avalonia.Media.PathGeometry.Parse(tab.CustomIconData),
-                        Width   = 14,
-                        Height  = 14,
+                        Width   = 18,
+                        Height  = 18,
                         Stretch = Avalonia.Media.Stretch.Uniform,
                         VerticalAlignment = VerticalAlignment.Center,
                     };
@@ -152,19 +152,13 @@ public class SlidingTabBar : Panel
                     icon = new PackIconSimpleIcons
                     {
                         Kind = tab.IconKind,
-                        Width = 14,
-                        Height = 14,
+                        Width = 18,
+                        Height = 18,
                         VerticalAlignment = VerticalAlignment.Center
                     };
                 }
                 Control iconControl = (Control?)customPath ?? icon!;
-                content = new StackPanel
-                {
-                    Orientation = Orientation.Horizontal,
-                    Spacing = 6,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    Children = { iconControl, label }
-                };
+                content = iconControl;
             }
 
             var btn = new Button
@@ -176,10 +170,11 @@ public class SlidingTabBar : Panel
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 HorizontalContentAlignment = HorizontalAlignment.Center,
                 VerticalContentAlignment = VerticalAlignment.Center,
-                Padding = new Thickness(12, 5),
+                Padding = new Thickness(8, 5),
                 FontSize = 13,
                 Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand),
                 [Grid.ColumnProperty] = idx,
+                [ToolTip.TipProperty] = tab.Header,
             };
 
             // Subtle hover/press — same feel as sidebar buttons
@@ -217,12 +212,15 @@ public class SlidingTabBar : Panel
         var count = Tabs.Count;
         var idx = Math.Clamp(SelectedIndex, 0, count - 1);
 
-        var totalWidth = _buttonGrid.Bounds.Width;
-        if (totalWidth <= 0) totalWidth = _inner.Bounds.Width;
-        if (totalWidth <= 0) return;
+        if (_buttonGrid.Children.Count <= idx) return;
+        var btn = _buttonGrid.Children[idx] as Button;
+        if (btn is null) return;
 
-        var pillWidth = totalWidth / count;
-        var targetX = idx * pillWidth;
+        var btnBounds = btn.Bounds;
+        if (btnBounds.Width <= 0) return;
+
+        var pillWidth = btnBounds.Width;
+        var targetX   = btnBounds.X;
 
         _pill.Width = pillWidth;
 
@@ -297,6 +295,14 @@ public class SlidingTabBar : Panel
             else if (btn.Content is TextBlock label)
             {
                 label.Foreground = brush;
+            }
+            else if (btn.Content is PackIconSimpleIcons iconDirect)
+            {
+                iconDirect.Foreground = brush;
+            }
+            else if (btn.Content is Path pathDirect)
+            {
+                pathDirect.Fill = brush;
             }
         }
     }

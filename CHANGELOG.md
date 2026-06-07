@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **xAI quota tracking**: xAI (Grok) is now tracked in the Quota section. Fetches plan badge from `/settings` and credit usage from `/billing` via `cli-chat-proxy.grok.com`. Token is automatically refreshed using the `refresh_token` from the cli-proxy-api auth file. Shows "No active Grok Build plan" state when no plan is active.
+
 ### Fixed
+
+- **Quota tab bar overflowing with many providers**: tabs now show only the icon (no label) with a tooltip on hover, freeing enough space for all 8 providers without clipping. Icon size increased to 18×18 for better visibility.
 
 - **Quota visible for CLIProxy-disabled accounts**: disabling an account in Providers (which sets `disabled: true` in the token file for CLIProxy routing) no longer hides it from the Quota view or prevents quota refresh. Quota and routing are now treated as independent concerns. `QuotaFetchService` no longer skips token files with `disabled: true`. The "disabled" badge is hidden in the Quota view. Quota account lists and refresh no longer filter by `IsDisabled`.
 - **Plan badge reset on provider sync**: `SyncOAuthAccounts` was unconditionally overwriting `PlanBadge` with the raw value from `OAuthTokenDetector` (e.g. `PLUS`) on every auth-dir change, discarding the richer Pascal Case value previously set by `QuotaFetchService`. It now only sets the badge as a fallback when the account has no existing value.

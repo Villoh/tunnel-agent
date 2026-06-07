@@ -50,6 +50,7 @@ public partial class MainWindowViewModel : ViewModelBase
         "codex",
         "gemini-cli",
         "antigravity",
+        "xai",
     };
     private readonly IAgentDetectionService _agentDetection = new AgentDetectionService();
     private readonly AgentConfigurationService _agentConfiguration = new AgentConfigurationService();
@@ -291,9 +292,10 @@ public partial class MainWindowViewModel : ViewModelBase
             "codex"          => 1,
             "gemini-cli"     => 2,
             "antigravity"    => 3,
-            "cursor"         => 4,
-            "kiro"           => 5,
-            "trae"           => 6,
+            "xai"            => 4,
+            "cursor"         => 5,
+            "kiro"           => 6,
+            "trae"           => 7,
             _                => 0,
         };
     public string ActiveEngineName => FocusedConfigEngine.Definition.DisplayName;
