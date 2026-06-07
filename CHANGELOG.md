@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.7] - 2026-06-10
+
 ### Added
 
 - **xAI quota tracking**: xAI (Grok) is now tracked in the Quota section. Fetches plan badge from `/settings` and credit usage from `/billing` via `cli-chat-proxy.grok.com`. Token is automatically refreshed using the `refresh_token` from the cli-proxy-api auth file. Shows "No active Grok Build plan" state when no plan is active.
@@ -641,7 +643,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.5.6...HEAD
+[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.5.7...HEAD
+[0.5.7]: https://github.com/Villoh/tunnel-agent/compare/v0.5.6...v0.5.7
 [0.5.6]: https://github.com/Villoh/tunnel-agent/compare/v0.5.5...v0.5.6
 [0.5.5]: https://github.com/Villoh/tunnel-agent/compare/v0.5.4...v0.5.5
 [0.5.4]: https://github.com/Villoh/tunnel-agent/compare/v0.5.3...v0.5.4
