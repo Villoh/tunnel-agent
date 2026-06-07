@@ -62,12 +62,11 @@ public sealed class AgentDetectionService : IAgentDetectionService
             var found = ScanPath(name);
             if (found != null) return found;
 
-            // Step 2: Well-known dirs
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                found = ScanWellKnownDirs(name);
-                if (found != null) return found;
-            }
+            // Step 2: Well-known dirs (OS-specific)
+            found = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? ScanWellKnownDirsWindows(name)
+                : ScanWellKnownDirsUnix(name);
+            if (found != null) return found;
 
             // Step 3: where.exe / which as fallback for exotic installs
             return await WhichAsync(name, ct).ConfigureAwait(false);
@@ -119,7 +118,7 @@ public sealed class AgentDetectionService : IAgentDetectionService
         return null;
     }
 
-    private static string? ScanWellKnownDirs(string name)
+    private static string? ScanWellKnownDirsWindows(string name)
     {
         var profile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         var localApp = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -129,11 +128,59 @@ public sealed class AgentDetectionService : IAgentDetectionService
         {
             Path.Combine(localApp, "Programs"),
             Path.Combine(appData, "npm"),
-            Path.Combine(profile, ".local", "bin"),
             Path.Combine(profile, ".cargo", "bin"),
             Path.Combine(profile, ".amp", "bin"),
         };
 
+        return ScanDirs(dirs, name);
+    }
+
+    private static string? ScanWellKnownDirsUnix(string name)
+    {
+        var profile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+        var dirs = new List<string>
+        {
+            // User-local binaries (XDG)
+            Path.Combine(profile, ".local", "bin"),
+            // Rust/Cargo
+            Path.Combine(profile, ".cargo", "bin"),
+            // Amp CLI
+            Path.Combine(profile, ".amp", "bin"),
+            // Node version managers
+            Path.Combine(profile, ".volta", "bin"),
+            Path.Combine(profile, ".fnm"),
+            Path.Combine(profile, ".nvm", "current", "bin"),
+            // npm global (when prefix is set to ~)
+            Path.Combine(profile, ".npm-global", "bin"),
+            // pnpm
+            Path.Combine(profile, ".local", "share", "pnpm"),
+        };
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            // Homebrew — Apple Silicon default prefix
+            dirs.Add("/opt/homebrew/bin");
+            // Homebrew — Intel macOS default prefix
+            dirs.Add("/usr/local/bin");
+        }
+        else
+        {
+            // Homebrew on Linux
+            dirs.Add("/home/linuxbrew/.linuxbrew/bin");
+            dirs.Add(Path.Combine(profile, ".linuxbrew", "bin"));
+            // Snap
+            dirs.Add("/snap/bin");
+            // Flatpak exports
+            dirs.Add(Path.Combine(profile, ".local", "share", "flatpak", "exports", "bin"));
+            dirs.Add("/var/lib/flatpak/exports/bin");
+        }
+
+        return ScanDirs(dirs, name);
+    }
+
+    private static string? ScanDirs(IEnumerable<string> dirs, string name)
+    {
         foreach (var dir in dirs)
         {
             var full = Path.Combine(dir, name);
@@ -145,9 +192,13 @@ public sealed class AgentDetectionService : IAgentDetectionService
     private static Task<bool> IsConfiguredAsync(AgentDefinition def, CancellationToken ct)
     {
         if (def.ConfiguredEnvVar is { } envVar)
-            return Task.FromResult(!string.IsNullOrEmpty(
-                Environment.GetEnvironmentVariable(envVar, EnvironmentVariableTarget.User) ??
-                Environment.GetEnvironmentVariable(envVar)));
+        {
+            // EnvironmentVariableTarget.User is not persistent on Unix — use
+            // UserEnvironmentService which reads our app-owned store first.
+            var value = TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get(envVar)
+                ?? Environment.GetEnvironmentVariable(envVar);
+            return Task.FromResult(!string.IsNullOrEmpty(value));
+        }
         return CheckConfiguredAsync(def.ConfigPaths, ct);
     }
 

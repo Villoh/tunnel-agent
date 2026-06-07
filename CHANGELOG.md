@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Linux/macOS: persistent user environment variables** (`UserEnvironmentService`): on Unix, `EnvironmentVariableTarget.User` has no persistent backing store — variables were silently lost on restart. A new `IUserEnvironmentService` abstraction (in `TunnelAgent.Abstractions`) now drives platform-specific implementations: `WindowsUserEnvironmentService` retains the existing registry + `WM_SETTINGCHANGE` behaviour; `UnixUserEnvironmentService` persists to `$XDG_CONFIG_HOME/tunnelagent/environment` (app-owned store, read at startup via `Initialize()`), to `$XDG_CONFIG_HOME/environment.d/tunnelagent.conf` on Linux (picked up by systemd ≥ 233 / PAM after next login), and calls `launchctl setenv` on macOS (takes effect in the current GUI session immediately). The existing static `UserEnvironmentService` facade is preserved so all call sites are unchanged.
+- **Linux: XDG Base Directory compliance** (`IPlatformInfo`, `UnixUserEnvironmentService`): `LinuxPlatform.SettingsDirectory` was constructed as `~/.config/TunnelAgent` using `SpecialFolder.UserProfile` — bypassing `$XDG_CONFIG_HOME` when set. It now uses `SpecialFolder.ApplicationData`, which .NET resolves as `$XDG_CONFIG_HOME` (fallback `~/.config`). Same fix applied to the Unix environment store paths.
+- **Perplexity engine: platform asset naming delegated to `IPlatformInfo`** (`IPlatformInfo`, `Perplexity/DownloadService`): `BuildAssetName` previously contained 15 lines of inline `OperatingSystem`/`RuntimeInformation` switches duplicating logic already present in `IPlatformInfo`. Two new interface members — `PerplexityBinaryName` and `PerplexityAssetSuffix` — are implemented per platform (`windows-amd64`, `macos-arm64`, `macos-26-intel`, `linux-arm64`, `linux-amd64`), and `BuildAssetName` is now a single line.
+- **Agent detection: Unix well-known directories** (`AgentDetectionService`): `ScanWellKnownDirs` was only called on Windows, leaving macOS and Linux relying solely on `PATH` scan and `which`. It is now split into `ScanWellKnownDirsWindows` / `ScanWellKnownDirsUnix`. The Unix variant covers: `~/.local/bin`, `~/.cargo/bin`, `~/.amp/bin`, `~/.volta/bin`, `~/.fnm`, `~/.nvm/current/bin`, `~/.npm-global/bin`, `~/.local/share/pnpm`; plus `/opt/homebrew/bin` and `/usr/local/bin` on macOS, and `/home/linuxbrew/.linuxbrew/bin`, `~/.linuxbrew/bin`, `/snap/bin`, Flatpak exports on Linux.
+- **Agent detection: configured-env-var check on Unix** (`AgentDetectionService`): `IsConfiguredAsync` was reading `EnvironmentVariableTarget.User` which on Unix is equivalent to the process environment and does not read persisted values. It now delegates to `UserEnvironmentService.Get`, which reads from the app-owned store on Unix.
+- **`DwmSetWindowAttribute` P/Invoke annotated** (`MainWindow`): the `dwmapi.dll` import lacked `[SupportedOSPlatform("windows")]`, preventing static CA1416 analysis and causing issues in AOT builds targeting Linux/macOS. The call site was already guarded by `IsWindowsVersionAtLeast` at runtime.
+
+### Fixed
+
+- **CS8826 warning in `ProviderViewModel`**: `OnQuotaFetchedEmptyChanged` partial method signature used `bool _` while the CommunityToolkit.Mvvm source generator emits `bool value`, causing a harmless but noisy signature-mismatch warning. Parameter renamed to match.
+
+### Infrastructure
+
+- **CI: build matrix extended to Linux and macOS** (`ci.yml`): the `build` job now runs on `windows-2025`, `ubuntu-latest`, and `macos-latest` in parallel with `fail-fast: false`. Build failures on any platform block the PR. NuGet cache is partitioned per OS.
+- **Release: multi-platform packaging** (`release.yml`): the Windows-only monolith is replaced by a three-job pipeline. `prepare` resolves the version and waits for CI. `build` is a matrix over `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64`, `osx-arm64` — each platform publishes, packages with Velopack, and uploads its artifacts. `publish` assembles the GitHub Release with all binaries and a unified `latest.json`. Linux packages as `.AppImage` (PNG icon). macOS packages as `.pkg` + `.zip` of the `.app` bundle (`.icns` icon). Version bump on Unix uses `sed` instead of PowerShell.
+- **`logo.icns` added to assets**: generated once from `logo-256.png` using ImageMagick and committed to the repo. Velopack macOS packaging references it directly — no runtime icon generation in CI.
+- **`OutputType` conditional on OS** (`TunnelAgent.Avalonia.csproj`): `WinExe` (suppresses console window) only when building on Windows; `Exe` on Linux/macOS where the distinction is meaningless.
+
 ## [0.5.7] - 2026-06-10
 
 ### Added

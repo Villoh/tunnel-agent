@@ -111,6 +111,7 @@ public partial class MainWindow : Window
     private static int ToColorRef(byte r, byte g, byte b) => r | (g << 8) | (b << 16);
 
     [DllImport("dwmapi.dll")]
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int dwAttribute, ref int pvAttribute, int cbAttribute);
 
 

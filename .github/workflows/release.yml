@@ -19,315 +19,366 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  release:
-    name: Build & Publish
-    runs-on: windows-2025
-    permissions:
-      contents: write
+  # ── Resolve version + wait for CI ─────────────────────────────────────────
+  prepare:
+    name: Prepare release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      semver: ${{ steps.version.outputs.semver }}
+      tag: ${{ steps.version.outputs.tag }}
+      is_prerelease: ${{ steps.version.outputs.is_prerelease }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: "10.x"
-
-      - name: Cache NuGet packages
-        uses: actions/cache@v5
-        with:
-          path: ~/.nuget/packages
-          key: nuget-${{ hashFiles('**/*.csproj', '**/TunnelAgent.slnx') }}
-          restore-keys: nuget-
-
-      - name: Install Velopack CLI (vpk)
-        run: dotnet tool install -g vpk
-
-      # ── Resolve version ────────────────────────────────────────────────────
       - name: Resolve version
         id: version
-        shell: pwsh
         run: |
-          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
-            $version = "${{ github.event.inputs.version }}".TrimStart('v')
-          } else {
-            # push tag: github.ref_name is the tag name (e.g. "v0.4.0")
-            $version = "${{ github.ref_name }}".TrimStart('v')
-          }
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            version="${{ github.event.inputs.version }}"
+          else
+            version="${{ github.ref_name }}"
+          fi
+          version="${version#v}"
+          semver="${version%%-*}"
+          is_prerelease=false
+          [[ "$version" =~ -(rc|beta|alpha)\. ]] && is_prerelease=true
+          echo "version=$version"             >> "$GITHUB_OUTPUT"
+          echo "semver=$semver"               >> "$GITHUB_OUTPUT"
+          echo "tag=v$version"                >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=$is_prerelease" >> "$GITHUB_OUTPUT"
+          echo "Version: $version | Semver: $semver | Pre-release: $is_prerelease"
 
-          $semver = ($version -split '-')[0]
-          $isPrerelease = $version -match '-(rc|beta|alpha)\.'
-
-          "version=$version"       >> $env:GITHUB_OUTPUT
-          "semver=$semver"         >> $env:GITHUB_OUTPUT
-          "tag=v$version"          >> $env:GITHUB_OUTPUT
-          "is_prerelease=$($isPrerelease.ToString().ToLower())" >> $env:GITHUB_OUTPUT
-          Write-Host "Version: $version  |  Semver: $semver  |  Pre-release: $isPrerelease"
-
-      # ── Wait for CI to pass on this commit (tag push only) ─────────────────
-      # CI triggers on the same tag push in parallel; wait for it before building.
       - name: Wait for CI to pass
         if: github.event_name == 'push'
-        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SHA: ${{ github.sha }}
           REPO: ${{ github.repository }}
         run: |
-          echo "Waiting for CI workflow to complete on $SHA..."
+          echo "Waiting for CI workflow on $SHA..."
           deadline=$(( $(date +%s) + 900 ))
-
           while true; do
             status=$(gh api \
               "repos/$REPO/actions/runs?head_sha=$SHA&name=CI&per_page=10" \
               --jq '[.workflow_runs[] | select(.name == "CI")] | sort_by(.created_at) | last | .conclusion // "pending"')
-
             echo "  CI status: $status"
-
             case "$status" in
-              success)
-                echo "CI passed — proceeding with release."
-                break
-                ;;
+              success) echo "CI passed."; break ;;
               failure|cancelled|timed_out|action_required|skipped)
-                echo "CI did not pass (conclusion: $status) — aborting release."
-                exit 1
-                ;;
+                echo "CI did not pass ($status) — aborting."; exit 1 ;;
             esac
-
-            if (( $(date +%s) >= deadline )); then
-              echo "Timed out waiting for CI after 15 minutes — aborting."
-              exit 1
-            fi
-
+            (( $(date +%s) >= deadline )) && { echo "Timed out."; exit 1; }
             sleep 30
           done
 
-      # ── Bump .csproj files ─────────────────────────────────────────────────
-      - name: Bump version in .csproj files
+  # ── Per-platform build & package ──────────────────────────────────────────
+  build:
+    name: Build (${{ matrix.rid }})
+    needs: prepare
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rid: win-x64
+            os: windows-2025
+            exe: TunnelAgent.exe
+          - rid: linux-x64
+            os: ubuntu-latest
+            exe: TunnelAgent
+          - rid: linux-arm64
+            os: ubuntu-24.04-arm
+            exe: TunnelAgent
+          - rid: osx-x64
+            os: macos-13
+            exe: TunnelAgent
+          - rid: osx-arm64
+            os: macos-latest
+            exe: TunnelAgent
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      SEMVER: ${{ needs.prepare.outputs.semver }}
+      TAG: ${{ needs.prepare.outputs.tag }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.x"
+
+      - uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ matrix.rid }}-${{ hashFiles('**/*.csproj', '**/TunnelAgent.slnx') }}
+          restore-keys: nuget-${{ matrix.rid }}-
+
+      - name: Install Velopack CLI (vpk)
+        run: dotnet tool install -g vpk
+
+      # ── Version bump ────────────────────────────────────────────────────────
+      - name: Bump version (Windows)
+        if: runner.os == 'Windows'
         shell: pwsh
-        run: .\scripts\bump-version.ps1 -Version "${{ steps.version.outputs.version }}"
+        run: .\scripts\bump-version.ps1 -Version "${{ env.VERSION }}"
 
-      # ── Restore ───────────────────────────────────────────────────────────
+      - name: Bump version (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          find . -name "*.csproj" ! -name "TunnelAgent.Tests.csproj" \
+            ! -path "*/obj/*" ! -path "*/bin/*" | while read f; do
+            sed -i.bak \
+              -e "s|<Version>[^<]*</Version>|<Version>${{ env.VERSION }}</Version>|g" \
+              -e "s|<AssemblyVersion>[^<]*</AssemblyVersion>|<AssemblyVersion>${{ env.SEMVER }}.0</AssemblyVersion>|g" \
+              -e "s|<FileVersion>[^<]*</FileVersion>|<FileVersion>${{ env.SEMVER }}.0</FileVersion>|g" \
+              "$f" && rm -f "$f.bak"
+          done
+
+      # ── Restore & publish ───────────────────────────────────────────────────
       - name: Restore
-        run: dotnet restore TunnelAgent.slnx -r win-x64
+        run: dotnet restore TunnelAgent.slnx -r ${{ matrix.rid }}
 
-      # ── Publish self-contained multi-file (for Velopack installer) ─────────
       - name: Publish
         run: >
           dotnet publish src/TunnelAgent.Avalonia/TunnelAgent.Avalonia.csproj
           --no-restore -c Release
-          -r win-x64 --self-contained true
+          -r ${{ matrix.rid }} --self-contained true
           -p:PublishSingleFile=false
           -p:DebugType=None -p:DebugSymbols=false
           -o artifacts/publish
 
-      # ── Publish portable (self-contained single exe, ~110 MB) ─────────────
-      - name: Publish portable
-        run: >
-          dotnet publish src/TunnelAgent.Avalonia/TunnelAgent.Avalonia.csproj
-          --no-restore -c Release
-          -r win-x64 --self-contained true
-          -p:PublishSingleFile=true
-          -p:IncludeNativeLibrariesForSelfExtract=true
-          -p:DebugType=None -p:DebugSymbols=false
-          -o artifacts/portable
-
-      - name: Create portable zip
-        shell: pwsh
-        run: |
-          $version = "${{ steps.version.outputs.semver }}"
-          $dest = "artifacts/velopack/TunnelAgent-$version-win-x64-portable.zip"
-          New-Item -ItemType Directory -Force -Path artifacts/velopack | Out-Null
-          Compress-Archive -Path artifacts/portable/TunnelAgent.exe -DestinationPath $dest
-          Write-Host "Created $dest"
-
-      # ── Package with Velopack ─────────────────────────────────────────────
-      - name: Package with Velopack
+      # ── Package with Velopack ───────────────────────────────────────────────
+      # Windows: produces Setup.exe + .nupkg + RELEASES + portable .zip (via --noPortable=false)
+      - name: Package with Velopack (Windows)
+        if: matrix.rid == 'win-x64'
         shell: pwsh
         run: |
           vpk pack `
-            --packId    TunnelAgent `
-            --packTitle "Tunnel Agent" `
-            --packVersion "${{ steps.version.outputs.semver }}" `
-            --packDir  artifacts/publish `
-            --mainExe  TunnelAgent.exe `
-            --icon     src/TunnelAgent.Avalonia/Assets/logo.ico `
-            --outputDir artifacts/velopack `
-            --noPortable
+            --packId      TunnelAgent `
+            --packTitle   "Tunnel Agent" `
+            --packVersion "${{ env.SEMVER }}" `
+            --packDir     artifacts/publish `
+            --mainExe     "${{ matrix.exe }}" `
+            --icon        src/TunnelAgent.Avalonia/Assets/logo.ico `
+            --outputDir   artifacts/velopack
 
-      - name: List Velopack artifacts
-        shell: pwsh
-        run: Get-ChildItem artifacts/velopack | Select-Object Name, Length
-
-      # ── Generate latest.json ──────────────────────────────────────────────
-      - name: Generate latest.json
-        shell: pwsh
+      # Linux: produces a single .AppImage — that IS the installer and the portable.
+      # --icon must be a PNG file.
+      - name: Package with Velopack (Linux)
+        if: startsWith(matrix.rid, 'linux-')
         run: |
-          $tag     = "${{ steps.version.outputs.tag }}"
-          $version = "${{ steps.version.outputs.semver }}"
-          $repo    = "${{ github.repository }}"
-          $base    = "https://github.com/$repo/releases/download/$tag"
+          vpk pack \
+            --packId      TunnelAgent \
+            --packTitle   "Tunnel Agent" \
+            --packVersion "${{ env.SEMVER }}" \
+            --packDir     artifacts/publish \
+            --mainExe     "${{ matrix.exe }}" \
+            --icon        src/TunnelAgent.Avalonia/Assets/logo-256.png \
+            --categories  Utility \
+            --outputDir   artifacts/velopack
 
-          $setupExe  = Get-ChildItem artifacts/velopack -Filter "*-win-Setup.exe" | Select-Object -First 1
-          $portable  = Get-ChildItem artifacts/velopack -Filter "*-win-x64-portable.zip" | Select-Object -First 1
+      # macOS: produces a .pkg installer and a portable .zip of the .app bundle.
+      # --icon must be a .icns file (generated above).
+      # --bundleId sets the CFBundleIdentifier in Info.plist.
+      - name: Package with Velopack (macOS)
+        if: startsWith(matrix.rid, 'osx-')
+        run: |
+          vpk pack \
+            --packId      TunnelAgent \
+            --packTitle   "Tunnel Agent" \
+            --packVersion "${{ env.SEMVER }}" \
+            --packDir     artifacts/publish \
+            --mainExe     "${{ matrix.exe }}" \
+            --icon        src/TunnelAgent.Avalonia/Assets/logo.icns \
+            --bundleId    com.tunnelagent.app \
+            --outputDir   artifacts/velopack
 
-          $setupHash    = (Get-FileHash $setupExe.FullName  -Algorithm SHA256).Hash.ToLower()
-          $portableHash = (Get-FileHash $portable.FullName  -Algorithm SHA256).Hash.ToLower()
+      - name: List artifacts
+        shell: bash
+        run: find artifacts/velopack -type f | sort
 
-          @{
-            version   = $version
-            tag       = $tag
-            installer = @{
-              url    = "$base/$($setupExe.Name)"
-              sha256 = $setupHash
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-${{ matrix.rid }}
+          path: artifacts/velopack/
+          retention-days: 1
+
+  # ── Create GitHub Release with all platform artifacts ──────────────────────
+  publish:
+    name: Publish GitHub Release
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      SEMVER: ${{ needs.prepare.outputs.semver }}
+      TAG: ${{ needs.prepare.outputs.tag }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: artifacts/velopack
+          merge-multiple: false
+
+      - name: Generate latest.json
+        run: |
+          repo="${{ github.repository }}"
+          base="https://github.com/$repo/releases/download/${{ env.TAG }}"
+          semver="${{ env.SEMVER }}"
+
+          entries=()
+          for rid in win-x64 linux-x64 linux-arm64 osx-x64 osx-arm64; do
+            dir="artifacts/velopack/release-$rid"
+            [[ -d "$dir" ]] || continue
+
+            # Windows: Setup.exe = installer, *-portable.zip = portable
+            # Linux:   .AppImage = both installer and portable (same file)
+            # macOS:   .pkg = installer, .zip = portable .app bundle
+            installer=$(find "$dir" -maxdepth 1 \( -name "*Setup.exe" -o -name "*.AppImage" -o -name "*.pkg" \) | head -1)
+            portable=$(find  "$dir" -maxdepth 1 \( -name "*portable.zip" -o -name "*.AppImage" -o -name "*.zip" \) \
+              ! -name "*Setup*" ! -name "*.nupkg" | head -1)
+
+            inst_json="null"
+            port_json="null"
+            [[ -n "$installer" ]] && {
+              hash=$(sha256sum "$installer" | awk '{print $1}')
+              name=$(basename "$installer")
+              inst_json="{\"url\":\"$base/$name\",\"sha256\":\"$hash\"}"
             }
-            portable  = @{
-              url    = "$base/$($portable.Name)"
-              sha256 = $portableHash
+            [[ -n "$portable" ]] && {
+              hash=$(sha256sum "$portable" | awk '{print $1}')
+              name=$(basename "$portable")
+              port_json="{\"url\":\"$base/$name\",\"sha256\":\"$hash\"}"
             }
-          } | ConvertTo-Json -Depth 3 | Set-Content artifacts/velopack/latest.json -Encoding UTF8
+            entries+=("\"$rid\":{\"installer\":$inst_json,\"portable\":$port_json}")
+          done
 
-          Write-Host "Generated latest.json:"
-          Get-Content artifacts/velopack/latest.json
+          joined=$(IFS=,; echo "${entries[*]}")
+          printf '{"version":"%s","tag":"%s","platforms":{%s}}\n' \
+            "$semver" "${{ env.TAG }}" "$joined" \
+            | python3 -m json.tool --indent 2 > artifacts/latest.json
 
-      # ── Create tag (workflow_dispatch only) ───────────────────────────────
+          echo "Generated latest.json:"
+          cat artifacts/latest.json
+
       - name: Create and push tag
         if: github.event_name == 'workflow_dispatch'
-        shell: pwsh
         run: |
-          $tag = "${{ steps.version.outputs.tag }}"
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if (git tag -l $tag) {
-            Write-Host "Tag $tag already exists, skipping."
-          } else {
-            git tag -a $tag -m "Release $tag"
-            git push origin $tag
-            Write-Host "Pushed tag $tag"
-          }
+          tag="${{ env.TAG }}"
+          if git tag -l "$tag" | grep -q .; then
+            echo "Tag $tag already exists, skipping."
+          else
+            git tag -a "$tag" -m "Release $tag"
+            git push origin "$tag"
+          fi
 
-      # ── Commit bumped .csproj files back to branch ────────────────────────
       - name: Commit version bump
-        shell: pwsh
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          $changed = git diff --name-only
-          if (-not $changed) { Write-Host "Nothing to commit."; exit 0 }
-
-          git add **/*.csproj
-          git commit -m "chore: bump version to ${{ steps.version.outputs.version }} [skip ci]"
-
-          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
-            $branch = "${{ github.ref_name }}"
-          } else {
-            $branch = git branch -r --contains HEAD |
-              Select-String 'origin/(main|master)' |
-              ForEach-Object { $_.Matches[0].Groups[1].Value } |
-              Select-Object -First 1
-            if (-not $branch) { $branch = "main" }
-          }
-
+          git diff --name-only | grep -q . || { echo "Nothing to commit."; exit 0; }
+          git add "**/*.csproj"
+          git commit -m "chore: bump version to ${{ env.VERSION }} [skip ci]"
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            branch="${{ github.ref_name }}"
+          else
+            branch=$(git branch -r --contains HEAD | grep -oE '(main|master)' | head -1 || echo "main")
+          fi
           git push origin "HEAD:refs/heads/$branch"
-          Write-Host "Pushed version bump to $branch"
 
-      # ── Extract changelog section for this version ───────────────────────
-      - name: Build release notes from CHANGELOG
-        shell: bash
-        env:
-          TAG: ${{ steps.version.outputs.tag }}
-          VERSION: ${{ steps.version.outputs.semver }}
+      - name: Build release notes
         run: |
-          set -euo pipefail
-
-          awk -v version="$VERSION" '
+          awk -v version="${{ env.SEMVER }}" '
             $0 ~ "^## \\[" version "\\]" { p=1; next }
             p && $0 ~ "^## \\[" { exit }
             p { print }
-          ' CHANGELOG.md \
-            | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' > changelog_section.md
+          ' CHANGELOG.md | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' > changelog_section.md
 
-          if [ ! -s changelog_section.md ]; then
-            echo "Failed to extract CHANGELOG section for $VERSION"
-            exit 1
-          fi
-          echo "Extracted CHANGELOG section:"
-          cat changelog_section.md
+          [[ -s changelog_section.md ]] || { echo "No CHANGELOG section for ${{ env.SEMVER }}"; exit 1; }
+
+          tag="${{ env.TAG }}"
+          semver="${{ env.SEMVER }}"
+          base="https://github.com/${{ github.repository }}/releases/download/$tag"
 
           {
             echo "## Installation"
             echo ""
-            echo "**Fresh install:** download and run \`TunnelAgent-${VERSION}-win-Setup.exe\`."
+            echo "| Platform | Installer | Portable |"
+            echo "|----------|-----------|----------|"
+            echo "| Windows x64 | [Setup.exe]($base/TunnelAgent-${semver}-win-Setup.exe) | [.zip]($base/TunnelAgent-${semver}-win-x64-portable.zip) |"
+            echo "| Linux x64 | [.AppImage]($base/TunnelAgent-${semver}-linux-x64.AppImage) | — |"
+            echo "| Linux arm64 | [.AppImage]($base/TunnelAgent-${semver}-linux-arm64.AppImage) | — |"
+            echo "| macOS x64 (Intel) | [.pkg]($base/TunnelAgent-${semver}-osx-x64.pkg) | [.zip]($base/TunnelAgent-${semver}-osx-x64.zip) |"
+            echo "| macOS arm64 (Apple Silicon) | [.pkg]($base/TunnelAgent-${semver}-osx-arm64.pkg) | [.zip]($base/TunnelAgent-${semver}-osx-arm64.zip) |"
             echo ""
-            echo "**Requirements:** Windows 10 or later."
-            echo ""
-            echo "> Existing installations update automatically — no manual download needed."
+            echo "> Existing installations update automatically via Velopack."
             echo ""
             echo "---"
             echo ""
             cat changelog_section.md
           } > release_body.md
 
-      # ── Publish GitHub Release ────────────────────────────────────────────
       - name: Create GitHub Release
-        id: gh_release
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          name: Tunnel Agent ${{ steps.version.outputs.version }}
-          prerelease: ${{ steps.version.outputs.is_prerelease == 'true' }}
-          generate_release_notes: true
-          append_body: true
+          tag_name: ${{ env.TAG }}
+          name: Tunnel Agent ${{ env.VERSION }}
+          prerelease: ${{ needs.prepare.outputs.is_prerelease == 'true' }}
+          generate_release_notes: false
           body_path: release_body.md
           files: |
-            artifacts/velopack/*.exe
-            artifacts/velopack/*.nupkg
-            artifacts/velopack/*.zip
-            artifacts/velopack/RELEASES
-            artifacts/velopack/releases.win.json
-            artifacts/velopack/assets.win.json
-            artifacts/velopack/latest.json
+            artifacts/velopack/release-win-x64/*.exe
+            artifacts/velopack/release-win-x64/*.nupkg
+            artifacts/velopack/release-win-x64/*.zip
+            artifacts/velopack/release-win-x64/RELEASES
+            artifacts/velopack/release-win-x64/releases.win.json
+            artifacts/velopack/release-win-x64/assets.win.json
+            artifacts/velopack/release-linux-x64/*.AppImage
+            artifacts/velopack/release-linux-arm64/*.AppImage
+            artifacts/velopack/release-osx-x64/*.pkg
+            artifacts/velopack/release-osx-x64/*.zip
+            artifacts/velopack/release-osx-arm64/*.pkg
+            artifacts/velopack/release-osx-arm64/*.zip
+            artifacts/latest.json
 
-      # ── Notify Scoop bucket (stable releases only) ────────────────────────
+      # Notify Scoop bucket (Windows portable, stable releases only)
       - name: Update Scoop bucket
-        if: steps.version.outputs.is_prerelease == 'false'
-        shell: pwsh
+        if: needs.prepare.outputs.is_prerelease == 'false'
         env:
           SCOOP_TOKEN: ${{ secrets.SCOOP_BUCKET_TOKEN }}
         run: |
-          $version = "${{ steps.version.outputs.semver }}"
-          $tag     = "${{ steps.version.outputs.tag }}"
-          $repo    = "${{ github.repository }}"
-          $base    = "https://github.com/$repo/releases/download/$tag"
+          portable=$(find artifacts/velopack/release-win-x64 -name "*portable.zip" | head -1)
+          hash=$(sha256sum "$portable" | awk '{print $1}')
+          name=$(basename "$portable")
+          base="https://github.com/${{ github.repository }}/releases/download/${{ env.TAG }}"
 
-          $portable     = Get-ChildItem artifacts/velopack -Filter "*-win-x64-portable.zip" | Select-Object -First 1
-          $portableHash = (Get-FileHash $portable.FullName -Algorithm SHA256).Hash.ToLower()
-
-          $body = @{
-            event_type     = "new-release"
-            client_payload = @{
-              version  = $version
-              url      = "$base/$($portable.Name)"
-              sha256   = $portableHash
-            }
-          } | ConvertTo-Json -Depth 3
-
-          $headers = @{
-            Authorization = "Bearer $env:SCOOP_TOKEN"
-            Accept        = "application/vnd.github+json"
-          }
-
-          Invoke-RestMethod `
-            -Uri     "https://api.github.com/repos/Villoh/scoop-bucket/dispatches" `
-            -Method  POST `
-            -Headers $headers `
-            -Body    $body `
-            -ContentType "application/json"
-
-          Write-Host "Dispatched new-release event to scoop-bucket for $version"
+          curl -sfL -X POST \
+            -H "Authorization: Bearer $SCOOP_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -d "{\"event_type\":\"new-release\",\"client_payload\":{\"version\":\"${{ env.SEMVER }}\",\"url\":\"$base/$name\",\"sha256\":\"$hash\"}}" \
+            "https://api.github.com/repos/Villoh/scoop-tunnelagent/dispatches"
+          echo "Scoop bucket notified for ${{ env.SEMVER }}"

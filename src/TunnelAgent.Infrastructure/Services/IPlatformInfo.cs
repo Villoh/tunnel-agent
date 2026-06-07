@@ -29,7 +29,7 @@ public interface IPlatformInfo
     /// Directory for user settings (roams with the user).
     /// Windows: %AppData%\TunnelAgent
     /// macOS:   ~/Library/Preferences/TunnelAgent
-    /// Linux:   ~/.config/TunnelAgent
+    /// Linux:   $XDG_CONFIG_HOME/TunnelAgent  (defaults to ~/.config/TunnelAgent)
     /// </summary>
     string SettingsDirectory { get; }
 
@@ -56,6 +56,16 @@ public interface IPlatformInfo
     /// </summary>
     string PerplexityAccountsDirectory => Path.Combine(SettingsDirectory, "perplexity-accounts");
 
+    /// <summary>
+    /// Asset name suffix used by the Perplexity WebUI Scraper release assets,
+    /// e.g. "windows-amd64", "macos-arm64", "linux-amd64".
+    /// Perplexity uses different OS/arch labels than CLIProxyAPI.
+    /// </summary>
+    string PerplexityAssetSuffix { get; }
+
+    /// <summary>Binary filename for the Perplexity WebUI Scraper engine.</summary>
+    string PerplexityBinaryName { get; }
+
     /// <summary>Any post-install steps needed after the binary is placed (e.g. chmod +x).</summary>
     Task PostInstallAsync(string binaryPath);
 
@@ -76,17 +86,20 @@ public interface IPlatformInfo
 
 public sealed class WindowsPlatform(string arch) : IPlatformInfo
 {
-    public string BinaryName          => "cli-proxy-api.exe";
-    public string OsSuffix            => "windows";
-    public string ArchSuffix          => arch;
-    public string ArchiveExtension    => ".zip";
-    public string SettingsDirectory   => Path.Combine(
+    public string BinaryName            => "cli-proxy-api.exe";
+    public string OsSuffix              => "windows";
+    public string ArchSuffix            => arch;
+    public string ArchiveExtension      => ".zip";
+    public string PerplexityBinaryName  => "perplexity-webui-scraper.exe";
+    // Perplexity only ships amd64 for Windows.
+    public string PerplexityAssetSuffix => "windows-amd64";
+    public string SettingsDirectory     => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "TunnelAgent");
-    public string LocalDataDirectory  => Path.Combine(
+    public string LocalDataDirectory    => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "TunnelAgent");
-    public string AuthDirectory       => Path.Combine(
+    public string AuthDirectory         => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
         ".cli-proxy-api");
     public Task PostInstallAsync(string binaryPath) => Task.CompletedTask;
@@ -94,17 +107,20 @@ public sealed class WindowsPlatform(string arch) : IPlatformInfo
 
 public sealed class MacOsPlatform(string arch) : IPlatformInfo
 {
-    public string BinaryName          => "cli-proxy-api";
-    public string OsSuffix            => "darwin";
-    public string ArchSuffix          => arch;
-    public string ArchiveExtension    => ".tar.gz";
-    public string SettingsDirectory   => Path.Combine(
+    public string BinaryName            => "cli-proxy-api";
+    public string OsSuffix              => "darwin";
+    public string ArchSuffix            => arch;
+    public string ArchiveExtension      => ".tar.gz";
+    public string PerplexityBinaryName  => "perplexity-webui-scraper";
+    // Perplexity uses "macos" (not "darwin") and "arm64" / "26-intel" as arch labels.
+    public string PerplexityAssetSuffix => arch == "aarch64" ? "macos-arm64" : "macos-26-intel";
+    public string SettingsDirectory     => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.Personal),
         "Library", "Preferences", "TunnelAgent");
-    public string LocalDataDirectory  => Path.Combine(
+    public string LocalDataDirectory    => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.Personal),
         "Library", "Application Support", "TunnelAgent");
-    public string AuthDirectory       => Path.Combine(
+    public string AuthDirectory         => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.Personal),
         ".cli-proxy-api");
     public async Task PostInstallAsync(string binaryPath) =>
@@ -113,17 +129,22 @@ public sealed class MacOsPlatform(string arch) : IPlatformInfo
 
 public sealed class LinuxPlatform(string arch) : IPlatformInfo
 {
-    public string BinaryName          => "cli-proxy-api";
-    public string OsSuffix            => "linux";
-    public string ArchSuffix          => arch;
-    public string ArchiveExtension    => ".tar.gz";
-    public string SettingsDirectory   => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-        ".config", "TunnelAgent");
-    public string LocalDataDirectory  => Path.Combine(
+    public string BinaryName            => "cli-proxy-api";
+    public string OsSuffix              => "linux";
+    public string ArchSuffix            => arch;
+    public string ArchiveExtension      => ".tar.gz";
+    public string PerplexityBinaryName  => "perplexity-webui-scraper";
+    // Perplexity uses "arm64" on Linux (not "aarch64" like CLIProxy).
+    public string PerplexityAssetSuffix => arch == "aarch64" ? "linux-arm64" : "linux-amd64";
+    // Use SpecialFolder.ApplicationData: on Linux .NET resolves it as
+    // $XDG_CONFIG_HOME when set, otherwise ~/.config — honouring the XDG spec.
+    public string SettingsDirectory     => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "TunnelAgent");
+    public string LocalDataDirectory    => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "TunnelAgent");
-    public string AuthDirectory       => Path.Combine(
+    public string AuthDirectory         => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
         ".cli-proxy-api");
     public async Task PostInstallAsync(string binaryPath) =>

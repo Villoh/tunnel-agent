@@ -1,46 +1,47 @@
 using System;
-using System.Runtime.InteropServices;
+using TunnelAgent.Services;
 
 namespace TunnelAgent.Infrastructure.Services;
 
 /// <summary>
-/// Sets and removes persistent user-level environment variables.
-/// On Windows, broadcasts WM_SETTINGCHANGE so newly spawned processes pick up the change without logoff.
+/// Static facade over <see cref="IUserEnvironmentService"/> — preserves all
+/// existing call sites while delegating to the correct OS implementation.
+/// <para>
+/// On startup, call <see cref="Initialize"/> once so that the Unix app-owned
+/// store is loaded into the current process environment before any <see cref="Get"/>
+/// calls are made.
+/// </para>
 /// </summary>
 public static class UserEnvironmentService
 {
-    public static string? Get(string name) =>
-        Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.User)
-        ?? Environment.GetEnvironmentVariable(name);
+    private static IUserEnvironmentService _impl = CreateImpl();
 
-    public static void Set(string name, string value)
+    private static IUserEnvironmentService CreateImpl()
     {
-        Environment.SetEnvironmentVariable(name, value, EnvironmentVariableTarget.User);
-        Environment.SetEnvironmentVariable(name, value, EnvironmentVariableTarget.Process);
-        BroadcastSettingChange();
+        if (OperatingSystem.IsWindows())
+            return new WindowsUserEnvironmentService();
+        return new UnixUserEnvironmentService();
     }
 
-    public static void Remove(string name)
+    /// <summary>
+    /// Seeds the current process environment from the Unix app-owned store so
+    /// that <see cref="Get"/> returns persisted values immediately after startup.
+    /// No-op on Windows (the registry is already the source of truth).
+    /// </summary>
+    public static void Initialize()
     {
-        Environment.SetEnvironmentVariable(name, null, EnvironmentVariableTarget.User);
-        Environment.SetEnvironmentVariable(name, null, EnvironmentVariableTarget.Process);
-        BroadcastSettingChange();
+        if (OperatingSystem.IsWindows()) return;
+        // Warm up the store: reading every persisted key via Get() propagates
+        // its value into EnvironmentVariableTarget.Process via UnixUserEnvironmentService.
+        // We rely on the fact that UnixUserEnvironmentService.Get reads the app store
+        // first; by calling Set for each found value we ensure the process env is seeded.
+        var unix = (UnixUserEnvironmentService)_impl;
+        unix.SeedProcessEnvironment();
     }
 
-    private static void BroadcastSettingChange()
-    {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
-        // Notify the system that user environment variables have changed.
-        // HWND_BROADCAST = 0xFFFF, WM_SETTINGCHANGE = 0x001A, "Environment"
-        SendMessageTimeout(new IntPtr(0xFFFF), 0x001A, IntPtr.Zero, "Environment",
-            SendMessageTimeoutFlags.SMTO_ABORTIFHUNG, 1000, out _);
-    }
+    public static string? Get(string name) => _impl.Get(name);
 
-    [Flags]
-    private enum SendMessageTimeoutFlags : uint { SMTO_ABORTIFHUNG = 0x0002 }
+    public static void Set(string name, string value) => _impl.Set(name, value);
 
-    [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-    private static extern IntPtr SendMessageTimeout(
-        IntPtr hWnd, uint msg, IntPtr wParam, string lParam,
-        SendMessageTimeoutFlags flags, uint timeout, out IntPtr result);
+    public static void Remove(string name) => _impl.Remove(name);
 }

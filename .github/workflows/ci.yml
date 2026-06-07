@@ -23,8 +23,12 @@ concurrency:
 
 jobs:
   build:
-    name: Build
-    runs-on: windows-2025
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2025, ubuntu-latest, macos-latest]
 
     steps:
       - uses: actions/checkout@v6
@@ -36,8 +40,8 @@ jobs:
       - uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
-          key: nuget-${{ hashFiles('**/*.csproj', '**/TunnelAgent.slnx') }}
-          restore-keys: nuget-
+          key: nuget-${{ matrix.os }}-${{ hashFiles('**/*.csproj', '**/TunnelAgent.slnx') }}
+          restore-keys: nuget-${{ matrix.os }}-
 
       - run: dotnet restore TunnelAgent.slnx
 

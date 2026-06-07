@@ -7,7 +7,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,9 +23,8 @@ public sealed class DownloadService
     private static readonly IPlatformInfo Platform = IPlatformInfo.Current;
 
     public static readonly string EngineDir = Path.Combine(Platform.LocalDataDirectory, "engine", EngineCatalog.PerplexityWebUiScraper.Id);
-    public static string BinaryPath => Path.Combine(EngineDir, BinaryName);
+    public static string BinaryPath => Path.Combine(EngineDir, Platform.PerplexityBinaryName);
     private static string InstallMetadataPath => Path.Combine(EngineDir, "install.json");
-    private static string BinaryName => System.OperatingSystem.IsWindows() ? "perplexity-webui-scraper.exe" : "perplexity-webui-scraper";
 
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
     private readonly SemaphoreSlim _installLock = new(1, 1);
@@ -339,16 +337,7 @@ public sealed class DownloadService
     private static string BuildAssetName(string version)
     {
         var normalized = version.TrimStart('v');
-        if (System.OperatingSystem.IsWindows())
-            return $"perplexity-webui-scraper-v{normalized}-windows-amd64.zip";
-
-        if (System.OperatingSystem.IsMacOS())
-            return RuntimeInformation.ProcessArchitecture == System.Runtime.InteropServices.Architecture.Arm64
-                ? $"perplexity-webui-scraper-v{normalized}-macos-arm64.tar.gz"
-                : $"perplexity-webui-scraper-v{normalized}-macos-26-intel.tar.gz";
-
-        var arch = RuntimeInformation.ProcessArchitecture == System.Runtime.InteropServices.Architecture.Arm64 ? "arm64" : "amd64";
-        return $"perplexity-webui-scraper-v{normalized}-linux-{arch}.tar.gz";
+        return $"perplexity-webui-scraper-v{normalized}-{Platform.PerplexityAssetSuffix}{Platform.ArchiveExtension}";
     }
 
     private void SetState(EngineState state)
@@ -422,7 +411,7 @@ public sealed class DownloadService
 
     private static string? FindBinary(string dir)
     {
-        foreach (var file in Directory.EnumerateFiles(dir, BinaryName, SearchOption.AllDirectories))
+        foreach (var file in Directory.EnumerateFiles(dir, Platform.PerplexityBinaryName, SearchOption.AllDirectories))
             return file;
         return null;
     }

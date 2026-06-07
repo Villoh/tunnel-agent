@@ -52,7 +52,7 @@ public partial class ProviderAccountViewModel : ViewModelBase
 
     /// <summary>Set to true after a successful quota fetch that returned no bars (e.g. no active plan).</summary>
     [ObservableProperty] private bool _quotaFetchedEmpty;
-    partial void OnQuotaFetchedEmptyChanged(bool _) { OnPropertyChanged(nameof(QuotaEmptyLabel)); OnPropertyChanged(nameof(QuotaEmptyDescription)); }
+    partial void OnQuotaFetchedEmptyChanged(bool value) { OnPropertyChanged(nameof(QuotaEmptyLabel)); OnPropertyChanged(nameof(QuotaEmptyDescription)); }
 
     public string QuotaEmptyLabel => QuotaFetchedEmpty ? "No quota data available" : "Quota not loaded";
     public string QuotaEmptyDescription => QuotaFetchedEmpty
