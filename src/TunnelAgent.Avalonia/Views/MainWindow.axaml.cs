@@ -297,8 +297,10 @@ public partial class MainWindow : Window
     private async void OnCopyAgentConfigClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not MainWindowViewModel vm) return;
-        var all = string.Join("\n\n---\n\n",
-            vm.AgentConfigPreviews.Select(p => $"# {p.Filename}\n# {p.TargetPath}\n\n{p.Content}"));
+        var previews = vm.AgentConfigPreviews.ToList();
+        var all = previews.Count > 1
+            ? string.Join("\n\n---\n\n", previews.Select(p => $"# {p.Filename}\n# {p.TargetPath}\n\n{p.Content}"))
+            : previews[0].Content;
         var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
         if (clipboard != null)
             await clipboard.SetTextAsync(all);

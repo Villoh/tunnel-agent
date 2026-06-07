@@ -839,7 +839,7 @@
                                             <CheckBox Grid.Column="1"
                                                       Margin="14,0,0,0"
                                                       VerticalAlignment="Center"
-                                                      IsThreeState="True"
+                                                      IsThreeState="False"
                                                       Content="Select all"
                                                       IsChecked="{Binding AllVisibleModelsSelected, Mode=TwoWay}" />
                                         </Grid>
