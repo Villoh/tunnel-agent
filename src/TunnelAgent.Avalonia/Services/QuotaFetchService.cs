@@ -60,6 +60,8 @@ public sealed class QuotaFetchService
 
         try
         {
+            token = await RefreshClaudeTokenIfNeededAsync(account.Email, token, ct) ?? token;
+
             using var req = new HttpRequestMessage(HttpMethod.Get,
                 "https://api.anthropic.com/api/oauth/usage");
             req.Headers.Add("Authorization", $"Bearer {token}");
@@ -68,30 +70,152 @@ public sealed class QuotaFetchService
             req.Headers.Add("User-Agent", "TunnelAgent/1.0");
 
             using var resp = await Http.SendAsync(req, ct);
+
+            // Reactive refresh on 401/403
+            if (resp.StatusCode is System.Net.HttpStatusCode.Unauthorized
+                                or System.Net.HttpStatusCode.Forbidden)
+            {
+                var refreshed = await RefreshClaudeTokenIfNeededAsync(account.Email, token, ct, force: true);
+                if (refreshed is null) return;
+                token = refreshed;
+                // Retry once with new token
+                using var req2 = new HttpRequestMessage(HttpMethod.Get,
+                    "https://api.anthropic.com/api/oauth/usage");
+                req2.Headers.Add("Authorization", $"Bearer {token}");
+                req2.Headers.Add("Accept", "application/json");
+                req2.Headers.Add("anthropic-beta", "oauth-2025-04-20");
+                req2.Headers.Add("User-Agent", "TunnelAgent/1.0");
+                using var resp2 = await Http.SendAsync(req2, ct);
+                if (!resp2.IsSuccessStatusCode) return;
+                await ParseClaudeUsageAsync(account, resp2, ct);
+                return;
+            }
+
             if (!resp.IsSuccessStatusCode) return;
-
-            var body = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
-            if (body is null) return;
-
-            var bars = new List<(string title, double utilization, string? resetsAt)>();
-
-            var fiveH  = body["five_hour"];
-            var sevenD = body["seven_day"];
-
-            if (fiveH?["utilization"] is not null)
-                bars.Add(("Primary Limit (5h)",
-                    fiveH["utilization"]!.GetValue<double>(),
-                    fiveH["resets_at"]?.GetValue<string>()));
-
-            if (sevenD?["utilization"] is not null)
-                bars.Add(("Weekly Limit",
-                    sevenD["utilization"]!.GetValue<double>(),
-                    sevenD["resets_at"]?.GetValue<string>()));
-
-            ApplyBarsFromUtilization(account, bars);
+            await ParseClaudeUsageAsync(account, resp, ct);
         }
         catch (OperationCanceledException) { throw; }
         catch { }
+    }
+
+    private async Task ParseClaudeUsageAsync(
+        ProviderAccountViewModel account,
+        HttpResponseMessage resp,
+        CancellationToken ct)
+    {
+        var body = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
+        if (body is null) return;
+
+        // Plan badge from ~/.claude/.credentials.json
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        var credsPath = Path.Combine(home, ".claude", ".credentials.json");
+        if (File.Exists(credsPath))
+        {
+            try
+            {
+                var credDoc = JsonNode.Parse(File.ReadAllText(credsPath));
+                var subType = credDoc?["claudeAiOauth"]?["subscriptionType"]?.GetValue<string>();
+                if (!string.IsNullOrEmpty(subType))
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                        account.PlanBadge = subType.ToUpperInvariant());
+            }
+            catch { }
+        }
+
+        var bars = new List<(string title, double utilization, string? resetsAt)>();
+
+        // All known rate-limit windows
+        var windows = new[]
+        {
+            ("five_hour",        "Primary (5h)"),
+            ("seven_day",        "Weekly"),
+            ("seven_day_opus",   "Weekly Opus"),
+            ("seven_day_sonnet", "Weekly Sonnet"),
+            ("seven_day_omelette", "Weekly Design"),
+        };
+
+        foreach (var (key, label) in windows)
+        {
+            var node = body[key];
+            if (node is null) continue;
+            var utilNode  = node["utilization"];
+            var resetsAt  = node["resets_at"]?.GetValue<string>();
+            if (utilNode is null) continue;
+            // Skip zero-utilization windows with no reset date (plan doesn't include them)
+            var util = utilNode.GetValue<double>();
+            if (util == 0 && string.IsNullOrEmpty(resetsAt)) continue;
+            bars.Add((label, util, resetsAt));
+        }
+
+        // extra_usage overage credits
+        var extra = body["extra_usage"];
+        if (extra?["is_enabled"]?.GetValue<bool>() == true)
+        {
+            var usedCts  = extra["used_credits"]?.GetValue<double>() ?? 0;
+            // Only surface overage when something has actually been spent
+            if (usedCts > 0)
+            {
+                var limitCts = extra["monthly_limit"]?.GetValue<double>();   // null = unlimited
+                var currency = extra["currency"]?.GetValue<string>() ?? "USD";
+                var limitStr = limitCts is null or 0 ? "unlimited" : $"{currency} {limitCts.Value / 100:0.00}";
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    var badge = account.PlanBadge;
+                    account.PlanBadge = string.IsNullOrEmpty(badge)
+                        ? $"Overage: {currency} {usedCts / 100:0.00}/{limitStr}"
+                        : $"{badge} · Overage: {currency} {usedCts / 100:0.00}/{limitStr}";
+                });
+            }
+        }
+
+        ApplyBarsFromUtilization(account, bars);
+    }
+
+    private async Task<string?> RefreshClaudeTokenIfNeededAsync(
+        string email, string currentToken, CancellationToken ct, bool force = false)
+    {
+        const string ClientId  = "9d1c250a-e61b-44d9-88ed-5944d1962f5e";
+        const string Scope     = "user:profile user:inference user:sessions:claude_code user:mcp_servers user:file_upload";
+        const string RefreshUrl = "https://platform.claude.com/v1/oauth/token";
+
+        if (!Directory.Exists(_authDir)) return null;
+        foreach (var file in Directory.GetFiles(_authDir, $"claude-{email}*.json"))
+        {
+            try
+            {
+                var doc = JsonNode.Parse(File.ReadAllText(file))?.AsObject();
+                if (doc is null) continue;
+
+                var refreshToken = doc["refresh_token"]?.GetValue<string>();
+                if (refreshToken is null) return null;
+
+                var expired = doc["expired"]?.GetValue<string>();
+                var isExpired = !DateTimeOffset.TryParse(expired, out var expDt)
+                    || DateTimeOffset.UtcNow >= expDt.AddMinutes(-5);
+
+                if (!force && !isExpired) return null; // still valid, no refresh needed
+
+                var body = $"{{\"grant_type\":\"refresh_token\",\"refresh_token\":\"{refreshToken}\",\"client_id\":\"{ClientId}\",\"scope\":\"{Scope}\"}}";
+                using var req = new HttpRequestMessage(HttpMethod.Post, RefreshUrl);
+                req.Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json");
+                using var resp = await Http.SendAsync(req, ct);
+                if (!resp.IsSuccessStatusCode) return null;
+
+                var rDoc = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
+                var newToken = rDoc?["access_token"]?.GetValue<string>();
+                if (newToken is null) return null;
+
+                // Persist updated token
+                var expiresIn = rDoc?["expires_in"]?.GetValue<int>() ?? 3600;
+                doc["access_token"]  = newToken;
+                doc["refresh_token"] = rDoc?["refresh_token"]?.GetValue<string>() ?? refreshToken;
+                doc["expired"]       = DateTimeOffset.UtcNow.AddSeconds(expiresIn).ToString("o");
+                File.WriteAllText(file, doc.ToJsonString());
+                return newToken;
+            }
+            catch { }
+        }
+        return null;
     }
 
     // ── Codex (ChatGPT) ──────────────────────────────────────────────────────

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Claude quota aligned with OpenUsage spec**: added `seven_day_opus`, `seven_day_sonnet`, and `seven_day_omelette` rate-limit windows (plan-dependent, optional); windows with `utilization=0` and no `resets_at` are hidden. `extra_usage` overage is shown in the plan badge only when `used_credits > 0`. `subscriptionType` from `~/.claude/.credentials.json` is used as the plan badge. Proactive token refresh 5 minutes before expiry; reactive refresh on 401/403.
 - **Trae shows wrong quota metrics for dollar-based plans**: the API response includes `is_dollar_usage_billing: true` for free-tier accounts, which use `basic_usage_amount`/`basic_usage_limit` (dollar spend) and `auto_completion_limit` — not Premium Fast/Slow or Advanced Models. The fetcher now branches on this flag and displays `Free plan ($x.xx/$y.00)` and `Autocomplete` bars instead.
 - **Trae username not shown on Windows**: `ReadTraeTokenFromLogs` now also extracts `userName` from `userInfoChange` log lines and uses it as the account identifier when no email is available from `storage.json`.
 - **Hide Sensitive Info does not mask non-email identifiers**: `MaskEmailAddress` only masked values containing `@`, leaving opaque IDs (e.g. Kiro `userId`) fully visible. Non-email values are now masked as first 4 characters followed by bullets.
