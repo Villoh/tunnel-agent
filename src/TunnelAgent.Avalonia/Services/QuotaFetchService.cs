@@ -530,6 +530,40 @@ public sealed class QuotaFetchService
 
         try
         {
+            // Step 1: loadCodeAssist to get projectId and plan badge
+            string? projectId = null;
+            using (var loadReq = new HttpRequestMessage(HttpMethod.Post,
+                "https://cloudcode-pa.googleapis.com/v1internal:loadCodeAssist"))
+            {
+                loadReq.Headers.Add("Authorization", $"Bearer {token}");
+                loadReq.Headers.Add("User-Agent", "antigravity/1.11.3");
+                loadReq.Content = new StringContent(
+                    "{\"metadata\":{\"ideType\":\"ANTIGRAVITY\"}}",
+                    System.Text.Encoding.UTF8, "application/json");
+                using var loadResp = await Http.SendAsync(loadReq, ct);
+                if (loadResp.IsSuccessStatusCode)
+                {
+                    var loadBody = JsonNode.Parse(await loadResp.Content.ReadAsStringAsync(ct));
+                    projectId = loadBody?["cloudaicompanionProject"]?.GetValue<string>();
+                    var tierId = loadBody?["currentTier"]?["id"]?.GetValue<string>() ?? "";
+                    var planBadge = tierId switch
+                    {
+                        var t when t.Contains("free")       => "Free",
+                        var t when t.Contains("pro")        => "Pro",
+                        var t when t.Contains("ultra")      => "Ultra",
+                        var t when t.Contains("enterprise") => "Enterprise",
+                        _ => ""
+                    };
+                    if (!string.IsNullOrEmpty(planBadge))
+                        Avalonia.Threading.Dispatcher.UIThread.Post(() => account.PlanBadge = planBadge);
+                }
+            }
+
+            // Step 2: fetchAvailableModels with projectId for real fractions
+            var modelsPayload = projectId is not null
+                ? $"{{\"project\":\"{projectId}\"}}"
+                : "{}";
+
             JsonNode? body = null;
             foreach (var baseUrl in new[]
             {
@@ -541,7 +575,7 @@ public sealed class QuotaFetchService
                     $"{baseUrl}/v1internal:fetchAvailableModels");
                 req.Headers.Add("Authorization", $"Bearer {token}");
                 req.Headers.Add("User-Agent", "antigravity/1.11.3");
-                req.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+                req.Content = new StringContent(modelsPayload, System.Text.Encoding.UTF8, "application/json");
                 using var resp = await Http.SendAsync(req, ct);
                 if (!resp.IsSuccessStatusCode) continue;
                 body = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
@@ -565,8 +599,10 @@ public sealed class QuotaFetchService
                 if (isInternal || string.IsNullOrEmpty(displayName)) continue;
                 if (_antigravityModelBlacklist.Contains(kvp.Key)) continue;
 
-                var qi        = m?["quotaInfo"];
-                var remaining = qi?["remainingFraction"]?.GetValue<double>() ?? 1.0;
+                var qi                = m?["quotaInfo"];
+                var remainingNode     = qi?["remainingFraction"];
+                if (remainingNode is null) continue; // no quota data for this model (e.g. Claude on free plan)
+                var remaining = remainingNode.GetValue<double>();
                 var resetTime = qi?["resetTime"]?.GetValue<string>();
 
                 if (!seen.TryGetValue(displayName, out var existing) || remaining < existing.remaining)
