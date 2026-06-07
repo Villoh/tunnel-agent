@@ -26,7 +26,7 @@
 ---
 
 <p align="center">
-  <video src="assets/preview.mp4" autoplay loop muted playsinline width="100%"></video>
+  <img src="https://raw.githubusercontent.com/Villoh/tunnel-agent/main/assets/preview.gif" alt="Tunnel Agent preview" width="100%">
 </p>
 
 ---
