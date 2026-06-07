@@ -339,13 +339,6 @@ public sealed class ProviderCatalogService : IDisposable
     {
         vm.IsEnabledChanged += async (_, enabled) =>
             await SetProviderEnabledAsync(vm.Id, enabled);
-
-        // Fetch quota when the user expands a connected OAuth provider
-        vm.IsExpandedChanged += async (_, isExpanded) =>
-        {
-            if (isExpanded && vm.IsOAuth && vm.Accounts.Count > 0)
-                await _quota.FetchAndApplyAsync(vm);
-        };
     }
 
     private void OnAuthDirChanged(object? sender, EventArgs e)
@@ -400,14 +393,15 @@ public sealed class ProviderCatalogService : IDisposable
             vm.Accounts.Add(acct);
         }
 
-        // Update disabled state
+        // Update disabled state — preserve PlanBadge if already enriched by QuotaFetchService
         foreach (var a in vm.Accounts)
         {
             var match = accounts.FirstOrDefault(r => r.Email == a.Email);
             if (match is not null)
             {
                 a.IsDisabled = match.IsDisabled;
-                a.PlanBadge  = match.Plan;
+                if (string.IsNullOrEmpty(a.PlanBadge))
+                    a.PlanBadge = match.Plan;
             }
         }
 

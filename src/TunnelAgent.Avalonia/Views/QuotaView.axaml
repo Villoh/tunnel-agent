@@ -140,7 +140,7 @@
                                         Background="#14000000"
                                         HorizontalAlignment="Right"
                                         Margin="0,6,0,0"
-                                        IsVisible="{Binding IsDisabled}">
+                                        IsVisible="False">
                                     <TextBlock Text="disabled" Foreground="{DynamicResource FgMutedBrush}" />
                                 </Border>
                             </Grid>

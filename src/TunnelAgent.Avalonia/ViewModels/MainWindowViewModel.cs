@@ -303,10 +303,10 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsLaunchAtLoginSupported => _launchAtLogin.IsSupported;
     public int ConnectedProviderCount => Providers.Count(p => p.Connected || p.ActiveAccountCount > 0);
     public IEnumerable<ProviderViewModel> QuotaProviders => Providers.Where(IsQuotaSupportedProvider).Concat(StandaloneQuotaProviders);
-    public int QuotaProviderCount => QuotaProviders.Count(p => p.Accounts.Any(a => !a.IsDisabled));
-    public IEnumerable<ProviderAccountViewModel> SelectedQuotaAccounts => SelectedQuotaProvider?.Accounts.Where(a => !a.IsDisabled) ?? Enumerable.Empty<ProviderAccountViewModel>();
+    public int QuotaProviderCount => QuotaProviders.Count(p => p.Accounts.Any());
+    public IEnumerable<ProviderAccountViewModel> SelectedQuotaAccounts => SelectedQuotaProvider?.Accounts ?? Enumerable.Empty<ProviderAccountViewModel>();
     public bool HasQuotaProviders => QuotaProviders.Any();
-    public bool HasQuotaAccounts => QuotaProviders.Any(p => p.Accounts.Any(a => !a.IsDisabled));
+    public bool HasQuotaAccounts => QuotaProviders.Any(p => p.Accounts.Any());
     public bool HasAnyQuotaData => QuotaProviders.SelectMany(p => p.Accounts).Any(a => a.HasQuota);
     public bool HasSelectedQuotaAccounts => SelectedQuotaAccounts.Any();
     public bool ShowQuotaAccountEmptyState => HasQuotaProviders && !HasSelectedQuotaAccounts;
@@ -687,7 +687,7 @@ public partial class MainWindowViewModel : ViewModelBase
         RefreshFocusedEngineState();
         await LoadEngineReleasesAsync();
         PropagateEmailMasking(MaskEmails);
-        _ = ScanQuotaProvidersAsync();
+        _ = ScanAndRefreshQuotaAsync();
 
         // Pre-detect agents in background so Agents section is ready when opened
         _ = DetectAgentsAsync();
@@ -1006,7 +1006,7 @@ public partial class MainWindowViewModel : ViewModelBase
         IsRefreshingAllQuotaProviders = true;
         try
         {
-            foreach (var account in QuotaProviders.SelectMany(p => p.Accounts).Where(a => !a.IsDisabled).ToList())
+            foreach (var account in QuotaProviders.SelectMany(p => p.Accounts).ToList())
                 await RefreshQuotaAsync(account);
         }
         finally
@@ -1015,9 +1015,6 @@ public partial class MainWindowViewModel : ViewModelBase
             RefreshQuotaNavigation();
         }
     }
-
-    private Task EnsureInitialQuotaLoadedAsync() =>
-        HasQuotaAccounts && !HasAnyQuotaData ? RefreshAllQuotaProvidersAsync() : Task.CompletedTask;
 
     private void OnAddAccountRequested(object? sender, EventArgs e)
     {
@@ -1350,6 +1347,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
 
 
+    private async Task ScanAndRefreshQuotaAsync()
+    {
+        await ScanQuotaProvidersAsync();
+        await RefreshAllQuotaProvidersAsync();
+    }
+
     [RelayCommand]
     private Task ScanQuotaProviders() => ScanQuotaProvidersAsync();
 
@@ -1485,7 +1488,7 @@ public partial class MainWindowViewModel : ViewModelBase
         SelectedSection = SectionKey.Quota;
         FocusedConfigEngineId = EngineCatalog.CliProxyApi.Id;
         RefreshQuotaNavigation();
-        _ = EnsureInitialQuotaLoadedAsync();
+
     }
 
     [RelayCommand]

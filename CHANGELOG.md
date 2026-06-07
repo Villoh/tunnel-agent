@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Quota visible for CLIProxy-disabled accounts**: disabling an account in Providers (which sets `disabled: true` in the token file for CLIProxy routing) no longer hides it from the Quota view or prevents quota refresh. Quota and routing are now treated as independent concerns. `QuotaFetchService` no longer skips token files with `disabled: true`. The "disabled" badge is hidden in the Quota view. Quota account lists and refresh no longer filter by `IsDisabled`.
+- **Plan badge reset on provider sync**: `SyncOAuthAccounts` was unconditionally overwriting `PlanBadge` with the raw value from `OAuthTokenDetector` (e.g. `PLUS`) on every auth-dir change, discarding the richer Pascal Case value previously set by `QuotaFetchService`. It now only sets the badge as a fallback when the account has no existing value.
+- **Plan badge casing from token file always uppercase**: `OAuthTokenDetector` was returning plan strings via `ToUpperInvariant()` from both the JSON `plan` field and the filename suffix. It now applies `ToPlanBadge()` normalisation at the source, producing consistent Pascal Case (`Plus`, `Pro`) regardless of fetch path.
+- **Plan badge pop when expanding a provider in Providers view**: `WireEvents` was triggering a full `FetchAndApplyAsync` on every expand, causing the badge to flash as the API response overwrote the existing value. Quota fetch is no longer tied to the expand gesture; it only happens at startup, on Quota section navigation, and on manual refresh.
+- **Cursor, Kiro and Trae quota not loaded on startup**: `ScanQuotaProvidersAsync` and `RefreshAllQuotaProvidersAsync` were fired as independent fire-and-forget tasks, so the refresh often ran before the scan had populated `StandaloneQuotaProviders`. They are now sequenced via `ScanAndRefreshQuotaAsync` at startup. Quota is fetched automatically in the background on launch without requiring manual refresh.
+
 ## [0.5.6] - 2026-06-10
 
 ### Added

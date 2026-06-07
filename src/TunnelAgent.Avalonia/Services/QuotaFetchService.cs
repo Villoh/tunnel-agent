@@ -334,7 +334,7 @@ public sealed class QuotaFetchService
             try
             {
                 var doc = JsonNode.Parse(File.ReadAllText(file))?.AsObject();
-                if (doc is null || doc["disabled"]?.GetValue<bool>() == true) continue;
+                if (doc is null) continue;
                 var fileEmail = doc["email"]?.GetValue<string>() ?? "";
                 if (!string.IsNullOrEmpty(email) &&
                     !string.Equals(fileEmail, email, StringComparison.OrdinalIgnoreCase))
@@ -524,7 +524,6 @@ public sealed class QuotaFetchService
             {
                 var doc = JsonNode.Parse(File.ReadAllText(file))?.AsObject();
                 if (doc is null) continue;
-                if (doc["disabled"]?.GetValue<bool>() == true) continue;
 
                 var fileEmail = doc["email"]?.GetValue<string>() ?? "";
                 if (!string.IsNullOrEmpty(email) &&
@@ -684,7 +683,6 @@ public sealed class QuotaFetchService
             {
                 var doc = JsonNode.Parse(File.ReadAllText(file))?.AsObject();
                 if (doc is null) continue;
-                if (doc["disabled"]?.GetValue<bool>() == true) continue;
 
                 var fileEmail = doc["email"]?.GetValue<string>() ?? "";
                 if (!string.IsNullOrEmpty(email) &&
@@ -1469,7 +1467,6 @@ public sealed class QuotaFetchService
             {
                 var doc = JsonNode.Parse(File.ReadAllText(file))?.AsObject();
                 if (doc is null) continue;
-                if (doc["disabled"]?.GetValue<bool>() == true) continue;
                 return doc["access_token"]?.GetValue<string>()
                     ?? doc["accessToken"]?.GetValue<string>();
             }

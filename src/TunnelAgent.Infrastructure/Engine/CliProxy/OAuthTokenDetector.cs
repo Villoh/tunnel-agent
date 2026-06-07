@@ -125,7 +125,7 @@ public sealed class OAuthTokenDetector
                 email = EmailFromFilename(filePath, prefix);
 
             // Plan: prefer JSON field, fall back to filename suffix
-            var plan = doc["plan"]?.GetValue<string>()?.ToUpperInvariant() ?? "";
+            var plan = ToPlanBadge(doc["plan"]?.GetValue<string>() ?? "");
             if (string.IsNullOrEmpty(plan))
                 plan = PlanFromFilename(filePath, prefix, email);
 
@@ -186,7 +186,14 @@ public sealed class OAuthTokenDetector
         if (!name.StartsWith(key, StringComparison.OrdinalIgnoreCase)) return "";
 
         var suffix = name[key.Length..];
-        return IsKnownPlan(suffix) ? suffix.ToUpperInvariant() : "";
+        return IsKnownPlan(suffix) ? ToPlanBadge(suffix) : "";
+    }
+
+    private static string ToPlanBadge(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return raw;
+        return string.Join(" ", raw.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Select(w => char.ToUpperInvariant(w[0]) + w[1..].ToLowerInvariant()));
     }
 
     private static bool IsKnownPlan(string s) =>
