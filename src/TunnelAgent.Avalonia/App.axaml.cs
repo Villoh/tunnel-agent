@@ -56,7 +56,7 @@ public partial class App : Application
                     });
 
             if (Array.Exists(desktop.Args ?? [], arg => string.Equals(arg, "--start-in-tray", StringComparison.OrdinalIgnoreCase)))
-                Dispatcher.UIThread.Post(mainWindow.Hide, DispatcherPriority.Background);
+                mainWindow.Hide();
 
             Dispatcher.UIThread.Post(async () =>
             {
