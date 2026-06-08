@@ -143,9 +143,12 @@ public sealed class QuotaFetchService
             var utilNode  = node["utilization"];
             var resetsAt  = node["resets_at"]?.GetValue<string>();
             if (utilNode is null) continue;
-            // Skip zero-utilization windows with no reset date (plan doesn't include them)
             var util = utilNode.GetValue<double>();
-            if (util == 0 && string.IsNullOrEmpty(resetsAt)) continue;
+            // Always show the primary windows (five_hour, seven_day) even at 0%
+            // so users see all their quotas. Only skip sub-plan windows (opus/sonnet/design)
+            // when zero with no reset date, as those indicate the plan doesn't include them.
+            var isSubWindow = key.StartsWith("seven_day_");
+            if (isSubWindow && util == 0 && string.IsNullOrEmpty(resetsAt)) continue;
             bars.Add((label, util, resetsAt));
         }
 
