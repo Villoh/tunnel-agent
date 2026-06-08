@@ -106,7 +106,7 @@ public sealed class ConfigService
     {
         var s       = _settings.Current;
         var authDir = _authDir.Replace('\\', '/');
-        var yaml    = BuildYaml(s, authDir);
+        var yaml    = await Task.Run(() => BuildYaml(s, authDir));
 
         Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath)!);
         await File.WriteAllTextAsync(ConfigPath, yaml);

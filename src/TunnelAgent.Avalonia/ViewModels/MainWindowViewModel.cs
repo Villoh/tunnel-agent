@@ -656,84 +656,105 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
 
     public async Task InitializeAsync()
     {
-        await _settings.LoadAsync();
-        await ReconcileLaunchAtLoginAsync();
-        NormalizeActiveEngineSetting();
-        RefreshSettingsBindings();
-
-        await _catalog.InitializeAsync();
-        Providers.Clear();
-        foreach (var vm in _catalog.Providers)
+        try
         {
-            vm.AddAccountRequested += OnAddAccountRequested;
-            Providers.Add(vm);
-        }
-        OnPropertyChanged(nameof(ConnectedProviderCount));
-        RefreshQuotaNavigation();
+            await Task.Run(_settings.LoadAsync);
+            _ = ObserveStartupTaskAsync(Task.Run(ReconcileLaunchAtLoginAsync));
+            NormalizeActiveEngineSetting();
+            RefreshSettingsBindings();
 
-        // Pass any legacy accounts from settings.json for one-time migration to files
-        await _perplexityAccounts.InitializeAsync(_settings.Current.PerplexityAccounts);
-        // Clear from settings after migration so they don't persist there anymore
-        if (_settings.Current.PerplexityAccounts.Count > 0)
-        {
-            _settings.Current.PerplexityAccounts.Clear();
-            await _settings.SaveImmediateAsync();
-        }
-        ReloadPerplexityAccounts();
+            var legacyPerplexityAccounts = _settings.Current.PerplexityAccounts.ToList();
+            var catalogTask = Task.Run(_catalog.InitializeAsync);
+            var perplexityAccountsTask = Task.Run(() => _perplexityAccounts.InitializeAsync(legacyPerplexityAccounts));
+            await Task.WhenAll(catalogTask, perplexityAccountsTask);
 
-        // Warm non-default sections early without constructing their views.
-        // This keeps first navigation to Quota/Agents responsive while startup UI stays lazy.
-        _ = ScanAndRefreshQuotaOnceAsync();
-        _ = DetectAgentsAsync();
-
-        foreach (var engine in _engineRegistry.Engines)
-        {
-            try { await engine.InitializeAsync(); }
-            catch { }
-        }
-
-        // AutoStart: start engines configured to launch automatically
-        foreach (var engine in _engineRegistry.Engines)
-        {
-            var runtime = _settings.Current.GetOrAddEngine(engine.Definition.Id, engine.Definition.DefaultPort);
-            if (!runtime.AutoStart || engine.State == EngineState.Running) continue;
-            try { await engine.StartAsync(); }
-            catch { }
-        }
-
-        // Kick off model fetch for any engine already Running after init
-        foreach (var engine in _engineRegistry.Engines)
-        {
-            if (engine.State != EngineState.Running) continue;
-            var isCliProxy = string.Equals(engine.Definition.Id, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase);
-            if (isCliProxy)
+            Providers.Clear();
+            foreach (var vm in _catalog.Providers)
             {
-                _cliProxyModelFetchCts = new CancellationTokenSource();
-                _ = _modelFetch.FetchAndApplyAsync(CliProxyModelGroups, engine.Port, engine.Definition.Id, _cliProxyModelFetchCts.Token);
-                // Engine already running at startup — configure management API and start log polling if needed
-                ConfigureLogsService(engine.Port);
-                _logs.SetManagementApiAvailable(true);
-                if (_logsInitialLoadPending && AreLogsActive)
+                vm.AddAccountRequested += OnAddAccountRequested;
+                Providers.Add(vm);
+            }
+            OnPropertyChanged(nameof(ConnectedProviderCount));
+            RefreshQuotaNavigation();
+
+            // Clear legacy Perplexity accounts from settings after migration so they don't persist there anymore.
+            if (_settings.Current.PerplexityAccounts.Count > 0)
+            {
+                _settings.Current.PerplexityAccounts.Clear();
+                await _settings.SaveImmediateAsync();
+            }
+            ReloadPerplexityAccounts();
+
+            // Warm non-default sections early without constructing their views.
+            // This keeps first navigation to Quota/Agents responsive while startup UI stays lazy.
+            _ = ObserveStartupTaskAsync(ScanAndRefreshQuotaOnceAsync());
+            _ = ObserveStartupTaskAsync(DetectAgentsAsync());
+
+            var engineInitTasks = _engineRegistry.Engines
+                .Select(engine => ObserveStartupTaskAsync(Task.Run(engine.InitializeAsync)))
+                .ToArray();
+            await Task.WhenAll(engineInitTasks);
+
+            // AutoStart: start engines configured to launch automatically.
+            // Keep this sequential to avoid multiple process starts and config writes contending at startup.
+            foreach (var engine in _engineRegistry.Engines)
+            {
+                var runtime = _settings.Current.GetOrAddEngine(engine.Definition.Id, engine.Definition.DefaultPort);
+                if (!runtime.AutoStart || engine.State == EngineState.Running) continue;
+                try { await Task.Run(() => engine.StartAsync()); }
+                catch (Exception ex) { TraceStartupWarning($"Engine autostart failed for {engine.Definition.Id}", ex); }
+            }
+
+            // Kick off model fetch for any engine already Running after init.
+            foreach (var engine in _engineRegistry.Engines)
+            {
+                if (engine.State != EngineState.Running) continue;
+                var isCliProxy = string.Equals(engine.Definition.Id, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase);
+                if (isCliProxy)
                 {
-                    _logsInitialLoadPending = false;
-                    _logs.Start();
+                    _cliProxyModelFetchCts = new CancellationTokenSource();
+                    _ = ObserveStartupTaskAsync(Task.Run(() =>
+                        _modelFetch.FetchAndApplyAsync(CliProxyModelGroups, engine.Port, engine.Definition.Id, _cliProxyModelFetchCts.Token)));
+                    // Engine already running at startup — configure management API and start log polling if needed.
+                    ConfigureLogsService(engine.Port);
+                    _logs.SetManagementApiAvailable(true);
+                    if (_logsInitialLoadPending && AreLogsActive)
+                    {
+                        _logsInitialLoadPending = false;
+                        _logs.Start();
+                    }
+                    else
+                    {
+                        UpdateLogsPollingState();
+                    }
                 }
                 else
                 {
-                    UpdateLogsPollingState();
+                    _perplexityModelFetchCts = new CancellationTokenSource();
+                    _ = ObserveStartupTaskAsync(Task.Run(() =>
+                        _modelFetch.FetchAndApplyAsync(PerplexityModelGroups, engine.Port, engine.Definition.Id, _perplexityModelFetchCts.Token)));
                 }
             }
-            else
-            {
-                _perplexityModelFetchCts = new CancellationTokenSource();
-                _ = _modelFetch.FetchAndApplyAsync(PerplexityModelGroups, engine.Port, engine.Definition.Id, _perplexityModelFetchCts.Token);
-            }
-        }
 
-        RefreshFocusedEngineState();
-        await LoadEngineReleasesAsync();
-        PropagateEmailMasking(MaskEmails);
+            RefreshFocusedEngineState();
+            PropagateEmailMasking(MaskEmails);
+
+            _ = ObserveStartupTaskAsync(LoadEngineReleasesAsync());
+        }
+        catch (Exception ex)
+        {
+            TraceStartupWarning("Startup initialization failed", ex);
+        }
     }
+
+    private static async Task ObserveStartupTaskAsync(Task task)
+    {
+        try { await task.ConfigureAwait(false); }
+        catch (Exception ex) { TraceStartupWarning("Background startup task failed", ex); }
+    }
+
+    private static void TraceStartupWarning(string message, Exception ex) =>
+        Trace.TraceWarning($"{message}: {ex}");
 
     private void NormalizeActiveEngineSetting()
     {
@@ -1424,7 +1445,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         foreach (var vm in QuotaAccounts) vm.IsScanning = true;
         try
         {
-            var result = await _quotaProviders.ScanAsync();
+            var result = await Task.Run(_quotaProviders.ScanAsync);
             await Dispatcher.UIThread.InvokeAsync(() => ApplyQuotaScanResult(result));
         }
         finally
