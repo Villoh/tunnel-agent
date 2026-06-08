@@ -380,5 +380,5 @@ jobs:
             -H "Authorization: Bearer $SCOOP_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             -d "{\"event_type\":\"new-release\",\"client_payload\":{\"version\":\"${{ env.SEMVER }}\",\"url\":\"$base/$name\",\"sha256\":\"$hash\"}}" \
-            "https://api.github.com/repos/Villoh/scoop-tunnelagent/dispatches"
+            "https://api.github.com/repos/Villoh/scoop-bucket/dispatches"
           echo "Scoop bucket notified for ${{ env.SEMVER }}"
