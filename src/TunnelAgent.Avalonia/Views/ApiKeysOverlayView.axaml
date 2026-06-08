@@ -1,0 +1,85 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TunnelAgent.ViewModels"
+             xmlns:cv="using:TunnelAgent.Converters"
+             xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+             x:Class="TunnelAgent.Views.ApiKeysOverlayView"
+             x:Name="Root"
+             x:DataType="vm:MainWindowViewModel">
+    <UserControl.Resources>
+        <cv:SecretPasswordCharConverter x:Key="SecretPasswordChar" />
+        <cv:BoolToEyeIconConverter x:Key="EyeIcon" />
+    </UserControl.Resources>
+<Border x:Name="ApiKeysOverlay" IsVisible="{Binding ShowApiKeysDialog}" Background="#88000000"
+        HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50"
+        KeyDown="OnApiKeysDialogKeyDown" Focusable="True"
+        PointerPressed="OnApiKeysOverlayPressed">
+    <Border Classes="card" Width="480" MaxHeight="560" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0"
+            PointerPressed="OnDialogCardPressed">
+        <Grid RowDefinitions="Auto,*,Auto">
+            <StackPanel Grid.Row="0" Margin="24,20,24,14" Spacing="4">
+                <TextBlock Classes="row-label" FontSize="15" Text="CLIProxyAPI keys" />
+                <TextBlock Classes="row-desc" TextWrapping="Wrap"
+                           Text="Keys accepted by CLIProxyAPI clients. Agent setup uses the default key; leave empty for no auth." />
+            </StackPanel>
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="12" Margin="24,0,24,0">
+                    <ItemsControl ItemsSource="{Binding CliProxyApiKeys}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:CliProxyApiKeyViewModel">
+                                <Border Background="{DynamicResource SideBgBrush}" CornerRadius="8" Padding="10,8" Margin="0,0,0,6">
+                                    <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Masked}"
+                                                       FontFamily="Cascadia Mono,Consolas,monospace"
+                                                       FontSize="12" VerticalAlignment="Center" />
+                                            <Border Classes="chip" Background="{DynamicResource AccentSoftBrush}"
+                                                    IsVisible="{Binding IsDefault}">
+                                                <TextBlock Text="default" Foreground="{DynamicResource AccentBrush}" FontSize="10" />
+                                            </Border>
+                                        </StackPanel>
+                                        <Button Grid.Column="1" Classes="app" Content="Use"
+                                                Margin="8,0,4,0" Padding="8,0"
+                                                Height="24" MinHeight="0"
+                                                VerticalContentAlignment="Center"
+                                                IsVisible="{Binding CanSetDefault}"
+                                                Command="{Binding #Root.DataContext.SetDefaultApiKeyCommand}"
+                                                CommandParameter="{Binding}" />
+                                        <Button Grid.Column="2" Classes="icon-btn"
+                                                ToolTip.Tip="Remove key"
+                                                IsVisible="{Binding CanRemove}"
+                                                Command="{Binding #Root.DataContext.RemoveApiKeyCommand}"
+                                                CommandParameter="{Binding}">
+                                            <lucide:PackIconLucide Kind="Trash2" Width="13" Height="13"
+                                                                   Foreground="{DynamicResource FgMutedBrush}" />
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="row-desc" Text="Add key" />
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBox Grid.Column="0" Classes="app"
+                                     PasswordChar="{Binding ShowApiKeyDraft, Converter={StaticResource SecretPasswordChar}}"
+                                     Watermark="sk-..."
+                                     Text="{Binding ApiKeyDraft, Mode=TwoWay}" />
+                            <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0"
+                                    ToolTip.Tip="Show/hide key"
+                                    Command="{Binding ToggleApiKeyDraftVisibilityCommand}">
+                                <lucide:PackIconLucide Kind="{Binding ShowApiKeyDraft, Converter={StaticResource EyeIcon}}" Width="14" Height="14" />
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="24,14,24,20">
+                <Button Classes="app" Content="Close" Command="{Binding DismissApiKeysCommand}" />
+                <Button Classes="app primary" Content="Add key" Command="{Binding AddApiKeyCommand}" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Border>
+
+</UserControl>

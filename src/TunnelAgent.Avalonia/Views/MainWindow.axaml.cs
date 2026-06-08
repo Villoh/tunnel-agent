@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -16,6 +17,9 @@ namespace TunnelAgent.Views;
 public partial class MainWindow : Window
 {
     private const int DwmwaBorderColor = 34;
+    private readonly Dictionary<SectionKey, Control> _sectionViews = new();
+    private ApiKeysOverlayView? _apiKeysOverlay;
+    private AgentConfigOverlayView? _agentConfigOverlay;
     private MainWindowViewModel? _currentViewModel;
 
     public MainWindow()
@@ -41,9 +45,20 @@ public partial class MainWindow : Window
             _currentViewModel.PropertyChanged -= OnViewModelPropertyChanged;
 
         _currentViewModel = DataContext as MainWindowViewModel;
-        if (_currentViewModel is null) return;
+        foreach (var view in _sectionViews.Values)
+            view.DataContext = _currentViewModel;
+        if (_apiKeysOverlay is not null) _apiKeysOverlay.DataContext = _currentViewModel;
+        if (_agentConfigOverlay is not null) _agentConfigOverlay.DataContext = _currentViewModel;
+
+        if (_currentViewModel is null)
+        {
+            SectionHost.Content = null;
+            return;
+        }
 
         _currentViewModel.PropertyChanged += OnViewModelPropertyChanged;
+        UpdateSectionContent(_currentViewModel);
+        EnsureVisibleOverlays(_currentViewModel);
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
@@ -55,14 +70,77 @@ public partial class MainWindow : Window
             ApplyThemeMode(vm);
             Dispatcher.UIThread.Post(ApplyNativeBorderColor, DispatcherPriority.Background);
         }
+        else if (args.PropertyName == nameof(MainWindowViewModel.SelectedSection))
+        {
+            UpdateSectionContent(vm);
+        }
         else if (args.PropertyName == nameof(MainWindowViewModel.ShowApiKeysDialog) && vm.ShowApiKeysDialog)
-            Dispatcher.UIThread.Post(() => ApiKeysOverlay.Focus(), DispatcherPriority.Input);
+            Dispatcher.UIThread.Post(() => EnsureApiKeysOverlay(vm).FocusOverlay(), DispatcherPriority.Input);
         else if (args.PropertyName == nameof(MainWindowViewModel.ShowPerplexityAccountDialog) && vm.ShowPerplexityAccountDialog)
             Dispatcher.UIThread.Post(() => PerplexityAccountOverlay.Focus(), DispatcherPriority.Input);
         else if (args.PropertyName == nameof(MainWindowViewModel.ShowAgentConfigDialog) && vm.ShowAgentConfigDialog)
-            Dispatcher.UIThread.Post(() => AgentConfigOverlay.Focus(), DispatcherPriority.Input);
+            Dispatcher.UIThread.Post(() => EnsureAgentConfigOverlay(vm).FocusOverlay(), DispatcherPriority.Input);
     }
 
+    private void EnsureVisibleOverlays(MainWindowViewModel vm)
+    {
+        if (vm.ShowApiKeysDialog)
+            EnsureApiKeysOverlay(vm);
+        if (vm.ShowAgentConfigDialog)
+            EnsureAgentConfigOverlay(vm);
+    }
+
+    private ApiKeysOverlayView EnsureApiKeysOverlay(MainWindowViewModel vm)
+    {
+        if (_apiKeysOverlay is null)
+        {
+            _apiKeysOverlay = new ApiKeysOverlayView();
+            ApiKeysOverlayHost.Content = _apiKeysOverlay;
+        }
+
+        _apiKeysOverlay.DataContext = vm;
+        return _apiKeysOverlay;
+    }
+
+    private AgentConfigOverlayView EnsureAgentConfigOverlay(MainWindowViewModel vm)
+    {
+        if (_agentConfigOverlay is null)
+        {
+            _agentConfigOverlay = new AgentConfigOverlayView();
+            AgentConfigOverlayHost.Content = _agentConfigOverlay;
+        }
+
+        _agentConfigOverlay.DataContext = vm;
+        return _agentConfigOverlay;
+    }
+
+    private void UpdateSectionContent(MainWindowViewModel vm)
+    {
+        var key = NormalizeSectionKey(vm.SelectedSection);
+        if (!_sectionViews.TryGetValue(key, out var view))
+        {
+            view = CreateSectionView(key);
+            view.DataContext = vm;
+            _sectionViews.Add(key, view);
+        }
+
+        SectionHost.Content = view;
+    }
+
+    private static SectionKey NormalizeSectionKey(SectionKey section) =>
+        section is SectionKey.ConfigGeneral or SectionKey.ConfigCliProxy or SectionKey.ConfigPerplexity
+            ? SectionKey.Configuration
+            : section;
+
+    private static Control CreateSectionView(SectionKey section) => section switch
+    {
+        SectionKey.Providers => new ProvidersView(),
+        SectionKey.Quota => new QuotaView(),
+        SectionKey.Agents => new AgentsView(),
+        SectionKey.Logs => new LogsView(),
+        SectionKey.Configuration => new ConfigurationView(),
+        _ => new ProvidersView()
+    };
 
     private static void ApplyThemeMode(MainWindowViewModel vm)
     {

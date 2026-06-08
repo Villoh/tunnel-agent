@@ -55,6 +55,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     private readonly IAgentDetectionService _agentDetection = new AgentDetectionService();
     private readonly AgentConfigurationService _agentConfiguration = new AgentConfigurationService();
     private bool _agentsDetectedOnce;
+    private bool _quotaScannedOnce;
+    private bool _quotaScanInProgress;
 
     private CancellationTokenSource? _cliProxyModelFetchCts;
     private CancellationTokenSource? _perplexityModelFetchCts;
@@ -583,6 +585,17 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         OnPropertyChanged(nameof(IsConfigSection));
         OnPropertyChanged(nameof(ConfigTabIndex));
         UpdateLogsPollingState();
+
+        if (value == SectionKey.Quota)
+        {
+            RefreshQuotaNavigation();
+            _ = ScanAndRefreshQuotaOnceAsync();
+        }
+        else if (value == SectionKey.Agents && !_agentsDetectedOnce)
+        {
+            _ = DetectAgentsAsync();
+        }
+
         // Drive FocusedConfigEngineId from config tab so engine commands/properties resolve correctly.
         if (value == SectionKey.ConfigCliProxy)
             FocusedConfigEngineId = EngineCatalog.CliProxyApi.Id;
@@ -715,9 +728,9 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         RefreshFocusedEngineState();
         await LoadEngineReleasesAsync();
         PropagateEmailMasking(MaskEmails);
-        _ = ScanAndRefreshQuotaAsync();
 
-        // Pre-detect agents in background so Agents section is ready when opened
+        // Warm non-default sections in the background without constructing their views.
+        _ = ScanAndRefreshQuotaOnceAsync();
         _ = DetectAgentsAsync();
     }
 
@@ -1386,6 +1399,22 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         await RefreshAllQuotaProvidersAsync();
     }
 
+    private async Task ScanAndRefreshQuotaOnceAsync()
+    {
+        if (_quotaScannedOnce || _quotaScanInProgress) return;
+        _quotaScanInProgress = true;
+        try
+        {
+            await ScanAndRefreshQuotaAsync();
+            _quotaScannedOnce = true;
+        }
+        catch { }
+        finally
+        {
+            _quotaScanInProgress = false;
+        }
+    }
+
     [RelayCommand]
     private Task ScanQuotaProviders() => ScanQuotaProvidersAsync();
 
@@ -1520,8 +1549,6 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     {
         SelectedSection = SectionKey.Quota;
         FocusedConfigEngineId = EngineCatalog.CliProxyApi.Id;
-        RefreshQuotaNavigation();
-
     }
 
     [RelayCommand]
@@ -1550,12 +1577,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     [RelayCommand] private Task RefreshAllQuotaProviders() => RefreshAllQuotaProvidersAsync();
 
     [RelayCommand]
-    private void SelectAgents()
-    {
-        SelectedSection = SectionKey.Agents;
-        if (!_agentsDetectedOnce)
-            _ = DetectAgentsAsync();
-    }
+    private void SelectAgents() => SelectedSection = SectionKey.Agents;
 
     [RelayCommand]
     private void SelectLogs()
@@ -2126,7 +2148,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
                 {
                     var r = results.FirstOrDefault(x => x.AgentId == vm.Id)
                             ?? AgentDetectionResult.NotFound(vm.Id);
-                    vm. ApplyDetection(r);
+                    vm.ApplyDetection(r);
                 }
                 OnPropertyChanged(nameof(EnabledAgentCount));
                 OnPropertyChanged(nameof(InstalledAgentCount));
