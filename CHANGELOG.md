@@ -31,8 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Infrastructure
 
-- **CI: build matrix extended to Linux and macOS** (`ci.yml`): the `build` job now runs on `windows-2025`, `ubuntu-latest`, and `macos-latest` in parallel with `fail-fast: false`. Build failures on any platform block the PR. NuGet cache is partitioned per OS.
+- **CI: build matrix extended to Linux and macOS** (`ci.yml`): the `build` job now runs on `windows-latest`, `ubuntu-latest`, and `macos-latest` in parallel with `fail-fast: false`. Build failures on any platform block the PR. NuGet cache is partitioned per OS.
 - **Release: multi-platform packaging** (`release.yml`): the Windows-only monolith is replaced by a three-job pipeline. `prepare` resolves the version and waits for CI. `build` is a matrix over `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64`, `osx-arm64` — each platform publishes, packages with Velopack, and uploads its artifacts. `publish` assembles the GitHub Release with all binaries and a unified `latest.json`. Linux packages as `.AppImage` (PNG icon). macOS packages as `.pkg` + `.zip` of the `.app` bundle (`.icns` icon). Version bump on Unix uses `sed` instead of PowerShell.
+- **CI/CD runners updated** (`ci.yml`, `release.yml`): `windows-2025` was routing to the `windows-2025-vs2026` image with broken Visual Studio paths, causing jobs to freeze. Changed to `windows-latest` which points to the stable Windows Server 2025 image. `macos-13` (retired December 2025) replaced with `macos-15-intel` for x64 builds. `ubuntu-24.04-arm` partner runner replaced with `ubuntu-latest` for arm64 builds now that GitHub maintains native arm64 runners.
 - **`logo.icns` added to assets**: generated once from `logo-256.png` using ImageMagick and committed to the repo. Velopack macOS packaging references it directly — no runtime icon generation in CI.
 - **`OutputType` conditional on OS** (`TunnelAgent.Avalonia.csproj`): `WinExe` (suppresses console window) only when building on Windows; `Exe` on Linux/macOS where the distinction is meaningless.
 

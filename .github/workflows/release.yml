@@ -87,16 +87,16 @@ jobs:
       matrix:
         include:
           - rid: win-x64
-            os: windows-2025
+            os: windows-latest
             exe: TunnelAgent.exe
           - rid: linux-x64
             os: ubuntu-latest
             exe: TunnelAgent
           - rid: linux-arm64
-            os: ubuntu-24.04-arm
+            os: ubuntu-latest
             exe: TunnelAgent
           - rid: osx-x64
-            os: macos-13
+            os: macos-15-intel
             exe: TunnelAgent
           - rid: osx-arm64
             os: macos-latest
