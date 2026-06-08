@@ -88,18 +88,27 @@ jobs:
         include:
           - rid: win-x64
             os: windows-latest
+            channel: win-x64
+            exe: TunnelAgent.exe
+          - rid: win-arm64
+            os: windows-latest
+            channel: win-arm64
             exe: TunnelAgent.exe
           - rid: linux-x64
             os: ubuntu-latest
+            channel: linux-x64
             exe: TunnelAgent
           - rid: linux-arm64
             os: ubuntu-latest
+            channel: linux-arm64
             exe: TunnelAgent
           - rid: osx-x64
             os: macos-15-intel
+            channel: osx-x64
             exe: TunnelAgent
           - rid: osx-arm64
             os: macos-latest
+            channel: osx-arm64
             exe: TunnelAgent
 
     runs-on: ${{ matrix.os }}
@@ -162,13 +171,14 @@ jobs:
       # ── Package with Velopack ───────────────────────────────────────────────
       # Windows: produces Setup.exe + .nupkg + RELEASES + portable .zip (via --noPortable=false)
       - name: Package with Velopack (Windows)
-        if: matrix.rid == 'win-x64'
+        if: startsWith(matrix.rid, 'win-')
         shell: pwsh
         run: |
           vpk pack `
             --packId      TunnelAgent `
             --packTitle   "Tunnel Agent" `
             --packVersion "${{ env.SEMVER }}" `
+            --channel     "${{ matrix.channel }}" `
             --packDir     artifacts/publish `
             --mainExe     "${{ matrix.exe }}" `
             --icon        src/TunnelAgent.Avalonia/Assets/logo.ico `
@@ -183,6 +193,7 @@ jobs:
             --packId      TunnelAgent \
             --packTitle   "Tunnel Agent" \
             --packVersion "${{ env.SEMVER }}" \
+            --channel     "${{ matrix.channel }}" \
             --packDir     artifacts/publish \
             --mainExe     "${{ matrix.exe }}" \
             --icon        src/TunnelAgent.Avalonia/Assets/logo-256.png \
@@ -199,6 +210,7 @@ jobs:
             --packId      TunnelAgent \
             --packTitle   "Tunnel Agent" \
             --packVersion "${{ env.SEMVER }}" \
+            --channel     "${{ matrix.channel }}" \
             --packDir     artifacts/publish \
             --mainExe     "${{ matrix.exe }}" \
             --icon        src/TunnelAgent.Avalonia/Assets/logo.icns \
@@ -392,17 +404,23 @@ jobs:
           base="https://github.com/${{ github.repository }}/releases/download/$tag"
 
           # Resolve actual Windows artifact names (Velopack-generated, not renamed)
-          win_setup=$(find artifacts/velopack/release-win-x64 -maxdepth 1 -name "*Setup.exe" | head -1)
-          win_setup_name=$(basename "$win_setup")
-          win_portable=$(find artifacts/velopack/release-win-x64 -maxdepth 1 -name "*portable.zip" | head -1)
-          win_portable_name=$(basename "$win_portable")
+          win_x64_setup=$(find artifacts/velopack/release-win-x64 -maxdepth 1 -name "*Setup.exe" | head -1)
+          win_x64_setup_name=$(basename "$win_x64_setup")
+          win_x64_portable=$(find artifacts/velopack/release-win-x64 -maxdepth 1 -name "*portable.zip" | head -1)
+          win_x64_portable_name=$(basename "$win_x64_portable")
+
+          win_arm64_setup=$(find artifacts/velopack/release-win-arm64 -maxdepth 1 -name "*Setup.exe" | head -1)
+          win_arm64_setup_name=$(basename "$win_arm64_setup")
+          win_arm64_portable=$(find artifacts/velopack/release-win-arm64 -maxdepth 1 -name "*portable.zip" | head -1)
+          win_arm64_portable_name=$(basename "$win_arm64_portable")
 
           {
             echo "## Installation"
             echo ""
             echo "| Platform | Installer | Portable |"
             echo "|----------|-----------|----------|"
-            echo "| Windows x64 | [Setup.exe]($base/$win_setup_name) | [.zip]($base/$win_portable_name) |"
+            echo "| Windows x64 | [Setup.exe]($base/$win_x64_setup_name) | [.zip]($base/$win_x64_portable_name) |"
+            echo "| Windows arm64 | [Setup.exe]($base/$win_arm64_setup_name) | [.zip]($base/$win_arm64_portable_name) |"
             echo "| Linux x64 | [.AppImage]($base/TunnelAgent-${semver}-linux-x64.AppImage) | — |"
             echo "| Linux arm64 | [.AppImage]($base/TunnelAgent-${semver}-linux-arm64.AppImage) | — |"
             echo "| macOS x64 (Intel) | [.pkg]($base/TunnelAgent-${semver}-osx-x64.pkg) | [.zip]($base/TunnelAgent-${semver}-osx-x64.zip) |"

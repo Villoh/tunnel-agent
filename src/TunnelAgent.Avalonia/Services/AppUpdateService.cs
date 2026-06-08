@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Velopack;
 using Velopack.Sources;
@@ -27,13 +28,25 @@ public sealed class AppUpdateService
         try
         {
             var source = new GithubSource($"https://github.com/{RepoOwner}/{RepoName}", null, allowPrerelease);
-            _manager = new UpdateManager(source);
+            var options = new UpdateOptions { ExplicitChannel = GetUpdateChannel() };
+            _manager = new UpdateManager(source, options);
         }
         catch
         {
             // Velopack not initialized (e.g. running in test host or without installer).
             // _manager stays null; IsInstalled will return false and all operations no-op.
         }
+    }
+
+    private static string GetUpdateChannel()
+    {
+        var arch = RuntimeInformation.OSArchitecture;
+        if (OperatingSystem.IsWindows())
+            return arch == Architecture.Arm64 ? "win-arm64" : "win-x64";
+        if (OperatingSystem.IsMacOS())
+            return arch == Architecture.Arm64 ? "osx-arm64" : "osx-x64";
+        // Linux
+        return arch == Architecture.Arm64 ? "linux-arm64" : "linux-x64";
     }
 
     public bool IsInstalled => _manager?.IsInstalled == true;

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Velopack autoupdate split by architecture** (`AppUpdateService`, `release.yml`): Velopack uses a single channel per OS by default (`win`, `linux`, `osx`), which cannot distinguish x64 from arm64. The release workflow now passes `--channel {rid}` to `vpk pack`, producing separate feeds (`releases.win-x64.json`, `releases.win-arm64.json`, etc.). `AppUpdateService` detects the current OS architecture at runtime and sets `UpdateOptions.ExplicitChannel` so the updater fetches the correct feed for the user's platform. Windows arm64 builds are now included in the release matrix. Linux and macOS channels are also split by architecture for consistency, though their existing installs will need to re-download once to migrate to the new channel-aware feeds.
+
 ## [0.5.8] - 2026-06-08
 
 ### Changed
