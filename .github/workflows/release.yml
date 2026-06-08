@@ -242,51 +242,70 @@ jobs:
           path: artifacts/velopack
           merge-multiple: false
 
-      - name: Rename artifacts with version and RID
+      - name: Rename distribution artifacts and update Velopack feeds
         run: |
           semver="${{ env.SEMVER }}"
-          for rid in win-x64 linux-x64 linux-arm64 osx-x64 osx-arm64; do
+
+          update_feed() {
+            local feed="$1"
+            local old_name="$2"
+            local new_name="$3"
+            [[ -f "$feed" ]] || return
+            jq --arg old "$old_name" --arg new "$new_name" '
+              def update:
+                if type == "object" then
+                  if has("FileName") and .FileName == $old then .FileName = $new else . end
+                  | with_entries(.value |= update)
+                elif type == "array" then map(update)
+                else . end;
+              update
+            ' "$feed" > "$feed.tmp" && mv "$feed.tmp" "$feed"
+          }
+
+          # Only rename Linux/macOS where filenames collide across RIDs.
+          # Windows names already include the channel (win) so they are unique.
+          for rid in linux-x64 linux-arm64 osx-x64 osx-arm64; do
             dir="artifacts/velopack/release-$rid"
             [[ -d "$dir" ]] || continue
             for f in "$dir"/*; do
               [[ -f "$f" ]] || continue
               base=$(basename "$f")
-              # Skip feed/metadata files
-              [[ "$base" == "RELEASES" ]] && continue
-              [[ "$base" == "releases."* ]] && continue
-              [[ "$base" == "assets."* ]] && continue
-              # Already has version? skip
+              # Skip feeds, nupkg, RELEASES — referenced by Velopack updater
+              [[ "$base" == *.nupkg ]] && continue
+              [[ "$base" == releases.* ]] && continue
+              [[ "$base" == assets.* ]] && continue
+              [[ "$base" == RELEASES ]] && continue
               [[ "$base" == *"-$semver"* ]] && continue
-              ext="${base##*.}"
+
               case "$rid" in
-                win-x64)
-                  if [[ "$base" == *Setup.exe ]]; then newname="TunnelAgent-${semver}-win-Setup.exe"
-                  elif [[ "$base" == *.zip ]]; then newname="TunnelAgent-${semver}-win-x64-portable.zip"
-                  elif [[ "$base" == *.nupkg ]]; then newname="TunnelAgent-${semver}-full.nupkg"
-                  else newname="TunnelAgent-${semver}-win-x64.${ext}"
-                  fi ;;
                 linux-x64)
                   if [[ "$base" == *.AppImage ]]; then newname="TunnelAgent-${semver}-linux-x64.AppImage"
-                  else newname="TunnelAgent-${semver}-linux-x64.${ext}"
+                  else continue
                   fi ;;
                 linux-arm64)
                   if [[ "$base" == *.AppImage ]]; then newname="TunnelAgent-${semver}-linux-arm64.AppImage"
-                  else newname="TunnelAgent-${semver}-linux-arm64.${ext}"
+                  else continue
                   fi ;;
                 osx-x64)
                   if [[ "$base" == *.pkg ]]; then newname="TunnelAgent-${semver}-osx-x64.pkg"
                   elif [[ "$base" == *.zip ]]; then newname="TunnelAgent-${semver}-osx-x64.zip"
-                  else newname="TunnelAgent-${semver}-osx-x64.${ext}"
+                  else continue
                   fi ;;
                 osx-arm64)
                   if [[ "$base" == *.pkg ]]; then newname="TunnelAgent-${semver}-osx-arm64.pkg"
                   elif [[ "$base" == *.zip ]]; then newname="TunnelAgent-${semver}-osx-arm64.zip"
-                  else newname="TunnelAgent-${semver}-osx-arm64.${ext}"
+                  else continue
                   fi ;;
-                *) newname="TunnelAgent-${semver}-${rid}.${ext}" ;;
+                *) continue ;;
               esac
+
               mv "$f" "$dir/$newname"
               echo "Renamed: $base -> $newname"
+
+              for feed in "$dir"/releases.*.json "$dir"/assets.*.json; do
+                [[ -f "$feed" ]] || continue
+                update_feed "$feed" "$base" "$newname"
+              done
             done
           done
 
@@ -372,12 +391,18 @@ jobs:
           semver="${{ env.SEMVER }}"
           base="https://github.com/${{ github.repository }}/releases/download/$tag"
 
+          # Resolve actual Windows artifact names (Velopack-generated, not renamed)
+          win_setup=$(find artifacts/velopack/release-win-x64 -maxdepth 1 -name "*Setup.exe" | head -1)
+          win_setup_name=$(basename "$win_setup")
+          win_portable=$(find artifacts/velopack/release-win-x64 -maxdepth 1 -name "*portable.zip" | head -1)
+          win_portable_name=$(basename "$win_portable")
+
           {
             echo "## Installation"
             echo ""
             echo "| Platform | Installer | Portable |"
             echo "|----------|-----------|----------|"
-            echo "| Windows x64 | [Setup.exe]($base/TunnelAgent-${semver}-win-Setup.exe) | [.zip]($base/TunnelAgent-${semver}-win-x64-portable.zip) |"
+            echo "| Windows x64 | [Setup.exe]($base/$win_setup_name) | [.zip]($base/$win_portable_name) |"
             echo "| Linux x64 | [.AppImage]($base/TunnelAgent-${semver}-linux-x64.AppImage) | — |"
             echo "| Linux arm64 | [.AppImage]($base/TunnelAgent-${semver}-linux-arm64.AppImage) | — |"
             echo "| macOS x64 (Intel) | [.pkg]($base/TunnelAgent-${semver}-osx-x64.pkg) | [.zip]($base/TunnelAgent-${semver}-osx-x64.zip) |"
@@ -399,18 +424,11 @@ jobs:
           generate_release_notes: false
           body_path: release_body.md
           files: |
-            artifacts/velopack/release-win-x64/*.exe
-            artifacts/velopack/release-win-x64/*.nupkg
-            artifacts/velopack/release-win-x64/*.zip
-            artifacts/velopack/release-win-x64/RELEASES
-            artifacts/velopack/release-win-x64/releases.win.json
-            artifacts/velopack/release-win-x64/assets.win.json
-            artifacts/velopack/release-linux-x64/*.AppImage
-            artifacts/velopack/release-linux-arm64/*.AppImage
-            artifacts/velopack/release-osx-x64/*.pkg
-            artifacts/velopack/release-osx-x64/*.zip
-            artifacts/velopack/release-osx-arm64/*.pkg
-            artifacts/velopack/release-osx-arm64/*.zip
+            artifacts/velopack/release-win-x64/*
+            artifacts/velopack/release-linux-x64/*
+            artifacts/velopack/release-linux-arm64/*
+            artifacts/velopack/release-osx-x64/*
+            artifacts/velopack/release-osx-arm64/*
             artifacts/latest.json
 
       # Notify Scoop bucket (Windows portable, stable releases only)
