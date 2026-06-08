@@ -2215,7 +2215,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
 
     // ── App self-update (Velopack) ────────────────────────────────────────────
 
-    public bool AppUpdateAvailable    => AppUpdateState == AppUpdateState.UpdateAvailable;
+    [ObservableProperty] private bool _appUpdateDismissed;
+    public bool AppUpdateAvailable    => AppUpdateState == AppUpdateState.UpdateAvailable && !AppUpdateDismissed;
     public bool AppUpdateDownloading  => AppUpdateState == AppUpdateState.Downloading;
     public bool AppUpdateReady        => AppUpdateState == AppUpdateState.ReadyToInstall;
     [ObservableProperty] private int _appUpdateDownloadProgress;
@@ -2225,6 +2226,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     {
         _appUpdate.StateChanged += () => Dispatcher.UIThread.Post(() =>
         {
+            AppUpdateDismissed = false;
             AppUpdateState      = _appUpdate.State;
             AppUpdateNewVersion = _appUpdate.NewVersion;
             OnPropertyChanged(nameof(AppUpdateAvailable));
@@ -2255,6 +2257,9 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
             _ = Task.Delay(4000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowAppNoUpdateToast = false));
         }
     }
+
+    [RelayCommand]
+    private void DismissAppUpdate() => AppUpdateDismissed = true;
 
     [RelayCommand]
     private async Task DownloadAppUpdate()

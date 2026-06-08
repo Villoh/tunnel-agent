@@ -590,6 +590,7 @@
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="12,0,0,0" VerticalAlignment="Center">
                     <Button Classes="app primary" Content="Download" Command="{Binding DownloadAppUpdateCommand}" />
+                    <Button Classes="app" Content="Dismiss" Command="{Binding DismissAppUpdateCommand}" />
                 </StackPanel>
             </Grid>
         </Border>
