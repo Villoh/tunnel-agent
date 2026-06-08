@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.8] - 2026-06-08
+
 ### Changed
 
 - **Linux/macOS: persistent user environment variables** (`UserEnvironmentService`): on Unix, `EnvironmentVariableTarget.User` has no persistent backing store — variables were silently lost on restart. A new `IUserEnvironmentService` abstraction (in `TunnelAgent.Abstractions`) now drives platform-specific implementations: `WindowsUserEnvironmentService` retains the existing registry + `WM_SETTINGCHANGE` behaviour; `UnixUserEnvironmentService` persists through two layers: (1) an app-owned shell-sourceable file with `export KEY=VALUE` lines (`$XDG_CONFIG_HOME/tunnelagent/environment` on Linux, `~/Library/Application Support/tunnelagent/environment` on macOS), read at startup via `Initialize()` to seed the process environment; (2) on Linux, a guarded block written once to `~/.profile` that sources that file — making variables available to all login sessions after the next login, removed automatically when the store is emptied; on macOS, a LaunchAgent plist (`~/Library/LaunchAgents/com.tunnelagent.environment.plist`) that runs `launchctl setenv` for each variable at every login (`RunAtLoad: true`), combined with an immediate `launchctl setenv` call for the current GUI session. The existing static `UserEnvironmentService` facade is preserved so all call sites are unchanged.
@@ -674,7 +676,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.5.7...HEAD
+[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.5.8...HEAD
+[0.5.8]: https://github.com/Villoh/tunnel-agent/compare/v0.5.7...v0.5.8
 [0.5.7]: https://github.com/Villoh/tunnel-agent/compare/v0.5.6...v0.5.7
 [0.5.6]: https://github.com/Villoh/tunnel-agent/compare/v0.5.5...v0.5.6
 [0.5.5]: https://github.com/Villoh/tunnel-agent/compare/v0.5.4...v0.5.5
