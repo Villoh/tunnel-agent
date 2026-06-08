@@ -681,6 +681,11 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         }
         ReloadPerplexityAccounts();
 
+        // Warm non-default sections early without constructing their views.
+        // This keeps first navigation to Quota/Agents responsive while startup UI stays lazy.
+        _ = ScanAndRefreshQuotaOnceAsync();
+        _ = DetectAgentsAsync();
+
         foreach (var engine in _engineRegistry.Engines)
         {
             try { await engine.InitializeAsync(); }
@@ -728,10 +733,6 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         RefreshFocusedEngineState();
         await LoadEngineReleasesAsync();
         PropagateEmailMasking(MaskEmails);
-
-        // Warm non-default sections in the background without constructing their views.
-        _ = ScanAndRefreshQuotaOnceAsync();
-        _ = DetectAgentsAsync();
     }
 
     private void NormalizeActiveEngineSetting()
