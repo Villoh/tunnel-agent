@@ -1445,7 +1445,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         foreach (var vm in QuotaAccounts) vm.IsScanning = true;
         try
         {
-            var result = await Task.Run(_quotaProviders.ScanAsync);
+            var result = await _quotaProviders.ScanAsync();
             await Dispatcher.UIThread.InvokeAsync(() => ApplyQuotaScanResult(result));
         }
         finally
@@ -1630,13 +1630,13 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     }
 
     [RelayCommand]
-    private void OpenAgentConfig(AgentViewModel vm)
+    private async Task OpenAgentConfigAsync(AgentViewModel vm)
     {
         foreach (var a in Agents) a.IsSelectedForConfig = false;
         IsAgentConfigBulkMode   = false;
         AgentConfigTarget       = vm;
         AgentConfigResult       = null;
-        AmpUpstreamApiKeyDraft  = vm.Id == "amp" ? _configService.GetAmpUpstreamApiKey() : "";
+        AmpUpstreamApiKeyDraft  = vm.Id == "amp" ? await _configService.GetAmpUpstreamApiKeyAsync() : "";
         ShowAmpUpstreamApiKey   = false;
         AgentConfigMultiResults = Array.Empty<AgentConfigItemResult>();
         IsAgentConfigManualMode = false;
@@ -1917,16 +1917,18 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         RefreshApiKeyItems();
     }
 
-    private void RefreshApiKeyItems()
+    private void RefreshApiKeyItems() => _ = RefreshApiKeyItemsAsync();
+
+    private async Task RefreshApiKeyItemsAsync()
     {
-        var keys   = _configService.ReadApiKeysFromConfig();
+        var keys   = await _configService.ReadApiKeysFromConfigAsync();
         var defKey = TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get("TUNNEL_AGENT_CLIPROXY_API_KEY") ?? "";
 
         // If env var has a key not in yaml, add it so both stay in sync
         if (!string.IsNullOrWhiteSpace(defKey) && !keys.Contains(defKey, StringComparer.Ordinal))
         {
             keys.Add(defKey);
-            _ = _configService.WriteApiKeysToConfigAsync(keys);
+            await _configService.WriteApiKeysToConfigAsync(keys);
         }
 
         CliProxyApiKeys.Clear();
@@ -1968,14 +1970,14 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     private async Task RemoveApiKeyAsync(CliProxyApiKeyViewModel? key)
     {
         if (key is null) return;
-        var keys = _configService.ReadApiKeysFromConfig();
+        var keys = await _configService.ReadApiKeysFromConfigAsync();
         keys.RemoveAll(k => string.Equals(k, key.Value, StringComparison.Ordinal));
         await _configService.WriteApiKeysToConfigAsync(keys);
         // Update default env var if removed key was the default
         var defKey = TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get("TUNNEL_AGENT_CLIPROXY_API_KEY") ?? "";
         if (string.Equals(defKey, key.Value, StringComparison.Ordinal))
             await SyncCliProxyEnvVarAsync(keys.FirstOrDefault() ?? "");
-        RefreshApiKeyItems();
+        await RefreshApiKeyItemsAsync();
     }
 
     [RelayCommand]
@@ -1983,17 +1985,17 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     {
         if (key is null) return;
         await SyncCliProxyEnvVarAsync(key.Value);
-        RefreshApiKeyItems();
+        await RefreshApiKeyItemsAsync();
     }
 
     private async Task PersistApiKeysAsync(string newKey, bool setDefault)
     {
-        var keys = _configService.ReadApiKeysFromConfig();
+        var keys = await _configService.ReadApiKeysFromConfigAsync();
         if (!keys.Contains(newKey, StringComparer.Ordinal))
             keys.Add(newKey);
         await _configService.WriteApiKeysToConfigAsync(keys);
         if (setDefault) await SyncCliProxyEnvVarAsync(newKey);
-        RefreshApiKeyItems();
+        await RefreshApiKeyItemsAsync();
         await CliProxyEngine.WriteConfigAsync();
     }
 

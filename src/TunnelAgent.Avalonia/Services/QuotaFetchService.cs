@@ -1385,7 +1385,7 @@ public sealed class QuotaFetchService
             // Fallback: extract token + userName from the most recent completion.log
             if (token is null)
             {
-                var (logToken, logUser) = QuotaProviderService.ReadTraeTokenFromLogs(appData);
+                var (logToken, logUser) = await QuotaProviderService.ReadTraeTokenFromLogsAsync(appData);
                 token = logToken;
                 email ??= logUser;
             }

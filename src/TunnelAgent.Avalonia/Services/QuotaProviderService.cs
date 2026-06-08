@@ -33,10 +33,10 @@ public sealed class QuotaProviderService
     private static readonly QuotaProviderInfo NotDetected =
         new(false, "", "", null, null, null, null, null, null, null, "us-east-1", null);
 
-    public Task<QuotaScanResult> ScanAsync() =>
-        Task.FromResult(new QuotaScanResult(ScanCursor(), ScanKiro(), ScanTrae()));
+    public async Task<QuotaScanResult> ScanAsync() =>
+        new QuotaScanResult(await ScanCursorAsync(), await ScanKiroAsync(), await ScanTraeAsync());
 
-    private static QuotaProviderInfo ScanCursor()
+    private static async Task<QuotaProviderInfo> ScanCursorAsync()
     {
         try
         {
@@ -45,12 +45,12 @@ public sealed class QuotaProviderService
             if (!File.Exists(dbPath)) return NotDetected;
 
             string? accessToken = null, refreshToken = null, email = null, planType = null;
-            using var conn = new SqliteConnection($"Data Source={dbPath};Mode=ReadOnly");
-            conn.Open();
+            await using var conn = new SqliteConnection($"Data Source={dbPath};Mode=ReadOnly");
+            await conn.OpenAsync();
             using var cmd = conn.CreateCommand();
             cmd.CommandText = "SELECT key, value FROM ItemTable WHERE key LIKE 'cursorAuth/%'";
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
             {
                 switch (reader.GetString(0))
                 {
@@ -83,7 +83,7 @@ public sealed class QuotaProviderService
         }
     }
 
-    private static QuotaProviderInfo ScanKiro()
+    private static async Task<QuotaProviderInfo> ScanKiroAsync()
     {
         try
         {
@@ -91,7 +91,7 @@ public sealed class QuotaProviderService
             var path = Path.Combine(userProfile, ".aws", "sso", "cache", "kiro-auth-token.json");
             if (!File.Exists(path)) return NotDetected;
 
-            var json = File.ReadAllText(path);
+            var json = await File.ReadAllTextAsync(path);
             var doc  = JsonNode.Parse(json)?.AsObject();
             if (doc is null) return NotDetected;
 
@@ -113,7 +113,7 @@ public sealed class QuotaProviderService
                 {
                     try
                     {
-                        var hashDoc = JsonNode.Parse(File.ReadAllText(hashPath))?.AsObject();
+                        var hashDoc = JsonNode.Parse(await File.ReadAllTextAsync(hashPath))?.AsObject();
                         clientId     ??= hashDoc?["client_id"]?.GetValue<string>();
                         clientSecret ??= hashDoc?["client_secret"]?.GetValue<string>();
                     }
@@ -131,7 +131,7 @@ public sealed class QuotaProviderService
                 {
                     try
                     {
-                        var pd = JsonNode.Parse(File.ReadAllText(profilePath))?.AsObject();
+                        var pd = JsonNode.Parse(await File.ReadAllTextAsync(profilePath))?.AsObject();
                         profileArn = pd?["arn"]?.GetValue<string>();
                     }
                     catch { }
@@ -160,7 +160,7 @@ public sealed class QuotaProviderService
         }
     }
 
-    private static QuotaProviderInfo ScanTrae()
+    private static async Task<QuotaProviderInfo> ScanTraeAsync()
     {
         try
         {
@@ -168,7 +168,7 @@ public sealed class QuotaProviderService
             var path = Path.Combine(appData, "Trae", "User", "globalStorage", "storage.json");
             if (!File.Exists(path)) return NotDetected;
 
-            var json = File.ReadAllText(path);
+            var json = await File.ReadAllTextAsync(path);
             var doc  = JsonNode.Parse(json)?.AsObject();
             if (doc is null) return NotDetected;
 
@@ -194,7 +194,7 @@ public sealed class QuotaProviderService
             // Fallback: extract token + userName from the most recent completion.log
             if (token is null)
             {
-                var (logToken, logUser) = ReadTraeTokenFromLogs(appData);
+                var (logToken, logUser) = await ReadTraeTokenFromLogsAsync(appData);
                 token = logToken;
                 email ??= logUser;
             }
@@ -225,7 +225,7 @@ public sealed class QuotaProviderService
     /// Scans the most recent Trae completion.log for a Cloud-IDE-JWT bearer token.
     /// Used as fallback when storage.json values are Electron safeStorage-encrypted (Windows).
     /// </summary>
-    internal static (string? token, string? userName) ReadTraeTokenFromLogs(string appData)
+    internal static async Task<(string? token, string? userName)> ReadTraeTokenFromLogsAsync(string appData)
     {
         try
         {
@@ -247,11 +247,11 @@ public sealed class QuotaProviderService
 
             const int ReadTail = 64 * 1024;
             string tail;
-            using (var fs = new FileStream(latestLog, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            await using (var fs = new FileStream(latestLog, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, FileOptions.Asynchronous))
+            using (var sr = new StreamReader(fs))
             {
                 fs.Seek(Math.Max(0, fs.Length - ReadTail), SeekOrigin.Begin);
-                using var sr = new StreamReader(fs);
-                tail = sr.ReadToEnd();
+                tail = await sr.ReadToEndAsync();
             }
 
             // Extract token

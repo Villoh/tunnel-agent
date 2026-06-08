@@ -108,7 +108,7 @@ openai-compatibility:
       - api-key: "key"
 """);
 
-        var providers = config.ReadProviderSettingsFromConfig();
+        var providers = await config.ReadProviderSettingsFromConfigAsync();
 
         var codex = Assert.Single(providers, p => p.Id == "codex");
         Assert.False(codex.Enabled);

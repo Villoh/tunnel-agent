@@ -45,10 +45,10 @@ public sealed class ConfigService
     /// Reads provider intent from proxy-config.yaml. This keeps proxy-config.yaml
     /// as source of truth while AppSettings keeps only app/UI preferences.
     /// </summary>
-    public List<ProviderSettings> ReadProviderSettingsFromConfig()
+    public async Task<List<ProviderSettings>> ReadProviderSettingsFromConfigAsync()
     {
         if (!File.Exists(ConfigPath)) return [];
-        var lines = File.ReadAllLines(ConfigPath);
+        var lines = await File.ReadAllLinesAsync(ConfigPath);
         var result = new List<ProviderSettings>();
 
         for (var i = 0; i < lines.Length; i++)
@@ -106,7 +106,7 @@ public sealed class ConfigService
     {
         var s       = _settings.Current;
         var authDir = _authDir.Replace('\\', '/');
-        var yaml    = await Task.Run(() => BuildYaml(s, authDir));
+        var yaml    = await BuildYamlAsync(s, authDir);
 
         Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath)!);
         await File.WriteAllTextAsync(ConfigPath, yaml);
@@ -135,7 +135,7 @@ public sealed class ConfigService
             if (legacyKeys.Count == 0) return;
 
             // Only migrate if yaml has no api-keys yet
-            var existing = ReadApiKeysFromConfig();
+            var existing = await ReadApiKeysFromConfigAsync();
             if (existing.Count == 0)
                 await WriteApiKeysToConfigAsync(legacyKeys);
 
@@ -151,7 +151,7 @@ public sealed class ConfigService
 
     // ── YAML builder ─────────────────────────────────────────────────────────
 
-    private string BuildYaml(AppSettings s, string authDir)
+    private async Task<string> BuildYamlAsync(AppSettings s, string authDir)
     {
         var sb = new StringBuilder();
 
@@ -165,11 +165,11 @@ public sealed class ConfigService
         sb.AppendLine($"port: {s.Port}");
         sb.AppendLine($"auth-dir: \"{authDir}\"");
 
-        AppendApiKeys(sb, ReadApiKeysFromConfig());
+        AppendApiKeys(sb, await ReadApiKeysFromConfigAsync());
 
         // Preserve existing secret-key from config (CLIProxyAPI bcrypt-hashes it on startup).
         // Only write the plain key from settings if the config has no key yet — same as Quotio.
-        var existingSecretKey = ReadSecretKeyFromConfig();
+        var existingSecretKey = await ReadSecretKeyFromConfigAsync();
         var secretKey = string.IsNullOrWhiteSpace(existingSecretKey) ? s.ManagementKey : existingSecretKey;
 
         sb.Append($"""
@@ -184,7 +184,7 @@ public sealed class ConfigService
             """);
 
         // ── ampcode ──────────────────────────────────────────────────────────────
-        var ampKey = ReadExistingAmpUpstreamApiKey();
+        var ampKey = await ReadExistingAmpUpstreamApiKeyAsync();
         if (!string.IsNullOrWhiteSpace(ampKey))
         {
             sb.AppendLine("ampcode:");
@@ -283,11 +283,11 @@ public sealed class ConfigService
 
     // ── Existing config readers ─────────────────────────────────────────────
 
-    public List<string> ReadApiKeysFromConfig()
+    public async Task<List<string>> ReadApiKeysFromConfigAsync()
     {
         if (!File.Exists(ConfigPath)) return [];
         var keys = new List<string>();
-        var lines = File.ReadAllLines(ConfigPath);
+        var lines = await File.ReadAllLinesAsync(ConfigPath);
         var inBlock = false;
         foreach (var line in lines)
         {
@@ -336,7 +336,7 @@ public sealed class ConfigService
         await File.WriteAllLinesAsync(ConfigPath, lines).ConfigureAwait(false);
     }
 
-    public string GetAmpUpstreamApiKey() => ReadExistingAmpUpstreamApiKey() ?? "";
+    public async Task<string> GetAmpUpstreamApiKeyAsync() => (await ReadExistingAmpUpstreamApiKeyAsync()) ?? "";
 
     public async Task SetAmpUpstreamApiKeyAsync(string apiKey)
     {
@@ -371,10 +371,11 @@ public sealed class ConfigService
         await File.WriteAllLinesAsync(ConfigPath, lines).ConfigureAwait(false);
     }
 
-    private string? ReadSecretKeyFromConfig()
+    private async Task<string?> ReadSecretKeyFromConfigAsync()
     {
         if (!File.Exists(ConfigPath)) return null;
-        foreach (var line in File.ReadLines(ConfigPath))
+        var lines = await File.ReadAllLinesAsync(ConfigPath);
+        foreach (var line in lines)
         {
             var t = line.Trim();
             if (t.StartsWith("secret-key:", System.StringComparison.Ordinal))
@@ -383,10 +384,11 @@ public sealed class ConfigService
         return null;
     }
 
-    private string? ReadExistingAmpUpstreamApiKey()
+    private async Task<string?> ReadExistingAmpUpstreamApiKeyAsync()
     {
         if (!File.Exists(ConfigPath)) return null;
-        foreach (var line in File.ReadLines(ConfigPath))
+        var lines = await File.ReadAllLinesAsync(ConfigPath);
+        foreach (var line in lines)
         {
             var t = line.Trim();
             if (t.StartsWith("upstream-api-key:", System.StringComparison.Ordinal))

@@ -67,9 +67,9 @@ public sealed class ProviderCatalogService : IDisposable
     /// Build the initial provider list from settings + auth-dir state.
     /// Call once during app init.
     /// </summary>
-    public Task InitializeAsync()
+    public async Task InitializeAsync()
     {
-        var fromConfig = _config.ReadProviderSettingsFromConfig();
+        var fromConfig = await _config.ReadProviderSettingsFromConfigAsync();
         foreach (var provider in fromConfig)
         {
             var existing = _settings.Current.Providers.FirstOrDefault(p => p.Id == provider.Id);
@@ -84,7 +84,6 @@ public sealed class ProviderCatalogService : IDisposable
             if (!string.IsNullOrWhiteSpace(provider.DisplayName)) existing.DisplayName = provider.DisplayName;
         }
         BuildProviderList();
-        return Task.CompletedTask;
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
