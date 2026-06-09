@@ -276,6 +276,14 @@ jobs:
             done
           done
 
+      - name: Generate backward-compatible Windows feed aliases
+        run: |
+          # Users with v0.5.8 or earlier installed without --channel use the
+          # default 'win' channel. Copy win-x64 feeds so they can still find updates.
+          win_x64="artifacts/velopack/release-win-x64"
+          [[ -f "$win_x64/releases.win-x64.json" ]] && cp "$win_x64/releases.win-x64.json" "$win_x64/releases.win.json"
+          [[ -f "$win_x64/assets.win-x64.json" ]]   && cp "$win_x64/assets.win-x64.json"   "$win_x64/assets.win.json"
+
       - name: Generate latest.json
         run: |
           repo="${{ github.repository }}"
