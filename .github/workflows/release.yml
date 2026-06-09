@@ -1,12 +1,8 @@
 name: Release
 
 on:
-  # Triggered automatically when a v* tag is pushed.
-  # CI runs on the tag commit in parallel; this job waits for it to pass.
-  push:
-    tags: ["v*"]
-
-  # Manual trigger (GitHub UI or changelog-release.yml).
+  # Manual trigger only. prepare bumps version, commits, and pushes the tag.
+  # The build matrix then checks out that tagged commit.
   workflow_dispatch:
     inputs:
       version:
@@ -19,10 +15,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ── Resolve version + wait for CI ─────────────────────────────────────────
+  # ── Bump version, commit, push, create tag ────────────────────────────────
   prepare:
     name: Prepare release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      workflows: write
     outputs:
       version: ${{ steps.version.outputs.version }}
       semver: ${{ steps.version.outputs.semver }}
@@ -38,11 +37,7 @@ jobs:
       - name: Resolve version
         id: version
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            version="${{ github.event.inputs.version }}"
-          else
-            version="${{ github.ref_name }}"
-          fi
+          version="${{ github.event.inputs.version }}"
           version="${version#v}"
           semver="${version%%-*}"
           is_prerelease=false
@@ -53,35 +48,25 @@ jobs:
           echo "is_prerelease=$is_prerelease" >> "$GITHUB_OUTPUT"
           echo "Version: $version | Semver: $semver | Pre-release: $is_prerelease"
 
-      - name: Wait for CI to pass
-        if: github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SHA: ${{ github.sha }}
-          REPO: ${{ github.repository }}
+      - name: Bump version
+        run: bash scripts/bump-version.sh "${{ steps.version.outputs.version }}"
+
+      - name: Commit, tag and push
         run: |
-          echo "Waiting for CI workflow on $SHA..."
-          deadline=$(( $(date +%s) + 900 ))
-          while true; do
-            status=$(gh api \
-              "repos/$REPO/actions/runs?head_sha=$SHA&name=CI&per_page=10" \
-              --jq '[.workflow_runs[] | select(.name == "CI")] | sort_by(.created_at) | last | .conclusion // "pending"')
-            echo "  CI status: $status"
-            case "$status" in
-              success) echo "CI passed."; break ;;
-              failure|cancelled|timed_out|action_required|skipped)
-                echo "CI did not pass ($status) — aborting."; exit 1 ;;
-            esac
-            (( $(date +%s) >= deadline )) && { echo "Timed out."; exit 1; }
-            sleep 30
-          done
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -u
+          git diff --cached --quiet \
+            && echo "Nothing to commit." \
+            || git commit -m "chore: bump version to ${{ steps.version.outputs.version }} [skip ci]"
+          git tag -a "${{ steps.version.outputs.tag }}" -m "Release ${{ steps.version.outputs.tag }}"
+          git push origin "HEAD:${{ github.ref_name }}"
+          git push origin "${{ steps.version.outputs.tag }}"
 
   # ── Per-platform build & package ──────────────────────────────────────────
   build:
     name: Build (${{ matrix.rid }})
     needs: prepare
-    permissions:
-      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -119,10 +104,10 @@ jobs:
       TAG: ${{ needs.prepare.outputs.tag }}
 
     steps:
+      # Checkout the tagged commit — already has the bumped version in .csproj
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ needs.prepare.outputs.tag }}
 
       - uses: actions/setup-dotnet@v5
         with:
@@ -137,25 +122,6 @@ jobs:
       - name: Install Velopack CLI (vpk)
         run: dotnet tool install -g vpk
 
-      # ── Version bump ────────────────────────────────────────────────────────
-      - name: Bump version (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: .\scripts\bump-version.ps1 -Version "${{ env.VERSION }}"
-
-      - name: Bump version (Unix)
-        if: runner.os != 'Windows'
-        run: |
-          find . -name "*.csproj" ! -name "TunnelAgent.Tests.csproj" \
-            ! -path "*/obj/*" ! -path "*/bin/*" | while read f; do
-            sed -i.bak \
-              -e "s|<Version>[^<]*</Version>|<Version>${{ env.VERSION }}</Version>|g" \
-              -e "s|<AssemblyVersion>[^<]*</AssemblyVersion>|<AssemblyVersion>${{ env.SEMVER }}.0</AssemblyVersion>|g" \
-              -e "s|<FileVersion>[^<]*</FileVersion>|<FileVersion>${{ env.SEMVER }}.0</FileVersion>|g" \
-              "$f" && rm -f "$f.bak"
-          done
-
-      # ── Restore & publish ───────────────────────────────────────────────────
       - name: Restore
         run: dotnet restore TunnelAgent.slnx -r ${{ matrix.rid }}
 
@@ -168,8 +134,6 @@ jobs:
           -p:DebugType=None -p:DebugSymbols=false
           -o artifacts/publish
 
-      # ── Package with Velopack ───────────────────────────────────────────────
-      # Windows: produces Setup.exe + .nupkg + RELEASES + portable .zip
       - name: Package with Velopack (Windows)
         if: startsWith(matrix.rid, 'win-')
         shell: pwsh
@@ -185,8 +149,6 @@ jobs:
             --noPortable  false `
             --outputDir   artifacts/velopack
 
-      # Linux: produces a single .AppImage — that IS the installer and the portable.
-      # --icon must be a PNG file.
       - name: Package with Velopack (Linux)
         if: startsWith(matrix.rid, 'linux-')
         run: |
@@ -201,9 +163,6 @@ jobs:
             --categories  Utility \
             --outputDir   artifacts/velopack
 
-      # macOS: produces a .pkg installer and a portable .zip of the .app bundle.
-      # --icon must be a .icns file (generated above).
-      # --bundleId sets the CFBundleIdentifier in Info.plist.
       - name: Package with Velopack (macOS)
         if: startsWith(matrix.rid, 'osx-')
         run: |
@@ -221,14 +180,6 @@ jobs:
       - name: List artifacts
         shell: bash
         run: find artifacts/velopack -type f | sort
-
-      - name: Upload bumped csproj
-        if: matrix.rid == 'win-x64'
-        uses: actions/upload-artifact@v7
-        with:
-          name: bumped-csproj
-          path: "**/*.csproj"
-          retention-days: 1
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
@@ -253,15 +204,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Download bumped csproj
-        uses: actions/download-artifact@v4
-        with:
-          name: bumped-csproj
-          path: .
-          merge-multiple: true
+          ref: ${{ needs.prepare.outputs.tag }}
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -290,15 +233,12 @@ jobs:
             ' "$feed" > "$feed.tmp" && mv "$feed.tmp" "$feed"
           }
 
-          # Only rename Linux/macOS where filenames collide across RIDs.
-          # Windows names already include the channel (win) so they are unique.
           for rid in linux-x64 linux-arm64 osx-x64 osx-arm64; do
             dir="artifacts/velopack/release-$rid"
             [[ -d "$dir" ]] || continue
             for f in "$dir"/*; do
               [[ -f "$f" ]] || continue
               base=$(basename "$f")
-              # Skip feeds, nupkg, RELEASES — referenced by Velopack updater
               [[ "$base" == *.nupkg ]] && continue
               [[ "$base" == releases.* ]] && continue
               [[ "$base" == assets.* ]] && continue
@@ -348,9 +288,6 @@ jobs:
             dir="artifacts/velopack/release-$rid"
             [[ -d "$dir" ]] || continue
 
-            # Windows: Setup.exe = installer, *-portable.zip = portable
-            # Linux:   .AppImage = both installer and portable (same file)
-            # macOS:   .pkg = installer, .zip = portable .app bundle
             installer=$(find "$dir" -maxdepth 1 \( -name "*Setup.exe" -o -name "*.AppImage" -o -name "*.pkg" \) | head -1)
             portable=$(find  "$dir" -maxdepth 1 \( -name "*portable.zip" -o -name "*.AppImage" -o -name "*.zip" \) \
               ! -name "*Setup*" ! -name "*.nupkg" | head -1)
@@ -378,33 +315,6 @@ jobs:
           echo "Generated latest.json:"
           cat artifacts/latest.json
 
-      - name: Create and push tag
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          tag="${{ env.TAG }}"
-          if git tag -l "$tag" | grep -q .; then
-            echo "Tag $tag already exists, skipping."
-          else
-            git tag -a "$tag" -m "Release $tag"
-            git push origin "$tag"
-          fi
-
-      - name: Commit version bump
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git diff --name-only | grep -q . || { echo "Nothing to commit."; exit 0; }
-          git add "**/*.csproj"
-          git commit -m "chore: bump version to ${{ env.VERSION }} [skip ci]"
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            branch="${{ github.ref_name }}"
-          else
-            branch=$(git branch -r --contains HEAD | grep -oE '(main|master)' | head -1 || echo "main")
-          fi
-          git push origin "HEAD:refs/heads/$branch"
-
       - name: Build release notes
         run: |
           awk -v version="${{ env.SEMVER }}" '
@@ -419,7 +329,6 @@ jobs:
           semver="${{ env.SEMVER }}"
           base="https://github.com/${{ github.repository }}/releases/download/$tag"
 
-          # Resolve actual Windows artifact names (Velopack-generated, not renamed)
           win_x64_setup=$(find artifacts/velopack/release-win-x64 -maxdepth 1 -name "*Setup.exe" | head -1)
           win_x64_setup_name=$(basename "$win_x64_setup")
           win_x64_portable=$(find artifacts/velopack/release-win-x64 -maxdepth 1 \( -name "*portable.zip" -o -name "*.zip" \) ! -name "*Setup*" ! -name "*.nupkg" | head -1)
@@ -465,7 +374,6 @@ jobs:
             artifacts/velopack/release-osx-arm64/*
             artifacts/latest.json
 
-      # Notify Scoop bucket (Windows portable, stable releases only)
       - name: Update Scoop bucket
         if: needs.prepare.outputs.is_prerelease == 'false'
         env:
