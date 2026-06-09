@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.9] - 2026-06-09
+
 ### Fixed
 
 - **Pi: Claude thinking broken due to all models using `openai-completions` API** (`AgentConfigurationService.cs`): Tunnel Agent was generating a single `tunnel-agent-cliproxy` provider with `api: "openai-completions"` for all models, including Claude. Pi requires `api: "anthropic-messages"` for native thinking support on Anthropic models. The provider block is now split into two: `tunnel-agent-cliproxy` (`openai-completions`) for OpenAI/Codex models and `tunnel-agent-cliproxy-anthropic` (`anthropic-messages`) for Claude models, with the Anthropic base URL stripped of `/v1` to match the expected endpoint format.
@@ -690,7 +692,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.5.8...HEAD
+[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.5.9...HEAD
+[0.5.9]: https://github.com/Villoh/tunnel-agent/compare/v0.5.8...v0.5.9
 [0.5.8]: https://github.com/Villoh/tunnel-agent/compare/v0.5.7...v0.5.8
 [0.5.7]: https://github.com/Villoh/tunnel-agent/compare/v0.5.6...v0.5.7
 [0.5.6]: https://github.com/Villoh/tunnel-agent/compare/v0.5.5...v0.5.6
