@@ -221,6 +221,14 @@ jobs:
         shell: bash
         run: find artifacts/velopack -type f | sort
 
+      - name: Upload bumped csproj
+        if: matrix.rid == 'win-x64'
+        uses: actions/upload-artifact@v7
+        with:
+          name: bumped-csproj
+          path: "**/*.csproj"
+          retention-days: 1
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
@@ -246,6 +254,13 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download bumped csproj
+        uses: actions/download-artifact@v4
+        with:
+          name: bumped-csproj
+          path: .
+          merge-multiple: true
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
