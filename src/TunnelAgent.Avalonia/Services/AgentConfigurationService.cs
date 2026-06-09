@@ -514,10 +514,14 @@ public sealed class AgentConfigurationService
     // ── Pi ──────────────────────────────────────────────────────────────
 
     private const string PiCliProxyProviderKey   = "tunnel-agent-cliproxy";
+    private const string PiCliProxyAnthropicProviderKey = "tunnel-agent-cliproxy-anthropic";
     private const string PiPerplexityProviderKey = "tunnel-agent-perplexity";
 
     private static bool IsPerplexityEntry(ModelEntry m) =>
         !string.IsNullOrEmpty(m.EngineBaseUrl) && m.EngineBaseUrl.Contains(":8327", StringComparison.Ordinal);
+
+    private static bool IsAnthropicEntry(ModelEntry m) =>
+        !string.IsNullOrEmpty(m.OwnedBy) && m.OwnedBy.Equals("anthropic", StringComparison.OrdinalIgnoreCase);
 
     private static async Task<Dictionary<string, OpenRouterContextService.ModelInfo>> BuildModelInfoMapAsync(
         IEnumerable<string> modelIds, CancellationToken ct)
@@ -535,11 +539,14 @@ public sealed class AgentConfigurationService
         IReadOnlyList<ModelEntry> entries,
         Dictionary<string, OpenRouterContextService.ModelInfo> modelInfoMap)
     {
-        var cliproxy   = entries.Where(m => !IsPerplexityEntry(m)).ToList();
+        var cliproxy   = entries.Where(m => !IsAnthropicEntry(m) && !IsPerplexityEntry(m)).ToList();
+        var cliproxyAnthropic = entries.Where(IsAnthropicEntry).ToList();
         var perplexity = entries.Where(IsPerplexityEntry).ToList();
         var providers  = new JsonObject();
         if (cliproxy.Count > 0)
-            providers[PiCliProxyProviderKey]   = BuildPiProviderBlock(cliproxy, modelInfoMap);
+            providers[PiCliProxyProviderKey]   = BuildPiProviderBlock(cliproxy, modelInfoMap, "openai-completions");
+        if (cliproxyAnthropic.Count > 0)
+            providers[PiCliProxyAnthropicProviderKey] = BuildPiProviderBlock(cliproxyAnthropic, modelInfoMap, "anthropic-messages");
         if (perplexity.Count > 0)
             providers[PiPerplexityProviderKey] = BuildPiProviderBlock(perplexity, modelInfoMap);
         return providers;
@@ -547,13 +554,17 @@ public sealed class AgentConfigurationService
 
     private static JsonObject BuildPiProviderBlock(
         IReadOnlyList<ModelEntry> entries,
-        Dictionary<string, OpenRouterContextService.ModelInfo> modelInfoMap)
+        Dictionary<string, OpenRouterContextService.ModelInfo> modelInfoMap,
+        string api = "openai-completions")
     {
         var first    = entries[0];
+        var baseUrl  = !string.IsNullOrEmpty(first.EngineBaseUrl) ? first.EngineBaseUrl : (string?)null;
+        if (api == "anthropic-messages" && !string.IsNullOrEmpty(baseUrl))
+            baseUrl = StripV1(baseUrl);
         var provider = new JsonObject
         {
-            ["baseUrl"] = !string.IsNullOrEmpty(first.EngineBaseUrl) ? first.EngineBaseUrl : (string?)null,
-            ["api"]     = "openai-completions"
+            ["baseUrl"] = baseUrl,
+            ["api"]     = api
         };
         provider["apiKey"] = HasApiKey(first.ApiKey) ? $"${{{first.ApiKey}}}" : "no-key";
         provider["models"] = new JsonArray(
@@ -601,6 +612,7 @@ public sealed class AgentConfigurationService
         if (remove)
         {
             providers.Remove(PiCliProxyProviderKey);
+            providers.Remove(PiCliProxyAnthropicProviderKey);
             providers.Remove(PiPerplexityProviderKey);
             if (providers.Count == 0) root.Remove("providers");
         }
