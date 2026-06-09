@@ -33,7 +33,9 @@ public partial class App : Application
             var vm = new MainWindowViewModel(settings, engineRegistry, catalog, perplexityAccounts, launchAtLogin, folderOpen);
 
             var mainWindow = new MainWindow { DataContext = vm };
-            desktop.MainWindow = mainWindow;
+            var startInTray = Array.Exists(desktop.Args ?? [], arg => string.Equals(arg, "--start-in-tray", StringComparison.OrdinalIgnoreCase));
+            if (!startInTray)
+                desktop.MainWindow = mainWindow;
             var tray = new TrayService(desktop, mainWindow, vm);
             desktop.Exit += async (_, _) =>
             {
@@ -49,14 +51,15 @@ public partial class App : Application
                 SingleInstance.ActivationRequested += () =>
                     Dispatcher.UIThread.Post(() =>
                     {
+                        if (desktop.MainWindow != mainWindow)
+                            desktop.MainWindow = mainWindow;
                         if (mainWindow.WindowState == Avalonia.Controls.WindowState.Minimized)
                             mainWindow.WindowState = Avalonia.Controls.WindowState.Normal;
                         mainWindow.Show();
                         mainWindow.Activate();
                     });
 
-            if (Array.Exists(desktop.Args ?? [], arg => string.Equals(arg, "--start-in-tray", StringComparison.OrdinalIgnoreCase)))
-                mainWindow.Hide();
+
 
             Dispatcher.UIThread.Post(async () =>
             {

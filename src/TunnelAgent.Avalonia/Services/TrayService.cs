@@ -182,6 +182,8 @@ public sealed class TrayService : IDisposable
 
     private void ShowWindow()
     {
+        if (_desktop.MainWindow != _window)
+            _desktop.MainWindow = _window;
         _window.Show();
         if (_window.WindowState == WindowState.Minimized)
             _window.WindowState = WindowState.Normal;

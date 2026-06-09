@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Controls;
 using System;
 using TunnelAgent.Services;
 using Velopack;
@@ -21,7 +22,7 @@ internal class Program
             return;
 
         singleInstance.StartListening();
-        BuildAvaloniaApp(singleInstance).StartWithClassicDesktopLifetime(args);
+        BuildAvaloniaApp(singleInstance).StartWithClassicDesktopLifetime(args, ShutdownMode.OnExplicitShutdown);
     }
 
     public static AppBuilder BuildAvaloniaApp(SingleInstanceService? singleInstance = null)

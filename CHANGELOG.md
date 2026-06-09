@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Launch-at-login window stays visible instead of hiding to tray** (`App.axaml.cs`, `Program.cs`, `TrayService.cs`): when launched with `--start-in-tray` (launch at login), the main window appeared in the foreground and remained visible. Commit `713d6cf` had replaced `Dispatcher.UIThread.Post(Hide, Background)` with a synchronous `Hide()` to eliminate a micro-flash, but Avalonia internally queues a `Show()` when `desktop.MainWindow` is assigned. The synchronous `Hide()` ran before that pending `Show()`, so the framework later showed the window and it stayed visible. The fix skips `MainWindow` assignment at startup when `--start-in-tray` is present, assigns it dynamically on the first `ShowWindow()` call, and sets `ShutdownMode.OnExplicitShutdown` so the application does not exit when no windows are visible.
+
 - **Claude quota missing reset time at 0%** (`QuotaFetchService`): when the `five_hour` or `seven_day` windows report `utilization: 0` and `resets_at: null`, the API means the window just reset and the session hasn't started yet. The UI was hiding the reset label because `FormatResetAtIso(null)` returned `""`. It now falls back to `UtcNow + 5h` for `five_hour` and `UtcNow + 7d` for `seven_day` so the label reads e.g. `"Resets in 4h 59m"` or `"Resets in 6d 23h"` instead of disappearing.
 
 ### Changed
