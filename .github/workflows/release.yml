@@ -169,7 +169,7 @@ jobs:
           -o artifacts/publish
 
       # ── Package with Velopack ───────────────────────────────────────────────
-      # Windows: produces Setup.exe + .nupkg + RELEASES + portable .zip (via --noPortable=false)
+      # Windows: produces Setup.exe + .nupkg + RELEASES + portable .zip
       - name: Package with Velopack (Windows)
         if: startsWith(matrix.rid, 'win-')
         shell: pwsh
@@ -182,6 +182,7 @@ jobs:
             --packDir     artifacts/publish `
             --mainExe     "${{ matrix.exe }}" `
             --icon        src/TunnelAgent.Avalonia/Assets/logo.ico `
+            --noPortable  false `
             --outputDir   artifacts/velopack
 
       # Linux: produces a single .AppImage — that IS the installer and the portable.
@@ -421,12 +422,12 @@ jobs:
           # Resolve actual Windows artifact names (Velopack-generated, not renamed)
           win_x64_setup=$(find artifacts/velopack/release-win-x64 -maxdepth 1 -name "*Setup.exe" | head -1)
           win_x64_setup_name=$(basename "$win_x64_setup")
-          win_x64_portable=$(find artifacts/velopack/release-win-x64 -maxdepth 1 -name "*portable.zip" | head -1)
+          win_x64_portable=$(find artifacts/velopack/release-win-x64 -maxdepth 1 \( -name "*portable.zip" -o -name "*.zip" \) ! -name "*Setup*" ! -name "*.nupkg" | head -1)
           win_x64_portable_name=$(basename "$win_x64_portable")
 
           win_arm64_setup=$(find artifacts/velopack/release-win-arm64 -maxdepth 1 -name "*Setup.exe" | head -1)
           win_arm64_setup_name=$(basename "$win_arm64_setup")
-          win_arm64_portable=$(find artifacts/velopack/release-win-arm64 -maxdepth 1 -name "*portable.zip" | head -1)
+          win_arm64_portable=$(find artifacts/velopack/release-win-arm64 -maxdepth 1 \( -name "*portable.zip" -o -name "*.zip" \) ! -name "*Setup*" ! -name "*.nupkg" | head -1)
           win_arm64_portable_name=$(basename "$win_arm64_portable")
 
           {
