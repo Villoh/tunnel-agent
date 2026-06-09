@@ -149,6 +149,12 @@ public sealed class QuotaFetchService
             // when zero with no reset date, as those indicate the plan doesn't include them.
             var isSubWindow = key.StartsWith("seven_day_");
             if (isSubWindow && util == 0 && string.IsNullOrEmpty(resetsAt)) continue;
+            // five_hour / seven_day with zero usage and no reset date means the window
+            // just reset and the session hasn't started yet — the next reset is in 5h / 7d.
+            if (key == "five_hour" && util == 0 && string.IsNullOrEmpty(resetsAt))
+                resetsAt = DateTimeOffset.UtcNow.AddHours(5).ToString("o");
+            else if (key == "seven_day" && util == 0 && string.IsNullOrEmpty(resetsAt))
+                resetsAt = DateTimeOffset.UtcNow.AddDays(7).ToString("o");
             bars.Add((label, util, resetsAt));
         }
 
