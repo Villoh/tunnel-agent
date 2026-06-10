@@ -352,11 +352,13 @@ public sealed class ProviderCatalogService : IDisposable
             // Update OAuth providers
             foreach (var vm in Providers.Where(p => p.IsOAuth))
             {
-                var accounts  = oauthAccounts.TryGetValue(vm.Id, out var accs) ? accs : [];
-                var hasAccts  = accounts.Count > 0;
-                vm.Connected  = hasAccts;
-                // Auto-disable toggle only when all accounts are actually removed, not just disabled
-                if (!hasAccts) vm.IsEnabled = false;
+                var accounts     = oauthAccounts.TryGetValue(vm.Id, out var accs) ? accs : [];
+                var hasAccts     = accounts.Count > 0;
+                var wasConnected = vm.Connected;
+                vm.Connected     = hasAccts;
+                // Auto-enable on first account added; auto-disable when last account removed
+                if (!wasConnected && hasAccts) vm.IsEnabled = true;
+                else if (!hasAccts)            vm.IsEnabled = false;
                 SyncOAuthAccounts(vm, accounts);
             }
 
