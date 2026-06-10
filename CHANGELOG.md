@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **AppImage crashes on Linux due to incompatible native SkiaSharp library** (`TunnelAgent.Avalonia.csproj`): `Avalonia.Svg.Skia 11.3.0` pulled in `SkiaSharp.NativeAssets.Linux 2.88.9` (native v88) while the managed `SkiaSharp 3.116.1` expected a native library in the range `[116.0, 117.0)`, causing an `InvalidOperationException` at startup. An explicit `PackageReference` for `SkiaSharp.NativeAssets.Linux 3.116.1` now overrides the transitive dependency so both managed and native versions match.
 
+- **Double title bar on Linux** (`MainWindow.axaml.cs`): GNOME drew its own native title bar on top of the app's custom one because `SystemDecorations` was set to `Full`. Overriding to `SystemDecorations.None` on Linux removes the system-managed bar, leaving only the app's custom title bar.
+
 - **AppImage crashes on Linux due to incompatible `Tmds.DBus.Protocol` version** (`TunnelAgent.Avalonia.csproj`): an explicit reference to `Tmds.DBus.Protocol 0.94.1` overrode the `0.21.3` version required by `Avalonia.FreeDesktop 11.3.17`, causing a `TypeLoadException` on `Connection` at startup. The explicit reference was removed so NuGet resolves the version Avalonia expects.
 
 - **Portable Windows update creates duplicate launcher** (`release.yml`): the initial portable stub was named `Tunnel Agent.exe` (from `--packTitle "Tunnel Agent"`) but after auto-updating Velopack recreated it as `TunnelAgent.exe` (from `--packId`), leaving two launchers pointing to the same app. `--packTitle` for the Windows packaging step is now set to `TunnelAgent` to match the package ID.
