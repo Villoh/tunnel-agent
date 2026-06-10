@@ -139,7 +139,7 @@ jobs:
         run: |
           vpk pack `
             --packId      TunnelAgent `
-            --packTitle   "Tunnel Agent" `
+            --packTitle   TunnelAgent `
             --packVersion "${{ env.SEMVER }}" `
             --channel     "${{ matrix.channel }}" `
             --packDir     artifacts/publish `

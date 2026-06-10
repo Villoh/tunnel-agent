@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Portable Windows update creates duplicate launcher** (`release.yml`): the initial portable stub was named `Tunnel Agent.exe` (from `--packTitle "Tunnel Agent"`) but after auto-updating Velopack recreated it as `TunnelAgent.exe` (from `--packId`), leaving two launchers pointing to the same app. `--packTitle` for the Windows packaging step is now set to `TunnelAgent` to match the package ID.
+
 ## [0.5.10] - 2026-06-10
 
 ### Added
