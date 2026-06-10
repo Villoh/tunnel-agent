@@ -9,7 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Auto-refresh quota on first account added** (`ProviderCatalogService`, `MainWindowViewModel`): when an OAuth provider transitions from having no accounts to having at least one, the quota for the new accounts is now fetched automatically in the background instead of waiting for the user to manually trigger a refresh.
+
 - **Gemini interactive login dialog** (`GeminiLoginService`, `MainWindowViewModel`, `MainWindow.axaml`, `ProvidersView.axaml.cs`): adding a Gemini account previously sent a blind delayed newline to stdin hoping the CLI would accept the default project — it failed silently for users whose token was already expired or who needed to choose a GCP project. The flow now runs the `cli-proxy-api -login` binary with redirected stdin/stdout and drives each interactive prompt from a purpose-built `GeminiLoginService` (modelled after `TokenGeneratorService`). A dedicated dialog walks through the three stages the CLI emits: (1) **Waiting for OAuth** — browser opens immediately, a progress bar stays visible while the user authenticates; (2) **Mode selection** — after OAuth completes, two clearly labelled buttons let the user pick *Code Assist* (manual GCP project) or *Google One* (personal account, auto-discover); (3) **Project selection** — for Code Assist, the project list returned by the CLI is parsed with a regex and displayed in a ListBox so the user can click to choose; success and error states are handled with appropriate banners and a Close/Cancel button that adapts its label. The old `SendDelayedNewlineAsync` workaround for `gemini-cli` in `OAuthService` is removed.
+
+### Fixed
+
+- **Provider toggle not enabled after first account added** (`ProviderCatalogService`): when a provider had no accounts and the first one was added, the toggle remained disabled. `OnAuthDirChanged` was only auto-disabling the toggle when accounts reached zero but never re-enabling it on the reverse transition. The previous connected state is now tracked so adding the first account enables the toggle, mirroring the existing disable-on-remove behaviour.
+
+- **Quota fetch snapshot taken before accounts were synced** (`ProviderCatalogService`): the `ProviderFirstConnected` event was raised before `SyncOAuthAccounts` ran, so the account list was still empty when the quota handler snapshotted it. Newly-connected provider IDs are now collected during the loop and the events raised after all accounts are synced.
 
 ## [0.5.9] - 2026-06-09
 
