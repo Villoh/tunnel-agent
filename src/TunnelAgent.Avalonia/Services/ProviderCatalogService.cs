@@ -352,6 +352,7 @@ public sealed class ProviderCatalogService : IDisposable
                 .ToDictionary(g => g.Key, g => g.ToList());
 
             // Update OAuth providers
+            var newlyConnected = new List<string>();
             foreach (var vm in Providers.Where(p => p.IsOAuth))
             {
                 var accounts     = oauthAccounts.TryGetValue(vm.Id, out var accs) ? accs : [];
@@ -359,10 +360,13 @@ public sealed class ProviderCatalogService : IDisposable
                 var wasConnected = vm.Connected;
                 vm.Connected     = hasAccts;
                 // Auto-enable on first account added; auto-disable when last account removed
-                if (!wasConnected && hasAccts) { vm.IsEnabled = true; ProviderFirstConnected?.Invoke(this, vm.Id); }
+                if (!wasConnected && hasAccts) { vm.IsEnabled = true; newlyConnected.Add(vm.Id); }
                 else if (!hasAccts)            vm.IsEnabled = false;
                 SyncOAuthAccounts(vm, accounts);
             }
+            // Raise after SyncOAuthAccounts so vm.Accounts is already populated
+            foreach (var id in newlyConnected)
+                ProviderFirstConnected?.Invoke(this, id);
 
             // Update custom provider account lists
             foreach (var vm in Providers.Where(p => !p.IsOAuth))
