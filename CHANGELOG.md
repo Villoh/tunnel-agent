@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.10] - 2026-06-10
+
 ### Added
 
 - **Auto-refresh quota on first account added** (`ProviderCatalogService`, `MainWindowViewModel`): when an OAuth provider transitions from having no accounts to having at least one, the quota for the new accounts is now fetched automatically in the background instead of waiting for the user to manually trigger a refresh.
@@ -704,7 +706,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.5.9...HEAD
+[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.5.10...HEAD
+[0.5.10]: https://github.com/Villoh/tunnel-agent/compare/v0.5.9...v0.5.10
 [0.5.9]: https://github.com/Villoh/tunnel-agent/compare/v0.5.8...v0.5.9
 [0.5.8]: https://github.com/Villoh/tunnel-agent/compare/v0.5.7...v0.5.8
 [0.5.7]: https://github.com/Villoh/tunnel-agent/compare/v0.5.6...v0.5.7
