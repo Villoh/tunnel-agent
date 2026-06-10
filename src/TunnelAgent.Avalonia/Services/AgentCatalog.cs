@@ -24,7 +24,7 @@ public static class AgentCatalog
         new AgentDefinition(
             "claude-code", "Claude Code",
             "Anthropic's official CLI coding agent.",
-            new[] { "claude", "claude.cmd", "claude.exe" },
+            new[] { "claude", "claude-code", "claude.cmd", "claude.exe" },
             new[] { "~/.claude/settings.json" },
             "https://docs.anthropic.com/en/docs/claude-code",
             "#CC785C",
