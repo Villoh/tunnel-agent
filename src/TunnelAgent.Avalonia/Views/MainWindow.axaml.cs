@@ -10,6 +10,7 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using Avalonia.Interactivity;
 using Avalonia.Styling;
+using TunnelAgent.Infrastructure.Engine.CliProxy;
 using TunnelAgent.ViewModels;
 
 namespace TunnelAgent.Views;
@@ -343,6 +344,39 @@ public partial class MainWindow : Window
     private void OnAgentConfigOverlayPressed(object? sender, PointerPressedEventArgs e)
     {
         if (DataContext is MainWindowViewModel vm) vm.DismissAgentConfigCommand.Execute(null);
+    }
+
+    private void OnGeminiLoginOverlayPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm) vm.DismissGeminiLoginDialogCommand.Execute(null);
+    }
+
+    private void OnGeminiLoginKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape && DataContext is MainWindowViewModel vm)
+        {
+            e.Handled = true;
+            vm.DismissGeminiLoginDialogCommand.Execute(null);
+        }
+    }
+
+    private async void OnGeminiSelectMode1(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm)
+            await vm.SelectGeminiModeAsync(1);
+    }
+
+    private async void OnGeminiSelectMode2(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm)
+            await vm.SelectGeminiModeAsync(2);
+    }
+
+    private async void OnGeminiConfirmProject(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        if (GeminiProjectListBox.SelectedItem is not GeminiProject project) return;
+        await vm.SelectGeminiProjectAsync(project.Id);
     }
 
     private void OnApiKeysDialogKeyDown(object? sender, KeyEventArgs e)

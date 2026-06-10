@@ -34,8 +34,6 @@ public sealed class OAuthService : IDisposable
     private Process? _authProcess;
     private readonly Lock _lock = new();
 
-    // Gemini needs a newline sent ~3s in to accept the default project choice
-    private static readonly TimeSpan GeminiNewlineDelay = TimeSpan.FromSeconds(3);
     // Codex needs a keepalive newline ~12s in
     private static readonly TimeSpan CodexKeepaliveDelay = TimeSpan.FromSeconds(12);
 
@@ -102,9 +100,7 @@ public sealed class OAuthService : IDisposable
         }
 
         // Provider-specific stdin automation
-        if (providerId == "gemini-cli")
-            _ = SendDelayedNewlineAsync(process, GeminiNewlineDelay);
-        else if (providerId == "codex")
+        if (providerId == "codex")
             _ = SendDelayedNewlineAsync(process, CodexKeepaliveDelay);
 
         // Wait up to 2s to check the process is alive and capture initial output

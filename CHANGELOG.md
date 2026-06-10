@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Gemini interactive login dialog** (`GeminiLoginService`, `MainWindowViewModel`, `MainWindow.axaml`, `ProvidersView.axaml.cs`): adding a Gemini account previously sent a blind delayed newline to stdin hoping the CLI would accept the default project — it failed silently for users whose token was already expired or who needed to choose a GCP project. The flow now runs the `cli-proxy-api -login` binary with redirected stdin/stdout and drives each interactive prompt from a purpose-built `GeminiLoginService` (modelled after `TokenGeneratorService`). A dedicated dialog walks through the three stages the CLI emits: (1) **Waiting for OAuth** — browser opens immediately, a progress bar stays visible while the user authenticates; (2) **Mode selection** — after OAuth completes, two clearly labelled buttons let the user pick *Code Assist* (manual GCP project) or *Google One* (personal account, auto-discover); (3) **Project selection** — for Code Assist, the project list returned by the CLI is parsed with a regex and displayed in a ListBox so the user can click to choose; success and error states are handled with appropriate banners and a Close/Cancel button that adapts its label. The old `SendDelayedNewlineAsync` workaround for `gemini-cli` in `OAuthService` is removed.
+
 ## [0.5.9] - 2026-06-09
 
 ### Fixed

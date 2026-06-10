@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -24,6 +25,12 @@ public partial class ProvidersView : UserControl
     {
         if (DataContext is not MainWindowViewModel vm) return;
         if (sender is not Button { Tag: ProviderViewModel provider }) return;
+
+        if (string.Equals(provider.Id, "gemini-cli", StringComparison.OrdinalIgnoreCase))
+        {
+            await vm.StartGeminiLoginAsync();
+            return;
+        }
 
         vm.ShowOAuthStatus = false;
         var (success, message) = await vm.ConnectOAuthAsync(provider.Id);

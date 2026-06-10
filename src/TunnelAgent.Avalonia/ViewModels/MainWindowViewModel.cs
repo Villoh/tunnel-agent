@@ -41,6 +41,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     private readonly TunnelAgent.Services.ModelFetchService _modelFetch;
     private ConfigService _configService = null!;
     private readonly TokenGeneratorService _perplexityTokenGenerator = new();
+    private readonly GeminiLoginService _geminiLogin = new();
+    private CancellationTokenSource _geminiLoginCts = new();
     private readonly Dictionary<string, bool> _engineUpdateToastShown = new(StringComparer.OrdinalIgnoreCase);
     private readonly QuotaFetchService _quota = new(IPlatformInfo.Current.AuthDirectory);
     private readonly QuotaProviderService _quotaProviders = new();
@@ -165,6 +167,27 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     [ObservableProperty] private PerplexityAccountViewModel? _editPerplexityLabelTarget;
     [ObservableProperty] private string _editPerplexityLabelDraft = "";
     [ObservableProperty] private bool _showResetPerplexityDialog;
+
+    [ObservableProperty] private bool _showGeminiLoginDialog;
+    [ObservableProperty] private bool _isGeminiLoginBusy;
+    [ObservableProperty] private GeminiLoginStage _geminiLoginStage = GeminiLoginStage.WaitingForOAuth;
+    [ObservableProperty] private string _geminiLoginPrompt = "";
+    [ObservableProperty] private string _geminiLoginDetail = "";
+    [ObservableProperty] private bool _geminiLoginHasError;
+    public ObservableCollection<GeminiProject> GeminiLoginProjects { get; } = [];
+
+    public bool IsGeminiWaiting         => GeminiLoginStage == GeminiLoginStage.WaitingForOAuth;
+    public bool IsGeminiModeSelection    => GeminiLoginStage == GeminiLoginStage.ModeSelection;
+    public bool IsGeminiProjectSelection => GeminiLoginStage == GeminiLoginStage.ProjectSelection;
+    public bool IsGeminiDone             => GeminiLoginStage == GeminiLoginStage.Success;
+
+    partial void OnGeminiLoginStageChanged(GeminiLoginStage value)
+    {
+        OnPropertyChanged(nameof(IsGeminiWaiting));
+        OnPropertyChanged(nameof(IsGeminiModeSelection));
+        OnPropertyChanged(nameof(IsGeminiProjectSelection));
+        OnPropertyChanged(nameof(IsGeminiDone));
+    }
 
     [ObservableProperty] private bool _showOAuthStatus;
     [ObservableProperty] private bool _oAuthStatusIsError;
@@ -1341,6 +1364,140 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         PerplexityGeneratedToken = "";
         await _perplexityTokenGenerator.DisposeAsync();
     }
+    // ── Gemini interactive login ──────────────────────────────────────────────
+
+    public async Task StartGeminiLoginAsync()
+    {
+        await _geminiLogin.DisposeAsync();
+        _geminiLoginCts.Cancel();
+        _geminiLoginCts = new CancellationTokenSource();
+
+        ShowGeminiLoginDialog    = true;
+        GeminiLoginHasError      = false;
+        GeminiLoginStage         = GeminiLoginStage.WaitingForOAuth;
+        GeminiLoginPrompt        = "Starting authentication\u2026";
+        GeminiLoginDetail        = "";
+        GeminiLoginProjects.Clear();
+        IsGeminiLoginBusy        = true;
+
+        var binaryPath = TunnelAgent.Infrastructure.Engine.CliProxy.DownloadService.BinaryPath;
+        var configPath = _configService.ConfigPath;
+        if (!System.IO.File.Exists(configPath))
+            await _configService.WriteConfigAsync();
+
+        var update = await _geminiLogin.StartAsync(binaryPath, configPath, _geminiLoginCts.Token);
+        IsGeminiLoginBusy = false;
+
+        if (update.Stage == GeminiLoginStage.Failed)
+        {
+            GeminiLoginHasError = true;
+            GeminiLoginPrompt   = update.Prompt;
+            GeminiLoginDetail   = update.Detail ?? "";
+            return;
+        }
+
+        GeminiLoginStage  = GeminiLoginStage.WaitingForOAuth;
+        GeminiLoginPrompt = update.Prompt;
+        GeminiLoginDetail = "";
+
+        // Wait for OAuth + mode selection prompt in the background
+        _ = WaitForGeminiModeSelectionAsync(_geminiLoginCts.Token);
+    }
+
+    private async Task WaitForGeminiModeSelectionAsync(CancellationToken ct)
+    {
+        var update = await _geminiLogin.WaitForModeSelectionAsync(ct);
+        if (ct.IsCancellationRequested) return;
+
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            if (update.Stage == GeminiLoginStage.Failed)
+            {
+                GeminiLoginHasError = true;
+                GeminiLoginPrompt   = update.Prompt;
+                GeminiLoginDetail   = update.Detail ?? "";
+                return;
+            }
+            GeminiLoginStage  = GeminiLoginStage.ModeSelection;
+            GeminiLoginPrompt = update.Prompt;
+            GeminiLoginDetail = "";
+            GeminiLoginHasError = false;
+        });
+    }
+
+    public async Task SelectGeminiModeAsync(int mode)
+    {
+        IsGeminiLoginBusy = true;
+        GeminiLoginHasError = false;
+        GeminiLoginPrompt = mode == 2
+            ? "Waiting for browser authentication\u2026"
+            : "Loading your Google Cloud projects\u2026";
+
+        var update = await _geminiLogin.SelectModeAsync(mode, _geminiLoginCts.Token);
+        IsGeminiLoginBusy = false;
+
+        if (update.Stage == GeminiLoginStage.Failed)
+        {
+            GeminiLoginHasError = true;
+            GeminiLoginPrompt   = update.Prompt;
+            GeminiLoginDetail   = update.Detail ?? "";
+            return;
+        }
+
+        if (update.Stage == GeminiLoginStage.Success)
+        {
+            GeminiLoginStage  = GeminiLoginStage.Success;
+            GeminiLoginPrompt = update.Prompt;
+            GeminiLoginDetail = "";
+            return;
+        }
+
+        // ProjectSelection
+        GeminiLoginStage  = GeminiLoginStage.ProjectSelection;
+        GeminiLoginPrompt = update.Prompt;
+        GeminiLoginDetail = "";
+        GeminiLoginProjects.Clear();
+        if (update.Projects is not null)
+            foreach (var p in update.Projects)
+                GeminiLoginProjects.Add(p);
+    }
+
+    public async Task SelectGeminiProjectAsync(string projectId)
+    {
+        if (string.IsNullOrWhiteSpace(projectId)) return;
+
+        IsGeminiLoginBusy = true;
+        GeminiLoginHasError = false;
+
+        var update = await _geminiLogin.SelectProjectAsync(projectId.Trim(), _geminiLoginCts.Token);
+        IsGeminiLoginBusy = false;
+
+        if (update.Stage == GeminiLoginStage.Failed)
+        {
+            GeminiLoginHasError = true;
+            GeminiLoginPrompt   = update.Prompt;
+            GeminiLoginDetail   = update.Detail ?? "";
+            return;
+        }
+
+        GeminiLoginStage  = GeminiLoginStage.Success;
+        GeminiLoginPrompt = update.Prompt;
+        GeminiLoginDetail = "";
+    }
+
+    [RelayCommand]
+    public async Task DismissGeminiLoginDialogAsync()
+    {
+        _geminiLoginCts.Cancel();
+        ShowGeminiLoginDialog = false;
+        await _geminiLogin.DisposeAsync();
+        GeminiLoginStage    = GeminiLoginStage.WaitingForOAuth;
+        GeminiLoginPrompt   = "";
+        GeminiLoginDetail   = "";
+        GeminiLoginHasError = false;
+        GeminiLoginProjects.Clear();
+    }
+
     [RelayCommand]
     private void DismissAddAccountDialog()
     {
@@ -2300,5 +2457,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         _logs.Dispose();
         _catalog.Dispose();
         await _perplexityTokenGenerator.DisposeAsync();
+        _geminiLoginCts.Cancel();
+        _geminiLoginCts.Dispose();
+        await _geminiLogin.DisposeAsync();
     }
 }

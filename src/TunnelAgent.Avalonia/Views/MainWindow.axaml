@@ -32,6 +32,7 @@
         <cv:SecretPasswordCharConverter x:Key="SecretPasswordChar" />
         <cv:BoolToEyeIconConverter      x:Key="EyeIcon" />
         <cv:IntGreaterThanZeroConverter  x:Key="IntGtZero" />
+        <cv:BoolToCloseCancelConverter   x:Key="BoolToCloseCancelConverter" />
     </Window.Resources>
 
     <Border Background="{DynamicResource WinBgBrush}"
@@ -562,6 +563,104 @@
                         <Button Classes="app" Content="Cancel" Command="{Binding DismissResetPerplexityDialogCommand}" />
                         <Button Classes="app danger" Content="Reset accounts" Command="{Binding ConfirmResetPerplexityAccountsCommand}" />
                     </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- Gemini interactive login dialog -->
+        <Border x:Name="GeminiLoginOverlay" IsVisible="{Binding ShowGeminiLoginDialog}" Background="#88000000"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50"
+                PointerPressed="OnGeminiLoginOverlayPressed" KeyDown="OnGeminiLoginKeyDown" Focusable="True">
+            <Border Classes="card" Width="440" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24"
+                    PointerPressed="OnDialogCardPressed">
+                <StackPanel Spacing="16">
+
+                    <TextBlock Classes="row-label" FontSize="15" Text="Add Gemini account" />
+
+                    <!-- Error banner -->
+                    <Border Classes="alert error" IsVisible="{Binding GeminiLoginHasError}">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <lucide:PackIconLucide Grid.Column="0" Kind="TriangleAlert" Width="16" Height="16"
+                                                   Foreground="{DynamicResource ErrBrush}" VerticalAlignment="Top" Margin="0,1,8,0" />
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock Classes="alert-title" Text="{Binding GeminiLoginPrompt}" />
+                                <TextBlock Classes="alert-body" Text="{Binding GeminiLoginDetail}"
+                                           IsVisible="{Binding GeminiLoginDetail, Converter={StaticResource StringNotEmpty}}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Panel: Waiting for OAuth (browser open) -->
+                    <StackPanel Spacing="10" IsVisible="{Binding IsGeminiWaiting}">
+                        <TextBlock Classes="row-desc" TextWrapping="Wrap"
+                                   Text="{Binding GeminiLoginPrompt}"
+                                   IsVisible="{Binding GeminiLoginHasError, Converter={StaticResource InvertBool}}" />
+                        <ProgressBar IsIndeterminate="True" Height="6" IsVisible="{Binding IsGeminiLoginBusy}" />
+                    </StackPanel>
+
+                    <!-- Panel: Mode selection -->
+                    <StackPanel Spacing="8" IsVisible="{Binding IsGeminiModeSelection}">
+                        <TextBlock Classes="row-desc" TextWrapping="Wrap"
+                                   Text="Choose how Gemini should authenticate."
+                                   IsVisible="{Binding GeminiLoginHasError, Converter={StaticResource InvertBool}}" />
+                        <Button Classes="app" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                                IsEnabled="{Binding IsGeminiLoginBusy, Converter={StaticResource InvertBool}}"
+                                Click="OnGeminiSelectMode1">
+                            <StackPanel Spacing="2">
+                                <TextBlock FontWeight="Medium" Text="Code Assist" />
+                                <TextBlock Classes="row-desc" Text="GCP project, manual selection" />
+                            </StackPanel>
+                        </Button>
+                        <Button Classes="app" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                                IsEnabled="{Binding IsGeminiLoginBusy, Converter={StaticResource InvertBool}}"
+                                Click="OnGeminiSelectMode2">
+                            <StackPanel Spacing="2">
+                                <TextBlock FontWeight="Medium" Text="Google One" />
+                                <TextBlock Classes="row-desc" Text="Personal account, auto-discover project" />
+                            </StackPanel>
+                        </Button>
+                        <ProgressBar IsIndeterminate="True" Height="6" IsVisible="{Binding IsGeminiLoginBusy}" />
+                    </StackPanel>
+
+                    <!-- Panel: Project selection -->
+                    <StackPanel Spacing="8" IsVisible="{Binding IsGeminiProjectSelection}">
+                        <TextBlock Classes="row-desc" TextWrapping="Wrap"
+                                   Text="{Binding GeminiLoginPrompt}"
+                                   IsVisible="{Binding GeminiLoginHasError, Converter={StaticResource InvertBool}}" />
+                        <ListBox x:Name="GeminiProjectListBox"
+                                 ItemsSource="{Binding GeminiLoginProjects}"
+                                 SelectionMode="Single" MaxHeight="180">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock FontWeight="Medium" Text="{Binding Id}" />
+                                        <TextBlock Classes="row-desc" Text="{Binding Label}"
+                                                   IsVisible="{Binding Label, Converter={StaticResource StringNotEmpty}}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <ProgressBar IsIndeterminate="True" Height="6" IsVisible="{Binding IsGeminiLoginBusy}" />
+                    </StackPanel>
+
+                    <!-- Panel: Success -->
+                    <StackPanel Spacing="8" Orientation="Horizontal" IsVisible="{Binding IsGeminiDone}">
+                        <lucide:PackIconLucide Kind="CircleCheck" Width="18" Height="18"
+                                               Foreground="{DynamicResource OkBrush}" VerticalAlignment="Center" />
+                        <TextBlock Classes="row-desc" Text="{Binding GeminiLoginPrompt}" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <!-- Action buttons -->
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,4,0,0">
+                        <Button Classes="app"
+                                Content="{Binding IsGeminiDone, Converter={StaticResource BoolToCloseCancelConverter}}"
+                                Command="{Binding DismissGeminiLoginDialogCommand}" />
+                        <Button Classes="app primary" Content="Connect"
+                                IsVisible="{Binding IsGeminiProjectSelection}"
+                                IsEnabled="{Binding IsGeminiLoginBusy, Converter={StaticResource InvertBool}}"
+                                Click="OnGeminiConfirmProject" />
+                    </StackPanel>
+
                 </StackPanel>
             </Border>
         </Border>
