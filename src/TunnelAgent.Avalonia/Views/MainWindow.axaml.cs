@@ -26,6 +26,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        if (OperatingSystem.IsLinux())
+            SystemDecorations = SystemDecorations.None;
         DataContextChanged += OnDataContextChanged;
         Opened += OnOpened;
         Activated += (_, _) => ApplyNativeBorderColor();
