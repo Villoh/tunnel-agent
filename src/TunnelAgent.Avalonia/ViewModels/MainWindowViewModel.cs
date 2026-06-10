@@ -294,7 +294,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         foreach (var engine in _engineRegistry.Engines)
             engine.StateChanged += OnAnyEngineStateChanged;
 
-        _catalog.ProvidersRefreshed += OnProvidersRefreshed;
+        _catalog.ProvidersRefreshed    += OnProvidersRefreshed;
+        _catalog.ProviderFirstConnected += OnProviderFirstConnected;
         _perplexityAccounts.AccountsChanged += OnPerplexityAccountsChanged;
 
         foreach (var definition in EngineCatalog.All)
@@ -804,6 +805,22 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
             RefreshQuotaNavigation();
             PropagateEmailMasking(MaskEmails);
         });
+
+    private void OnProviderFirstConnected(object? sender, string providerId)
+    {
+        if (!QuotaSupportedProviderIds.Contains(providerId)) return;
+        // Snapshot accounts on the UI thread before handing off to background
+        var provider = Providers.FirstOrDefault(p => p.Id == providerId)
+                    ?? StandaloneQuotaProviders.FirstOrDefault(p => p.Id == providerId);
+        if (provider is null) return;
+        var accounts = provider.Accounts.ToList();
+        _ = Task.Run(async () =>
+        {
+            foreach (var account in accounts)
+                await _quota.FetchAccountPublicAsync(providerId, account);
+            await Dispatcher.UIThread.InvokeAsync(RefreshQuotaNavigation);
+        });
+    }
 
     private static bool IsQuotaSupportedProvider(ProviderViewModel provider) =>
         QuotaSupportedProviderIds.Contains(provider.Id);
@@ -2448,7 +2465,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         foreach (var engine in _engineRegistry.Engines)
             engine.StateChanged -= OnAnyEngineStateChanged;
 
-        _catalog.ProvidersRefreshed -= OnProvidersRefreshed;
+        _catalog.ProvidersRefreshed    -= OnProvidersRefreshed;
+        _catalog.ProviderFirstConnected -= OnProviderFirstConnected;
         _perplexityAccounts.AccountsChanged -= OnPerplexityAccountsChanged;
         _logs.EntriesLoaded -= OnLogEntriesLoaded;
         _logs.RawLinesLoaded -= OnRawLogLinesLoaded;

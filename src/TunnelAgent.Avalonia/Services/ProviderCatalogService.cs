@@ -45,6 +45,8 @@ public sealed class ProviderCatalogService : IDisposable
     public List<ProviderViewModel> Providers { get; } = [];
 
     public event EventHandler? ProvidersRefreshed;
+    /// <summary>Raised when a provider transitions from no accounts to having at least one.</summary>
+    public event EventHandler<string>? ProviderFirstConnected;
 
     public ProviderCatalogService(SettingsService settings, ConfigService config)
         : this(settings, config, IPlatformInfo.Current.AuthDirectory) { }
@@ -357,7 +359,7 @@ public sealed class ProviderCatalogService : IDisposable
                 var wasConnected = vm.Connected;
                 vm.Connected     = hasAccts;
                 // Auto-enable on first account added; auto-disable when last account removed
-                if (!wasConnected && hasAccts) vm.IsEnabled = true;
+                if (!wasConnected && hasAccts) { vm.IsEnabled = true; ProviderFirstConnected?.Invoke(this, vm.Id); }
                 else if (!hasAccts)            vm.IsEnabled = false;
                 SyncOAuthAccounts(vm, accounts);
             }
