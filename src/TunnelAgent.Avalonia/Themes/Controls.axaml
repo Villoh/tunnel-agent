@@ -126,6 +126,20 @@
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
 
+    <!-- Tray usage popup left rail button -->
+    <Style Selector="Button.rail">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="Padding" Value="0,7" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.rail:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#14808080" />
+    </Style>
+
     <Style Selector="Button.icon">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />

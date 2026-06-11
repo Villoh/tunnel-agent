@@ -192,11 +192,11 @@ public partial class MainWindow : Window
         if (handle == IntPtr.Zero)
             return;
 
-        // Hide the thin DWM border that Windows draws even with ExtendClientArea by matching
-        // it to the window background color.
+        // Draw the same subtle rounded border the tray popup uses (WinBorderBrush) on the
+        // native Windows 11 window frame.
         var dark = Application.Current?.ActualThemeVariant == ThemeVariant.Dark ||
                    Application.Current?.RequestedThemeVariant == ThemeVariant.Dark;
-        var color = dark ? ToColorRef(0x1F, 0x21, 0x28) : ToColorRef(0xFC, 0xFC, 0xFD);
+        var color = dark ? ToColorRef(0x1A, 0x1A, 0x1A) : ToColorRef(0xD8, 0xDB, 0xE0);
         _ = DwmSetWindowAttribute(handle, DwmwaBorderColor, ref color, sizeof(int));
     }
 

@@ -1,6 +1,9 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Svg.Skia;
+using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IconPacks.Avalonia.SimpleIcons;
@@ -115,6 +118,80 @@ public partial class ProviderViewModel : ViewModelBase
     public string LogoColor   { get; }
     public string Description { get; }
 
+    // ── Brand SVG icon (Assets/Providers) — same approach as AgentViewModel ──
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSvgIcon))]
+    private SvgImage? _svgIcon;
+    public bool HasSvgIcon => SvgIcon is not null;
+    public string Initials => Name.Length >= 2 ? Name[..2] : Name;
+
+    /// <summary>Maps a provider id to its bundled brand SVG and whether the glyph uses currentColor (needs theme fill).</summary>
+    private static (string Asset, bool ThemeFill)? ResolveProviderSvg(string id) => id.ToLowerInvariant() switch
+    {
+        "claude"                 => ("/Assets/providers/claude.svg",      false),
+        "codex"                  => ("/Assets/providers/openai.svg",      true),
+        "gemini-cli"             => ("/Assets/providers/gemini.svg",      false),
+        "antigravity"            => ("/Assets/providers/antigravity.svg", false),
+        "xai" or "grok"          => ("/Assets/providers/xai.svg",         true),
+        "cursor"                 => ("/Assets/providers/cursor.svg",      true),
+        "kiro"                   => ("/Assets/providers/kiro.svg",        false),
+        "trae"                   => ("/Assets/providers/trae.svg",        false),
+        _                        => null,
+    };
+
+    private bool _svgThemeFill;
+
+    private void InitProviderSvg()
+    {
+        if (ResolveProviderSvg(Id) is not { } map) return;
+        _svgThemeFill = map.ThemeFill;
+        _ = LoadSvgIconAsync(map.Asset);
+        if (_svgThemeFill && Avalonia.Application.Current is not null)
+            Avalonia.Application.Current.ActualThemeVariantChanged += (_, _) => _ = LoadSvgIconAsync(map.Asset);
+    }
+
+    private async Task LoadSvgIconAsync(string path)
+    {
+        var normalized = Converters.SvgImageConverter.NormalizeAssetPath(path);
+        await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            SvgSource? source;
+            if (_svgThemeFill)
+            {
+                // Monochrome brand glyphs must follow the active theme. Setting SvgImage.Css
+                // throws when the icon is built during early startup (the styling system isn't
+                // ready yet), leaving the icon null — so we bake the theme colour straight into
+                // the SVG markup, which is plain parsing and works at any point.
+                var raw = ReadAssetText(normalized);
+                source = raw is null ? null : SvgSource.LoadFromSvg(Recolor(raw, IsDarkTheme() ? "#ffffff" : "#000000"));
+            }
+            else
+            {
+                source = SvgSource.Load(normalized, null);
+            }
+            SvgIcon = source is null ? null : new SvgImage { Source = source };
+        }, Avalonia.Threading.DispatcherPriority.Background);
+    }
+
+    private static string? ReadAssetText(string uri)
+    {
+        try
+        {
+            using var stream = Avalonia.Platform.AssetLoader.Open(new Uri(uri));
+            using var reader = new System.IO.StreamReader(stream);
+            return reader.ReadToEnd();
+        }
+        catch { return null; }
+    }
+
+    /// <summary>Bakes an explicit fill colour into a monochrome brand glyph (replaces an explicit black fill).</summary>
+    private static string Recolor(string svg, string color) =>
+        svg.Replace("fill=\"#000000\"", $"fill=\"{color}\"").Replace("fill=\"#000\"", $"fill=\"{color}\"");
+
+    private static bool IsDarkTheme() =>
+        Avalonia.Application.Current?.ActualThemeVariant == ThemeVariant.Dark
+        || Avalonia.Application.Current?.RequestedThemeVariant == ThemeVariant.Dark;
+
     /// <summary>True = provider type uses OAuth (no API keys to manage).</summary>
     public bool IsOAuth { get; }
 
@@ -201,6 +278,7 @@ public partial class ProviderViewModel : ViewModelBase
         Description    = description;
         IsOAuth        = isOAuth;
         CustomIconData = customIconData;
+        InitProviderSvg();
     }
 
     /// <summary>Raised when the user toggles the provider on/off.</summary>

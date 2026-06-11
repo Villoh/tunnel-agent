@@ -24,6 +24,15 @@ public partial class App : Application
         {
             var settings = new SettingsService();
             settings.LoadSync(); // Apply persisted theme before window is shown to avoid flash
+            // Apply the persisted theme to the Application up front so theme-dependent assets
+            // (e.g. provider brand SVGs recoloured via CSS) resolve the correct variant when the
+            // view models build them — before the MainWindow constructor would otherwise set it.
+            RequestedThemeVariant = settings.Current.ThemeMode switch
+            {
+                "light" => Avalonia.Styling.ThemeVariant.Light,
+                "dark" => Avalonia.Styling.ThemeVariant.Dark,
+                _ => Avalonia.Styling.ThemeVariant.Default
+            };
             var engineRegistry = new EngineRegistryService(settings);
             var engineConfig = new ConfigService(settings);
             var catalog = new ProviderCatalogService(settings, engineConfig);

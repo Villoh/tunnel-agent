@@ -1,0 +1,443 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TunnelAgent.ViewModels"
+        xmlns:cv="using:TunnelAgent.Converters"
+        xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+        x:Class="TunnelAgent.Views.TrayUsagePopup"
+        x:Name="Root"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Tunnel Agent — Usage"
+        Width="460" Height="540"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Topmost="True"
+        SystemDecorations="None"
+        TransparencyLevelHint="Transparent"
+        Background="Transparent">
+    <Window.Resources>
+        <cv:HexToBrushConverter         x:Key="HexBrush" />
+        <cv:StringNotEmptyConverter     x:Key="StringNotEmpty" />
+        <cv:InvertBoolConverter         x:Key="InvertBool" />
+        <cv:ServerStateToTextConverter  x:Key="StateToText" />
+        <cv:ServerStateToBrushConverter x:Key="StateToBrush" />
+        <cv:ServerStateRunningConverter x:Key="StateIsRunning" />
+    </Window.Resources>
+
+    <Window.Styles>
+        <!-- Copy-endpoint icon swap (per-button copied feedback) -->
+        <Style Selector="Button.copy-endpoint lucide|PackIconLucide.check">
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+        <Style Selector="Button.copy-endpoint.copied lucide|PackIconLucide.copy">
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+        <Style Selector="Button.copy-endpoint.copied lucide|PackIconLucide.check">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+
+        <!-- Restart: color-only hover (no background square), like the quota refresh -->
+        <Style Selector="Button.icon.engine-restart:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Button.icon.engine-restart:pointerover">
+            <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
+        </Style>
+    </Window.Styles>
+
+    <Border Background="{DynamicResource WinBgBrush}"
+            BorderBrush="{DynamicResource WinBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="12"
+            ClipToBounds="True">
+        <Grid ColumnDefinitions="52,*">
+
+            <!-- Left provider rail -->
+            <Border Grid.Column="0"
+                    Background="{DynamicResource SideBgBrush}"
+                    BorderBrush="{DynamicResource SideBorderBrush}"
+                    BorderThickness="0,0,1,0">
+              <DockPanel LastChildFill="True">
+                <!-- Settings (bottom) -->
+                <Button DockPanel.Dock="Bottom"
+                        Classes="rail"
+                        ToolTip.Tip="Configuration"
+                        ToolTip.Placement="Right"
+                        ToolTip.HorizontalOffset="8"
+                        Click="OnOpenConfig"
+                        Margin="0,0,0,8">
+                    <Panel Width="34" Height="34">
+                        <lucide:PackIconLucide Kind="Settings" Width="18" Height="18"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Panel>
+                </Button>
+
+                <ScrollViewer VerticalScrollBarVisibility="Hidden"
+                              HorizontalScrollBarVisibility="Disabled"
+                              Padding="0,8,0,8">
+                    <Grid>
+                        <!-- Single animated selection indicator -->
+                        <Border x:Name="Indicator"
+                                Width="3" Height="30" CornerRadius="0, 3, 3, 0"
+                                Margin="0,0,0,0"
+                                HorizontalAlignment="Left" VerticalAlignment="Top"
+                                Background="{DynamicResource AccentBrush}"
+                                IsVisible="False"
+                                IsHitTestVisible="False">
+                            <Border.RenderTransform>
+                                <TranslateTransform>
+                                    <TranslateTransform.Transitions>
+                                        <Transitions>
+                                            <DoubleTransition Property="Y" Duration="0:0:0.26" Easing="CubicEaseOut" />
+                                        </Transitions>
+                                    </TranslateTransform.Transitions>
+                                </TranslateTransform>
+                            </Border.RenderTransform>
+                        </Border>
+
+                        <StackPanel x:Name="RailItems">
+                            <!-- Home / engines -->
+                            <Button x:Name="HomeButton"
+                                    Classes="rail"
+                                    ToolTip.Tip="Home"
+                                    Click="OnHomeClick">
+                                <Panel Width="34" Height="34">
+                                    <lucide:PackIconLucide Kind="House" Width="18" Height="18"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Panel>
+                            </Button>
+
+                            <ItemsControl x:Name="ProviderItems" ItemsSource="{Binding QuotaProvidersForRail}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ProviderViewModel">
+                                        <Button Classes="rail"
+                                                ToolTip.Tip="{Binding Name}"
+                                                Tag="{Binding}"
+                                                Click="OnRailProviderClick">
+                                            <Panel Width="34" Height="34">
+                                                <Panel Width="24" Height="24"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Image Source="{Binding SvgIcon}"
+                                                           Width="22" Height="22"
+                                                           Stretch="Uniform"
+                                                           IsVisible="{Binding HasSvgIcon}" />
+                                                    <Border IsVisible="{Binding HasSvgIcon, Converter={StaticResource InvertBool}}"
+                                                            Width="24" Height="24" CornerRadius="7"
+                                                            Background="{Binding LogoColor, Converter={StaticResource HexBrush}}">
+                                                        <TextBlock Text="{Binding Initials}" Foreground="White"
+                                                                   FontSize="10" FontWeight="SemiBold"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    </Border>
+                                                </Panel>
+                                            </Panel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
+              </DockPanel>
+            </Border>
+
+            <!-- Right content -->
+            <Grid Grid.Column="1" RowDefinitions="Auto,*,Auto">
+
+                <!-- Header -->
+                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="16,14,12,10">
+                    <StackPanel VerticalAlignment="Center"
+                                IsVisible="{Binding TrayHomeSelected, Converter={StaticResource InvertBool}}">
+                        <TextBlock Text="Usage" Classes="page-title" FontSize="16" />
+                        <TextBlock Text="AI subscription quotas at a glance"
+                                   Classes="page-sub" FontSize="11" />
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Center"
+                                IsVisible="{Binding TrayHomeSelected}">
+                        <TextBlock Text="Engines" Classes="page-title" FontSize="16" />
+                        <TextBlock Text="Local engine status and controls"
+                                   Classes="page-sub" FontSize="11" />
+                    </StackPanel>
+                    <Button Grid.Column="1"
+                            Classes="icon"
+                            VerticalAlignment="Center"
+                            ToolTip.Tip="Refresh all"
+                            IsVisible="{Binding TrayHomeSelected, Converter={StaticResource InvertBool}}"
+                            IsEnabled="{Binding HasQuotaAccounts}"
+                            Click="OnRefreshAll">
+                        <lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14"
+                                               Classes.spin="{Binding IsRefreshingAllQuotaProviders}" />
+                    </Button>
+                </Grid>
+
+                <!-- Selected provider quota -->
+                <ScrollViewer Grid.Row="1"
+                              Padding="14,0,12,8"
+                              IsVisible="{Binding TrayHomeSelected, Converter={StaticResource InvertBool}}"
+                              VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="0">
+
+                        <!-- Empty: nothing connected at all -->
+                        <Border Classes="card" Padding="20" Margin="0,4,0,0"
+                                IsVisible="{Binding HasQuotaAccounts, Converter={StaticResource InvertBool}}">
+                            <StackPanel Spacing="8" HorizontalAlignment="Center">
+                                <lucide:PackIconLucide Kind="ChartBar" Width="26" Height="26"
+                                                       Foreground="{DynamicResource FgFaintBrush}"
+                                                       HorizontalAlignment="Center" />
+                                <TextBlock Classes="row-label" Text="No usage data yet"
+                                           HorizontalAlignment="Center" />
+                                <TextBlock Classes="row-desc"
+                                           Text="Connect provider accounts and refresh to see quota usage here."
+                                           TextAlignment="Center" TextWrapping="Wrap" MaxWidth="260" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Selected provider header -->
+                        <StackPanel Orientation="Horizontal" Spacing="9" Margin="0,4,0,12"
+                                    VerticalAlignment="Center"
+                                    IsVisible="{Binding HasSelectedQuotaAccounts}">
+                            <Panel Width="24" Height="24">
+                                <Image Source="{Binding SelectedQuotaProvider.SvgIcon}"
+                                       Width="22" Height="22" Stretch="Uniform"
+                                       IsVisible="{Binding SelectedQuotaProvider.HasSvgIcon}" />
+                                <Border IsVisible="{Binding !SelectedQuotaProvider.HasSvgIcon}"
+                                        Width="24" Height="24" CornerRadius="7"
+                                        Background="{Binding SelectedQuotaProvider.LogoColor, Converter={StaticResource HexBrush}}">
+                                    <TextBlock Text="{Binding SelectedQuotaProvider.Initials}" Foreground="White"
+                                               FontSize="10" FontWeight="SemiBold"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                            </Panel>
+                            <TextBlock Text="{Binding SelectedQuotaProvider.Name}"
+                                       FontSize="15" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource FgBrush}"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <!-- Selected provider accounts -->
+                        <ItemsControl ItemsSource="{Binding SelectedQuotaAccounts}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ProviderAccountViewModel">
+                                    <Border Classes="card" Padding="14" Margin="0,0,0,10">
+                                        <StackPanel Spacing="12">
+                                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                                <TextBlock Text="{Binding DisplayName}"
+                                                           FontSize="12" FontWeight="Medium"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           Foreground="{DynamicResource FgBrush}"
+                                                           VerticalAlignment="Center"
+                                                           Margin="0,0,10,0" />
+                                                <Border Grid.Column="1"
+                                                        Background="{DynamicResource AccentSoftBrush}"
+                                                        CornerRadius="5" Padding="6,1"
+                                                        VerticalAlignment="Center"
+                                                        IsVisible="{Binding PlanBadge, Converter={StaticResource StringNotEmpty}}">
+                                                    <TextBlock Text="{Binding PlanBadge}"
+                                                               FontSize="10" FontWeight="Bold"
+                                                               Foreground="{DynamicResource AccentBrush}" />
+                                                </Border>
+                                                <Button Grid.Column="2"
+                                                        Classes="icon engine-restart"
+                                                        Margin="6,0,0,0"
+                                                        Width="24" Height="24"
+                                                        ToolTip.Tip="Refresh quota"
+                                                        Click="OnRefreshQuota"
+                                                        Tag="{Binding}">
+                                                    <lucide:PackIconLucide Kind="RefreshCw" Width="13" Height="13"
+                                                                           Classes.spin="{Binding IsRefreshing}" />
+                                                </Button>
+                                            </Grid>
+
+                                            <ItemsControl ItemsSource="{Binding QuotaBars}"
+                                                          IsVisible="{Binding HasQuota}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:QuotaBarViewModel">
+                                                        <StackPanel Spacing="5" Margin="0,0,0,10">
+                                                            <Grid ColumnDefinitions="*,Auto">
+                                                                <TextBlock Text="{Binding Title}"
+                                                                           FontSize="12" FontWeight="Medium"
+                                                                           Foreground="{DynamicResource FgBrush}" />
+                                                                <TextBlock Grid.Column="1"
+                                                                           Text="{Binding UsedLabel}"
+                                                                           FontSize="12" FontWeight="SemiBold"
+                                                                           Foreground="{DynamicResource AccentBrush}" />
+                                                            </Grid>
+                                                            <ProgressBar Minimum="0" Maximum="1"
+                                                                         Value="{Binding Used}"
+                                                                         Height="8" />
+                                                            <TextBlock Text="{Binding ResetIn}"
+                                                                       FontSize="10.5"
+                                                                       Foreground="{DynamicResource FgFaintBrush}"
+                                                                       IsVisible="{Binding ResetIn, Converter={StaticResource StringNotEmpty}}" />
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+
+                                            <TextBlock Classes="row-desc"
+                                                       Text="{Binding QuotaEmptyLabel}"
+                                                       IsVisible="{Binding HasQuota, Converter={StaticResource InvertBool}}" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Selected provider has no accounts -->
+                        <Border Classes="card" Padding="18" Margin="0,4,0,0"
+                                IsVisible="{Binding ShowQuotaAccountEmptyState}">
+                            <TextBlock Classes="row-desc"
+                                       Text="{Binding QuotaEmptyStateText}"
+                                       TextAlignment="Center" TextWrapping="Wrap" />
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Home: engine status & controls -->
+                <ScrollViewer Grid.Row="1"
+                              Padding="14,0,12,8"
+                              IsVisible="{Binding TrayHomeSelected}"
+                              VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="10" Margin="0,4,0,0">
+                        <!-- CLIProxyAPI -->
+                        <Border Classes="card">
+                            <StackPanel Margin="16,12" Spacing="10">
+                                <Grid ColumnDefinitions="22,*,Auto">
+                                    <Grid Classes="status-indicator">
+                                        <Ellipse Classes="status-pulse"
+                                                 Fill="{Binding CliProxyServerState, Converter={StaticResource StateToBrush}}"
+                                                 IsVisible="{Binding CliProxyServerState, Converter={StaticResource StateIsRunning}}" />
+                                        <Ellipse Classes="status-dot"
+                                                 Fill="{Binding CliProxyServerState, Converter={StaticResource StateToBrush}}" />
+                                    </Grid>
+                                    <StackPanel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Classes="row-label" Text="CLIProxyAPI" />
+                                        <TextBlock Classes="row-desc">
+                                            <Run Text="Listening on port " />
+                                            <Run Text="{Binding CliProxyPort}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                        <Button Classes="icon-btn engine-action start" Tag="cliproxyapi" Click="OnEngineStart"
+                                                ToolTip.Tip="Start"
+                                                IsVisible="{Binding CliProxyServerState, Converter={StaticResource StateIsRunning}, ConverterParameter=Invert}">
+                                            <lucide:PackIconLucide Kind="Play" Width="12" Height="12" Margin="1,0,0,0" />
+                                        </Button>
+                                        <Button Classes="icon-btn engine-action stop" Tag="cliproxyapi" Click="OnEngineStop"
+                                                ToolTip.Tip="Stop"
+                                                IsVisible="{Binding CliProxyServerState, Converter={StaticResource StateIsRunning}}">
+                                            <lucide:PackIconLucide Kind="Square" Width="10" Height="10" />
+                                        </Button>
+                                        <Button Classes="icon engine-restart" Tag="cliproxyapi" Click="OnEngineRestart"
+                                                ToolTip.Tip="Restart"
+                                                IsEnabled="{Binding CliProxyServerState, Converter={StaticResource StateIsRunning}}">
+                                            <lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14" />
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Border Classes="endpoint" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding CliProxyEndpointUrl}"
+                                                   FontFamily="Cascadia Mono,Consolas,monospace"
+                                                   FontSize="11.5"
+                                                   Foreground="{DynamicResource FgBrush}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center" />
+                                    </Border>
+                                    <Button Classes="icon-btn copy-endpoint"
+                                            Tag="{Binding CliProxyEndpointUrl}"
+                                            ToolTip.Tip="Copy endpoint"
+                                            Click="OnCopyEndpoint">
+                                        <Panel>
+                                            <lucide:PackIconLucide Classes="copy" Kind="Copy" Width="13" Height="13" />
+                                            <lucide:PackIconLucide Classes="check" Kind="Check" Width="13" Height="13" />
+                                        </Panel>
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Perplexity -->
+                        <Border Classes="card">
+                            <StackPanel Margin="16,12" Spacing="10">
+                                <Grid ColumnDefinitions="22,*,Auto">
+                                    <Grid Classes="status-indicator">
+                                        <Ellipse Classes="status-pulse"
+                                                 Fill="{Binding PerplexityServerState, Converter={StaticResource StateToBrush}}"
+                                                 IsVisible="{Binding PerplexityServerState, Converter={StaticResource StateIsRunning}}" />
+                                        <Ellipse Classes="status-dot"
+                                                 Fill="{Binding PerplexityServerState, Converter={StaticResource StateToBrush}}" />
+                                    </Grid>
+                                    <StackPanel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Classes="row-label" Text="Perplexity" />
+                                        <TextBlock Classes="row-desc">
+                                            <Run Text="Listening on port " />
+                                            <Run Text="{Binding PerplexityPort}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                        <Button Classes="icon-btn engine-action start" Tag="perplexity-webui-scraper" Click="OnEngineStart"
+                                                ToolTip.Tip="Start"
+                                                IsVisible="{Binding PerplexityServerState, Converter={StaticResource StateIsRunning}, ConverterParameter=Invert}">
+                                            <lucide:PackIconLucide Kind="Play" Width="12" Height="12" Margin="1,0,0,0" />
+                                        </Button>
+                                        <Button Classes="icon-btn engine-action stop" Tag="perplexity-webui-scraper" Click="OnEngineStop"
+                                                ToolTip.Tip="Stop"
+                                                IsVisible="{Binding PerplexityServerState, Converter={StaticResource StateIsRunning}}">
+                                            <lucide:PackIconLucide Kind="Square" Width="10" Height="10" />
+                                        </Button>
+                                        <Button Classes="icon engine-restart" Tag="perplexity-webui-scraper" Click="OnEngineRestart"
+                                                ToolTip.Tip="Restart"
+                                                IsEnabled="{Binding PerplexityServerState, Converter={StaticResource StateIsRunning}}">
+                                            <lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14" />
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Border Classes="endpoint" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding PerplexityEndpointUrl}"
+                                                   FontFamily="Cascadia Mono,Consolas,monospace"
+                                                   FontSize="11.5"
+                                                   Foreground="{DynamicResource FgBrush}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center" />
+                                    </Border>
+                                    <Button Classes="icon-btn copy-endpoint"
+                                            Tag="{Binding PerplexityEndpointUrl}"
+                                            ToolTip.Tip="Copy endpoint"
+                                            Click="OnCopyEndpoint">
+                                        <Panel>
+                                            <lucide:PackIconLucide Classes="copy" Kind="Copy" Width="13" Height="13" />
+                                            <lucide:PackIconLucide Classes="check" Kind="Check" Width="13" Height="13" />
+                                        </Panel>
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Footer -->
+                <Border Grid.Row="2"
+                        BorderBrush="{DynamicResource RowDividerBrush}"
+                        BorderThickness="0,1,0,0"
+                        Padding="14,8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock VerticalAlignment="Center"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource FgFaintBrush}">
+                            <Run Text="Tunnel Agent" />
+                            <Run Text="{Binding AppVersion}" />
+                        </TextBlock>
+                        <Button Grid.Column="1"
+                                Classes="icon"
+                                ToolTip.Tip="Open app"
+                                ToolTip.Placement="Top"
+                                ToolTip.VerticalOffset="-8"
+                                Click="OnOpenMainWindow">
+                            <lucide:PackIconLucide Kind="DoorOpen" Width="15" Height="15" />
+                        </Button>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

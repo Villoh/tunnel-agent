@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Tray usage popup** (`Views/TrayUsagePopup.axaml(.cs)`, `Services/TrayService.cs`, `ViewModels/MainWindowViewModel.cs`, `ViewModels/ProviderViewModel.cs`): an OpenUsage-style quota popup that opens from the tray icon (left-click on Windows, or the *Show Usage…* menu item) while the existing native right-click menu is preserved. It is a borderless, top-most, light-dismissed window positioned in the screen corner (bottom-right on Windows, top-right on macOS/Linux) and built entirely from the existing design tokens so it matches the main app. A left rail with a single animated accent indicator switches between a **Home** view and each connected provider; the **Home** view reuses the Providers window's engine status component (status dot + "Listening on port" + Start/Stop/Restart and a copy-endpoint chip) for CLIProxyAPI and Perplexity, and selecting a provider shows that provider's quota inline (per-account plan badge, usage bars and a per-account refresh button) without opening a separate window. The footer exposes an *Open app* door button, and the rail's gear opens the app directly on its Configuration section. The popup always opens on **Home**.
+
 ### Fixed
+
+- **Provider brand icons (OpenAI/Codex, xAI) invisible in the tray popup at startup** (`ProviderViewModel.cs`, `App.axaml.cs`, `Assets/providers/*.svg`): the monochrome brand glyphs relied on `currentColor` recoloured via `SvgImage.Css`, which (a) does not reliably recolour inherited fills in `Avalonia.Svg.Skia` and (b) threw when the icon was built during early startup (before the styling system was ready), leaving `SvgIcon` null so the rail fell back to initials. The SVGs now ship with an explicit `fill` (like the Agents icons) and are recoloured per theme via the proven CSS path, and the persisted theme variant is applied to the `Application` in `App.OnFrameworkInitializationCompleted` *before* the view models build their icons so the correct colour is resolved from the first load.
+
+### Changed
+
+- **Main window uses the tray popup's subtle rounded border** (`MainWindow.axaml.cs`): `ApplyNativeBorderColor` previously matched the native Windows 11 DWM border to the window background to hide it. It now paints the border with the `WinBorder` colour (`#1A1A1A` dark / `#D8DBE0` light) — the same brush the popup uses — so the window shows the same subtle rounded border, updated on theme change.
 
 - **AppImage crashes on Linux due to incompatible native SkiaSharp library** (`TunnelAgent.Avalonia.csproj`): `Avalonia.Svg.Skia 11.3.0` pulled in `SkiaSharp.NativeAssets.Linux 2.88.9` (native v88) while the managed `SkiaSharp 3.116.1` expected a native library in the range `[116.0, 117.0)`, causing an `InvalidOperationException` at startup. An explicit `PackageReference` for `SkiaSharp.NativeAssets.Linux 3.116.1` now overrides the transitive dependency so both managed and native versions match.
 

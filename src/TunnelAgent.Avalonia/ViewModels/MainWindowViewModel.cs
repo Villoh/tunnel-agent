@@ -352,6 +352,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     public bool IsLaunchAtLoginSupported => _launchAtLogin.IsSupported;
     public int ConnectedProviderCount => Providers.Count(p => p.Connected || p.ActiveAccountCount > 0);
     public IEnumerable<ProviderViewModel> QuotaProviders => Providers.Where(IsQuotaSupportedProvider).Concat(StandaloneQuotaProviders);
+    /// <summary>Quota providers that actually have at least one connected account — used by the tray usage popup.</summary>
+    public IEnumerable<ProviderViewModel> QuotaProvidersForRail => QuotaProviders.Where(p => p.Accounts.Any());
     public int QuotaProviderCount => QuotaProviders.Count(p => p.Accounts.Any());
     public IEnumerable<ProviderAccountViewModel> SelectedQuotaAccounts => SelectedQuotaProvider?.Accounts ?? Enumerable.Empty<ProviderAccountViewModel>();
     public bool HasQuotaProviders => QuotaProviders.Any();
@@ -834,6 +836,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
             UpdateQuotaSelectionFlags();
 
         OnPropertyChanged(nameof(QuotaProviders));
+        OnPropertyChanged(nameof(QuotaProvidersForRail));
         OnPropertyChanged(nameof(QuotaProviderCount));
         OnPropertyChanged(nameof(SelectedQuotaAccounts));
         OnPropertyChanged(nameof(HasQuotaProviders));
@@ -1747,10 +1750,14 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         FocusedConfigEngineId = EngineCatalog.CliProxyApi.Id;
     }
 
+    /// <summary>True when the tray usage popup is showing the Home (engines) view instead of provider quota.</summary>
+    [ObservableProperty] private bool _trayHomeSelected;
+
     [RelayCommand]
     private void SelectQuotaProvider(ProviderViewModel provider)
     {
         if (!IsQuotaSupportedProvider(provider) && !StandaloneQuotaProviders.Contains(provider)) return;
+        TrayHomeSelected = false;
         SelectedQuotaProvider = provider;
     }
 

@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -18,7 +19,10 @@ public sealed class TrayService : IDisposable
     private readonly MainWindow _window;
     private readonly MainWindowViewModel _viewModel;
     private readonly TrayIcon _trayIcon;
+    private readonly NativeMenuItem _showUsageItem;
     private readonly NativeMenuItem _showHideItem;
+    private TrayUsagePopup? _popup;
+    private DateTime _popupShownAt;
     private readonly NativeMenuItem _cliProxyStartItem;
     private readonly NativeMenuItem _cliProxyStopItem;
     private readonly NativeMenuItem _cliProxyRestartItem;
@@ -38,6 +42,7 @@ public sealed class TrayService : IDisposable
         _window = window;
         _viewModel = viewModel;
 
+        _showUsageItem = CreateItem("Show Usage…", (_, _) => TogglePopup());
         _showHideItem = CreateItem("Hide Window", (_, _) => ToggleWindow());
 
         _cliProxyStatusItem = CreateItem("Server: Stopped", null);
@@ -78,6 +83,7 @@ public sealed class TrayService : IDisposable
         {
             Items =
             {
+                _showUsageItem,
                 _showHideItem,
                 new NativeMenuItemSeparator(),
                 new NativeMenuItem { Header = "CLIProxyAPI", Menu = cliProxyMenu },
@@ -98,7 +104,7 @@ public sealed class TrayService : IDisposable
             Menu = menu,
             IsVisible = true
         };
-        _trayIcon.Clicked += (_, _) => ShowWindow();
+        _trayIcon.Clicked += (_, _) => TogglePopup();
 
         _window.Closing += OnWindowClosing;
         _window.PropertyChanged += OnWindowPropertyChanged;
@@ -167,6 +173,72 @@ public sealed class TrayService : IDisposable
         if (e.PropertyName is nameof(MainWindowViewModel.EngineState) or nameof(MainWindowViewModel.ServerState)
             or nameof(MainWindowViewModel.CliProxyServerState) or nameof(MainWindowViewModel.PerplexityServerState))
             RefreshMenu();
+    }
+
+    private void TogglePopup()
+    {
+        if (!Dispatcher.UIThread.CheckAccess())
+        {
+            Dispatcher.UIThread.Post(TogglePopup);
+            return;
+        }
+
+        if (_popup is { IsVisible: true })
+        {
+            _popup.Hide();
+            return;
+        }
+
+        ShowPopup();
+    }
+
+    private void ShowPopup()
+    {
+        if (_popup is null)
+        {
+            _popup = new TrayUsagePopup { DataContext = _viewModel };
+            _popup.OpenMainWindowRequested += (_, _) =>
+            {
+                _popup?.Hide();
+                ShowWindow();
+            };
+            _popup.Deactivated += OnPopupDeactivated;
+        }
+
+        // Always open on the Home (engines) view rather than a provider's quota.
+        _viewModel.TrayHomeSelected = true;
+
+        _popup.Show();
+        PositionPopup(_popup);
+        _popupShownAt = DateTime.UtcNow;
+        _popup.Activate();
+    }
+
+    private void OnPopupDeactivated(object? sender, EventArgs e)
+    {
+        // Ignore the spurious deactivation that can fire right after showing.
+        if ((DateTime.UtcNow - _popupShownAt).TotalMilliseconds < 250) return;
+        _popup?.Hide();
+    }
+
+    private void PositionPopup(TrayUsagePopup popup)
+    {
+        var screen = popup.Screens?.Primary ?? popup.Screens?.All?.FirstOrDefault();
+        if (screen is null) return;
+
+        var area = screen.WorkingArea;
+        var scale = screen.Scaling;
+        var w = (int)(popup.Width * scale);
+        var h = (int)(popup.Height * scale);
+        var margin = (int)(8 * scale);
+
+        var x = area.X + area.Width - w - margin;
+        // Windows tray sits bottom-right; macOS/Linux status bar sits top-right.
+        var y = OperatingSystem.IsWindows()
+            ? area.Y + area.Height - h - margin
+            : area.Y + margin;
+
+        popup.Position = new PixelPoint(x, y);
     }
 
     private void ToggleWindow()
@@ -256,6 +328,12 @@ public sealed class TrayService : IDisposable
         _window.PropertyChanged -= OnWindowPropertyChanged;
         _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
         _desktop.ShutdownRequested -= OnShutdownRequested;
+        if (_popup is not null)
+        {
+            _popup.Deactivated -= OnPopupDeactivated;
+            _popup.Close();
+            _popup = null;
+        }
         _trayIcon.Dispose();
     }
 }
