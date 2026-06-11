@@ -9,13 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Smooth crossfade animation for engine start/stop buttons** (`Views/ProvidersView.axaml`, `Views/TrayUsagePopup.axaml`, `Converters/Converters.cs`): the start and stop buttons now fade smoothly between each other using opacity transitions instead of instant visibility toggling. A new `ServerStateToOpacityConverter` controls the opacity based on server state, with `IsHitTestVisible` ensuring only the visible button is clickable.
+
+- **Native token fallback for quota fetching** (`Services/QuotaFetchService.cs`): added fallback logic to read authentication tokens from native CLI tool config files (`~/.claude/.credentials.json`, `~/.codex/auth.json`, `~/.gemini/oauth_creds.json`, `~/.antigravity/credentials.json`, `~/.grok/auth.json`, `~/.xai/auth.json`) when tokens are not found in the CLIProxyAPI auth directory. Supports various token formats including Grok's scope-keyed structure, Gemini's Unix millisecond timestamps, and recursive token search for nested JSON structures.
+
 - **Tray usage popup** (`Views/TrayUsagePopup.axaml(.cs)`, `Services/TrayService.cs`, `ViewModels/MainWindowViewModel.cs`, `ViewModels/ProviderViewModel.cs`): an OpenUsage-style quota popup that opens from the tray icon (left-click on Windows, or the *Show Usage…* menu item) while the existing native right-click menu is preserved. It is a borderless, top-most, light-dismissed window positioned in the screen corner (bottom-right on Windows, top-right on macOS/Linux) and built entirely from the existing design tokens so it matches the main app. A left rail with a single animated accent indicator switches between a **Home** view and each connected provider; the **Home** view reuses the Providers window's engine status component (status dot + "Listening on port" + Start/Stop/Restart and a copy-endpoint chip) for CLIProxyAPI and Perplexity, and selecting a provider shows that provider's quota inline (per-account plan badge, usage bars and a per-account refresh button) without opening a separate window. The footer exposes an *Open app* door button, and the rail's gear opens the app directly on its Configuration section. The popup always opens on **Home**.
 
 ### Fixed
 
+- **Gray square appearing behind engine action buttons when disabled** (`Themes/Controls.axaml`): the start/stop buttons showed an unwanted gray background square when their async commands were running (Starting state) due to missing `:disabled` style overrides. Added transparent background and preserved foreground colors for disabled engine action buttons.
+
+- **Restart button in tray popup showing gray square when disabled** (`Views/TrayUsagePopup.axaml`): the restart button displayed a gray background square when disabled. Added `:disabled` styles to remove the background, change cursor to arrow, and prevent hover color changes.
+
 - **Provider brand icons (OpenAI/Codex, xAI) invisible in the tray popup at startup** (`ProviderViewModel.cs`, `App.axaml.cs`, `Assets/providers/*.svg`): the monochrome brand glyphs relied on `currentColor` recoloured via `SvgImage.Css`, which (a) does not reliably recolour inherited fills in `Avalonia.Svg.Skia` and (b) threw when the icon was built during early startup (before the styling system was ready), leaving `SvgIcon` null so the rail fell back to initials. The SVGs now ship with an explicit `fill` (like the Agents icons) and are recoloured per theme via the proven CSS path, and the persisted theme variant is applied to the `Application` in `App.OnFrameworkInitializationCompleted` *before* the view models build their icons so the correct colour is resolved from the first load.
 
 ### Changed
+
+- **Plan badge positioning in tray popup quota accounts** (`Views/TrayUsagePopup.axaml`): the plan badge (Plus, Free, etc.) now appears to the left of the account name, matching the layout in the main app's Quota view.
 
 - **Main window uses the tray popup's subtle rounded border** (`MainWindow.axaml.cs`): `ApplyNativeBorderColor` previously matched the native Windows 11 DWM border to the window background to hide it. It now paints the border with the `WinBorder` colour (`#1A1A1A` dark / `#D8DBE0` light) — the same brush the popup uses — so the window shows the same subtle rounded border, updated on theme change.
 

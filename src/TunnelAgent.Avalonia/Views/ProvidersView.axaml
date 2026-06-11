@@ -10,6 +10,7 @@
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Resources>
         <cv:ServerStateRunningConverter x:Key="StateIsRunning" />
+        <cv:ServerStateToOpacityConverter x:Key="StateToOpacity" />
         <cv:ServerStateToTextConverter  x:Key="StateToText" />
         <cv:ServerStateToBrushConverter x:Key="StateToBrush" />
         <cv:HexToBrushConverter         x:Key="HexBrush" />
@@ -63,13 +64,15 @@
                             <Button Classes="icon-btn engine-action start"
                                     ToolTip.Tip="Start server"
                                     Command="{Binding StartServerCommand}"
-                                    IsVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}, ConverterParameter=Invert}">
+                                    Opacity="{Binding ServerState, Converter={StaticResource StateToOpacity}, ConverterParameter=Invert}"
+                                    IsHitTestVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}, ConverterParameter=Invert}">
                                 <lucide:PackIconLucide Kind="Play" Width="12" Height="12" Margin="1,0,0,0" />
                             </Button>
                             <Button Classes="icon-btn engine-action stop"
                                     ToolTip.Tip="Stop server"
                                     Command="{Binding StopServerCommand}"
-                                    IsVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}}">
+                                    Opacity="{Binding ServerState, Converter={StaticResource StateToOpacity}}"
+                                    IsHitTestVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}}">
                                 <lucide:PackIconLucide Kind="Square" Width="10" Height="10" />
                             </Button>
                         </Panel>

@@ -357,7 +357,29 @@ public sealed class QuotaFetchService
             }
             catch { }
         }
-        return (null, null, DateTimeOffset.MinValue);
+        return ReadNativeCodexToken();
+    }
+
+    private static (string? token, string? accountId, DateTimeOffset lastRefresh) ReadNativeCodexToken()
+    {
+        try
+        {
+            var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var path = Path.Combine(home, ".codex", "auth.json");
+            if (!File.Exists(path)) return (null, null, DateTimeOffset.MinValue);
+            var doc = JsonNode.Parse(File.ReadAllText(path))?.AsObject();
+            if (doc is null) return (null, null, DateTimeOffset.MinValue);
+
+            var token = doc["tokens"]?["access_token"]?.GetValue<string>()
+                     ?? doc["access_token"]?.GetValue<string>();
+            if (string.IsNullOrEmpty(token)) return (null, null, DateTimeOffset.MinValue);
+
+            var accountId = doc["account_id"]?.GetValue<string>()
+                         ?? doc["accountId"]?.GetValue<string>();
+            DateTimeOffset.TryParse(doc["last_refresh"]?.GetValue<string>(), out var lastRefresh);
+            return (token, accountId, lastRefresh);
+        }
+        catch { return (null, null, DateTimeOffset.MinValue); }
     }
 
     private async Task<string?> RefreshCodexTokenIfNeededAsync(
@@ -527,7 +549,7 @@ public sealed class QuotaFetchService
     private async Task<(string? token, string projectId)> ReadGeminiTokenAsync(
         string email, CancellationToken ct)
     {
-        if (!Directory.Exists(_authDir)) return (null, "");
+        if (!Directory.Exists(_authDir)) return await ReadNativeGeminiTokenAsync(ct);
         foreach (var file in Directory.GetFiles(_authDir, "gemini-*.json"))
         {
             try
@@ -565,6 +587,42 @@ public sealed class QuotaFetchService
                 return (accessToken, projectId);
             }
             catch { }
+        }
+        return await ReadNativeGeminiTokenAsync(ct);
+    }
+
+    private static async Task<(string? token, string projectId)> ReadNativeGeminiTokenAsync(CancellationToken ct)
+    {
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        foreach (var file in new[]
+        {
+            Path.Combine(home, ".gemini", "oauth_creds.json"),
+            Path.Combine(home, ".gemini", "credentials.json"),
+            Path.Combine(home, ".config", "gemini", "oauth_creds.json"),
+        })
+        {
+            var doc = ReadJsonObject(file);
+            if (doc is null) continue;
+            var tokenObj = doc["token"]?.AsObject() ?? doc;
+            var accessToken = tokenObj["access_token"]?.GetValue<string>()
+                           ?? tokenObj["accessToken"]?.GetValue<string>();
+            if (string.IsNullOrEmpty(accessToken)) continue;
+
+            var refreshToken = tokenObj["refresh_token"]?.GetValue<string>()
+                            ?? tokenObj["refreshToken"]?.GetValue<string>();
+            var expiry = tokenObj["expiry"]?.GetValue<string>()
+                      ?? tokenObj["expires_at"]?.GetValue<string>();
+            var expiryDateMs = tokenObj["expiry_date"]?.GetValue<long?>();
+            var tokenUri = tokenObj["token_uri"]?.GetValue<string>() ?? "https://oauth2.googleapis.com/token";
+            var clientId = tokenObj["client_id"]?.GetValue<string>() ?? "";
+            var clientSecret = tokenObj["client_secret"]?.GetValue<string>() ?? "";
+            var projectId = doc["project_id"]?.GetValue<string>() ?? "";
+
+            var isExpired = IsExpired(expiry, expiryDateMs);
+            if (isExpired && !string.IsNullOrEmpty(refreshToken))
+                accessToken = await RefreshGoogleTokenAsync(tokenUri, clientId, clientSecret, refreshToken, ct) ?? accessToken;
+
+            return (accessToken, projectId);
         }
         return (null, "");
     }
@@ -719,7 +777,9 @@ public sealed class QuotaFetchService
             }
             catch { }
         }
-        return null;
+        return ReadNativeAccessToken(
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".antigravity", "credentials.json"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "antigravity", "credentials.json"));
     }
 
 
@@ -861,7 +921,9 @@ public sealed class QuotaFetchService
             }
             catch { }
         }
-        return null;
+        return ReadNativeAccessToken(
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".grok", "auth.json"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".xai", "auth.json"));
     }
 
     private static string? ExtractXaiClientId(JsonObject doc)
@@ -1620,19 +1682,80 @@ public sealed class QuotaFetchService
 
     private string? ReadAccessToken(string prefix, string email)
     {
-        if (!Directory.Exists(_authDir)) return null;
-        foreach (var file in Directory.GetFiles(_authDir, $"{prefix}-{email}*.json"))
+        if (Directory.Exists(_authDir))
         {
-            try
+            foreach (var file in Directory.GetFiles(_authDir, $"{prefix}-{email}*.json"))
             {
-                var doc = JsonNode.Parse(File.ReadAllText(file))?.AsObject();
-                if (doc is null) continue;
-                return doc["access_token"]?.GetValue<string>()
-                    ?? doc["accessToken"]?.GetValue<string>();
+                try
+                {
+                    var doc = JsonNode.Parse(File.ReadAllText(file))?.AsObject();
+                    if (doc is null) continue;
+                    return doc["access_token"]?.GetValue<string>()
+                        ?? doc["accessToken"]?.GetValue<string>();
+                }
+                catch { }
             }
-            catch { }
+        }
+
+        if (prefix.Equals("claude", StringComparison.OrdinalIgnoreCase))
+        {
+            var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var doc = ReadJsonObject(Path.Combine(home, ".claude", ".credentials.json"));
+            return doc?["claudeAiOauth"]?["accessToken"]?.GetValue<string>()
+                ?? doc?["claudeAiOauth"]?["access_token"]?.GetValue<string>();
+        }
+
+        return null;
+    }
+
+    private static JsonObject? ReadJsonObject(string path)
+    {
+        try
+        {
+            return File.Exists(path)
+                ? JsonNode.Parse(File.ReadAllText(path))?.AsObject()
+                : null;
+        }
+        catch { return null; }
+    }
+
+    private static string? ReadNativeAccessToken(params string[] paths)
+    {
+        foreach (var path in paths)
+        {
+            var doc = ReadJsonObject(path);
+            if (doc is null) continue;
+            var token = FindNativeToken(doc);
+            if (!string.IsNullOrEmpty(token)) return token;
         }
         return null;
+    }
+
+    private static string? FindNativeToken(JsonNode? node)
+    {
+        if (node is null) return null;
+        if (node is JsonObject obj)
+        {
+            foreach (var key in new[] { "access_token", "accessToken", "key" })
+            {
+                var token = obj[key]?.GetValue<string>();
+                if (!string.IsNullOrEmpty(token)) return token;
+            }
+            foreach (var (_, value) in obj)
+            {
+                var token = FindNativeToken(value);
+                if (!string.IsNullOrEmpty(token)) return token;
+            }
+        }
+        return null;
+    }
+
+    private static bool IsExpired(string? expiryIso, long? expiryDateMs)
+    {
+        if (expiryDateMs is not null)
+            return DateTimeOffset.FromUnixTimeMilliseconds(expiryDateMs.Value) - DateTimeOffset.UtcNow <= TimeSpan.FromSeconds(60);
+        return DateTimeOffset.TryParse(expiryIso, out var expiryDt)
+            && expiryDt - DateTimeOffset.UtcNow <= TimeSpan.FromSeconds(60);
     }
 
     // ── Format helpers ────────────────────────────────────────────────────────

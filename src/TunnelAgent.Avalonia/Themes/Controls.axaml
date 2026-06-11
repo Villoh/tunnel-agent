@@ -589,6 +589,16 @@
     <Style Selector="Button.icon-btn.engine-action.stop">
         <Setter Property="Foreground" Value="#D46A6A" />
     </Style>
+    <!-- Keep engine start/stop buttons clean while their async command is running (Starting state) -->
+    <Style Selector="Button.icon-btn.engine-action:disabled /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.icon-btn.engine-action.start:disabled">
+        <Setter Property="Foreground" Value="#58B97B" />
+    </Style>
+    <Style Selector="Button.icon-btn.engine-action.stop:disabled">
+        <Setter Property="Foreground" Value="#D46A6A" />
+    </Style>
 
     <!-- Horizontal pill tab bar -->
     <Style Selector="Border.tab-bar">

@@ -62,6 +62,19 @@ public sealed class ServerStateRunningConverter : IValueConverter
     public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
 }
 
+/// <summary>Returns 1.0 when the server is Running (0.0 otherwise), inverted with the "Invert" parameter. Used to crossfade the start/stop buttons.</summary>
+public sealed class ServerStateToOpacityConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var running = value is ServerState s && s == ServerState.Running;
+        if (parameter is string p && p.Equals("Invert", StringComparison.OrdinalIgnoreCase))
+            return running ? 0.0 : 1.0;
+        return running ? 1.0 : 0.0;
+    }
+    public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
+}
+
 public sealed class HexToBrushConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
