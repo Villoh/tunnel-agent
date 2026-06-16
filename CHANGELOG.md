@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **Tray menu labels simplified** (`Services/TrayService.cs`): removed trailing ellipses from **Show Usage** and **Configuration** for consistency with the rest of the tray menu.
+
+- **Legacy root engine settings removed from settings output** (`AppSettings`, `SettingsService`): `ActiveEngineId`, root `Port`, and root `PreferredEngineVersion` are no longer written to `settings.json`; per-engine values in `Engines` are now the source of truth while old files still migrate on load.
+
+### Fixed
+
+- **Enter key in CLIProxyAPI key dialog** (`Views/ApiKeysOverlayView.axaml(.cs)`): pressing Enter in the add-key field now runs **Add key**, matching the button behavior.
+
+- **Engine update toast follows detected engine** (`MainWindow`, `MainWindowViewModel`): the toast now captures the engine that raised the update notification, so switching between CLIProxyAPI and Perplexity no longer changes the version text or updates the wrong engine.
+
 ## [0.6.0] - 2026-06-11
 
 ### Added
