@@ -103,7 +103,7 @@ public sealed class EngineService : IManagedEngine
         await _process.StartAsync(
             DownloadService.BinaryPath,
             _config.ConfigPath,
-            _settings.Current.Port,
+            _settings.Current.GetOrAddEngine(Definition.Id, Definition.DefaultPort).Port,
             defaultKey,
             ct);
     }

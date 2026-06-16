@@ -12,7 +12,7 @@ public sealed class ConfigServiceEdgeTests
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
         await settings.LoadAsync();
-        settings.Current.Port = 9999;
+        settings.Current.GetOrAddEngine(TunnelAgent.Core.Engine.EngineCatalog.CliProxyApi.Id, TunnelAgent.Core.Engine.EngineCatalog.CliProxyApi.DefaultPort).Port = 9999;
         settings.Current.RoutingStrategy = ViewModels.RoutingStrategy.FillFirst;
         var config = new ConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
 
@@ -28,7 +28,7 @@ public sealed class ConfigServiceEdgeTests
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
         await settings.LoadAsync();
-        settings.Current.Port = 9999;
+        settings.Current.GetOrAddEngine(TunnelAgent.Core.Engine.EngineCatalog.CliProxyApi.Id, TunnelAgent.Core.Engine.EngineCatalog.CliProxyApi.DefaultPort).Port = 9999;
         settings.Current.RoutingStrategy = ViewModels.RoutingStrategy.RoundRobin;
         var config = new ConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
 
@@ -44,7 +44,7 @@ public sealed class ConfigServiceEdgeTests
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
         await settings.LoadAsync();
-        settings.Current.Port = 9999;
+        settings.Current.GetOrAddEngine(TunnelAgent.Core.Engine.EngineCatalog.CliProxyApi.Id, TunnelAgent.Core.Engine.EngineCatalog.CliProxyApi.DefaultPort).Port = 9999;
         var config = new ConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
 
         await config.WriteConfigAsync();
@@ -74,12 +74,12 @@ public sealed class ConfigServiceEdgeTests
         await settings.LoadAsync();
         var config = new ConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
 
-        settings.Current.Port = 1111;
+        settings.Current.GetOrAddEngine(TunnelAgent.Core.Engine.EngineCatalog.CliProxyApi.Id, TunnelAgent.Core.Engine.EngineCatalog.CliProxyApi.DefaultPort).Port = 1111;
         await config.WriteConfigAsync();
         var yaml1 = await File.ReadAllTextAsync(config.ConfigPath);
         Assert.Contains("port: 1111", yaml1);
 
-        settings.Current.Port = 2222;
+        settings.Current.GetOrAddEngine(TunnelAgent.Core.Engine.EngineCatalog.CliProxyApi.Id, TunnelAgent.Core.Engine.EngineCatalog.CliProxyApi.DefaultPort).Port = 2222;
         await config.WriteConfigAsync();
         var yaml2 = await File.ReadAllTextAsync(config.ConfigPath);
         Assert.Contains("port: 2222", yaml2);

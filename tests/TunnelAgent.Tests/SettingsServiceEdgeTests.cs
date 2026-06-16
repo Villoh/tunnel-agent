@@ -65,11 +65,12 @@ public sealed class SettingsServiceEdgeTests
         var service = new SettingsService(path);
         await service.LoadAsync();
 
-        Assert.Equal(5555, service.Current.Port);
+        Assert.Equal(5555, service.Current.GetOrAddEngine(Core.Engine.EngineCatalog.CliProxyApi.Id, Core.Engine.EngineCatalog.CliProxyApi.DefaultPort).Port);
         Assert.True(service.Current.LaunchAtLogin); // default
         Assert.Equal("system", service.Current.ThemeMode); // default
         var persisted = await File.ReadAllTextAsync(path);
-        Assert.Contains("\"Port\": 5555", persisted);
+        using var doc = JsonDocument.Parse(persisted);
+        Assert.False(doc.RootElement.TryGetProperty("Port", out _));
         Assert.Contains("\"LaunchAtLogin\": true", persisted);
         Assert.Contains("\"ThemeMode\": \"system\"", persisted);
     }

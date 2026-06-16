@@ -161,8 +161,10 @@ public sealed class ConfigService
             _ => "round-robin"
         };
 
+        var runtime = s.GetOrAddEngine(Core.Engine.EngineCatalog.CliProxyApi.Id, Core.Engine.EngineCatalog.CliProxyApi.DefaultPort);
+
         sb.AppendLine("host: \"127.0.0.1\"");
-        sb.AppendLine($"port: {s.Port}");
+        sb.AppendLine($"port: {runtime.Port}");
         sb.AppendLine($"auth-dir: \"{authDir}\"");
 
         AppendApiKeys(sb, await ReadApiKeysFromConfigAsync());

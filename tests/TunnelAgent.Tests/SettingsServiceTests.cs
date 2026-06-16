@@ -1,4 +1,5 @@
 using System.Text.Json;
+using TunnelAgent.Core.Engine;
 using TunnelAgent.Services;
 using Xunit;
 
@@ -15,7 +16,7 @@ public sealed class SettingsServiceTests
 
         await service.LoadAsync();
 
-        Assert.Equal(8317, service.Current.Port);
+        Assert.Equal(8317, CliProxyPort(service.Current));
         Assert.True(File.Exists(path));
     }
 
@@ -29,7 +30,7 @@ public sealed class SettingsServiceTests
 
         await service.LoadAsync();
 
-        Assert.Equal(8317, service.Current.Port);
+        Assert.Equal(8317, CliProxyPort(service.Current));
         var json = await File.ReadAllTextAsync(path);
         Assert.Contains("\"Port\": 8317", json);
         Assert.Contains("\"ThemeMode\": \"system\"", json);
@@ -49,7 +50,7 @@ public sealed class SettingsServiceTests
 
         await service.LoadAsync();
 
-        Assert.Equal(9001, service.Current.Port);
+        Assert.Equal(9001, CliProxyPort(service.Current));
         Assert.False(service.Current.LaunchAtLogin);
     }
 
@@ -63,7 +64,7 @@ public sealed class SettingsServiceTests
 
         await service.LoadAsync();
 
-        Assert.Equal(8317, service.Current.Port);
+        Assert.Equal(8317, CliProxyPort(service.Current));
     }
 
     [Fact]
@@ -73,12 +74,15 @@ public sealed class SettingsServiceTests
         var path = temp.File("settings.json");
         var service = new SettingsService(path);
         await service.LoadAsync();
-        service.Current.Port = 7777;
+        service.Current.GetOrAddEngine(EngineCatalog.CliProxyApi.Id, EngineCatalog.CliProxyApi.DefaultPort).Port = 7777;
 
         await service.SaveImmediateAsync();
 
         var reloaded = new SettingsService(path);
         await reloaded.LoadAsync();
-        Assert.Equal(7777, reloaded.Current.Port);
+        Assert.Equal(7777, CliProxyPort(reloaded.Current));
     }
+
+    private static int CliProxyPort(AppSettings settings) =>
+        settings.GetOrAddEngine(EngineCatalog.CliProxyApi.Id, EngineCatalog.CliProxyApi.DefaultPort).Port;
 }

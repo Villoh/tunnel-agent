@@ -181,6 +181,9 @@ public sealed class SettingsService
         var node = JsonSerializer.Deserialize<Dictionary<string, object?>>(root.GetRawText(), JsonOptions) ?? [];
         node.Remove("Providers");
         node.Remove("PerplexityAccounts");
+        node.Remove("ActiveEngineId");
+        node.Remove("Port");
+        node.Remove("PreferredEngineVersion");
         return JsonSerializer.Serialize(node, JsonOptions);
     }
 }

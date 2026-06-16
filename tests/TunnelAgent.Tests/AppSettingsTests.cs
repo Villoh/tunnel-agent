@@ -13,7 +13,7 @@ public sealed class AppSettingsTests
     {
         var settings = new AppSettings();
 
-        Assert.Equal(8317, settings.Port);
+        Assert.Equal(0, settings.Port);
         Assert.True(settings.LaunchAtLogin);
         Assert.Equal("system", settings.ThemeMode);
         Assert.True(settings.AutoCheckForUpdates);
@@ -69,7 +69,6 @@ public sealed class AppSettingsTests
     {
         var original = new AppSettings
         {
-            Port = 8317,
             Providers =
             [
                 new ProviderSettings

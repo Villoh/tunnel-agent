@@ -453,10 +453,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
             if (runtime.Port == value) return;
             runtime.Port = value;
             if (string.Equals(FocusedConfigEngineId, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase))
-            {
-                _settings.Current.Port = value;
                 ConfigureLogsService(value);
-            }
             _settings.Save();
             OnPropertyChanged();
             OnPropertyChanged(nameof(EditablePort));
@@ -668,8 +665,6 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         var runtime = _settings.Current.GetOrAddEngine(FocusedConfigEngineId, FocusedConfigEngine.Definition.DefaultPort);
         var latestTag = FocusedConfigEngine.LatestVersion ?? EngineReleases.FirstOrDefault(r => !r.IsPrerelease)?.TagName;
         runtime.PreferredVersion = VersionsEqual(value.TagName, latestTag) ? string.Empty : value.TagName;
-        if (string.Equals(FocusedConfigEngineId, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase))
-            _settings.Current.PreferredEngineVersion = runtime.PreferredVersion;
         _settings.Save();
     }
 

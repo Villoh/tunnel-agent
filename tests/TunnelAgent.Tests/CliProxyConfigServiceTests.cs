@@ -12,7 +12,7 @@ public sealed class ConfigServiceTests
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
         await settings.LoadAsync();
-        settings.Current.Port = 9999;
+        settings.Current.GetOrAddEngine(TunnelAgent.Core.Engine.EngineCatalog.CliProxyApi.Id, TunnelAgent.Core.Engine.EngineCatalog.CliProxyApi.DefaultPort).Port = 9999;
         var authDir = temp.File("auth");
         var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir);
 
