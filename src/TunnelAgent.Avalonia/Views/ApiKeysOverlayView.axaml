@@ -64,7 +64,8 @@
                             <TextBox Grid.Column="0" Classes="app"
                                      PasswordChar="{Binding ShowApiKeyDraft, Converter={StaticResource SecretPasswordChar}}"
                                      Watermark="sk-..."
-                                     Text="{Binding ApiKeyDraft, Mode=TwoWay}" />
+                                     Text="{Binding ApiKeyDraft, Mode=TwoWay}"
+                                     KeyDown="OnApiKeyDraftKeyDown" />
                             <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0"
                                     ToolTip.Tip="Show/hide key"
                                     Command="{Binding ToggleApiKeyDraftVisibilityCommand}">

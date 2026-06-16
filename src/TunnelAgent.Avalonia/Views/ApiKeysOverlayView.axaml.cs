@@ -29,4 +29,13 @@ public partial class ApiKeysOverlayView : UserControl
             vm.DismissApiKeysCommand.Execute(null);
         }
     }
+
+    private void OnApiKeyDraftKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter || DataContext is not MainWindowViewModel vm) return;
+
+        e.Handled = true;
+        if (vm.AddApiKeyCommand.CanExecute(null))
+            vm.AddApiKeyCommand.Execute(null);
+    }
 }
