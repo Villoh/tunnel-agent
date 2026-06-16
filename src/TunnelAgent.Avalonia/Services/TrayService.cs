@@ -42,7 +42,7 @@ public sealed class TrayService : IDisposable
         _window = window;
         _viewModel = viewModel;
 
-        _showUsageItem = CreateItem("Show Usage…", (_, _) => TogglePopup());
+        _showUsageItem = CreateItem("Show Usage", (_, _) => TogglePopup());
         _showHideItem = CreateItem("Hide Window", (_, _) => ToggleWindow());
 
         _cliProxyStatusItem = CreateItem("Server: Stopped", null);
@@ -89,7 +89,7 @@ public sealed class TrayService : IDisposable
                 new NativeMenuItem { Header = "CLIProxyAPI", Menu = cliProxyMenu },
                 new NativeMenuItem { Header = "Perplexity", Menu = perplexityMenu },
                 new NativeMenuItemSeparator(),
-                CreateItem("Configuration…", (_, _) => ShowConfiguration()),
+                CreateItem("Configuration", (_, _) => ShowConfiguration()),
                 CreateItem("Open Auth Folder", (_, _) => _viewModel.OpenAuthFolder()),
                 CreateItem("Open Settings Folder", (_, _) => _viewModel.OpenSettingsFolder()),
                 new NativeMenuItemSeparator(),
