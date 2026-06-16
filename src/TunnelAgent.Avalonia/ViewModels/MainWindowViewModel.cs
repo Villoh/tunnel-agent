@@ -141,6 +141,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     [ObservableProperty] private AppUpdateState _appUpdateState = AppUpdateState.Idle;
     [ObservableProperty] private string? _appUpdateNewVersion;
     [ObservableProperty] private bool _showUpdateToast;
+    [ObservableProperty] private string _updateToastEngineId = "";
+    [ObservableProperty] private string _updateToastText = "";
     [ObservableProperty] private bool _showNoUpdateToast;
     [ObservableProperty] private bool _showAppNoUpdateToast;
     [ObservableProperty] private bool _endpointCopied;
@@ -905,6 +907,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
                             _ = _engineRegistry.Get(engine.Definition.Id).DownloadAndInstallAsync();
                         else
                         {
+                            UpdateToastEngineId = engine.Definition.Id;
+                            UpdateToastText = $"{engine.Definition.DisplayName} {engine.LatestVersion} is ready to install.";
                             ShowUpdateToast = true;
                             _ = Task.Delay(8000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowUpdateToast = false));
                         }
@@ -2270,32 +2274,43 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     private async Task UpdateEngine()
     {
         if (!FocusedConfigEngine.UpdateAvailable) return;
-        await InstallEngineVersionAsync(null);
+        await InstallEngineVersionAsync(null, FocusedConfigEngineId);
+    }
+
+    [RelayCommand]
+    private async Task UpdateToastEngine()
+    {
+        var engineId = string.IsNullOrWhiteSpace(UpdateToastEngineId) ? FocusedConfigEngineId : UpdateToastEngineId;
+        var engine = _engineRegistry.Get(engineId);
+        if (!engine.UpdateAvailable) return;
+        await InstallEngineVersionAsync(null, engineId);
     }
 
     [RelayCommand]
     private async Task InstallSelectedEngine()
     {
         if (SelectedEngineRelease is null || !CanInstallSelectedEngine) return;
-        await InstallEngineVersionAsync(SelectedEngineRelease.TagName);
+        await InstallEngineVersionAsync(SelectedEngineRelease.TagName, FocusedConfigEngineId);
     }
 
-    private async Task InstallEngineVersionAsync(string? version)
+    private async Task InstallEngineVersionAsync(string? version, string engineId)
     {
-        // Stay on correct config section for the active engine
-        SelectedSection = string.Equals(FocusedConfigEngineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase)
+        var engine = _engineRegistry.Get(engineId);
+
+        // Stay on correct config section for the engine being updated.
+        SelectedSection = string.Equals(engineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase)
             ? SectionKey.ConfigPerplexity
             : SectionKey.ConfigCliProxy;
         ShowUpdateToast = false;
-        var requestedVersion = string.IsNullOrWhiteSpace(version) ? FocusedConfigEngine.LatestVersion : version;
-        if (!string.IsNullOrWhiteSpace(requestedVersion) && !VersionsEqual(requestedVersion, FocusedConfigEngine.LatestVersion))
-            _suppressAutoUpdateForEngineId = FocusedConfigEngineId;
-        try { await FocusedConfigEngine.DownloadAndInstallAsync(requestedVersion); }
+        var requestedVersion = string.IsNullOrWhiteSpace(version) ? engine.LatestVersion : version;
+        if (!string.IsNullOrWhiteSpace(requestedVersion) && !VersionsEqual(requestedVersion, engine.LatestVersion))
+            _suppressAutoUpdateForEngineId = engineId;
+        try { await engine.DownloadAndInstallAsync(requestedVersion); }
         catch { return; }
         ConfigHasBadge = false;
-        _engineUpdateToastShown[FocusedConfigEngineId] = false;
+        _engineUpdateToastShown[engineId] = false;
         ShowUpdateSuccess = true;
-        var isPerplexity = string.Equals(FocusedConfigEngineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase);
+        var isPerplexity = string.Equals(engineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase);
         if (isPerplexity) ShowPerplexityUpdateSuccess = true;
         else ShowCliProxyUpdateSuccess = true;
         _ = Task.Delay(4000).ContinueWith(_ => Dispatcher.UIThread.Post(() =>

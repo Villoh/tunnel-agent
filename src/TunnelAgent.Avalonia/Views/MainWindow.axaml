@@ -711,10 +711,10 @@
                 <StackPanel Grid.Column="0" Spacing="2">
                     <TextBlock Classes="row-label" Text="Engine update available"/>
                     <TextBlock Classes="row-desc"
-                               Text="{Binding LatestVersion, StringFormat='CLIProxyAPI {0} is ready to install.'}" />
+                               Text="{Binding UpdateToastText}" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="12,0,0,0" VerticalAlignment="Center">
-                    <Button Classes="app primary" Content="Update" Command="{Binding UpdateEngineCommand}" />
+                    <Button Classes="app primary" Content="Update" Command="{Binding UpdateToastEngineCommand}" />
                     <Button Classes="app" Content="Dismiss" Command="{Binding DismissToastCommand}" />
                 </StackPanel>
             </Grid>
