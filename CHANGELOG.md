@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.2] - 2026-06-16
+
+### Fixed
+
+- **App update toast dismiss button** (`MainWindowViewModel`): dismissing the "Tunnel Agent update available" toast now refreshes the computed visibility state immediately, so the toast hides when **Dismiss** is clicked.
+
+- **Update toast stacking** (`MainWindow.axaml`): Tunnel Agent and engine update toasts now share the same bottom-center stack and width, so simultaneous update notices no longer overlap or appear misaligned.
+
 ## [0.6.1] - 2026-06-16
 
 ### Changed
@@ -754,7 +762,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.6.2...HEAD
+[0.6.2]: https://github.com/Villoh/tunnel-agent/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/Villoh/tunnel-agent/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Villoh/tunnel-agent/compare/v0.5.10...v0.6.0
 [0.5.10]: https://github.com/Villoh/tunnel-agent/compare/v0.5.9...v0.5.10

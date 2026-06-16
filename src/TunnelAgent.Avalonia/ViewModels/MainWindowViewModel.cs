@@ -2452,6 +2452,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         }
     }
 
+    partial void OnAppUpdateDismissedChanged(bool value) => OnPropertyChanged(nameof(AppUpdateAvailable));
+
     [RelayCommand]
     private void DismissAppUpdate() => AppUpdateDismissed = true;
 

@@ -669,31 +669,52 @@
                         IsVisible="{Binding ShowAgentConfigDialog}"
                         ZIndex="50" />
 
-        <!-- App self-update toast -->
-        <Border IsVisible="{Binding AppUpdateAvailable}"
-                Background="{DynamicResource CardBgBrush}"
-                BorderBrush="{DynamicResource CardBorderBrush}"
-                BorderThickness="1"
-                CornerRadius="10"
-                Padding="14,10"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Bottom"
-                Margin="0,0,0,60"
-                MaxWidth="400"
-                ZIndex="50">
-            <Grid ColumnDefinitions="*,Auto">
-                <StackPanel Grid.Column="0" Spacing="2">
-                    <TextBlock Classes="row-label" Text="Tunnel Agent update available"/>
-                    <TextBlock Classes="row-desc"
-                               Text="{Binding AppUpdateNewVersion, StringFormat='Version {0} is ready to download.'}" />
-                </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="12,0,0,0" VerticalAlignment="Center">
-                    <Button Classes="app primary" Content="Download" Command="{Binding DownloadAppUpdateCommand}" />
-                    <Button Classes="app" Content="Dismiss" Command="{Binding DismissAppUpdateCommand}" />
-                </StackPanel>
-            </Grid>
-        </Border>
+        <!-- Update toasts -->
+        <StackPanel HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,0,20"
+                    Spacing="8"
+                    ZIndex="50">
+            <Border IsVisible="{Binding AppUpdateAvailable}"
+                    Background="{DynamicResource CardBgBrush}"
+                    BorderBrush="{DynamicResource CardBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Padding="14,10"
+                    Width="400">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Grid.Column="0" Spacing="2">
+                        <TextBlock Classes="row-label" Text="Tunnel Agent update available"/>
+                        <TextBlock Classes="row-desc"
+                                   Text="{Binding AppUpdateNewVersion, StringFormat='Version {0} is ready to download.'}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="12,0,0,0" VerticalAlignment="Center">
+                        <Button Classes="app primary" Content="Download" Command="{Binding DownloadAppUpdateCommand}" />
+                        <Button Classes="app" Content="Dismiss" Command="{Binding DismissAppUpdateCommand}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
 
+            <Border IsVisible="{Binding ShowUpdateToast}"
+                    Background="{DynamicResource CardBgBrush}"
+                    BorderBrush="{DynamicResource CardBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Padding="14,10"
+                    Width="400">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Grid.Column="0" Spacing="2">
+                        <TextBlock Classes="row-label" Text="Engine update available"/>
+                        <TextBlock Classes="row-desc"
+                                   Text="{Binding UpdateToastText}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="12,0,0,0" VerticalAlignment="Center">
+                        <Button Classes="app primary" Content="Update" Command="{Binding UpdateToastEngineCommand}" />
+                        <Button Classes="app" Content="Dismiss" Command="{Binding DismissToastCommand}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </StackPanel>
 
         <!-- Management key repaired toast -->
         <Border IsVisible="{Binding ShowManagementKeyRepairedToast}" Classes="card" MaxWidth="400"
@@ -709,30 +730,6 @@
             </Grid>
         </Border>
 
-        <!-- Engine update toast overlay -->
-        <Border IsVisible="{Binding ShowUpdateToast}"
-                Background="{DynamicResource CardBgBrush}"
-                BorderBrush="{DynamicResource CardBorderBrush}"
-                BorderThickness="1"
-                CornerRadius="10"
-                Padding="14,10"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Bottom"
-                Margin="0,0,0,20"
-                MaxWidth="380"
-                ZIndex="50">
-            <Grid ColumnDefinitions="*,Auto">
-                <StackPanel Grid.Column="0" Spacing="2">
-                    <TextBlock Classes="row-label" Text="Engine update available"/>
-                    <TextBlock Classes="row-desc"
-                               Text="{Binding UpdateToastText}" />
-                </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="12,0,0,0" VerticalAlignment="Center">
-                    <Button Classes="app primary" Content="Update" Command="{Binding UpdateToastEngineCommand}" />
-                    <Button Classes="app" Content="Dismiss" Command="{Binding DismissToastCommand}" />
-                </StackPanel>
-            </Grid>
-        </Border>
         </Panel>
     </Border>
 </Window>
