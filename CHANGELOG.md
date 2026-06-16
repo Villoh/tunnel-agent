@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Engine update toast follows detected engine** (`MainWindow`, `MainWindowViewModel`): the toast now captures the engine that raised the update notification, so switching between CLIProxyAPI and Perplexity no longer changes the version text or updates the wrong engine.
 
+- **CLIProxyAPI management key auto-repair** (`LogsService`, `ConfigService`, `MainWindow`, `MainWindowViewModel`): when the management API rejects Tunnel Agent's key with 401/403, Tunnel Agent now rewrites `remote-management.secret-key` from `ManagementKey`, restarts CLIProxyAPI if it is running, and shows a short repaired toast.
+
 ## [0.6.0] - 2026-06-11
 
 ### Added

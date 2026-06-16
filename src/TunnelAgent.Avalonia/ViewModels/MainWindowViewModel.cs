@@ -69,6 +69,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     public LogsViewModel Logs { get; } = new();
     private bool _logsInitialLoadPending;
     private bool _isWindowVisibleForLogs = true;
+    private bool _managementKeyRepairAttempted;
     private bool _disposed;
 
     public static IReadOnlyList<int> LogsRefreshIntervalOptions { get; } = [2, 5, 10, 30];
@@ -145,6 +146,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     [ObservableProperty] private string _updateToastText = "";
     [ObservableProperty] private bool _showNoUpdateToast;
     [ObservableProperty] private bool _showAppNoUpdateToast;
+    [ObservableProperty] private bool _showManagementKeyRepairedToast;
     [ObservableProperty] private bool _endpointCopied;
     [ObservableProperty] private bool _showUpdateSuccess;
     [ObservableProperty] private bool _showCliProxyUpdateSuccess;
@@ -291,6 +293,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
                 PopulateSelectableModels();
         };
         _modelFetch = new TunnelAgent.Services.ModelFetchService(settings);
+        _logs.ManagementKeyRejected += OnManagementKeyRejected;
         ConfigureLogsService();
 
         foreach (var engine in _engineRegistry.Engines)
@@ -2466,6 +2469,31 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         _appUpdate.ApplyAndRestart();
     }
 
+    private void OnManagementKeyRejected()
+    {
+        if (_managementKeyRepairAttempted) return;
+        _managementKeyRepairAttempted = true;
+        _ = RepairManagementKeyAsync();
+    }
+
+    private async Task RepairManagementKeyAsync()
+    {
+        await _configService.WriteConfigAsync(forceManagementKey: true);
+        if (CliProxyEngine.State is EngineState.Running or EngineState.Starting)
+        {
+            await CliProxyEngine.StopAsync();
+            await CliProxyEngine.StartAsync();
+            ConfigureLogsService(CliProxyEngine.Port);
+            _logs.SetManagementApiAvailable(true);
+        }
+
+        ShowManagementKeyRepairedToast = true;
+        _ = Task.Delay(4000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowManagementKeyRepairedToast = false));
+    }
+
+    [RelayCommand]
+    private void DismissManagementKeyRepairedToast() => ShowManagementKeyRepairedToast = false;
+
     public async ValueTask DisposeAsync()
     {
         if (_disposed) return;
@@ -2488,6 +2516,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         _logs.EntriesLoaded -= OnLogEntriesLoaded;
         _logs.RawLinesLoaded -= OnRawLogLinesLoaded;
         _logs.Cleared -= OnLogsCleared;
+        _logs.ManagementKeyRejected -= OnManagementKeyRejected;
 
         _logs.Dispose();
         _catalog.Dispose();

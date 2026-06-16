@@ -695,6 +695,20 @@
         </Border>
 
 
+        <!-- Management key repaired toast -->
+        <Border IsVisible="{Binding ShowManagementKeyRepairedToast}" Classes="card" MaxWidth="400"
+                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,50,20,0" Padding="14,10" ZIndex="50">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Text="CLIProxyAPI management key repaired and applied."
+                           TextWrapping="Wrap" FontSize="12" VerticalAlignment="Center"
+                           Foreground="{DynamicResource FgBrush}" MaxWidth="330" />
+                <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0" VerticalAlignment="Top"
+                        Command="{Binding DismissManagementKeyRepairedToastCommand}">
+                    <lucide:PackIconLucide Kind="X" Width="12" Height="12" Foreground="{DynamicResource FgMutedBrush}" />
+                </Button>
+            </Grid>
+        </Border>
+
         <!-- Engine update toast overlay -->
         <Border IsVisible="{Binding ShowUpdateToast}"
                 Background="{DynamicResource CardBgBrush}"

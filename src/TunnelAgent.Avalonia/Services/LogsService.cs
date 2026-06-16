@@ -46,6 +46,7 @@ public sealed class LogsService : IDisposable
     public event Action<IReadOnlyList<RequestLogEntry>, bool>? EntriesLoaded;
     public event Action<IReadOnlyList<string>, bool>?          RawLinesLoaded;
     public event Action?                                       Cleared;
+    public event Action?                                       ManagementKeyRejected;
 
     public LogsService(string authDirectory)
     {
@@ -207,6 +208,8 @@ public sealed class LogsService : IDisposable
             req.Headers.TryAddWithoutValidation("X-Management-Key", _managementKey);
 
             using var resp = await Http.SendAsync(req, ct);
+            if (resp.StatusCode is System.Net.HttpStatusCode.Unauthorized or System.Net.HttpStatusCode.Forbidden)
+                Dispatcher.UIThread.Post(() => ManagementKeyRejected?.Invoke());
             if (!resp.IsSuccessStatusCode) return false;
 
             var body = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));

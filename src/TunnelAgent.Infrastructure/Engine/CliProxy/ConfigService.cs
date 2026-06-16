@@ -102,11 +102,11 @@ public sealed class ConfigService
     /// <summary>
     /// Writes config from current AppSettings. Must be called before starting the process.
     /// </summary>
-    public async Task WriteConfigAsync()
+    public async Task WriteConfigAsync(bool forceManagementKey = false)
     {
         var s       = _settings.Current;
         var authDir = _authDir.Replace('\\', '/');
-        var yaml    = await BuildYamlAsync(s, authDir);
+        var yaml    = await BuildYamlAsync(s, authDir, forceManagementKey);
 
         Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath)!);
         await File.WriteAllTextAsync(ConfigPath, yaml);
@@ -151,7 +151,7 @@ public sealed class ConfigService
 
     // ── YAML builder ─────────────────────────────────────────────────────────
 
-    private async Task<string> BuildYamlAsync(AppSettings s, string authDir)
+    private async Task<string> BuildYamlAsync(AppSettings s, string authDir, bool forceManagementKey)
     {
         var sb = new StringBuilder();
 
@@ -171,7 +171,7 @@ public sealed class ConfigService
 
         // Preserve existing secret-key from config (CLIProxyAPI bcrypt-hashes it on startup).
         // Only write the plain key from settings if the config has no key yet — same as Quotio.
-        var existingSecretKey = await ReadSecretKeyFromConfigAsync();
+        var existingSecretKey = forceManagementKey ? null : await ReadSecretKeyFromConfigAsync();
         var secretKey = string.IsNullOrWhiteSpace(existingSecretKey) ? s.ManagementKey : existingSecretKey;
 
         sb.Append($"""
