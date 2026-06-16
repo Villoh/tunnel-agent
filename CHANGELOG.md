@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-06-16
+
 ### Changed
 
 - **Tray menu labels simplified** (`Services/TrayService.cs`): removed trailing ellipses from **Show Usage** and **Configuration** for consistency with the rest of the tray menu.
@@ -752,7 +754,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/Villoh/tunnel-agent/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Villoh/tunnel-agent/compare/v0.5.10...v0.6.0
 [0.5.10]: https://github.com/Villoh/tunnel-agent/compare/v0.5.9...v0.5.10
 [0.5.9]: https://github.com/Villoh/tunnel-agent/compare/v0.5.8...v0.5.9
