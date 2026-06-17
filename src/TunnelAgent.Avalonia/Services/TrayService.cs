@@ -205,9 +205,6 @@ public sealed class TrayService : IDisposable
             _popup.Deactivated += OnPopupDeactivated;
         }
 
-        // Always open on the Home (engines) view rather than a provider's quota.
-        _viewModel.TrayHomeSelected = true;
-
         _popup.Show();
         PositionPopup(_popup);
         _popupShownAt = DateTime.UtcNow;
