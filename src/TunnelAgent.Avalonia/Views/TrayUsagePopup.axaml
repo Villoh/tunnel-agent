@@ -72,16 +72,16 @@
                     BorderBrush="{DynamicResource SideBorderBrush}"
                     BorderThickness="0,0,1,0">
               <DockPanel LastChildFill="True">
-                <!-- Settings (bottom) -->
+                <!-- Open app (bottom) -->
                 <Button DockPanel.Dock="Bottom"
                         Classes="rail"
-                        ToolTip.Tip="Configuration"
+                        ToolTip.Tip="Open app"
                         ToolTip.Placement="Right"
                         ToolTip.HorizontalOffset="8"
-                        Click="OnOpenConfig"
+                        Click="OnOpenMainWindow"
                         Margin="0,0,0,8">
                     <Panel Width="34" Height="34">
-                        <lucide:PackIconLucide Kind="Settings" Width="18" Height="18"
+                        <lucide:PackIconLucide Kind="DoorOpen" Width="18" Height="18"
                                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Panel>
                 </Button>
@@ -439,11 +439,11 @@
                         </TextBlock>
                         <Button Grid.Column="1"
                                 Classes="icon"
-                                ToolTip.Tip="Open app"
+                                ToolTip.Tip="Configuration"
                                 ToolTip.Placement="Top"
                                 ToolTip.VerticalOffset="-8"
-                                Click="OnOpenMainWindow">
-                            <lucide:PackIconLucide Kind="DoorOpen" Width="15" Height="15" />
+                                Click="OnOpenConfig">
+                            <lucide:PackIconLucide Kind="Settings" Width="15" Height="15" />
                         </Button>
                     </Grid>
                 </Border>
