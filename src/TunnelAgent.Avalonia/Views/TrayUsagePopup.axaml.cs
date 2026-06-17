@@ -34,7 +34,10 @@ public partial class TrayUsagePopup : Window
 
     private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(MainWindowViewModel.TrayHomeSelected))
+        if (e.PropertyName is nameof(MainWindowViewModel.TrayHomeSelected)
+            or nameof(MainWindowViewModel.TrayUsageAllSelected)
+            or nameof(MainWindowViewModel.SelectedQuotaProvider)
+            or nameof(MainWindowViewModel.QuotaProvidersForRail))
             Dispatcher.UIThread.Post(() => RepositionIndicator(animate: true), DispatcherPriority.Background);
     }
 
@@ -43,9 +46,13 @@ public partial class TrayUsagePopup : Window
     {
         if (_vm is null) return;
 
-        Control target = _vm.TrayHomeSelected ? HomeButton : UsageButton;
+        Control? target = _vm.TrayHomeSelected ? HomeButton
+            : _vm.TrayUsageAllSelected ? UsageButton
+            : _vm.SelectedQuotaProvider is { } p
+                ? ProviderItems.ContainerFromItem(p) as Control
+                : null;
 
-        if (target.Bounds.Height <= 0) return;
+        if (target is null || target.Bounds.Height <= 0) return;
 
         var center = target.TranslatePoint(new Point(0, target.Bounds.Height / 2), RailItems);
         if (center is null) return;
@@ -92,7 +99,14 @@ public partial class TrayUsagePopup : Window
 
     private void OnUsageClick(object? sender, RoutedEventArgs e)
     {
-        if (DataContext is MainWindowViewModel vm) vm.TrayHomeSelected = false;
+        if (DataContext is MainWindowViewModel vm) vm.SelectTrayUsageAllCommand.Execute(null);
+    }
+
+    private void OnRailProviderClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: ProviderViewModel provider }) return;
+        if (DataContext is not MainWindowViewModel vm) return;
+        vm.SelectQuotaProviderCommand.Execute(provider);
     }
 
     private void OnEngineStart(object? sender, RoutedEventArgs e)
