@@ -32,6 +32,7 @@ public sealed record CliProxyApiKeyViewModel(string Value, bool IsDefault)
 
 public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
 {
+    private readonly LocalizationService _localization;
     private readonly SettingsService _settings;
     private readonly EngineRegistryService _engineRegistry;
     private readonly ProviderCatalogService _catalog;
@@ -261,7 +262,14 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         ILaunchAtLoginService? launchAtLogin = null,
         IFolderOpenService? folderOpen = null)
     {
+        _localization = LocalizationService.Instance;
         _settings = settings;
+
+        // Resolve language: saved preference → system language → English fallback.
+        var languageCode = _settings.Current.Language ?? GetSystemLanguageOrEnglish();
+        _localization.SetCulture(languageCode);
+        _selectedLanguage = LocalizationService.SupportedLanguages.FirstOrDefault(l => l.Code == languageCode)
+            ?? LocalizationService.SupportedLanguages[0];
         _engineRegistry = engineRegistry ?? new EngineRegistryService(settings);
         _configService = new ConfigService(settings);
         var engineConfig = _configService;
@@ -351,9 +359,15 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
             _                => 0,
         };
     public string ActiveEngineName => FocusedConfigEngine.Definition.DisplayName;
-    public string ActiveEngineDescription => FocusedConfigEngine.Definition.Description;
+    public string ActiveEngineDescription => FocusedConfigEngine.Definition.Id switch
+    {
+        "cliproxyapi" => _localization.GetString("Provider_cliproxyapi_Description"),
+        "perplexity-webui-scraper" => _localization.GetString("Provider_perplexity-webui-scraper_Description"),
+        _ => FocusedConfigEngine.Definition.Description,
+    };
     public string EndpointUrl => $"http://127.0.0.1:{Port}";
     public string AppVersion { get; } = TunnelAgent.AppVersion.Current;
+    public LocalizationService Localization => _localization;
     public bool IsLaunchAtLoginSupported => _launchAtLogin.IsSupported;
     public int ConnectedProviderCount => Providers.Count(p => p.Connected || p.ActiveAccountCount > 0);
     public IEnumerable<ProviderViewModel> QuotaProviders => Providers.Where(IsQuotaSupportedProvider).Concat(StandaloneQuotaProviders);
@@ -415,12 +429,16 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     public int AgentConfigSelectedCount       => IsAgentConfigBulkMode
         ? Agents.Count(a => a.IsSelectedForConfig && a.Installed)
         : AgentConfigTarget?.Installed == true ? 1 : 0;
-    public string AgentConfigApplyLabel       => IsAgentConfigBulkMode ? $"Apply ({AgentConfigSelectedCount})" : "Apply";
-    public string AgentConfigDialogTitle      => IsAgentConfigBulkMode
-        ? "Configure Agents"
-        : AgentConfigTarget is { } target ? $"Configure {target.Name}" : "Configure Agent";
+    public string AgentConfigApplyLabel => IsAgentConfigBulkMode
+        ? _localization.GetString("AgentConfigOverlay_ApplySelectedButton", AgentConfigSelectedCount)
+        : _localization.GetString("AgentConfigOverlay_ApplyButton");
+    public string AgentConfigDialogTitle => IsAgentConfigBulkMode
+        ? _localization.GetString("AgentConfigOverlay_BulkTitle")
+        : AgentConfigTarget is { } target
+            ? _localization.GetString("AgentConfigOverlay_SingleTitle", target.Name)
+            : _localization.GetString("AgentConfigOverlay_SingleFallbackTitle");
     public string AgentConfigDialogDescription => IsAgentConfigBulkMode
-        ? "Choose installed agents, then apply shared config."
+        ? _localization.GetString("AgentConfigOverlay_BulkDescription")
         : AgentConfigTarget?.Description ?? "";
     public IEnumerable<AvailableModelGroupViewModel> FocusedModelGroups =>
         IsPerplexityEngineSelected ? PerplexityModelGroups : CliProxyModelGroups;
@@ -505,6 +523,27 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     }
 
     public static string[] ThemeModes { get; } = { "system", "light", "dark" };
+
+    public IReadOnlyList<LanguageOption> SupportedLanguages => LocalizationService.SupportedLanguages;
+
+    private LanguageOption _selectedLanguage;
+    public LanguageOption SelectedLanguage
+    {
+        get => _selectedLanguage;
+        set
+        {
+            if (value != null && SetProperty(ref _selectedLanguage, value))
+            {
+                _localization.SetCulture(value.Code);
+                _settings.Current.Language = value.Code;
+                _settings.Save();
+                OnPropertyChanged(nameof(ActiveEngineDescription));
+                OnPropertyChanged(nameof(AgentConfigApplyLabel));
+                OnPropertyChanged(nameof(AgentConfigDialogTitle));
+                OnPropertyChanged(nameof(AgentConfigDialogDescription));
+            }
+        }
+    }
 
     public bool AutoCheckForUpdates
     {
@@ -679,6 +718,30 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         "dark" => "dark",
         _ => "system"
     };
+
+    /// <summary>
+    /// Resolves the system language to a supported culture, falling back to English.
+    /// Tries an exact match first (e.g. es-ES), then a two-letter prefix match (es-* → es-ES).
+    /// </summary>
+    private static string GetSystemLanguageOrEnglish()
+    {
+        var systemCulture = System.Globalization.CultureInfo.CurrentUICulture;
+        var supported = LocalizationService.SupportedLanguages;
+
+        var exactMatch = supported.FirstOrDefault(l =>
+            l.Code.Equals(systemCulture.Name, StringComparison.OrdinalIgnoreCase));
+        if (exactMatch != null)
+            return exactMatch.Code;
+
+        var languagePrefix = systemCulture.TwoLetterISOLanguageName;
+        var prefixMatch = supported.FirstOrDefault(l =>
+            l.Code.StartsWith(languagePrefix + "-", StringComparison.OrdinalIgnoreCase));
+        if (prefixMatch != null)
+            return prefixMatch.Code;
+
+        // Fallback a inglés
+        return "en-US";
+    }
 
     public async Task InitializeAsync()
     {

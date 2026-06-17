@@ -4,6 +4,7 @@
              xmlns:cv="using:TunnelAgent.Converters"
              xmlns:lucide="using:IconPacks.Avalonia.Lucide"
              xmlns:ctrl="using:TunnelAgent.Controls"
+             xmlns:l="using:TunnelAgent.Services"
              x:Class="TunnelAgent.Views.ConfigurationView"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Resources>
@@ -20,9 +21,9 @@
                 <ctrl:SlidingTabBar Margin="0,0,0,16"
                                     SelectedIndex="{Binding ConfigTabIndex}">
                     <ctrl:SlidingTabBar.Tabs>
-                        <ctrl:SlidingTab Header="General"    Command="{Binding SelectConfigGeneralCommand}" />
-                        <ctrl:SlidingTab Header="CLIProxyAPI" Command="{Binding SelectConfigCliProxyCommand}" />
-                        <ctrl:SlidingTab Header="Perplexity" Command="{Binding SelectConfigPerplexityCommand}" />
+                        <ctrl:SlidingTab Header="{l:Loc ConfigView_TabGeneral}"    Command="{Binding SelectConfigGeneralCommand}" />
+                        <ctrl:SlidingTab Header="{l:Loc ConfigView_TabCLIProxyAPI}" Command="{Binding SelectConfigCliProxyCommand}" />
+                        <ctrl:SlidingTab Header="{l:Loc ConfigView_TabPerplexity}" Command="{Binding SelectConfigPerplexityCommand}" />
                     </ctrl:SlidingTabBar.Tabs>
                 </ctrl:SlidingTabBar>
 
@@ -41,29 +42,29 @@
                 <!-- ══ GENERAL ══════════════════════════════════════════ -->
                 <StackPanel IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=ConfigGeneral}">
                     <StackPanel Margin="0,0,0,14">
-                        <TextBlock Classes="page-title" Text="General" />
-                        <TextBlock Classes="page-sub" Text="App appearance and startup." />
+                        <TextBlock Classes="page-title" Text="{l:Loc ConfigView_General_Title}" />
+                        <TextBlock Classes="page-sub" Text="{l:Loc ConfigView_General_Subtitle}" />
                     </StackPanel>
 
-                    <TextBlock Classes="section-label" Text="TUNNEL AGENT"/>
+                    <TextBlock Classes="section-label" Text="{l:Loc ConfigView_General_TunnelAgentSection}"/>
                     <Border Classes="card" Margin="0,0,0,16">
                         <StackPanel>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Tunnel Agent"/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_General_TunnelAgent_Label}"/>
                                     <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,2,0,0">
-                                        <TextBlock Classes="row-desc" Text="{Binding AppVersion, StringFormat='Installed: {0}'}" />
+                                        <TextBlock Classes="row-desc" Text="{l:LocFormat Key=ConfigView_General_TunnelAgent_Installed, Path=AppVersion}" />
                                         <TextBlock Classes="row-desc" Text="→" IsVisible="{Binding AppUpdateAvailable}" />
                                         <TextBlock Classes="row-desc" Foreground="{DynamicResource AccentBrush}"
-                                                   Text="{Binding AppUpdateNewVersion, StringFormat='{}{0} available'}"
+                                                   Text="{l:LocFormat Key=ConfigView_General_TunnelAgent_Available, Path=AppUpdateNewVersion}"
                                                    IsVisible="{Binding AppUpdateAvailable}" />
                                     </StackPanel>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <Button Classes="app" Content="Check"
+                                    <Button Classes="app" Content="{l:Loc ConfigView_General_TunnelAgent_Check}"
                                             Command="{Binding CheckForAppUpdateCommand}"
                                             IsVisible="{Binding !AppUpdateAvailable}" />
-                                    <Button Classes="app primary" Content="Download"
+                                    <Button Classes="app primary" Content="{l:Loc ConfigView_General_TunnelAgent_Download}"
                                             Command="{Binding DownloadAppUpdateCommand}"
                                             IsVisible="{Binding AppUpdateAvailable}" />
                                 </StackPanel>
@@ -75,13 +76,13 @@
                                              Foreground="{DynamicResource AccentBrush}"
                                              Background="{DynamicResource RowDividerBrush}" />
                                 <TextBlock Classes="row-desc" Margin="0,4,0,0"
-                                           Text="{Binding AppUpdateDownloadProgress, StringFormat='Downloading… {0}%'}" />
+                                           Text="{l:LocFormat Key=Toast_Downloading, Path=AppUpdateDownloadProgress}" />
                             </StackPanel>
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Auto-check for app updates"/>
-                                    <TextBlock Classes="row-desc" Text="Check GitHub for a new Tunnel Agent version on startup."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_General_TunnelAgent_AutoCheck_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_General_TunnelAgent_AutoCheck_Description}"/>
                                 </StackPanel>
                                 <ToggleButton Grid.Column="1" Classes="enable-toggle"
                                               IsChecked="{Binding AutoCheckForAppUpdates, Mode=TwoWay}" />
@@ -89,13 +90,13 @@
                         </StackPanel>
                     </Border>
 
-                    <TextBlock Classes="section-label" Text="APP"/>
+                    <TextBlock Classes="section-label" Text="{l:Loc ConfigView_General_AppSection}"/>
                     <Border Classes="card">
                         <StackPanel>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Launch at login"/>
-                                    <TextBlock Classes="row-desc" Text="Start automatically and stay in the system tray."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_General_LaunchAtLogin_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_General_LaunchAtLogin_Description}"/>
                                 </StackPanel>
                                 <ToggleButton Grid.Column="1" Classes="enable-toggle"
                                               IsChecked="{Binding LaunchAtLogin, Mode=TwoWay}"
@@ -104,8 +105,8 @@
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Theme"/>
-                                    <TextBlock Classes="row-desc" Text="Follow system theme or force light/dark mode."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_General_Theme_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_General_Theme_Description}"/>
                                 </StackPanel>
                                 <ComboBox Grid.Column="1" ItemsSource="{Binding ThemeModes}"
                                           SelectedItem="{Binding ThemeMode, Mode=TwoWay}"
@@ -114,8 +115,18 @@
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Hide sensitive information"/>
-                                    <TextBlock Classes="row-desc" Text="Replaces account email addresses with dots to keep them private."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_General_Language_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_General_Language_Description}"/>
+                                </StackPanel>
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding SupportedLanguages}"
+                                          SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}"
+                                          Width="110" Height="26" MinHeight="0" Padding="8,0" VerticalContentAlignment="Center" />
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_General_MaskEmails_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_General_MaskEmails_Description}"/>
                                 </StackPanel>
                                 <ToggleButton Grid.Column="1" Classes="enable-toggle"
                                               IsChecked="{Binding MaskEmails, Mode=TwoWay}" />
@@ -128,38 +139,38 @@
                 <!-- ══ CLIPROXY ══════════════════════════════════════════ -->
                 <StackPanel IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=ConfigCliProxy}">
                     <StackPanel Margin="0,0,0,14">
-                        <TextBlock Classes="page-title" Text="CLIProxyAPI" />
-                        <TextBlock Classes="page-sub" Text="Engine version, network, and update settings." />
+                        <TextBlock Classes="page-title" Text="{l:Loc ConfigView_CLIProxy_Title}" />
+                        <TextBlock Classes="page-sub" Text="{l:Loc ConfigView_CLIProxy_Subtitle}" />
                     </StackPanel>
 
                     <!-- Update success banner -->
                     <Border IsVisible="{Binding ShowCliProxyUpdateSuccess}" Background="{DynamicResource AccentBrush}"
                             CornerRadius="8" Padding="12,8" Margin="0,0,0,8">
-                        <TextBlock Text="{Binding InstalledVersion, StringFormat='Successfully updated to {0}'}"
+                        <TextBlock Text="{l:LocFormat Key=ConfigView_CLIProxy_UpdateSuccess, Path=InstalledVersion}"
                                    Foreground="White" FontSize="12" FontWeight="Medium"/>
                     </Border>
 
-                    <TextBlock Classes="section-label" Text="ENGINE"/>
+                    <TextBlock Classes="section-label" Text="{l:Loc ConfigView_CLIProxy_EngineSection}"/>
                     <Border Classes="card">
                         <StackPanel>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="CLIProxyAPI"/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_Engine_Label}"/>
                                     <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,2,0,0">
                                         <TextBlock Classes="row-desc"
-                                                   Text="{Binding CliProxyInstalledVersion, StringFormat='Installed: {0}'}" />
+                                                   Text="{l:LocFormat Key=ConfigView_CLIProxy_Engine_Installed, Path=CliProxyInstalledVersion}" />
                                         <TextBlock Classes="row-desc" Text="→" IsVisible="{Binding CliProxyUpdateAvailable}" />
                                         <TextBlock Classes="row-desc" Foreground="{DynamicResource AccentBrush}"
-                                                   Text="{Binding CliProxyLatestVersion, StringFormat='{}{0} available'}"
+                                                   Text="{l:LocFormat Key=ConfigView_CLIProxy_Engine_Available, Path=CliProxyLatestVersion}"
                                                    IsVisible="{Binding CliProxyUpdateAvailable}" />
                                     </StackPanel>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <Button Classes="app" Content="Check"
+                                    <Button Classes="app" Content="{l:Loc ConfigView_CLIProxy_Engine_Check}"
                                             Command="{Binding CheckForUpdateCommand}"
                                             IsEnabled="{Binding !IsCheckingForUpdate}"
                                             IsVisible="{Binding !CliProxyUpdateAvailable}" />
-                                    <Button Classes="app primary" Content="Update now"
+                                    <Button Classes="app primary" Content="{l:Loc ConfigView_CLIProxy_Engine_UpdateNow}"
                                             Command="{Binding UpdateEngineCommand}"
                                             IsVisible="{Binding CliProxyUpdateAvailable}" />
                                 </StackPanel>
@@ -167,7 +178,7 @@
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Engine version"/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_EngineVersion_Label}"/>
                                     <TextBlock Classes="row-desc" Text="{Binding SelectedEngineVersionDescription}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
@@ -175,10 +186,10 @@
                                               Cursor="Hand" IsEnabled="{Binding CanSelectEngineRelease}"
                                               Width="150" Height="26" MinHeight="0" Padding="8,0"
                                               VerticalAlignment="Center" VerticalContentAlignment="Center" />
-                                    <Button Classes="app" Content="Reload"
+                                    <Button Classes="app" Content="{l:Loc ConfigView_CLIProxy_EngineVersion_Reload}"
                                             Command="{Binding RefreshEngineReleasesCommand}"
                                             IsEnabled="{Binding CanSelectEngineRelease}" VerticalAlignment="Center" />
-                                    <Button Classes="app primary" Content="Install"
+                                    <Button Classes="app primary" Content="{l:Loc ConfigView_CLIProxy_EngineVersion_Install}"
                                             Command="{Binding InstallSelectedEngineCommand}"
                                             IsEnabled="{Binding CanInstallSelectedEngine}" VerticalAlignment="Center" />
                                 </StackPanel>
@@ -194,8 +205,8 @@
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Package integrity"/>
-                                    <TextBlock Classes="row-desc" Text="Downloads are verified before install."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_Integrity_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_Integrity_Description}"/>
                                     <TextBlock Classes="row-desc" ToolTip.Tip="{Binding InstalledEngineHashFull}">
                                         <Run Text="{Binding InstalledEngineHashLabel}" /><Run Text=": " /><Run Text="{Binding InstalledEngineHashShort}" />
                                     </TextBlock>
@@ -214,8 +225,8 @@
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Auto-start"/>
-                                    <TextBlock Classes="row-desc" Text="Start this engine automatically when the app launches."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_AutoStart_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_AutoStart_Description}"/>
                                 </StackPanel>
                                 <ToggleButton Grid.Column="1" Classes="enable-toggle"
                                               IsChecked="{Binding EngineAutoStart, Mode=TwoWay}" />
@@ -223,8 +234,8 @@
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Auto-check for updates"/>
-                                    <TextBlock Classes="row-desc" Text="Check GitHub for a new engine version on startup."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_AutoCheck_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_AutoCheck_Description}"/>
                                 </StackPanel>
                                 <ToggleButton Grid.Column="1" Classes="enable-toggle"
                                               IsChecked="{Binding AutoCheckForUpdates, Mode=TwoWay}" />
@@ -232,8 +243,8 @@
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Auto-update"/>
-                                    <TextBlock Classes="row-desc" Text="Automatically download and install new engine versions."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_AutoUpdate_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_AutoUpdate_Description}"/>
                                 </StackPanel>
                                 <ToggleButton Grid.Column="1" Classes="enable-toggle"
                                               IsChecked="{Binding AutoUpdate, Mode=TwoWay}"
@@ -242,45 +253,45 @@
                         </StackPanel>
                     </Border>
 
-                    <TextBlock Classes="section-label" Text="SECURITY"/>
+                    <TextBlock Classes="section-label" Text="{l:Loc ConfigView_CLIProxy_SecuritySection}"/>
                     <Border Classes="card">
                         <StackPanel>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Auth files location"/>
-                                    <TextBlock Classes="row-desc" Text="OAuth tokens and custom provider keys are stored in the app auth folder."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_AuthFolder_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_AuthFolder_Description}"/>
                                 </StackPanel>
-                                <Button Grid.Column="1" Classes="app" Content="Open Folder"
+                                <Button Grid.Column="1" Classes="app" Content="{l:Loc ConfigView_CLIProxy_AuthFolder_Open}"
                                         Command="{Binding OpenAuthFolderCommand}" />
                             </Grid>
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="API keys"/>
-                                    <TextBlock Classes="row-desc" Text="Keys accepted by CLIProxyAPI clients. Agent setup uses the default key."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_ApiKeys_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_ApiKeys_Description}"/>
                                 </StackPanel>
-                                <Button Grid.Column="1" Classes="app" Content="Manage"
+                                <Button Grid.Column="1" Classes="app" Content="{l:Loc ConfigView_CLIProxy_ApiKeys_Manage}"
                                         Command="{Binding OpenApiKeysCommand}" />
                             </Grid>
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Reset all credentials"/>
-                                    <TextBlock Classes="row-desc" Text="Backs up and removes Tunnel Agent-managed OAuth tokens and API keys."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_ResetCredentials_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_ResetCredentials_Description}"/>
                                 </StackPanel>
-                                <Button Grid.Column="1" Classes="app danger" Content="Reset"
+                                <Button Grid.Column="1" Classes="app danger" Content="{l:Loc ConfigView_CLIProxy_ResetCredentials_Reset}"
                                         Command="{Binding ResetAllCredentialsCommand}" />
                             </Grid>
                         </StackPanel>
                     </Border>
 
-                    <TextBlock Classes="section-label" Text="NETWORK"/>
+                    <TextBlock Classes="section-label" Text="{l:Loc ConfigView_CLIProxy_NetworkSection}"/>
                     <Border Classes="card">
                         <StackPanel>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Routing strategy"/>
-                                    <TextBlock Classes="row-desc" Text="How requests are distributed across multiple accounts or keys."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_RoutingStrategy_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_RoutingStrategy_Description}"/>
                                 </StackPanel>
                                 <ComboBox Grid.Column="1" ItemsSource="{Binding RoutingStrategies}" Cursor="Hand"
                                           SelectedItem="{Binding RoutingStrategy, Mode=TwoWay}"
@@ -296,11 +307,11 @@
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Listen port"/>
-                                    <TextBlock Classes="row-desc" Text="Localhost only. Restart required to apply."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_ListenPort_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_ListenPort_Description}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                    <Button Classes="app" Content="Reset" Command="{Binding ResetPortCommand}" />
+                                    <Button Classes="app" Content="{l:Loc ConfigView_CLIProxy_ListenPort_Reset}" Command="{Binding ResetPortCommand}" />
                                     <TextBox Classes="app" Text="{Binding EditablePort, Mode=TwoWay}"
                                              Width="70" Height="24" MinHeight="0" Padding="8,0" MaxLength="5"
                                              VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
@@ -309,13 +320,13 @@
                         </StackPanel>
                     </Border>
 
-                    <TextBlock Classes="section-label" Text="LOGS"/>
+                    <TextBlock Classes="section-label" Text="{l:Loc ConfigView_CLIProxy_LogsSection}"/>
                     <Border Classes="card" Margin="0,0,0,16">
                         <StackPanel>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Auto-refresh"/>
-                                    <TextBlock Classes="row-desc" Text="Automatically poll for new log entries in the Logs screen."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_LogsAutoRefresh_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_LogsAutoRefresh_Description}"/>
                                 </StackPanel>
                                 <ToggleButton Grid.Column="1" Classes="enable-toggle"
                                               IsChecked="{Binding LogsAutoRefresh, Mode=TwoWay}" />
@@ -325,8 +336,8 @@
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto"
                                   IsVisible="{Binding LogsAutoRefresh}">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Refresh interval"/>
-                                    <TextBlock Classes="row-desc" Text="How often to check for new entries."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_LogsRefreshInterval_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_LogsRefreshInterval_Description}"/>
                                 </StackPanel>
                                 <ComboBox Grid.Column="1"
                                           ItemsSource="{Binding LogsRefreshIntervalOptions}"
@@ -334,7 +345,7 @@
                                           FontSize="12" MinWidth="110">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate x:DataType="x:Int32">
-                                            <TextBlock Text="{Binding StringFormat='{}{0} seconds'}" />
+                                            <TextBlock Text="{l:LocFormat Key=ConfigView_CLIProxy_LogsRefreshInterval_Seconds, Path=.}" />
                                         </DataTemplate>
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
@@ -346,39 +357,39 @@
                 <!-- ══ PERPLEXITY ══════════════════════════════════════════ -->
                 <StackPanel IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=ConfigPerplexity}">
                     <StackPanel Margin="0,0,0,14">
-                        <TextBlock Classes="page-title" Text="Perplexity" />
-                        <TextBlock Classes="page-sub" Text="Engine version, port, and session settings." />
+                        <TextBlock Classes="page-title" Text="{l:Loc ConfigView_Perplexity_Title}" />
+                        <TextBlock Classes="page-sub" Text="{l:Loc ConfigView_Perplexity_Subtitle}" />
                     </StackPanel>
 
                     <!-- Update success banner -->
                     <Border IsVisible="{Binding ShowPerplexityUpdateSuccess}" Background="{DynamicResource AccentBrush}"
                             CornerRadius="8" Padding="12,8" Margin="0,0,0,8">
-                        <TextBlock Text="{Binding InstalledVersion, StringFormat='Successfully updated to {0}'}"
+                        <TextBlock Text="{l:LocFormat Key=ConfigView_Perplexity_UpdateSuccess, Path=InstalledVersion}"
                                    Foreground="White" FontSize="12" FontWeight="Medium"/>
                     </Border>
 
-                    <TextBlock Classes="section-label" Text="ENGINE"/>
+                    <TextBlock Classes="section-label" Text="{l:Loc ConfigView_CLIProxy_EngineSection}"/>
                     <Border Classes="card">
                         <StackPanel>
                             <!-- Version row -->
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Perplexity WebUI Scraper"/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_Perplexity_Engine_Label}"/>
                                     <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,2,0,0">
                                         <TextBlock Classes="row-desc"
-                                                   Text="{Binding PerplexityInstalledVersion, StringFormat='Installed: {0}'}" />
+                                                   Text="{l:LocFormat Key=ConfigView_Perplexity_Engine_Installed, Path=PerplexityInstalledVersion}" />
                                         <TextBlock Classes="row-desc" Text="→" IsVisible="{Binding PerplexityUpdateAvailable}" />
                                         <TextBlock Classes="row-desc" Foreground="{DynamicResource AccentBrush}"
-                                                   Text="{Binding PerplexityLatestVersion, StringFormat='{}{0} available'}"
+                                                   Text="{l:LocFormat Key=ConfigView_Perplexity_Engine_Available, Path=PerplexityLatestVersion}"
                                                    IsVisible="{Binding PerplexityUpdateAvailable}" />
                                     </StackPanel>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <Button Classes="app" Content="Check"
+                                    <Button Classes="app" Content="{l:Loc ConfigView_Perplexity_Engine_Check}"
                                             Command="{Binding CheckForUpdateCommand}"
                                             IsEnabled="{Binding !IsCheckingForUpdate}"
                                             IsVisible="{Binding !UpdateAvailable}" />
-                                    <Button Classes="app primary" Content="Update now"
+                                    <Button Classes="app primary" Content="{l:Loc ConfigView_Perplexity_Engine_UpdateNow}"
                                             Command="{Binding UpdateEngineCommand}"
                                             IsVisible="{Binding UpdateAvailable}" />
                                 </StackPanel>
@@ -387,7 +398,7 @@
                             <!-- Version selector -->
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Engine version"/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_EngineVersion_Label}"/>
                                     <TextBlock Classes="row-desc" Text="{Binding SelectedEngineVersionDescription}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
@@ -395,10 +406,10 @@
                                               Cursor="Hand" IsEnabled="{Binding CanSelectEngineRelease}"
                                               Width="150" Height="26" MinHeight="0" Padding="8,0"
                                               VerticalAlignment="Center" VerticalContentAlignment="Center" />
-                                    <Button Classes="app" Content="Reload"
+                                    <Button Classes="app" Content="{l:Loc ConfigView_CLIProxy_EngineVersion_Reload}"
                                             Command="{Binding RefreshEngineReleasesCommand}"
                                             IsEnabled="{Binding CanSelectEngineRelease}" VerticalAlignment="Center" />
-                                    <Button Classes="app primary" Content="Install"
+                                    <Button Classes="app primary" Content="{l:Loc ConfigView_CLIProxy_EngineVersion_Install}"
                                             Command="{Binding InstallSelectedEngineCommand}"
                                             IsEnabled="{Binding CanInstallSelectedEngine}" VerticalAlignment="Center" />
                                 </StackPanel>
@@ -416,8 +427,8 @@
                             <!-- Package integrity -->
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Package integrity"/>
-                                    <TextBlock Classes="row-desc" Text="Downloads are verified before install."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_Integrity_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_Integrity_Description}"/>
                                     <TextBlock Classes="row-desc" ToolTip.Tip="{Binding InstalledEngineHashFull}">
                                         <Run Text="{Binding InstalledEngineHashLabel}" /><Run Text=": " /><Run Text="{Binding InstalledEngineHashShort}" />
                                     </TextBlock>
@@ -437,8 +448,8 @@
                             <!-- Auto-start -->
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Auto-start"/>
-                                    <TextBlock Classes="row-desc" Text="Start this engine automatically when the app launches."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_AutoStart_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_AutoStart_Description}"/>
                                 </StackPanel>
                                 <ToggleButton Grid.Column="1" Classes="enable-toggle"
                                               IsChecked="{Binding EngineAutoStart, Mode=TwoWay}" />
@@ -447,8 +458,8 @@
                             <!-- Auto-check -->
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Auto-check for updates"/>
-                                    <TextBlock Classes="row-desc" Text="Check GitHub for a new engine version on startup."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_AutoCheck_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_AutoCheck_Description}"/>
                                 </StackPanel>
                                 <ToggleButton Grid.Column="1" Classes="enable-toggle"
                                               IsChecked="{Binding AutoCheckForUpdates, Mode=TwoWay}" />
@@ -457,8 +468,8 @@
                             <!-- Auto-update -->
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Auto-update"/>
-                                    <TextBlock Classes="row-desc" Text="Automatically download and install new engine versions."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_AutoUpdate_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_AutoUpdate_Description}"/>
                                 </StackPanel>
                                 <ToggleButton Grid.Column="1" Classes="enable-toggle"
                                               IsChecked="{Binding AutoUpdate, Mode=TwoWay}"
@@ -468,39 +479,39 @@
                         </StackPanel>
                     </Border>
 
-                    <TextBlock Classes="section-label" Text="SECURITY"/>
+                    <TextBlock Classes="section-label" Text="{l:Loc ConfigView_CLIProxy_SecuritySection}"/>
                     <Border Classes="card">
                         <StackPanel>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Accounts location"/>
-                                    <TextBlock Classes="row-desc" Text="Session token files are stored in the app settings folder under perplexity-accounts/."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_Perplexity_AccountsFolder_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_Perplexity_AccountsFolder_Description}"/>
                                 </StackPanel>
-                                <Button Grid.Column="1" Classes="app" Content="Open Folder"
+                                <Button Grid.Column="1" Classes="app" Content="{l:Loc ConfigView_Perplexity_AccountsFolder_Open}"
                                         Command="{Binding OpenSettingsFolderCommand}" />
                             </Grid>
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Reset session accounts"/>
-                                    <TextBlock Classes="row-desc" Text="Removes all saved Perplexity WebUI session tokens."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_Perplexity_ResetAccounts_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_Perplexity_ResetAccounts_Description}"/>
                                 </StackPanel>
-                                <Button Grid.Column="1" Classes="app danger" Content="Reset"
+                                <Button Grid.Column="1" Classes="app danger" Content="{l:Loc ConfigView_Perplexity_ResetAccounts_Reset}"
                                         Command="{Binding ResetPerplexityAccountsCommand}" />
                             </Grid>
                         </StackPanel>
                     </Border>
 
-                    <TextBlock Classes="section-label" Text="NETWORK"/>
+                    <TextBlock Classes="section-label" Text="{l:Loc ConfigView_CLIProxy_NetworkSection}"/>
                     <Border Classes="card">
                         <StackPanel>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
-                                    <TextBlock Classes="row-label" Text="Listen port"/>
-                                    <TextBlock Classes="row-desc" Text="Localhost only. Restart required to apply."/>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_Perplexity_ListenPort_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_Perplexity_ListenPort_Description}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                    <Button Classes="app" Content="Reset" Command="{Binding ResetPortCommand}" />
+                                    <Button Classes="app" Content="{l:Loc ConfigView_Perplexity_ListenPort_Reset}" Command="{Binding ResetPortCommand}" />
                                     <TextBox Classes="app" Text="{Binding EditablePort, Mode=TwoWay}"
                                              Width="70" Height="24" MinHeight="0" Padding="8,0" MaxLength="5"
                                              VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
@@ -517,7 +528,7 @@
         <Border IsVisible="{Binding ShowNoUpdateToast}" Classes="card" MaxWidth="400"
                 HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,12,12,0" Padding="14,10" ZIndex="10">
             <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Grid.Column="0" Text="No updates available. You are on the latest version."
+                <TextBlock Grid.Column="0" Text="{l:Loc Toast_NoUpdateAvailable}"
                            TextWrapping="Wrap" FontSize="12" VerticalAlignment="Center"
                            Foreground="{DynamicResource FgBrush}" MaxWidth="330" />
                 <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0" VerticalAlignment="Top"
@@ -531,7 +542,7 @@
         <Border IsVisible="{Binding ShowAppNoUpdateToast}" Classes="card" MaxWidth="400"
                 HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,12,12,0" Padding="14,10" ZIndex="10">
             <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Grid.Column="0" Text="Tunnel Agent is up to date."
+                <TextBlock Grid.Column="0" Text="{l:Loc Toast_AppNoUpdateAvailable}"
                            TextWrapping="Wrap" FontSize="12" VerticalAlignment="Center"
                            Foreground="{DynamicResource FgBrush}" MaxWidth="330" />
                 <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0" VerticalAlignment="Top"

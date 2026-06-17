@@ -2,15 +2,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TunnelAgent.ViewModels"
              xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+             xmlns:l="using:TunnelAgent.Services"
              x:Class="TunnelAgent.Views.ActivityView"
              x:DataType="vm:MainWindowViewModel">
     <StackPanel Spacing="0">
         <Grid Margin="0,0,0,14" ColumnDefinitions="*,Auto">
             <StackPanel>
-                <TextBlock Classes="page-title" Text="Recent Activity" />
-                <TextBlock Classes="page-sub" Text="Requests handled by the local proxy and routed to connected providers." />
+                <TextBlock Classes="page-title" Text="{l:Loc ActivityView_Title}" />
+                <TextBlock Classes="page-sub" Text="{l:Loc ActivityView_Subtitle}" />
             </StackPanel>
-            <Button Grid.Column="1" Classes="app" Content="Clear" VerticalAlignment="Bottom" />
+            <Button Grid.Column="1" Classes="app" Content="{l:Loc ActivityView_ClearButton}" VerticalAlignment="Bottom" />
         </Grid>
 
         <Border Classes="card">

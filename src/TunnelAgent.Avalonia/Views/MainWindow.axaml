@@ -5,11 +5,12 @@
         xmlns:cv="using:TunnelAgent.Converters"
         xmlns:lucide="using:IconPacks.Avalonia.Lucide"
         xmlns:svc="using:TunnelAgent.Services"
+        xmlns:l="using:TunnelAgent.Services"
         xmlns:svg="using:Avalonia.Svg.Skia"
         x:Class="TunnelAgent.Views.MainWindow"
         x:Name="Root"
         x:DataType="vm:MainWindowViewModel"
-        Title="Tunnel Agent"
+        Title="{l:Loc App_Title}"
         Icon="/Assets/logo.ico"
         Width="820" Height="620"
         MinWidth="600" MinHeight="500"
@@ -57,13 +58,13 @@
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8"
                             HorizontalAlignment="Right" VerticalAlignment="Center"
                             Margin="0,0,12,0">
-                    <Button Classes="traffic minimize" ToolTip.Tip="Minimize" Click="OnMinimize">
+                    <Button Classes="traffic minimize" ToolTip.Tip="{l:Loc MainWindow_MinimizeTooltip}" Click="OnMinimize">
                         <lucide:PackIconLucide Kind="Minus" Width="8" Height="8" Foreground="Black" />
                     </Button>
-                    <Button Classes="traffic maximize" ToolTip.Tip="Maximize / Restore" Click="OnMaximizeRestore">
+                    <Button Classes="traffic maximize" ToolTip.Tip="{l:Loc MainWindow_MaximizeTooltip}" Click="OnMaximizeRestore">
                         <lucide:PackIconLucide Kind="Maximize2" Width="8" Height="8" Foreground="Black" />
                     </Button>
-                    <Button Classes="traffic close" ToolTip.Tip="Close" Click="OnClose">
+                    <Button Classes="traffic close" ToolTip.Tip="{l:Loc MainWindow_CloseTooltip}" Click="OnClose">
                         <lucide:PackIconLucide Kind="X" Width="8" Height="8" Foreground="Black" />
                     </Button>
                 </StackPanel>
@@ -104,15 +105,15 @@
                                         <Image Source="/Assets/logo-20.png" Width="16" Height="16"
                                                VerticalAlignment="Center" RenderOptions.BitmapInterpolationMode="HighQuality"/>
                                         <TextBlock FontSize="13" Foreground="{DynamicResource FgBrush}" VerticalAlignment="Center">
-                                            <Run Text="Tunnel" FontWeight="Bold" />
-                                            <Run Text="Agent" />
+                                            <Run Text="{l:Loc Sidebar_Logo_App}" FontWeight="Bold" />
+                                            <Run Text="{l:Loc Sidebar_Logo_Agent}" />
                                         </TextBlock>
                                     </StackPanel>
                                 </Panel>
                                 <!-- Single toggle button with flip animation -->
                                 <Button Grid.Column="1" Classes="icon" Width="24" Height="24"
                                         HorizontalAlignment="Right" VerticalAlignment="Center"
-                                        ToolTip.Tip="Toggle sidebar"
+                                        ToolTip.Tip="{l:Loc Sidebar_ToggleSidebarTooltip}"
                                         Command="{Binding ToggleSidebarCommand}">
                                     <Panel Width="15" Height="15"
                                            RenderTransformOrigin="50%,50%">
@@ -144,7 +145,7 @@
                                                 <DoubleTransition Property="Opacity" Duration="0:0:0.18" Easing="CubicEaseInOut" />
                                             </Transitions>
                                         </Panel.Transitions>
-                                        <TextBlock Text="Providers" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
+                                        <TextBlock Text="{l:Loc Sidebar_Providers}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
                                                    IsVisible="{Binding !IsSidebarCollapsed}"/>
                                         <Border HorizontalAlignment="Right" CornerRadius="999" Background="#14000000" Padding="6,1"
                                                 IsVisible="{Binding !IsSidebarCollapsed}">
@@ -166,7 +167,7 @@
                                                 <DoubleTransition Property="Opacity" Duration="0:0:0.18" Easing="CubicEaseInOut" />
                                             </Transitions>
                                         </Panel.Transitions>
-                                        <TextBlock Text="Quota" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
+                                        <TextBlock Text="{l:Loc Sidebar_Quota}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
                                                    IsVisible="{Binding !IsSidebarCollapsed}"/>
                                         <Border HorizontalAlignment="Right" CornerRadius="999" Background="#14000000" Padding="6,1"
                                                 IsVisible="{Binding !IsSidebarCollapsed}">
@@ -189,7 +190,7 @@
                                                 <DoubleTransition Property="Opacity" Duration="0:0:0.18" Easing="CubicEaseInOut" />
                                             </Transitions>
                                         </Panel.Transitions>
-                                        <TextBlock Text="Agents" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
+                                        <TextBlock Text="{l:Loc Sidebar_Agents}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
                                                    IsVisible="{Binding !IsSidebarCollapsed}"/>
                                         <Border HorizontalAlignment="Right" CornerRadius="999" Background="#14000000" Padding="6,1"
                                                 IsVisible="{Binding !IsSidebarCollapsed}">
@@ -212,7 +213,7 @@
                                                 <DoubleTransition Property="Opacity" Duration="0:0:0.18" Easing="CubicEaseInOut" />
                                             </Transitions>
                                         </Panel.Transitions>
-                                        <TextBlock Text="Logs" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
+                                        <TextBlock Text="{l:Loc Sidebar_Logs}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
                                                    IsVisible="{Binding !IsSidebarCollapsed}"/>
                                     </Panel>
                                 </Grid>
@@ -230,7 +231,7 @@
                                                 <DoubleTransition Property="Opacity" Duration="0:0:0.18" Easing="CubicEaseInOut" />
                                             </Transitions>
                                         </Panel.Transitions>
-                                        <TextBlock Text="Configuration" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
+                                        <TextBlock Text="{l:Loc Sidebar_Configuration}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
                                                    IsVisible="{Binding !IsSidebarCollapsed}"/>
                                         <Grid Classes="status-indicator" HorizontalAlignment="Right" VerticalAlignment="Center"
                                               Margin="0,0,1,0"
@@ -250,7 +251,7 @@
                                         <DoubleTransition Property="Opacity" Duration="0:0:0.18" Easing="CubicEaseInOut" />
                                     </Transitions>
                                 </Panel.Transitions>
-                                <TextBlock Classes="section-label" Text="STATUS" Margin="10,0,10,0"
+                                <TextBlock Classes="section-label" Text="{l:Loc Sidebar_Status}" Margin="10,0,10,0"
                                            IsVisible="{Binding !IsSidebarCollapsed}"/>
                             </Panel>
 
@@ -269,7 +270,7 @@
                                             <DoubleTransition Property="Opacity" Duration="0:0:0.18" Easing="CubicEaseInOut" />
                                         </Transitions>
                                     </Panel.Transitions>
-                                    <TextBlock Text="CLIProxyAPI" Margin="8,0,0,0" FontSize="12" Foreground="{DynamicResource FgBrush}"
+                                    <TextBlock Text="{l:Loc Sidebar_CLIProxyAPI}" Margin="8,0,0,0" FontSize="12" Foreground="{DynamicResource FgBrush}"
                                                VerticalAlignment="Center"
                                                IsVisible="{Binding !IsSidebarCollapsed}" />
                                 </Panel>
@@ -290,7 +291,7 @@
                                             <DoubleTransition Property="Opacity" Duration="0:0:0.18" Easing="CubicEaseInOut" />
                                         </Transitions>
                                     </Panel.Transitions>
-                                    <TextBlock Text="Perplexity" Margin="8,0,0,0" FontSize="12" Foreground="{DynamicResource FgBrush}"
+                                    <TextBlock Text="{l:Loc Sidebar_Perplexity}" Margin="8,0,0,0" FontSize="12" Foreground="{DynamicResource FgBrush}"
                                                VerticalAlignment="Center"
                                                IsVisible="{Binding !IsSidebarCollapsed}" />
                                 </Panel>
@@ -311,17 +312,17 @@
                                         </Transitions>
                                     </Grid.Transitions>
                                     <StackPanel Grid.Column="0" Spacing="2">
-                                        <TextBlock Text="{Binding AppVersion, StringFormat='v{0} · MIT'}" FontSize="11"
+                                        <TextBlock Text="{l:LocFormat Key=Sidebar_Version, Path=AppVersion}" FontSize="11"
                                                    Foreground="{DynamicResource FgFaintBrush}" />
                                         <Button Classes="link" Command="{Binding OpenIssueUrlCommand}"
                                                 HorizontalAlignment="Left">
-                                            <TextBlock Text="Report an issue" FontSize="11"
+                                            <TextBlock Text="{l:Loc Sidebar_ReportIssue}" FontSize="11"
                                                        Foreground="{DynamicResource AccentBrush}"
                                                        Cursor="Hand" />
                                         </Button>
                                     </StackPanel>
                                     <Button Grid.Column="1" Classes="icon" HorizontalAlignment="Right"
-                                            ToolTip.Tip="Toggle light / dark mode"
+                                            ToolTip.Tip="{l:Loc Sidebar_ToggleThemeTooltip}"
                                             Command="{Binding ToggleThemeCommand}">
                                         <Grid Width="18" Height="18" Classes="theme-icon" HorizontalAlignment="Center" VerticalAlignment="Center">
                                             <lucide:PackIconLucide Kind="Moon" Width="15" Height="15"
@@ -337,7 +338,7 @@
                                 </Grid>
                                 <Button Classes="icon" HorizontalAlignment="Center" VerticalAlignment="Center"
                                         IsVisible="{Binding IsSidebarCollapsed}"
-                                        ToolTip.Tip="Toggle light / dark mode"
+                                        ToolTip.Tip="{l:Loc Sidebar_ToggleThemeTooltip}"
                                         Command="{Binding ToggleThemeCommand}">
                                     <Grid Width="18" Height="18" Classes="theme-icon" HorizontalAlignment="Center" VerticalAlignment="Center">
                                         <lucide:PackIconLucide Kind="Moon" Width="15" Height="15"
@@ -377,13 +378,13 @@
                     VerticalAlignment="Center"
                     Padding="24">
                 <StackPanel Spacing="14">
-                    <TextBlock Classes="row-label" FontSize="15" Text="Delete log file?" />
+                    <TextBlock Classes="row-label" FontSize="15" Text="{l:Loc Dialog_DeleteLogFile_Title}" />
                     <TextBlock Classes="row-desc" TextWrapping="Wrap"
-                               Text="This permanently deletes the CLIProxyAPI log file on disk. The view will be cleared and new entries will appear as the proxy runs." />
+                               Text="{l:Loc Dialog_DeleteLogFile_Description}" />
                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
-                        <Button Classes="app" Content="Cancel"
+                        <Button Classes="app" Content="{l:Loc Dialog_DeleteLogFile_Cancel}"
                                 Command="{Binding DismissDeleteLogsConfirmCommand}" />
-                        <Button Classes="app danger" Content="Delete log file"
+                        <Button Classes="app danger" Content="{l:Loc Dialog_DeleteLogFile_Delete}"
                                 Command="{Binding ConfirmDeleteLogsCommand}" />
                     </StackPanel>
                 </StackPanel>
@@ -402,13 +403,13 @@
                     VerticalAlignment="Center"
                     Padding="24">
                 <StackPanel Spacing="14">
-                    <TextBlock Classes="row-label" FontSize="15" Text="Reset all credentials?" />
+                    <TextBlock Classes="row-label" FontSize="15" Text="{l:Loc Dialog_ResetCredentials_Title}" />
                     <TextBlock Classes="row-desc" TextWrapping="Wrap"
-                               Text="This backs up and removes Tunnel Agent-managed OAuth tokens and custom provider keys. Other JSON files in the auth folder are preserved." />
+                               Text="{l:Loc Dialog_ResetCredentials_Description}" />
                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
-                        <Button Classes="app" Content="Cancel"
+                        <Button Classes="app" Content="{l:Loc Dialog_ResetCredentials_Cancel}"
                                 Command="{Binding DismissResetCredentialsDialogCommand}" />
-                        <Button Classes="app danger" Content="Reset credentials"
+                        <Button Classes="app danger" Content="{l:Loc Dialog_ResetCredentials_Reset}"
                                 Command="{Binding ConfirmResetCredentialsCommand}" />
                     </StackPanel>
                 </StackPanel>
@@ -424,32 +425,32 @@
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50">
             <Border Classes="card" MaxWidth="420" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24">
                 <StackPanel Spacing="14">
-                    <TextBlock Classes="row-label" FontSize="15" Text="{Binding AddAccountTarget.Name, StringFormat='Add account — {0}'}" />
+                    <TextBlock Classes="row-label" FontSize="15" Text="{l:LocFormat Key=Dialog_AddAccount_Title, Path=AddAccountTarget.Name}" />
                     <StackPanel Spacing="4" IsVisible="{Binding AddAccountTarget.IsOAuth, Converter={StaticResource InvertBool}, FallbackValue=False}">
-                        <TextBlock Classes="row-desc" Text="Base URL" />
-                        <TextBox x:Name="BaseUrlBox" Classes="app" Watermark="https://api.example.com/v1" />
+                        <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddAccount_BaseUrlLabel}" />
+                        <TextBox x:Name="BaseUrlBox" Classes="app" Watermark="{l:Loc Dialog_AddAccount_BaseUrlPlaceholder}" />
                     </StackPanel>
                     <StackPanel Spacing="4">
-                        <TextBlock Classes="row-desc" Text="API Key" />
+                        <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddAccount_ApiKeyLabel}" />
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBox Grid.Column="0" x:Name="ApiKeyBox" Classes="app"
                                      PasswordChar="{Binding ShowAddAccountApiKey, Converter={StaticResource SecretPasswordChar}}"
-                                     Watermark="sk-..."
+                                     Watermark="{l:Loc Dialog_AddAccount_ApiKeyPlaceholder}"
                                      Text="{Binding AddAccountApiKeyDraft, Mode=TwoWay}" />
                             <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0"
-                                    ToolTip.Tip="Show/hide key"
+                                    ToolTip.Tip="{l:Loc Dialog_AddAccount_ShowHideTooltip}"
                                     Command="{Binding ToggleAddAccountApiKeyVisibilityCommand}">
                                 <lucide:PackIconLucide Kind="{Binding ShowAddAccountApiKey, Converter={StaticResource EyeIcon}}" Width="14" Height="14" />
                             </Button>
                         </Grid>
                     </StackPanel>
                     <StackPanel Spacing="4">
-                        <TextBlock Classes="row-desc" Text="Label (optional)" />
-                        <TextBox x:Name="LabelBox" Classes="app" Watermark="My account" />
+                        <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddAccount_LabelLabel}" />
+                        <TextBox x:Name="LabelBox" Classes="app" Watermark="{l:Loc Dialog_AddAccount_LabelPlaceholder}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
-                        <Button Classes="app" Content="Cancel" Command="{Binding DismissAddAccountDialogCommand}" />
-                        <Button Classes="app primary" Content="Add Account" Click="OnConfirmAddAccount" />
+                        <Button Classes="app" Content="{l:Loc Dialog_AddAccount_Cancel}" Command="{Binding DismissAddAccountDialogCommand}" />
+                        <Button Classes="app primary" Content="{l:Loc Dialog_AddAccount_Add}" Click="OnConfirmAddAccount" />
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -464,39 +465,39 @@
                     PointerPressed="OnDialogCardPressed">
                 <Grid>
                     <StackPanel Spacing="14" IsVisible="{Binding IsPerplexityTokenGenerationMode, Converter={StaticResource InvertBool}}">
-                        <TextBlock Classes="row-label" FontSize="15" Text="Add Perplexity account" />
+                        <TextBlock Classes="row-label" FontSize="15" Text="{l:Loc Dialog_AddPerplexity_Title}" />
                         <StackPanel Spacing="4">
-                            <TextBlock Classes="row-desc" Text="Label (optional)" />
-                            <TextBox x:Name="PerplexityLabelBox" Classes="app" Watermark="Primary"
+                            <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddPerplexity_LabelLabel}" />
+                            <TextBox x:Name="PerplexityLabelBox" Classes="app" Watermark="{l:Loc Dialog_AddPerplexity_LabelPlaceholder}"
                                      KeyDown="OnPerplexityAccountInputKeyDown" />
                         </StackPanel>
                         <StackPanel Spacing="4">
-                            <TextBlock Classes="row-desc" Text="Session token" />
+                            <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddPerplexity_TokenLabel}" />
                             <Grid ColumnDefinitions="*,Auto">
                                 <TextBox Grid.Column="0" x:Name="PerplexitySessionTokenBox" Classes="app"
                                          PasswordChar="{Binding ShowPerplexitySessionToken, Converter={StaticResource SecretPasswordChar}}"
-                                         Watermark="pplx-session-token"
+                                         Watermark="{l:Loc Dialog_AddPerplexity_TokenPlaceholder}"
                                          Text="{Binding PerplexitySessionTokenDraft, Mode=TwoWay}"
                                          KeyDown="OnPerplexityAccountInputKeyDown" />
                                 <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0"
-                                        ToolTip.Tip="Show/hide token"
+                                        ToolTip.Tip="{l:Loc Dialog_AddPerplexity_ShowHideTooltip}"
                                         Command="{Binding TogglePerplexitySessionTokenVisibilityCommand}">
                                     <lucide:PackIconLucide Kind="{Binding ShowPerplexitySessionToken, Converter={StaticResource EyeIcon}}" Width="14" Height="14" />
                                 </Button>
                             </Grid>
                         </StackPanel>
                         <TextBlock Classes="row-desc" TextWrapping="Wrap"
-                                   Text="Paste your Perplexity WebUI session token, or generate one via email verification." />
+                                   Text="{l:Loc Dialog_AddPerplexity_Description}" />
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
-                            <Button Classes="app" Content="Generate Token" Click="OnStartPerplexityTokenFlow" />
-                            <Button Classes="app" Content="Cancel" Command="{Binding DismissPerplexityAccountDialogCommand}" />
-                            <Button Classes="app primary" Content="Save Account" Click="OnConfirmPerplexityAccount" />
+                            <Button Classes="app" Content="{l:Loc Dialog_AddPerplexity_GenerateToken}" Click="OnStartPerplexityTokenFlow" />
+                            <Button Classes="app" Content="{l:Loc Dialog_AddPerplexity_Cancel}" Command="{Binding DismissPerplexityAccountDialogCommand}" />
+                            <Button Classes="app primary" Content="{l:Loc Dialog_AddPerplexity_Save}" Click="OnConfirmPerplexityAccount" />
                         </StackPanel>
                     </StackPanel>
 
                     <StackPanel Spacing="14" IsVisible="{Binding IsPerplexityTokenGenerationMode}">
                         <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Grid.Column="0" Classes="row-label" FontSize="15" Text="Generate Perplexity token" />
+                            <TextBlock Grid.Column="0" Classes="row-label" FontSize="15" Text="{l:Loc Dialog_GeneratePerplexityToken_Title}" />
                             <TextBlock Grid.Column="1" Classes="row-desc" Text="{Binding PerplexityTokenStepLabel}" />
                         </Grid>
                         <TextBlock Classes="row-desc" Text="{Binding PerplexityTokenPrompt}" TextWrapping="Wrap"
@@ -508,7 +509,7 @@
                                 <lucide:PackIconLucide Grid.Column="0" Kind="TriangleAlert" Width="16" Height="16"
                                                        Foreground="{DynamicResource ErrBrush}" VerticalAlignment="Top" Margin="0,1,8,0" />
                                 <StackPanel Grid.Column="1" Spacing="4">
-                                    <TextBlock Classes="alert-title" Text="Token generation failed" />
+                                    <TextBlock Classes="alert-title" Text="{l:Loc Dialog_GeneratePerplexityToken_Failed}" />
                                     <TextBlock Classes="alert-body" Text="{Binding PerplexityTokenDetail}" />
                                 </StackPanel>
                             </Grid>
@@ -520,7 +521,7 @@
                         <ProgressBar IsIndeterminate="True" Height="6"
                                      IsVisible="{Binding IsPerplexityTokenFlowBusy}" />
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
-                            <Button Classes="app" Content="Back" Command="{Binding CancelPerplexityTokenFlowCommand}" />
+                            <Button Classes="app" Content="{l:Loc Dialog_GeneratePerplexityToken_Back}" Command="{Binding CancelPerplexityTokenFlowCommand}" />
                             <Button Classes="app primary" Content="{Binding PerplexityTokenContinueLabel}" Click="OnSubmitPerplexityTokenFlow" />
                         </StackPanel>
                     </StackPanel>
@@ -536,16 +537,16 @@
             <Border Classes="card" MaxWidth="420" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24"
                     PointerPressed="OnDialogCardPressed">
                 <StackPanel Spacing="14">
-                    <TextBlock Classes="row-label" FontSize="15" Text="Edit Perplexity account label" />
+                    <TextBlock Classes="row-label" FontSize="15" Text="{l:Loc Dialog_EditPerplexityLabel_Title}" />
                     <StackPanel Spacing="4">
-                        <TextBlock Classes="row-desc" Text="Label" />
-                        <TextBox x:Name="EditPerplexityLabelBox" Classes="app" Watermark="Primary"
+                        <TextBlock Classes="row-desc" Text="{l:Loc Dialog_EditPerplexityLabel_LabelLabel}" />
+                        <TextBox x:Name="EditPerplexityLabelBox" Classes="app" Watermark="{l:Loc Dialog_EditPerplexityLabel_LabelPlaceholder}"
                                  Text="{Binding EditPerplexityLabelDraft, Mode=TwoWay}"
                                  KeyDown="OnEditPerplexityLabelKeyDown" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
-                        <Button Classes="app" Content="Cancel" Command="{Binding DismissEditPerplexityLabelDialogCommand}" />
-                        <Button Classes="app primary" Content="Save" Command="{Binding ConfirmEditPerplexityLabelCommand}" />
+                        <Button Classes="app" Content="{l:Loc Dialog_EditPerplexityLabel_Cancel}" Command="{Binding DismissEditPerplexityLabelDialogCommand}" />
+                        <Button Classes="app primary" Content="{l:Loc Dialog_EditPerplexityLabel_Save}" Command="{Binding ConfirmEditPerplexityLabelCommand}" />
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -556,12 +557,12 @@
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50">
             <Border Classes="card" MaxWidth="440" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24">
                 <StackPanel Spacing="14">
-                    <TextBlock Classes="row-label" FontSize="15" Text="Reset Perplexity accounts?" />
+                    <TextBlock Classes="row-label" FontSize="15" Text="{l:Loc Dialog_ResetPerplexity_Title}" />
                     <TextBlock Classes="row-desc" TextWrapping="Wrap"
-                               Text="This backs up and removes all saved Perplexity WebUI session token files." />
+                               Text="{l:Loc Dialog_ResetPerplexity_Description}" />
                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
-                        <Button Classes="app" Content="Cancel" Command="{Binding DismissResetPerplexityDialogCommand}" />
-                        <Button Classes="app danger" Content="Reset accounts" Command="{Binding ConfirmResetPerplexityAccountsCommand}" />
+                        <Button Classes="app" Content="{l:Loc Dialog_ResetPerplexity_Cancel}" Command="{Binding DismissResetPerplexityDialogCommand}" />
+                        <Button Classes="app danger" Content="{l:Loc Dialog_ResetPerplexity_Reset}" Command="{Binding ConfirmResetPerplexityAccountsCommand}" />
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -575,7 +576,7 @@
                     PointerPressed="OnDialogCardPressed">
                 <StackPanel Spacing="16">
 
-                    <TextBlock Classes="row-label" FontSize="15" Text="Add Gemini account" />
+                    <TextBlock Classes="row-label" FontSize="15" Text="{l:Loc Dialog_GeminiLogin_Title}" />
 
                     <!-- Error banner -->
                     <Border Classes="alert error" IsVisible="{Binding GeminiLoginHasError}">
@@ -601,22 +602,22 @@
                     <!-- Panel: Mode selection -->
                     <StackPanel Spacing="8" IsVisible="{Binding IsGeminiModeSelection}">
                         <TextBlock Classes="row-desc" TextWrapping="Wrap"
-                                   Text="Choose how Gemini should authenticate."
+                                   Text="{l:Loc Dialog_GeminiLogin_SelectMode_Text}"
                                    IsVisible="{Binding GeminiLoginHasError, Converter={StaticResource InvertBool}}" />
                         <Button Classes="app" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
                                 IsEnabled="{Binding IsGeminiLoginBusy, Converter={StaticResource InvertBool}}"
                                 Click="OnGeminiSelectMode1">
                             <StackPanel Spacing="2">
-                                <TextBlock FontWeight="Medium" Text="Code Assist" />
-                                <TextBlock Classes="row-desc" Text="GCP project, manual selection" />
+                                <TextBlock FontWeight="Medium" Text="{l:Loc Dialog_GeminiLogin_SelectMode1_Title}" />
+                                <TextBlock Classes="row-desc" Text="{l:Loc Dialog_GeminiLogin_SelectMode1_Desc}" />
                             </StackPanel>
                         </Button>
                         <Button Classes="app" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
                                 IsEnabled="{Binding IsGeminiLoginBusy, Converter={StaticResource InvertBool}}"
                                 Click="OnGeminiSelectMode2">
                             <StackPanel Spacing="2">
-                                <TextBlock FontWeight="Medium" Text="Google One" />
-                                <TextBlock Classes="row-desc" Text="Personal account, auto-discover project" />
+                                <TextBlock FontWeight="Medium" Text="{l:Loc Dialog_GeminiLogin_SelectMode2_Title}" />
+                                <TextBlock Classes="row-desc" Text="{l:Loc Dialog_GeminiLogin_SelectMode2_Desc}" />
                             </StackPanel>
                         </Button>
                         <ProgressBar IsIndeterminate="True" Height="6" IsVisible="{Binding IsGeminiLoginBusy}" />
@@ -655,7 +656,7 @@
                         <Button Classes="app"
                                 Content="{Binding IsGeminiDone, Converter={StaticResource BoolToCloseCancelConverter}}"
                                 Command="{Binding DismissGeminiLoginDialogCommand}" />
-                        <Button Classes="app primary" Content="Connect"
+                        <Button Classes="app primary" Content="{l:Loc Dialog_GeminiLogin_Connect}"
                                 IsVisible="{Binding IsGeminiProjectSelection}"
                                 IsEnabled="{Binding IsGeminiLoginBusy, Converter={StaticResource InvertBool}}"
                                 Click="OnGeminiConfirmProject" />
@@ -684,13 +685,13 @@
                     Width="400">
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Grid.Column="0" Spacing="2">
-                        <TextBlock Classes="row-label" Text="Tunnel Agent update available"/>
+                        <TextBlock Classes="row-label" Text="{l:Loc Toast_AppUpdateAvailable_Title}"/>
                         <TextBlock Classes="row-desc"
-                                   Text="{Binding AppUpdateNewVersion, StringFormat='Version {0} is ready to download.'}" />
+                                   Text="{l:LocFormat Key=Toast_AppUpdateAvailable_Version, Path=AppUpdateNewVersion}" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="12,0,0,0" VerticalAlignment="Center">
-                        <Button Classes="app primary" Content="Download" Command="{Binding DownloadAppUpdateCommand}" />
-                        <Button Classes="app" Content="Dismiss" Command="{Binding DismissAppUpdateCommand}" />
+                        <Button Classes="app primary" Content="{l:Loc Toast_AppUpdateAvailable_Download}" Command="{Binding DownloadAppUpdateCommand}" />
+                        <Button Classes="app" Content="{l:Loc Toast_AppUpdateAvailable_Dismiss}" Command="{Binding DismissAppUpdateCommand}" />
                     </StackPanel>
                 </Grid>
             </Border>
@@ -704,13 +705,13 @@
                     Width="400">
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Grid.Column="0" Spacing="2">
-                        <TextBlock Classes="row-label" Text="Engine update available"/>
+                        <TextBlock Classes="row-label" Text="{l:Loc Toast_EngineUpdateAvailable_Title}"/>
                         <TextBlock Classes="row-desc"
                                    Text="{Binding UpdateToastText}" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="12,0,0,0" VerticalAlignment="Center">
-                        <Button Classes="app primary" Content="Update" Command="{Binding UpdateToastEngineCommand}" />
-                        <Button Classes="app" Content="Dismiss" Command="{Binding DismissToastCommand}" />
+                        <Button Classes="app primary" Content="{l:Loc Toast_EngineUpdateAvailable_Update}" Command="{Binding UpdateToastEngineCommand}" />
+                        <Button Classes="app" Content="{l:Loc Toast_EngineUpdateAvailable_Dismiss}" Command="{Binding DismissToastCommand}" />
                     </StackPanel>
                 </Grid>
             </Border>
@@ -720,7 +721,7 @@
         <Border IsVisible="{Binding ShowManagementKeyRepairedToast}" Classes="card" MaxWidth="400"
                 HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,50,20,0" Padding="14,10" ZIndex="50">
             <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Grid.Column="0" Text="CLIProxyAPI management key repaired and applied."
+                <TextBlock Grid.Column="0" Text="{l:Loc Toast_ManagementKeyRepaired}"
                            TextWrapping="Wrap" FontSize="12" VerticalAlignment="Center"
                            Foreground="{DynamicResource FgBrush}" MaxWidth="330" />
                 <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0" VerticalAlignment="Top"

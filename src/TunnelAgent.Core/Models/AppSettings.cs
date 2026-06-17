@@ -52,6 +52,7 @@ public sealed class AppSettings
     public int Port { get; set; }
     public bool LaunchAtLogin { get; set; } = true;
     public string ThemeMode { get; set; } = "system";
+    public string? Language { get; set; } = null; // null = usar idioma del sistema
     public bool AutoCheckForUpdates { get; set; } = true;
     public bool AutoCheckForAppUpdates { get; set; } = true;
     public bool AutoUpdate { get; set; } = false;

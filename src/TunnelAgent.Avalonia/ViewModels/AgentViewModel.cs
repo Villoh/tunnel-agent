@@ -12,7 +12,7 @@ public partial class AgentViewModel : ViewModelBase
     public string Id { get; }
     public string Name { get; }
     public string BinaryName { get; }
-    public string Description { get; }
+    public string Description => LocalizationService.Instance.GetString($"Agent_{Id}_Description");
     public string? DocsUrl { get; }
     public string AccentHex { get; }
     public string? IconAssetPath { get; }
@@ -40,7 +40,8 @@ public partial class AgentViewModel : ViewModelBase
     /// <summary>True when installed but not yet configured through the proxy.</summary>
     public bool IsInstalledOnly => Installed && !Configured;
 
-    public string ConfigureButtonLabel => Configured ? "Reconfigure" : "Configure";
+    public string ConfigureButtonLabel => LocalizationService.Instance.GetString(
+        Configured ? "AgentsView_Agent_ReconfigureButton" : "AgentsView_Agent_ConfigureButton");
 
     /// <summary>Checked in the Configure dialog to pick which agents to configure at once.</summary>
     [ObservableProperty] private bool _isSelectedForConfig;
@@ -50,8 +51,8 @@ public partial class AgentViewModel : ViewModelBase
         Id = def.Id;
         Name = def.DisplayName;
         BinaryName = def.BinaryNames.Length > 0 ? def.BinaryNames[0] : def.Id;
-        Description = def.Description;
         DocsUrl = def.DocsUrl;
+        LocalizationService.Instance.PropertyChanged += OnLocalizationChanged;
         AccentHex = def.AccentHex;
         IconAssetPath = def.IconAssetPath;
         IconNeedsDarkBg = def.IconNeedsDarkBg;
@@ -61,6 +62,12 @@ public partial class AgentViewModel : ViewModelBase
             if (def.IconNeedsDarkBg)
                 SubscribeToThemeChanges(def.IconAssetPath);
         }
+    }
+
+    private void OnLocalizationChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        OnPropertyChanged(nameof(Description));
+        OnPropertyChanged(nameof(ConfigureButtonLabel));
     }
 
     private void SubscribeToThemeChanges(string path)

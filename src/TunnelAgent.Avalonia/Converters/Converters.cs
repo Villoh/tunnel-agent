@@ -259,10 +259,11 @@ public sealed class StatusChipFgConverter : IValueConverter
     public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
 }
 
-/// <summary>Returns "Close" when true, "Cancel" when false.</summary>
+/// <summary>Returns the localized "Close" label when true, "Cancel" when false.</summary>
 public sealed class BoolToCloseCancelConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
-        value is true ? "Close" : "Cancel";
+        TunnelAgent.Services.LocalizationService.Instance.GetString(
+            value is true ? "Dialog_Common_Close" : "Dialog_Common_Cancel");
     public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
 }

@@ -5,6 +5,7 @@
              xmlns:si="using:IconPacks.Avalonia.SimpleIcons"
              xmlns:lucide="using:IconPacks.Avalonia.Lucide"
              xmlns:ctrl="using:TunnelAgent.Controls"
+             xmlns:l="using:TunnelAgent.Services"
              x:Class="TunnelAgent.Views.ProvidersView"
              x:Name="Root"
              x:DataType="vm:MainWindowViewModel">
@@ -28,8 +29,8 @@
                 <ctrl:SlidingTabBar Margin="0,0,0,16"
                                     SelectedIndex="{Binding ProvidersTabIndex}">
                     <ctrl:SlidingTabBar.Tabs>
-                        <ctrl:SlidingTab Header="CLIProxyAPI" Command="{Binding FocusCliProxyCommand}" />
-                        <ctrl:SlidingTab Header="Perplexity"  Command="{Binding FocusPerplexityCommand}" />
+                        <ctrl:SlidingTab Header="{l:Loc ProvidersView_TabCLIProxyAPI}" Command="{Binding FocusCliProxyCommand}" />
+                        <ctrl:SlidingTab Header="{l:Loc ProvidersView_TabPerplexity}"  Command="{Binding FocusPerplexityCommand}" />
                     </ctrl:SlidingTabBar.Tabs>
                 </ctrl:SlidingTabBar>
 
@@ -39,7 +40,7 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel>
-                        <TextBlock Classes="page-title" Text="Services" />
+                        <TextBlock Classes="page-title" Text="{l:Loc ProvidersView_Title}" />
                         <TextBlock Classes="page-sub" Text="{Binding ActiveEngineDescription}" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
@@ -53,7 +54,7 @@
                         </Border>
                         <Button Classes="icon-btn copy-endpoint"
                                 Classes.copied="{Binding EndpointCopied}"
-                                ToolTip.Tip="Copy endpoint"
+                                ToolTip.Tip="{l:Loc ProvidersView_CopyEndpointTooltip}"
                                 Click="OnCopyEndpoint">
                             <Panel>
                                 <lucide:PackIconLucide Kind="Copy" Width="13" Height="13" IsVisible="{Binding !EndpointCopied}" />
@@ -62,14 +63,14 @@
                         </Button>
                         <Panel Width="26" Height="26">
                             <Button Classes="icon-btn engine-action start"
-                                    ToolTip.Tip="Start server"
+                                    ToolTip.Tip="{l:Loc ProvidersView_StartServerTooltip}"
                                     Command="{Binding StartServerCommand}"
                                     Opacity="{Binding ServerState, Converter={StaticResource StateToOpacity}, ConverterParameter=Invert}"
                                     IsHitTestVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}, ConverterParameter=Invert}">
                                 <lucide:PackIconLucide Kind="Play" Width="12" Height="12" Margin="1,0,0,0" />
                             </Button>
                             <Button Classes="icon-btn engine-action stop"
-                                    ToolTip.Tip="Stop server"
+                                    ToolTip.Tip="{l:Loc ProvidersView_StopServerTooltip}"
                                     Command="{Binding StopServerCommand}"
                                     Opacity="{Binding ServerState, Converter={StaticResource StateToOpacity}}"
                                     IsHitTestVisible="{Binding ServerState, Converter={StaticResource StateIsRunning}}">
@@ -91,7 +92,7 @@
                         <StackPanel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
                             <TextBlock Classes="row-label" Text="{Binding ActiveEngineName}" />
                             <TextBlock Classes="row-desc">
-                                <Run Text="Listening on port " />
+                                <Run Text="{l:Loc ProvidersView_ListeningOn}" />
                                 <Run Text="{Binding Port}" />
                             </TextBlock>
                         </StackPanel>
@@ -107,11 +108,11 @@
                     <StackPanel Margin="16,14" Spacing="12">
                         <Grid ColumnDefinitions="*,Auto">
                             <StackPanel>
-                                <TextBlock Classes="row-label" Text="Perplexity session accounts" />
-                                <TextBlock Classes="row-desc" Text="Saved WebUI session tokens used by Perplexity WebUI Scraper." />
+                                <TextBlock Classes="row-label" Text="{l:Loc ProvidersView_PerplexitySection_Title}" />
+                                <TextBlock Classes="row-desc" Text="{l:Loc ProvidersView_PerplexitySection_Description}" />
                             </StackPanel>
                             <Button Grid.Column="1" Classes="icon-btn"
-                                    ToolTip.Tip="Add account"
+                                    ToolTip.Tip="{l:Loc ProvidersView_PerplexitySection_AddTooltip}"
                                     Command="{Binding ShowAddPerplexityAccountCommand}">
                                 <lucide:PackIconLucide Kind="Plus" Width="14" Height="14"
                                                        Foreground="{DynamicResource FgMutedBrush}" />
@@ -121,7 +122,7 @@
                         <Border Background="#08FFFFFF" CornerRadius="8" Padding="14,16"
                                 IsVisible="{Binding HasPerplexityAccounts, Converter={StaticResource InvertBool}}">
                             <StackPanel Spacing="6">
-                                <TextBlock Classes="row-label" Text="No accounts yet" />
+                                <TextBlock Classes="row-label" Text="{l:Loc ProvidersView_PerplexitySection_NoAccounts}" />
                                 <TextBlock Classes="row-desc" Text="{Binding PerplexityEmptyStateText}" TextWrapping="Wrap" />
                             </StackPanel>
                         </Border>
@@ -135,27 +136,27 @@
                                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                                     <TextBlock Classes="row-label" Text="{Binding Label}" />
                                                     <Border Classes="chip" Background="{DynamicResource AccentSoftBrush}" IsVisible="{Binding IsDefault}">
-                                                        <TextBlock Text="default" Foreground="{DynamicResource AccentBrush}" />
+                                                        <TextBlock Text="{l:Loc ProvidersView_PerplexityAccount_DefaultBadge}" Foreground="{DynamicResource AccentBrush}" />
                                                     </Border>
                                                 </StackPanel>
                                                 <TextBlock Classes="row-desc"
                                                            Text="{Binding MaskedSessionToken}"
                                                            FontFamily="Cascadia Mono,Consolas,monospace" />
                                             </StackPanel>
-                                            <Button Grid.Column="1" Classes="app" Content="Make default"
+                                            <Button Grid.Column="1" Classes="app" Content="{l:Loc ProvidersView_PerplexityAccount_MakeDefault}"
                                                     Margin="8,0,8,0"
                                                     IsVisible="{Binding IsDefault, Converter={StaticResource InvertBool}}"
                                                     Command="{Binding #Root.DataContext.SetDefaultPerplexityAccountCommand}"
                                                     CommandParameter="{Binding}" />
                                             <Button Grid.Column="2" Classes="icon-btn"
-                                                    ToolTip.Tip="Edit label"
+                                                    ToolTip.Tip="{l:Loc ProvidersView_PerplexityAccount_EditLabelTooltip}"
                                                     Command="{Binding #Root.DataContext.EditPerplexityAccountLabelCommand}"
                                                     CommandParameter="{Binding}">
                                                 <lucide:PackIconLucide Kind="Pencil" Width="13" Height="13"
                                                                        Foreground="{DynamicResource FgMutedBrush}" />
                                             </Button>
                                             <Button Grid.Column="3" Classes="icon-btn"
-                                                    ToolTip.Tip="Remove account"
+                                                    ToolTip.Tip="{l:Loc ProvidersView_PerplexityAccount_RemoveTooltip}"
                                                     Command="{Binding #Root.DataContext.RemovePerplexityAccountCommand}"
                                                     CommandParameter="{Binding}">
                                                 <lucide:PackIconLucide Kind="Trash2" Width="13" Height="13"
@@ -204,7 +205,7 @@
                                                         <Border Classes="chip" Background="#22FF7A00"
                                                                 IsVisible="{Binding IsEnabled, Converter={StaticResource InvertBool}}"
                                                                 VerticalAlignment="Center">
-                                                            <TextBlock Text="disabled" Foreground="#CC7A2B" FontSize="10" />
+                                                            <TextBlock Text="{l:Loc ProvidersView_Provider_Disabled}" Foreground="#CC7A2B" FontSize="10" />
                                                         </Border>
                                                     </StackPanel>
                                                     <TextBlock Text="{Binding ConnectedSubText}" FontSize="11.5"
@@ -213,19 +214,19 @@
                                                 </StackPanel>
                                                 <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center" Margin="8,0">
                                                     <Border Classes="chip" Background="#22AAAAFF" IsVisible="{Binding IsConnecting}" VerticalAlignment="Center" Margin="0,0,4,0">
-                                                        <TextBlock Text="connecting…" Foreground="#8888FF" FontSize="10" />
+                                                        <TextBlock Text="{l:Loc ProvidersView_Provider_Connecting}" Foreground="#8888FF" FontSize="10" />
                                                     </Border>
-                                                    <Button Classes="icon-btn" ToolTip.Tip="Add account" IsVisible="{Binding IsOAuth}"
+                                                    <Button Classes="icon-btn" ToolTip.Tip="{l:Loc ProvidersView_Provider_AddAccountTooltip}" IsVisible="{Binding IsOAuth}"
                                                             IsEnabled="{Binding IsConnecting, Converter={StaticResource InvertBool}}"
                                                             Click="OnOAuthConnect" Tag="{Binding}">
                                                         <lucide:PackIconLucide Kind="Plus" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
                                                     </Button>
-                                                    <Button Classes="icon-btn" ToolTip.Tip="Remove all accounts" IsVisible="{Binding Connected}"
+                                                    <Button Classes="icon-btn" ToolTip.Tip="{l:Loc ProvidersView_Provider_RemoveAllTooltip}" IsVisible="{Binding Connected}"
                                                             IsEnabled="{Binding IsConnecting, Converter={StaticResource InvertBool}}"
                                                             Click="OnOAuthDisconnect" Tag="{Binding}">
                                                         <lucide:PackIconLucide Kind="Trash2" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
                                                     </Button>
-                                                    <Button Classes="app" Content="Add Account"
+                                                    <Button Classes="app" Content="{l:Loc ProvidersView_Provider_AddAccountButton}"
                                                             IsVisible="{Binding IsOAuth, Converter={StaticResource InvertBool}}"
                                                             Command="{Binding RequestAddAccountCommand}"
                                                             FontSize="12" Padding="10,3" />
@@ -259,11 +260,11 @@
                                                                     </Border>
                                                                 </StackPanel>
                                                                 <Button Grid.Column="1" Classes="icon-btn power-toggle" Classes.account-disabled="{Binding IsDisabled}"
-                                                                        IsEnabled="{Binding IsProviderEnabled}" ToolTip.Tip="Enable / disable this account"
+                                                                        IsEnabled="{Binding IsProviderEnabled}" ToolTip.Tip="{l:Loc ProvidersView_Provider_EnableDisableTooltip}"
                                                                         Click="OnToggleAccount" Tag="{Binding}" VerticalAlignment="Center">
                                                                     <lucide:PackIconLucide Kind="Power" Width="13" Height="13" />
                                                                 </Button>
-                                                                <Button Grid.Column="2" Classes="icon-btn" ToolTip.Tip="Remove account"
+                                                                <Button Grid.Column="2" Classes="icon-btn" ToolTip.Tip="{l:Loc ProvidersView_Provider_RemoveAccountTooltip}"
                                                                         Command="{Binding #Root.DataContext.RemoveAccountCommand}"
                                                                         CommandParameter="{Binding}" VerticalAlignment="Center">
                                                                     <lucide:PackIconLucide Kind="Trash2" Width="13" Height="13" Foreground="{DynamicResource FgMutedBrush}" />
@@ -284,7 +285,7 @@
 
                 </StackPanel>
 
-                <TextBlock Classes="section-label" Text="AVAILABLE MODELS" />
+                <TextBlock Classes="section-label" Text="{l:Loc ProvidersView_Models_Section}" />
                 <Border Classes="card">
                     <StackPanel>
                         <Grid Margin="16,12" ColumnDefinitions="30,*,Auto">
@@ -294,11 +295,11 @@
                                                        HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                                <TextBlock Classes="row-label" Text="Available models" />
-                                <TextBlock Classes="row-desc" Text="Models exposed by running engine." />
+                                <TextBlock Classes="row-label" Text="{l:Loc ProvidersView_Models_Title}" />
+                                <TextBlock Classes="row-desc" Text="{l:Loc ProvidersView_Models_Description}" />
                             </StackPanel>
                             <TextBlock Grid.Column="2"
-                                       Text="{Binding TotalAvailableModelCount, StringFormat='{}{0} total'}"
+                                       Text="{l:LocFormat Key=ProvidersView_Models_TotalCount, Path=TotalAvailableModelCount}"
                                        Classes="status"
                                        Foreground="{DynamicResource FgMutedBrush}"
                                        VerticalAlignment="Center"
@@ -312,7 +313,7 @@
                             <lucide:PackIconLucide Kind="ServerOff" Width="28" Height="28"
                                                    Foreground="{DynamicResource FgFaintBrush}"
                                                    HorizontalAlignment="Center" />
-                            <TextBlock Text="Start the engine to see available models"
+                            <TextBlock Text="{l:Loc ProvidersView_Models_EmptyState}"
                                        FontSize="12"
                                        Foreground="{DynamicResource FgMutedBrush}"
                                        HorizontalAlignment="Center" />
@@ -341,10 +342,10 @@
                                                 </Border>
                                                 <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
                                                     <TextBlock Classes="row-label" Text="{Binding ProviderName}" />
-                                                    <TextBlock Classes="row-desc" Text="{Binding ModelCount, StringFormat='{}{0} models'}" />
+                                                    <TextBlock Classes="row-desc" Text="{l:LocFormat Key=ProvidersView_Models_ModelCount, Path=ModelCount}" />
                                                 </StackPanel>
                                                 <Border Grid.Column="2" Classes="chip" Background="#14000000" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding ModelCount, StringFormat='{}{0} models'}" Foreground="{DynamicResource FgMutedBrush}" />
+                                                    <TextBlock Text="{l:LocFormat Key=ProvidersView_Models_ModelCount, Path=ModelCount}" Foreground="{DynamicResource FgMutedBrush}" />
                                                 </Border>
                                                 <Grid Grid.Column="3" Width="18" Height="18" Margin="6,0,0,0" VerticalAlignment="Center">
                                                     <lucide:PackIconLucide Kind="ChevronRight" Width="14" Height="14"

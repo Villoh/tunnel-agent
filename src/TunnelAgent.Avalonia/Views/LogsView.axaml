@@ -4,6 +4,7 @@
              xmlns:cv="using:TunnelAgent.Converters"
              xmlns:ctrl="using:TunnelAgent.Controls"
              xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+             xmlns:l="using:TunnelAgent.Services"
              x:Class="TunnelAgent.Views.LogsView"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Resources>
@@ -17,13 +18,13 @@
         <!-- Header row: title + toolbar icons -->
         <Grid Margin="0,0,0,14" ColumnDefinitions="*,Auto">
             <StackPanel Grid.Column="0">
-                <TextBlock Classes="page-title" Text="Logs" />
-                <TextBlock Classes="page-sub" Text="Request traffic routed through the local proxy." />
+                <TextBlock Classes="page-title" Text="{l:Loc LogsView_Title}" />
+                <TextBlock Classes="page-sub" Text="{l:Loc LogsView_Subtitle}" />
             </StackPanel>
             <!-- Toolbar: Download · Refresh · Trash -->
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Bottom">
                 <!-- Download: bounce down on hover -->
-                <Button Classes="icon-btn" ToolTip.Tip="Export logs"
+                <Button Classes="icon-btn" ToolTip.Tip="{l:Loc LogsView_ExportTooltip}"
                         RenderTransformOrigin="50%,50%"
                         Click="OnExportClick">
                     <Button.Transitions>
@@ -44,14 +45,14 @@
                 </Button>
 
                 <!-- Refresh: spin icon on click -->
-                <Button Classes="icon" ToolTip.Tip="Refresh" Click="OnRefreshLogs">
+                <Button Classes="icon" ToolTip.Tip="{l:Loc LogsView_RefreshTooltip}" Click="OnRefreshLogs">
                     <lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14"
                                            Foreground="{DynamicResource FgMutedBrush}"
                                            Classes.spin="{Binding Logs.IsRefreshing}" />
                 </Button>
 
                 <!-- Eraser: clear view only -->
-                <Button Classes="icon-btn" ToolTip.Tip="Clear view"
+                <Button Classes="icon-btn" ToolTip.Tip="{l:Loc LogsView_ClearViewTooltip}"
                         Command="{Binding ClearLogsCommand}"
                         RenderTransformOrigin="50%,50%">
                     <Button.Transitions>
@@ -72,7 +73,7 @@
                 </Button>
 
                 <!-- Trash: delete log file with confirmation -->
-                <Button Classes="icon-btn" ToolTip.Tip="Delete log file"
+                <Button Classes="icon-btn" ToolTip.Tip="{l:Loc LogsView_DeleteLogFileTooltip}"
                         Command="{Binding ShowDeleteLogsConfirmCommand}"
                         RenderTransformOrigin="50%,50%">
                     <Button.Transitions>
@@ -98,8 +99,8 @@
         <ctrl:SlidingTabBar Margin="0,0,0,14"
                             SelectedIndex="{Binding Logs.SelectedTabIndex}">
             <ctrl:SlidingTabBar.Tabs>
-                <ctrl:SlidingTab Header="Requests"   Command="{Binding Logs.SelectRequestsTabCommand}" />
-                <ctrl:SlidingTab Header="Proxy Logs" Command="{Binding Logs.SelectProxyLogsTabCommand}" />
+                <ctrl:SlidingTab Header="{l:Loc LogsView_TabRequests}"   Command="{Binding Logs.SelectRequestsTabCommand}" />
+                <ctrl:SlidingTab Header="{l:Loc LogsView_TabProxyLogs}" Command="{Binding Logs.SelectProxyLogsTabCommand}" />
             </ctrl:SlidingTabBar.Tabs>
         </ctrl:SlidingTabBar>
 
@@ -112,24 +113,24 @@
             <!-- Stats bar + Provider dropdown -->
             <Grid Margin="0,0,0,10" ColumnDefinitions="Auto,Auto,Auto,*,Auto">
                 <StackPanel Grid.Column="0" Margin="0,0,24,0">
-                    <TextBlock Classes="row-desc" Text="Total" />
+                    <TextBlock Classes="row-desc" Text="{l:Loc LogsView_Requests_Total}" />
                     <TextBlock Classes="row-label" FontSize="15" FontWeight="SemiBold"
                                Text="{Binding Logs.TotalRequests}" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Margin="0,0,24,0">
-                    <TextBlock Classes="row-desc" Text="Success" />
+                    <TextBlock Classes="row-desc" Text="{l:Loc LogsView_Requests_Success}" />
                     <TextBlock Classes="row-label" FontSize="15" FontWeight="SemiBold"
                                Text="{Binding Logs.SuccessRate}" />
                 </StackPanel>
                 <StackPanel Grid.Column="2" Margin="0,0,24,0">
-                    <TextBlock Classes="row-desc" Text="Avg Time" />
+                    <TextBlock Classes="row-desc" Text="{l:Loc LogsView_Requests_AvgTime}" />
                     <TextBlock Classes="row-label" FontSize="15" FontWeight="SemiBold"
                                Text="{Binding Logs.AvgTime}" />
                 </StackPanel>
 
                 <!-- Provider filter — ComboBox on the right -->
                 <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="6" VerticalAlignment="Bottom">
-                    <TextBlock Classes="row-desc" VerticalAlignment="Center" Text="Provider" />
+                    <TextBlock Classes="row-desc" VerticalAlignment="Center" Text="{l:Loc LogsView_Requests_ProviderLabel}" />
                     <ComboBox ItemsSource="{Binding Logs.ProviderOptions}"
                               SelectedItem="{Binding Logs.SelectedProvider, Mode=TwoWay}"
                               MinWidth="120"
@@ -154,7 +155,7 @@
                              Padding="4,8"
                              VerticalContentAlignment="Center"
                              FontSize="12"
-                             Watermark="Search requests..."
+                             Watermark="{l:Loc LogsView_Requests_SearchPlaceholder}"
                              Text="{Binding Logs.SearchText, Mode=TwoWay}" />
                 </Grid>
             </Border>
@@ -170,8 +171,8 @@
                         <lucide:PackIconLucide Kind="FileText" Width="28" Height="28"
                                               HorizontalAlignment="Center"
                                               Foreground="{DynamicResource FgFaintBrush}" />
-                        <TextBlock Classes="row-desc" Text="No requests yet." HorizontalAlignment="Center" />
-                        <TextBlock Classes="row-desc" Text="Start the proxy and make a request."
+                        <TextBlock Classes="row-desc" Text="{l:Loc LogsView_Requests_EmptyTitle}" HorizontalAlignment="Center" />
+                        <TextBlock Classes="row-desc" Text="{l:Loc LogsView_Requests_EmptyDescription}"
                                    HorizontalAlignment="Center" Opacity="0.6" />
                     </StackPanel>
 
@@ -238,7 +239,7 @@
             <Grid Margin="0,8,0,0" ColumnDefinitions="Auto,*,Auto"
                   IsVisible="{Binding Logs.TotalRequests, Converter={StaticResource IntGtZero}}">
                 <Button Grid.Column="0" Classes="app"
-                        Content="&lt;- Prev"
+                        Content="{l:Loc LogsView_Requests_PrevButton}"
                         FontSize="11" Padding="10,4"
                         IsEnabled="{Binding Logs.CanGoPrev}"
                         Command="{Binding Logs.PrevPageCommand}" />
@@ -249,7 +250,7 @@
                            FontSize="11"
                            Foreground="{DynamicResource FgMutedBrush}" />
                 <Button Grid.Column="2" Classes="app"
-                        Content="Next -&gt;"
+                        Content="{l:Loc LogsView_Requests_NextButton}"
                         FontSize="11" Padding="10,4"
                         IsEnabled="{Binding Logs.CanGoNext}"
                         Command="{Binding Logs.NextPageCommand}" />
@@ -279,7 +280,7 @@
                              Padding="4,8"
                              VerticalContentAlignment="Center"
                              FontSize="12"
-                             Watermark="Search logs..."
+                             Watermark="{l:Loc LogsView_ProxyLogs_SearchPlaceholder}"
                              Text="{Binding Logs.ProxyLogsSearch, Mode=TwoWay}" />
                 </Grid>
             </Border>
@@ -295,8 +296,8 @@
                         <lucide:PackIconLucide Kind="FileText" Width="28" Height="28"
                                               HorizontalAlignment="Center"
                                               Foreground="{DynamicResource FgFaintBrush}" />
-                        <TextBlock Classes="row-desc" Text="No log lines yet." HorizontalAlignment="Center" />
-                        <TextBlock Classes="row-desc" Text="Start the proxy to see output."
+                        <TextBlock Classes="row-desc" Text="{l:Loc LogsView_ProxyLogs_EmptyTitle}" HorizontalAlignment="Center" />
+                        <TextBlock Classes="row-desc" Text="{l:Loc LogsView_ProxyLogs_EmptyDescription}"
                                    HorizontalAlignment="Center" Opacity="0.6" />
                     </StackPanel>
 

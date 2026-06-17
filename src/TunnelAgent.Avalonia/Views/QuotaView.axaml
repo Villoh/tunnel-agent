@@ -4,6 +4,7 @@
              xmlns:cv="using:TunnelAgent.Converters"
              xmlns:ctrl="using:TunnelAgent.Controls"
              xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+             xmlns:l="using:TunnelAgent.Services"
              x:Class="TunnelAgent.Views.QuotaView"
              x:Name="Root"
              x:DataType="vm:MainWindowViewModel">
@@ -42,12 +43,12 @@
 
         <Grid Margin="0,0,0,16" ColumnDefinitions="*,Auto">
             <StackPanel>
-                <TextBlock Classes="page-title" Text="Quota" />
-                <TextBlock Classes="page-sub" Text="Track quota usage for supported CLIProxyAPI accounts." />
+                <TextBlock Classes="page-title" Text="{l:Loc QuotaView_Title}" />
+                <TextBlock Classes="page-sub" Text="{l:Loc QuotaView_Subtitle}" />
             </StackPanel>
             <Button Grid.Column="1"
                     Classes="icon"
-                    ToolTip.Tip="Refresh all quota providers"
+                    ToolTip.Tip="{l:Loc QuotaView_RefreshAllTooltip}"
                     VerticalAlignment="Bottom"
                     IsEnabled="{Binding HasQuotaAccounts}"
                     Click="OnRefreshAllQuota">
@@ -67,7 +68,7 @@
                                        Height="30"
                                        Foreground="{DynamicResource FgFaintBrush}"
                                        HorizontalAlignment="Center" />
-                <TextBlock Classes="row-label" Text="No quota providers" HorizontalAlignment="Center" />
+                <TextBlock Classes="row-label" Text="{l:Loc QuotaView_NoProviders_Title}" HorizontalAlignment="Center" />
                 <TextBlock Classes="row-desc"
                            Text="{Binding QuotaEmptyStateText}"
                            TextAlignment="Center"
@@ -85,7 +86,7 @@
                                        Height="30"
                                        Foreground="{DynamicResource FgFaintBrush}"
                                        HorizontalAlignment="Center" />
-                <TextBlock Classes="row-label" Text="No accounts to show" HorizontalAlignment="Center" />
+                <TextBlock Classes="row-label" Text="{l:Loc QuotaView_NoAccounts_Title}" HorizontalAlignment="Center" />
                 <TextBlock Classes="row-desc"
                            Text="{Binding QuotaEmptyStateText}"
                            TextAlignment="Center"
@@ -129,7 +130,7 @@
                                 <Button Grid.Column="1"
                                         Grid.Row="0"
                                         Classes="icon"
-                                        ToolTip.Tip="Refresh quota"
+                                        ToolTip.Tip="{l:Loc QuotaView_Account_RefreshTooltip}"
                                         Click="OnRefreshQuota"
                                         Tag="{Binding}">
                                     <lucide:PackIconLucide Kind="RefreshCw"
@@ -149,7 +150,7 @@
                             </Grid>
 
                             <StackPanel Spacing="10" IsVisible="{Binding HasQuota}">
-                                <TextBlock Classes="section-label" Text="USAGE" Margin="0" />
+                                <TextBlock Classes="section-label" Text="{l:Loc QuotaView_Account_UsageSection}" Margin="0" />
                                 <ItemsControl ItemsSource="{Binding QuotaBars}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="vm:QuotaBarViewModel">

@@ -7,6 +7,7 @@ using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IconPacks.Avalonia.SimpleIcons;
+using TunnelAgent.Services;
 
 namespace TunnelAgent.ViewModels;
 
@@ -116,7 +117,8 @@ public partial class ProviderViewModel : ViewModelBase
     public string? CustomIconData { get; }
     public bool HasCustomIcon => CustomIconData is not null;
     public string LogoColor   { get; }
-    public string Description { get; }
+    private readonly string _descriptionFallback;
+    public string Description => GetLocalizedDescription();
 
     // ── Brand SVG icon (Assets/Providers) — same approach as AgentViewModel ──
     [ObservableProperty]
@@ -231,7 +233,9 @@ public partial class ProviderViewModel : ViewModelBase
         {
             var n = ActiveAccountCount > 0 ? ActiveAccountCount : (Connected ? 1 : 0);
             if (n == 0) return Description;
-            return $"{n} connected account{(n == 1 ? "" : "s")}";
+            return LocalizationService.Instance.GetString(
+                n == 1 ? "ProvidersView_Provider_ConnectedAccountSingular" : "ProvidersView_Provider_ConnectedAccountPlural",
+                n);
         }
     }
 
@@ -275,10 +279,33 @@ public partial class ProviderViewModel : ViewModelBase
         Name           = name;
         IconKind       = iconKind;
         LogoColor      = logoColor;
-        Description    = description;
+        _descriptionFallback = description;
         IsOAuth        = isOAuth;
         CustomIconData = customIconData;
+        LocalizationService.Instance.PropertyChanged += OnLocalizationChanged;
         InitProviderSvg();
+    }
+
+    private string GetLocalizedDescription()
+    {
+        var key = Id switch
+        {
+            "cliproxyapi" => "Provider_cliproxyapi_Description",
+            "perplexity-webui-scraper" => "Provider_perplexity-webui-scraper_Description",
+            _ => null,
+        };
+
+        if (key is null)
+            return _descriptionFallback;
+
+        var text = LocalizationService.Instance.GetString(key);
+        return text == $"[{key}]" ? _descriptionFallback : text;
+    }
+
+    private void OnLocalizationChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        OnPropertyChanged(nameof(Description));
+        OnPropertyChanged(nameof(ConnectedSubText));
     }
 
     /// <summary>Raised when the user toggles the provider on/off.</summary>

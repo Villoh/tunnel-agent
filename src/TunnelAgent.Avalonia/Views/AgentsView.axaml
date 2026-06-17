@@ -4,6 +4,7 @@
              xmlns:cv="using:TunnelAgent.Converters"
              xmlns:lucide="using:IconPacks.Avalonia.Lucide"
              xmlns:svg="using:Avalonia.Svg.Skia"
+             xmlns:l="using:TunnelAgent.Services"
              x:Class="TunnelAgent.Views.AgentsView"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Resources>
@@ -18,16 +19,16 @@
         <!-- ── Header ─────────────────────────────────────────────────── -->
         <Grid Margin="0,0,0,14" ColumnDefinitions="*,Auto,Auto">
             <StackPanel>
-                <TextBlock Classes="page-title" Text="Agents" />
-                <TextBlock Classes="page-sub" Text="Route each CLI tool through a connected provider." />
+                <TextBlock Classes="page-title" Text="{l:Loc AgentsView_Title}" />
+                <TextBlock Classes="page-sub" Text="{l:Loc AgentsView_Subtitle}" />
             </StackPanel>
             <Button Grid.Column="1" Classes="icon" VerticalAlignment="Bottom" Margin="0,0,8,0"
-                    ToolTip.Tip="Configure multiple"
+                    ToolTip.Tip="{l:Loc AgentsView_ConfigureMultipleTooltip}"
                     Command="{Binding OpenBulkAgentConfigCommand}">
                 <lucide:PackIconLucide Kind="Settings" Width="15" Height="15" />
             </Button>
             <Button Grid.Column="2" Classes="icon" VerticalAlignment="Bottom"
-                    ToolTip.Tip="Detect agents"
+                    ToolTip.Tip="{l:Loc AgentsView_DetectAgentsTooltip}"
                     Click="OnDetectAgents">
                 <lucide:PackIconLucide Kind="RefreshCw" Width="15" Height="15"
                                        Classes.spin="{Binding IsDetectingAgents}" />
@@ -40,14 +41,14 @@
                 <StackPanel Orientation="Horizontal" Spacing="4">
                     <TextBlock Text="{Binding InstalledAgentCount}"
                                Foreground="#46C788" FontWeight="SemiBold" FontSize="12" />
-                    <TextBlock Text="installed" Foreground="#46C788" FontSize="12" />
+                    <TextBlock Text="{l:Loc AgentsView_InstalledChip}" Foreground="#46C788" FontSize="12" />
                 </StackPanel>
             </Border>
             <Border Classes="chip" Background="#144285F4">
                 <StackPanel Orientation="Horizontal" Spacing="4">
                     <TextBlock Text="{Binding ConfiguredAgentCount}"
                                Foreground="#4285F4" FontWeight="SemiBold" FontSize="12" />
-                    <TextBlock Text="configured" Foreground="#4285F4" FontSize="12" />
+                    <TextBlock Text="{l:Loc AgentsView_ConfiguredChip}" Foreground="#4285F4" FontSize="12" />
                 </StackPanel>
             </Border>
         </StackPanel>
@@ -55,7 +56,7 @@
         <!-- ── Installed section ───────────────────────────────────────── -->
         <StackPanel Spacing="6" Margin="0,0,0,18"
                     IsVisible="{Binding InstalledAgentCount, Converter={StaticResource IntGtZero}}">
-            <TextBlock Classes="section-label" Text="INSTALLED" Margin="4,0,4,6" />
+            <TextBlock Classes="section-label" Text="{l:Loc AgentsView_InstalledSection}" Margin="4,0,4,6" />
             <ItemsControl ItemsSource="{Binding InstalledAgents}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:AgentViewModel">
@@ -87,11 +88,11 @@
                                         <TextBlock Classes="row-label" Text="{Binding Name}" />
                                         <Border Classes="chip" Background="#1446C788"
                                                 IsVisible="{Binding Configured}">
-                                            <TextBlock Text="Configured" Foreground="#46C788" FontSize="10" FontWeight="SemiBold" />
+                                            <TextBlock Text="{l:Loc AgentsView_Agent_ConfiguredBadge}" Foreground="#46C788" FontSize="10" FontWeight="SemiBold" />
                                         </Border>
                                         <Border Classes="chip" Background="#14E2A52E"
                                                 IsVisible="{Binding IsInstalledOnly}">
-                                            <TextBlock Text="Installed" Foreground="#E2A52E" FontSize="10" FontWeight="SemiBold" />
+                                            <TextBlock Text="{l:Loc AgentsView_Agent_InstalledBadge}" Foreground="#E2A52E" FontSize="10" FontWeight="SemiBold" />
                                         </Border>
                                     </StackPanel>
                                     <TextBlock Classes="row-desc" Text="{Binding Description}" />
@@ -107,7 +108,7 @@
                                 <StackPanel Grid.Column="2" Orientation="Horizontal"
                                             Spacing="4" VerticalAlignment="Center">
                                     <Button Classes="icon"
-                                            ToolTip.Tip="View documentation"
+                                            ToolTip.Tip="{l:Loc AgentsView_Agent_DocsTooltip}"
                                             IsVisible="{Binding DocsUrl, Converter={StaticResource StringNotEmpty}}"
                                             Tag="{Binding DocsUrl}"
                                             Click="OnDocsClick">
@@ -129,7 +130,7 @@
         <!-- ── Not-installed section ───────────────────────────────────── -->
         <StackPanel Spacing="8"
                     IsVisible="{Binding NotInstalledAgentCount, Converter={StaticResource IntGtZero}}">
-            <TextBlock Classes="section-label" Text="NOT INSTALLED"
+            <TextBlock Classes="section-label" Text="{l:Loc AgentsView_NotInstalledSection}"
                        Foreground="{DynamicResource FgMutedBrush}" Margin="4,0,4,6" />
             <ItemsControl ItemsSource="{Binding NotInstalledAgents}">
                 <ItemsControl.ItemsPanel>
@@ -163,7 +164,7 @@
                                            Foreground="{DynamicResource FgMutedBrush}"
                                            VerticalAlignment="Center" />
                                 <Button Classes="icon"
-                                        ToolTip.Tip="View documentation"
+                                        ToolTip.Tip="{l:Loc AgentsView_Agent_DocsTooltip}"
                                         IsVisible="{Binding DocsUrl, Converter={StaticResource StringNotEmpty}}"
                                         Tag="{Binding DocsUrl}"
                                         Click="OnDocsClick">

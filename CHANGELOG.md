@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Spanish localization and language selector** (`Resources/Strings*.resx`, `Services/LocalizationService.cs`, `Services/LocExtension.cs`, `Views/*.axaml`): added runtime English/Spanish localization across the Avalonia UI, including the new **Language** combo under Configuration → General → Theme, persisted language preference, localized formatted strings, provider/agent descriptions, tray popup, overlays, dialogs, and quota/provider views.
+
+### Changed
+
+- **Localization infrastructure** (`Resources/Strings*.resx`, `Services/LocExtension.cs`): replaced hardcoded UI text with `{l:Loc ...}` / `{l:LocFormat ...}` bindings backed by resx resources, with live refresh when the selected language changes.
+
 ## [0.6.3] - 2026-06-17
 
 ### Changed

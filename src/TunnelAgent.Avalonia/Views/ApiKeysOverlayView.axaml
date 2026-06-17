@@ -3,6 +3,7 @@
              xmlns:vm="using:TunnelAgent.ViewModels"
              xmlns:cv="using:TunnelAgent.Converters"
              xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+             xmlns:l="using:TunnelAgent.Services"
              x:Class="TunnelAgent.Views.ApiKeysOverlayView"
              x:Name="Root"
              x:DataType="vm:MainWindowViewModel">
@@ -18,9 +19,9 @@
             PointerPressed="OnDialogCardPressed">
         <Grid RowDefinitions="Auto,*,Auto">
             <StackPanel Grid.Row="0" Margin="24,20,24,14" Spacing="4">
-                <TextBlock Classes="row-label" FontSize="15" Text="CLIProxyAPI keys" />
+                <TextBlock Classes="row-label" FontSize="15" Text="{l:Loc ApiKeysOverlay_Title}" />
                 <TextBlock Classes="row-desc" TextWrapping="Wrap"
-                           Text="Keys accepted by CLIProxyAPI clients. Agent setup uses the default key; leave empty for no auth." />
+                           Text="{l:Loc ApiKeysOverlay_Description}" />
             </StackPanel>
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                 <StackPanel Spacing="12" Margin="24,0,24,0">
@@ -35,10 +36,10 @@
                                                        FontSize="12" VerticalAlignment="Center" />
                                             <Border Classes="chip" Background="{DynamicResource AccentSoftBrush}"
                                                     IsVisible="{Binding IsDefault}">
-                                                <TextBlock Text="default" Foreground="{DynamicResource AccentBrush}" FontSize="10" />
+                                                <TextBlock Text="{l:Loc ApiKeysOverlay_DefaultChip}" Foreground="{DynamicResource AccentBrush}" FontSize="10" />
                                             </Border>
                                         </StackPanel>
-                                        <Button Grid.Column="1" Classes="app" Content="Use"
+                                        <Button Grid.Column="1" Classes="app" Content="{l:Loc ApiKeysOverlay_UseButton}"
                                                 Margin="8,0,4,0" Padding="8,0"
                                                 Height="24" MinHeight="0"
                                                 VerticalContentAlignment="Center"
@@ -46,7 +47,7 @@
                                                 Command="{Binding #Root.DataContext.SetDefaultApiKeyCommand}"
                                                 CommandParameter="{Binding}" />
                                         <Button Grid.Column="2" Classes="icon-btn"
-                                                ToolTip.Tip="Remove key"
+                                                ToolTip.Tip="{l:Loc ApiKeysOverlay_RemoveKeyTooltip}"
                                                 IsVisible="{Binding CanRemove}"
                                                 Command="{Binding #Root.DataContext.RemoveApiKeyCommand}"
                                                 CommandParameter="{Binding}">
@@ -59,7 +60,7 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                     <StackPanel Spacing="4">
-                        <TextBlock Classes="row-desc" Text="Add key" />
+                        <TextBlock Classes="row-desc" Text="{l:Loc ApiKeysOverlay_AddKeyLabel}" />
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBox Grid.Column="0" Classes="app"
                                      PasswordChar="{Binding ShowApiKeyDraft, Converter={StaticResource SecretPasswordChar}}"
@@ -67,7 +68,7 @@
                                      Text="{Binding ApiKeyDraft, Mode=TwoWay}"
                                      KeyDown="OnApiKeyDraftKeyDown" />
                             <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0"
-                                    ToolTip.Tip="Show/hide key"
+                                    ToolTip.Tip="{l:Loc ApiKeysOverlay_ShowHideKeyTooltip}"
                                     Command="{Binding ToggleApiKeyDraftVisibilityCommand}">
                                 <lucide:PackIconLucide Kind="{Binding ShowApiKeyDraft, Converter={StaticResource EyeIcon}}" Width="14" Height="14" />
                             </Button>
@@ -76,8 +77,8 @@
                 </StackPanel>
             </ScrollViewer>
             <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="24,14,24,20">
-                <Button Classes="app" Content="Close" Command="{Binding DismissApiKeysCommand}" />
-                <Button Classes="app primary" Content="Add key" Command="{Binding AddApiKeyCommand}" />
+                <Button Classes="app" Content="{l:Loc ApiKeysOverlay_CloseButton}" Command="{Binding DismissApiKeysCommand}" />
+                <Button Classes="app primary" Content="{l:Loc ApiKeysOverlay_AddKeyButton}" Command="{Binding AddApiKeyCommand}" />
             </StackPanel>
         </Grid>
     </Border>

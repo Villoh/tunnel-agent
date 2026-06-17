@@ -4,6 +4,7 @@
              xmlns:cv="using:TunnelAgent.Converters"
              xmlns:lucide="using:IconPacks.Avalonia.Lucide"
              xmlns:svc="using:TunnelAgent.Services"
+             xmlns:l="using:TunnelAgent.Services"
              x:Class="TunnelAgent.Views.AgentConfigOverlayView"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Resources>
@@ -86,7 +87,7 @@
 
                         <!-- Bulk agent picker -->
                         <StackPanel Spacing="6" IsVisible="{Binding ShowAgentConfigAgentPicker}">
-                            <TextBlock Classes="section-label" Text="AGENTS" Margin="2,0" />
+                            <TextBlock Classes="section-label" Text="{l:Loc AgentConfigOverlay_AgentsSectionLabel}" Margin="2,0" />
                             <ItemsControl ItemsSource="{Binding InstalledAgents}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
@@ -117,11 +118,11 @@
                                                     <StackPanel Orientation="Horizontal" Spacing="4">
                                                         <Border Classes="chip" Background="#1446C788"
                                                                 IsVisible="{Binding Configured}">
-                                                            <TextBlock Text="Configured" Foreground="#46C788" FontSize="9" />
+                                                            <TextBlock Text="{l:Loc AgentConfigOverlay_ConfiguredChip}" Foreground="#46C788" FontSize="9" />
                                                         </Border>
                                                         <Border Classes="chip" Background="#14E2A52E"
                                                                 IsVisible="{Binding IsInstalledOnly}">
-                                                            <TextBlock Text="Installed" Foreground="#E2A52E" FontSize="9" />
+                                                            <TextBlock Text="{l:Loc AgentConfigOverlay_InstalledChip}" Foreground="#E2A52E" FontSize="9" />
                                                         </Border>
                                                     </StackPanel>
                                                 </StackPanel>
@@ -132,38 +133,38 @@
                             </ItemsControl>
                             <TextBlock Classes="row-desc"
                                        IsVisible="{Binding NotInstalledAgentCount, Converter={StaticResource IntGtZero}}"
-                                       Text="{Binding NotInstalledAgentCount, StringFormat='{}{0} agent(s) not installed — install them to configure.'}"
+                                       Text="{l:LocFormat Key=AgentConfigOverlay_NotInstalledAgentsHint, Path=NotInstalledAgentCount}"
                                        Margin="2,2,0,0" />
                         </StackPanel>
 
                         <!-- Config mode selector (Proxy only) -->
                         <StackPanel Spacing="6" IsVisible="{Binding !IsAgentConfigDefaultMode}">
-                            <TextBlock Classes="section-label" Text="CONFIG MODE" Margin="2,0" />
+                            <TextBlock Classes="section-label" Text="{l:Loc AgentConfigOverlay_ConfigModeSectionLabel}" Margin="2,0" />
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <Button Classes="app"
                                         Classes.primary="{Binding !IsAgentConfigManualMode}"
-                                        Command="{Binding SetAgentAutoModeCommand}">Automatic</Button>
+                                        Command="{Binding SetAgentAutoModeCommand}" Content="{l:Loc AgentConfigOverlay_AutomaticModeButton}" />
                                 <Button Classes="app"
                                         Classes.primary="{Binding IsAgentConfigManualMode}"
-                                        Command="{Binding SetAgentManualModeCommand}">Manual</Button>
+                                        Command="{Binding SetAgentManualModeCommand}" Content="{l:Loc AgentConfigOverlay_ManualModeButton}" />
                             </StackPanel>
                             <TextBlock Classes="row-desc" IsVisible="{Binding !IsAgentConfigManualMode}"
-                                       Text="Writes config files directly. A backup is created before any changes." />
+                                       Text="{l:Loc AgentConfigOverlay_AutomaticModeDescription}" />
                             <TextBlock Classes="row-desc" IsVisible="{Binding IsAgentConfigManualMode}"
-                                       Text="Preview the config and copy it manually to the target location." />
+                                       Text="{l:Loc AgentConfigOverlay_ManualModeDescription}" />
                         </StackPanel>
 
                         <!-- Amp upstream API key -->
                         <StackPanel Spacing="4" IsVisible="{Binding ShowAmpUpstreamApiKeyField}">
-                            <TextBlock Classes="row-desc" Text="Amp access token" />
+                            <TextBlock Classes="row-desc" Text="{l:Loc AgentConfigOverlay_AmpAccessTokenLabel}" />
                             <Grid ColumnDefinitions="*,Auto">
                                 <TextBox Grid.Column="0" Classes="app"
                                          Height="32" MinHeight="32" Padding="8,5"
                                          PasswordChar="{Binding ShowAmpUpstreamApiKey, Converter={StaticResource SecretPasswordChar}}"
-                                         Watermark="your-amp-access-token"
+                                         Watermark="{l:Loc AgentConfigOverlay_AmpAccessTokenWatermark}"
                                          Text="{Binding AmpUpstreamApiKeyDraft, Mode=TwoWay}" />
                                 <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0"
-                                        ToolTip.Tip="Show/hide key"
+                                        ToolTip.Tip="{l:Loc AgentConfigOverlay_ShowHideKeyTooltip}"
                                         Command="{Binding ToggleAmpUpstreamApiKeyVisibilityCommand}">
                                     <lucide:PackIconLucide Kind="{Binding ShowAmpUpstreamApiKey, Converter={StaticResource EyeIcon}}" Width="14" Height="14" />
                                 </Button>
@@ -171,7 +172,7 @@
                             <Button Classes="link" HorizontalAlignment="Left" Padding="0"
                                     Tag="https://ampcode.com/settings"
                                     Click="OnOpenUrlClick">
-                                <TextBlock Classes="row-desc" Text="Used to authenticate the Amp CLI. Get it from ampcode.com/settings"
+                                <TextBlock Classes="row-desc" Text="{l:Loc AgentConfigOverlay_AmpAccessTokenHelp}"
                                            TextDecorations="Underline" />
                             </Button>
                         </StackPanel>
@@ -198,10 +199,10 @@
                             <StackPanel IsVisible="{Binding IsModelsExpanded}" Spacing="12">
                                 <!-- Empty state -->
                                 <TextBlock Classes="row-desc" Margin="2,0"
-                                           Text="Start an engine to load available models."
+                                           Text="{l:Loc AgentConfigOverlay_ModelsEmptyState}"
                                            IsVisible="{Binding HasSelectableModels, Converter={StaticResource InvertBool}}" />
                                 <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasSelectableModels}">
-                                    <TextBox Grid.Column="0" Classes="app" Watermark="Search models"
+                                    <TextBox Grid.Column="0" Classes="app" Watermark="{l:Loc AgentConfigOverlay_SearchModelsWatermark}"
                                              Height="26" MinHeight="26" Padding="8,3"
                                              VerticalAlignment="Center"
                                              Text="{Binding ModelSearchText, Mode=TwoWay}" />
@@ -209,11 +210,11 @@
                                               Margin="14,0,0,0"
                                               VerticalAlignment="Center"
                                               IsThreeState="False"
-                                              Content="Select all"
+                                              Content="{l:Loc AgentConfigOverlay_SelectAllModels}"
                                               IsChecked="{Binding AllVisibleModelsSelected, Mode=TwoWay}" />
                                 </Grid>
                                 <TextBlock Classes="row-desc" Margin="2,0"
-                                           Text="No models match your search."
+                                           Text="{l:Loc AgentConfigOverlay_NoModelSearchResults}"
                                            IsVisible="{Binding ShowNoModelSearchResults}" />
                                 <!-- CLIProxy models -->
                                 <StackPanel IsVisible="{Binding HasCliProxySelectableModels}" Spacing="4">
@@ -268,7 +269,7 @@
                         <Border Classes="card" Padding="12,10"
                                 IsVisible="{Binding !IsAgentConfigManualMode}">
                             <StackPanel Spacing="4">
-                                <TextBlock Classes="section-label" Text="PROXY ENDPOINT" Margin="0,0,0,2" />
+                                <TextBlock Classes="section-label" Text="{l:Loc AgentConfigOverlay_ProxyEndpointSectionLabel}" Margin="0,0,0,2" />
                                 <TextBlock Text="{Binding AgentProxyBaseUrl}"
                                            FontFamily="Cascadia Mono,Consolas,monospace"
                                            FontSize="11" Foreground="{DynamicResource FgMutedBrush}" />
@@ -277,7 +278,7 @@
 
                         <!-- Manual config preview -->
                         <StackPanel Spacing="8" IsVisible="{Binding IsAgentConfigManualMode}">
-                            <TextBlock Classes="section-label" Text="CONFIG PREVIEW" Margin="2,0" />
+                            <TextBlock Classes="section-label" Text="{l:Loc AgentConfigOverlay_ConfigPreviewSectionLabel}" Margin="2,0" />
                             <ItemsControl ItemsSource="{Binding AgentConfigPreviews}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="svc:RawConfigPreview">
@@ -372,10 +373,10 @@
             <!-- Footer -->
             <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right"
                         Spacing="8" Margin="18,12">
-                <Button Classes="app" Content="Cancel"
+                <Button Classes="app" Content="{l:Loc AgentConfigOverlay_CancelButton}"
                         IsVisible="{Binding !AgentConfigHasResult}"
                         Command="{Binding DismissAgentConfigCommand}" />
-                <Button Classes="app primary" Content="Copy All"
+                <Button Classes="app primary" Content="{l:Loc AgentConfigOverlay_CopyAllButton}"
                         IsVisible="{Binding ShowAgentConfigCopyButton}"
                         Click="OnCopyAgentConfigClick" />
                 <Button Classes="app primary"
@@ -383,7 +384,7 @@
                         IsVisible="{Binding ShowAgentConfigApplyButton}"
                         IsEnabled="{Binding IsApplyingAgentConfig, Converter={StaticResource InvertBool}}"
                         Command="{Binding ApplyAgentConfigCommand}" />
-                <Button Classes="app primary" Content="Done"
+                <Button Classes="app primary" Content="{l:Loc AgentConfigOverlay_DoneButton}"
                         IsVisible="{Binding AgentConfigHasResult}"
                         Command="{Binding DismissAgentConfigCommand}" />
             </StackPanel>

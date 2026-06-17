@@ -1,0 +1,1022 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- Microsoft ResX File, format version 2.0 -->
+  <!-- To add a localized resource simply add an entry to this file and recompile. -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata" type="xsd:string" minOccurs="0" />
+          <xsd:element name="assembly" type="xsd:string" minOccurs="0" />
+          <xsd:element name="data" type="xsd:string" minOccurs="0" msdata:Attributes="xml:space preserve" />
+          <xsd:element name="resheader" type="xsd:string" minOccurs="0" />
+        </xsd:choice>
+        <xsd:attribute name="version" type="xsd:decimal" use="required" />
+      </xsd:complexType>
+    </xsd:element>
+    <xsd:element name="resheader">
+      <xsd:complexType>
+        <xsd:sequence>
+          <xsd:element name="value" type="xsd:string" minOccurs="0" />
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" use="required" />
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       MAIN WINDOW - Window Title & Toolbar
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="App_Title" xml:space="preserve">
+    <value>Tunnel Agent</value>
+  </data>
+  <data name="MainWindow_MinimizeTooltip" xml:space="preserve">
+    <value>Minimize</value>
+  </data>
+  <data name="MainWindow_MaximizeTooltip" xml:space="preserve">
+    <value>Maximize / Restore</value>
+  </data>
+  <data name="MainWindow_CloseTooltip" xml:space="preserve">
+    <value>Close</value>
+  </data>
+
+  <!-- Sidebar Navigation -->
+  <data name="Sidebar_Logo_App" xml:space="preserve">
+    <value>Tunnel</value>
+  </data>
+  <data name="Sidebar_Logo_Agent" xml:space="preserve">
+    <value>Agent</value>
+  </data>
+  <data name="Sidebar_ToggleSidebarTooltip" xml:space="preserve">
+    <value>Toggle sidebar</value>
+  </data>
+  <data name="Sidebar_Providers" xml:space="preserve">
+    <value>Providers</value>
+  </data>
+  <data name="Sidebar_Quota" xml:space="preserve">
+    <value>Quota</value>
+  </data>
+  <data name="Sidebar_Agents" xml:space="preserve">
+    <value>Agents</value>
+  </data>
+  <data name="Sidebar_Logs" xml:space="preserve">
+    <value>Logs</value>
+  </data>
+  <data name="Sidebar_Configuration" xml:space="preserve">
+    <value>Configuration</value>
+  </data>
+  <data name="Sidebar_Status" xml:space="preserve">
+    <value>STATUS</value>
+  </data>
+  <data name="Sidebar_CLIProxyAPI" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="Sidebar_Perplexity" xml:space="preserve">
+    <value>Perplexity</value>
+  </data>
+  <data name="Sidebar_Version" xml:space="preserve">
+    <value>v{0} · MIT</value>
+  </data>
+  <data name="Sidebar_ReportIssue" xml:space="preserve">
+    <value>Report an issue</value>
+  </data>
+  <data name="Sidebar_ToggleThemeTooltip" xml:space="preserve">
+    <value>Toggle light / dark mode</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       MAIN WINDOW - Dialogs
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="Dialog_DeleteLogFile_Title" xml:space="preserve">
+    <value>Delete log file?</value>
+  </data>
+  <data name="Dialog_DeleteLogFile_Description" xml:space="preserve">
+    <value>This permanently deletes the CLIProxyAPI log file on disk. The view will be cleared and new entries will appear as the proxy runs.</value>
+  </data>
+  <data name="Dialog_DeleteLogFile_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Dialog_DeleteLogFile_Delete" xml:space="preserve">
+    <value>Delete log file</value>
+  </data>
+
+  <data name="Dialog_ResetCredentials_Title" xml:space="preserve">
+    <value>Reset all credentials?</value>
+  </data>
+  <data name="Dialog_ResetCredentials_Description" xml:space="preserve">
+    <value>This backs up and removes Tunnel Agent-managed OAuth tokens and custom provider keys. Other JSON files in the auth folder are preserved.</value>
+  </data>
+  <data name="Dialog_ResetCredentials_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Dialog_ResetCredentials_Reset" xml:space="preserve">
+    <value>Reset credentials</value>
+  </data>
+
+  <data name="Dialog_AddAccount_Title" xml:space="preserve">
+    <value>Add account — {0}</value>
+  </data>
+  <data name="Dialog_AddAccount_BaseUrlLabel" xml:space="preserve">
+    <value>Base URL</value>
+  </data>
+  <data name="Dialog_AddAccount_BaseUrlPlaceholder" xml:space="preserve">
+    <value>https://api.example.com/v1</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyLabel" xml:space="preserve">
+    <value>API Key</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyPlaceholder" xml:space="preserve">
+    <value>sk-...</value>
+  </data>
+  <data name="Dialog_AddAccount_ShowHideTooltip" xml:space="preserve">
+    <value>Show/hide key</value>
+  </data>
+  <data name="Dialog_AddAccount_LabelLabel" xml:space="preserve">
+    <value>Label (optional)</value>
+  </data>
+  <data name="Dialog_AddAccount_LabelPlaceholder" xml:space="preserve">
+    <value>My account</value>
+  </data>
+  <data name="Dialog_AddAccount_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Dialog_AddAccount_Add" xml:space="preserve">
+    <value>Add Account</value>
+  </data>
+
+  <data name="Dialog_AddPerplexity_Title" xml:space="preserve">
+    <value>Add Perplexity account</value>
+  </data>
+  <data name="Dialog_AddPerplexity_LabelLabel" xml:space="preserve">
+    <value>Label (optional)</value>
+  </data>
+  <data name="Dialog_AddPerplexity_LabelPlaceholder" xml:space="preserve">
+    <value>Primary</value>
+  </data>
+  <data name="Dialog_AddPerplexity_TokenLabel" xml:space="preserve">
+    <value>Session token</value>
+  </data>
+  <data name="Dialog_AddPerplexity_TokenPlaceholder" xml:space="preserve">
+    <value>pplx-session-token</value>
+  </data>
+  <data name="Dialog_AddPerplexity_ShowHideTooltip" xml:space="preserve">
+    <value>Show/hide token</value>
+  </data>
+  <data name="Dialog_AddPerplexity_Description" xml:space="preserve">
+    <value>Paste your Perplexity WebUI session token, or generate one via email verification.</value>
+  </data>
+  <data name="Dialog_AddPerplexity_GenerateToken" xml:space="preserve">
+    <value>Generate Token</value>
+  </data>
+  <data name="Dialog_AddPerplexity_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Dialog_AddPerplexity_Save" xml:space="preserve">
+    <value>Save Account</value>
+  </data>
+
+  <data name="Dialog_GeneratePerplexityToken_Title" xml:space="preserve">
+    <value>Generate Perplexity token</value>
+  </data>
+  <data name="Dialog_GeneratePerplexityToken_Failed" xml:space="preserve">
+    <value>Token generation failed</value>
+  </data>
+  <data name="Dialog_GeneratePerplexityToken_Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+
+  <data name="Dialog_EditPerplexityLabel_Title" xml:space="preserve">
+    <value>Edit Perplexity account label</value>
+  </data>
+  <data name="Dialog_EditPerplexityLabel_LabelLabel" xml:space="preserve">
+    <value>Label</value>
+  </data>
+  <data name="Dialog_EditPerplexityLabel_LabelPlaceholder" xml:space="preserve">
+    <value>Primary</value>
+  </data>
+  <data name="Dialog_EditPerplexityLabel_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Dialog_EditPerplexityLabel_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+
+  <data name="Dialog_ResetPerplexity_Title" xml:space="preserve">
+    <value>Reset Perplexity accounts?</value>
+  </data>
+  <data name="Dialog_ResetPerplexity_Description" xml:space="preserve">
+    <value>This backs up and removes all saved Perplexity WebUI session token files.</value>
+  </data>
+  <data name="Dialog_ResetPerplexity_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Dialog_ResetPerplexity_Reset" xml:space="preserve">
+    <value>Reset accounts</value>
+  </data>
+
+  <data name="Dialog_GeminiLogin_Title" xml:space="preserve">
+    <value>Add Gemini account</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode_Text" xml:space="preserve">
+    <value>Choose how Gemini should authenticate.</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode1_Title" xml:space="preserve">
+    <value>Code Assist</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode1_Desc" xml:space="preserve">
+    <value>GCP project, manual selection</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode2_Title" xml:space="preserve">
+    <value>Google One</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode2_Desc" xml:space="preserve">
+    <value>Personal account, auto-discover project</value>
+  </data>
+  <data name="Dialog_GeminiLogin_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Dialog_GeminiLogin_Connect" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       TOAST NOTIFICATIONS
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="Toast_AppUpdateAvailable_Title" xml:space="preserve">
+    <value>Tunnel Agent update available</value>
+  </data>
+  <data name="Toast_AppUpdateAvailable_Version" xml:space="preserve">
+    <value>Version {0} is ready to download.</value>
+  </data>
+  <data name="Toast_AppUpdateAvailable_Download" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="Toast_AppUpdateAvailable_Dismiss" xml:space="preserve">
+    <value>Dismiss</value>
+  </data>
+
+  <data name="Toast_EngineUpdateAvailable_Title" xml:space="preserve">
+    <value>Engine update available</value>
+  </data>
+  <data name="Toast_EngineUpdateAvailable_Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Toast_EngineUpdateAvailable_Dismiss" xml:space="preserve">
+    <value>Dismiss</value>
+  </data>
+
+  <data name="Toast_ManagementKeyRepaired" xml:space="preserve">
+    <value>CLIProxyAPI management key repaired and applied.</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       PROVIDERS VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ProvidersView_TabCLIProxyAPI" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="ProvidersView_TabPerplexity" xml:space="preserve">
+    <value>Perplexity</value>
+  </data>
+  <data name="ProvidersView_Title" xml:space="preserve">
+    <value>Services</value>
+  </data>
+  <data name="ProvidersView_CopyEndpointTooltip" xml:space="preserve">
+    <value>Copy endpoint</value>
+  </data>
+  <data name="ProvidersView_StartServerTooltip" xml:space="preserve">
+    <value>Start server</value>
+  </data>
+  <data name="ProvidersView_StopServerTooltip" xml:space="preserve">
+    <value>Stop server</value>
+  </data>
+  <data name="ProvidersView_ListeningOn" xml:space="preserve">
+    <value>Listening on port </value>
+  </data>
+
+  <data name="ProvidersView_PerplexitySection_Title" xml:space="preserve">
+    <value>Perplexity session accounts</value>
+  </data>
+  <data name="ProvidersView_PerplexitySection_Description" xml:space="preserve">
+    <value>Saved WebUI session tokens used by Perplexity WebUI Scraper.</value>
+  </data>
+  <data name="ProvidersView_PerplexitySection_AddTooltip" xml:space="preserve">
+    <value>Add account</value>
+  </data>
+  <data name="ProvidersView_PerplexitySection_NoAccounts" xml:space="preserve">
+    <value>No accounts yet</value>
+  </data>
+  <data name="ProvidersView_PerplexityAccount_MakeDefault" xml:space="preserve">
+    <value>Make default</value>
+  </data>
+  <data name="ProvidersView_PerplexityAccount_EditLabelTooltip" xml:space="preserve">
+    <value>Edit label</value>
+  </data>
+  <data name="ProvidersView_PerplexityAccount_RemoveTooltip" xml:space="preserve">
+    <value>Remove account</value>
+  </data>
+  <data name="ProvidersView_PerplexityAccount_DefaultBadge" xml:space="preserve">
+    <value>default</value>
+  </data>
+
+  <data name="ProvidersView_Provider_EnableDisableTooltip" xml:space="preserve">
+    <value>Enable / disable this account</value>
+  </data>
+  <data name="ProvidersView_Provider_Disabled" xml:space="preserve">
+    <value>disabled</value>
+  </data>
+  <data name="ProvidersView_Provider_Connecting" xml:space="preserve">
+    <value>connecting…</value>
+  </data>
+  <data name="ProvidersView_Provider_AddAccountTooltip" xml:space="preserve">
+    <value>Add account</value>
+  </data>
+  <data name="ProvidersView_Provider_RemoveAllTooltip" xml:space="preserve">
+    <value>Remove all accounts</value>
+  </data>
+  <data name="ProvidersView_Provider_AddAccountButton" xml:space="preserve">
+    <value>Add Account</value>
+  </data>
+  <data name="ProvidersView_Provider_RemoveAccountTooltip" xml:space="preserve">
+    <value>Remove account</value>
+  </data>
+
+  <data name="ProvidersView_Models_Section" xml:space="preserve">
+    <value>AVAILABLE MODELS</value>
+  </data>
+  <data name="ProvidersView_Models_Title" xml:space="preserve">
+    <value>Available models</value>
+  </data>
+  <data name="ProvidersView_Models_Description" xml:space="preserve">
+    <value>Models exposed by running engine.</value>
+  </data>
+  <data name="ProvidersView_Models_TotalCount" xml:space="preserve">
+    <value>{0} total</value>
+  </data>
+  <data name="ProvidersView_Models_EmptyState" xml:space="preserve">
+    <value>Start the engine to see available models</value>
+  </data>
+  <data name="ProvidersView_Models_ModelCount" xml:space="preserve">
+    <value>{0} models</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       AGENTS VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="AgentsView_Title" xml:space="preserve">
+    <value>Agents</value>
+  </data>
+  <data name="AgentsView_Subtitle" xml:space="preserve">
+    <value>Route each CLI tool through a connected provider.</value>
+  </data>
+  <data name="AgentsView_ConfigureMultipleTooltip" xml:space="preserve">
+    <value>Configure multiple</value>
+  </data>
+  <data name="AgentsView_DetectAgentsTooltip" xml:space="preserve">
+    <value>Detect agents</value>
+  </data>
+  <data name="AgentsView_InstalledChip" xml:space="preserve">
+    <value>installed</value>
+  </data>
+  <data name="AgentsView_ConfiguredChip" xml:space="preserve">
+    <value>configured</value>
+  </data>
+  <data name="AgentsView_InstalledSection" xml:space="preserve">
+    <value>INSTALLED</value>
+  </data>
+  <data name="AgentsView_NotInstalledSection" xml:space="preserve">
+    <value>NOT INSTALLED</value>
+  </data>
+  <data name="AgentsView_Agent_ConfiguredBadge" xml:space="preserve">
+    <value>Configured</value>
+  </data>
+  <data name="AgentsView_Agent_InstalledBadge" xml:space="preserve">
+    <value>Installed</value>
+  </data>
+  <data name="AgentsView_Agent_DocsTooltip" xml:space="preserve">
+    <value>View documentation</value>
+  </data>
+  <data name="AgentsView_Agent_ConfigureTooltip" xml:space="preserve">
+    <value>Configure</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       LOGS VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="LogsView_Title" xml:space="preserve">
+    <value>Logs</value>
+  </data>
+  <data name="LogsView_Subtitle" xml:space="preserve">
+    <value>Request traffic routed through the local proxy.</value>
+  </data>
+  <data name="LogsView_ExportTooltip" xml:space="preserve">
+    <value>Export logs</value>
+  </data>
+  <data name="LogsView_RefreshTooltip" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="LogsView_ClearViewTooltip" xml:space="preserve">
+    <value>Clear view</value>
+  </data>
+  <data name="LogsView_DeleteLogFileTooltip" xml:space="preserve">
+    <value>Delete log file</value>
+  </data>
+  <data name="LogsView_TabRequests" xml:space="preserve">
+    <value>Requests</value>
+  </data>
+  <data name="LogsView_TabProxyLogs" xml:space="preserve">
+    <value>Proxy Logs</value>
+  </data>
+  <data name="LogsView_Requests_Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="LogsView_Requests_Success" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="LogsView_Requests_AvgTime" xml:space="preserve">
+    <value>Avg Time</value>
+  </data>
+  <data name="LogsView_Requests_ProviderLabel" xml:space="preserve">
+    <value>Provider</value>
+  </data>
+  <data name="LogsView_Requests_SearchPlaceholder" xml:space="preserve">
+    <value>Search requests...</value>
+  </data>
+  <data name="LogsView_Requests_EmptyTitle" xml:space="preserve">
+    <value>No requests yet.</value>
+  </data>
+  <data name="LogsView_Requests_EmptyDescription" xml:space="preserve">
+    <value>Start the proxy and make a request.</value>
+  </data>
+  <data name="LogsView_Requests_PageLabel" xml:space="preserve">
+    <value>Page {0} of {1}</value>
+  </data>
+  <data name="LogsView_Requests_PrevButton" xml:space="preserve">
+    <value>&lt;- Prev</value>
+  </data>
+  <data name="LogsView_Requests_NextButton" xml:space="preserve">
+    <value>Next -&gt;</value>
+  </data>
+
+  <data name="LogsView_ProxyLogs_SearchPlaceholder" xml:space="preserve">
+    <value>Search logs...</value>
+  </data>
+  <data name="LogsView_ProxyLogs_EmptyTitle" xml:space="preserve">
+    <value>No log lines yet.</value>
+  </data>
+  <data name="LogsView_ProxyLogs_EmptyDescription" xml:space="preserve">
+    <value>Start the proxy to see output.</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       QUOTA VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="QuotaView_Title" xml:space="preserve">
+    <value>Quota</value>
+  </data>
+  <data name="QuotaView_Subtitle" xml:space="preserve">
+    <value>Track quota usage for supported CLIProxyAPI accounts.</value>
+  </data>
+  <data name="QuotaView_RefreshAllTooltip" xml:space="preserve">
+    <value>Refresh all quota providers</value>
+  </data>
+  <data name="QuotaView_NoProviders_Title" xml:space="preserve">
+    <value>No quota providers</value>
+  </data>
+  <data name="QuotaView_NoAccounts_Title" xml:space="preserve">
+    <value>No accounts to show</value>
+  </data>
+  <data name="QuotaView_Account_RefreshTooltip" xml:space="preserve">
+    <value>Refresh quota</value>
+  </data>
+  <data name="QuotaView_Account_UsageSection" xml:space="preserve">
+    <value>USAGE</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       ACTIVITY VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ActivityView_Title" xml:space="preserve">
+    <value>Recent Activity</value>
+  </data>
+  <data name="ActivityView_Subtitle" xml:space="preserve">
+    <value>Requests handled by the local proxy and routed to connected providers.</value>
+  </data>
+  <data name="ActivityView_ClearButton" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       CONFIGURATION VIEW - GENERAL
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ConfigView_TabGeneral" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="ConfigView_TabCLIProxyAPI" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_TabPerplexity" xml:space="preserve">
+    <value>Perplexity</value>
+  </data>
+
+  <data name="ConfigView_General_Title" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="ConfigView_General_Subtitle" xml:space="preserve">
+    <value>App appearance and startup.</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgentSection" xml:space="preserve">
+    <value>TUNNEL AGENT</value>
+  </data>
+  <data name="ConfigView_General_AppSection" xml:space="preserve">
+    <value>APP</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Label" xml:space="preserve">
+    <value>Tunnel Agent</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Installed" xml:space="preserve">
+    <value>Installed: {0}</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Available" xml:space="preserve">
+    <value>{0} available</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Check" xml:space="preserve">
+    <value>Check</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Download" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_AutoCheck_Label" xml:space="preserve">
+    <value>Auto-check for app updates</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_AutoCheck_Description" xml:space="preserve">
+    <value>Check GitHub for a new Tunnel Agent version on startup.</value>
+  </data>
+
+  <data name="ConfigView_General_LaunchAtLogin_Label" xml:space="preserve">
+    <value>Launch at login</value>
+  </data>
+  <data name="ConfigView_General_LaunchAtLogin_Description" xml:space="preserve">
+    <value>Start automatically and stay in the system tray.</value>
+  </data>
+  <data name="ConfigView_General_Theme_Label" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="ConfigView_General_Theme_Description" xml:space="preserve">
+    <value>Follow system theme or force light/dark mode.</value>
+  </data>
+  <data name="ConfigView_General_MaskEmails_Label" xml:space="preserve">
+    <value>Hide sensitive information</value>
+  </data>
+  <data name="ConfigView_General_MaskEmails_Description" xml:space="preserve">
+    <value>Replaces account email addresses with dots to keep them private.</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       CONFIGURATION VIEW - CLIPROXY
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ConfigView_CLIProxy_Title" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Subtitle" xml:space="preserve">
+    <value>Engine version, network, and update settings.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_UpdateSuccess" xml:space="preserve">
+    <value>Successfully updated to {0}</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineSection" xml:space="preserve">
+    <value>ENGINE</value>
+  </data>
+  <data name="ConfigView_CLIProxy_SecuritySection" xml:space="preserve">
+    <value>SECURITY</value>
+  </data>
+  <data name="ConfigView_CLIProxy_NetworkSection" xml:space="preserve">
+    <value>NETWORK</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsSection" xml:space="preserve">
+    <value>LOGS</value>
+  </data>
+
+  <data name="ConfigView_CLIProxy_Engine_Label" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Engine_Installed" xml:space="preserve">
+    <value>Installed: {0}</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Engine_Available" xml:space="preserve">
+    <value>{0} available</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Engine_Check" xml:space="preserve">
+    <value>Check</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Engine_UpdateNow" xml:space="preserve">
+    <value>Update now</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_Label" xml:space="preserve">
+    <value>Engine version</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_Reload" xml:space="preserve">
+    <value>Reload</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_Install" xml:space="preserve">
+    <value>Install</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_Label" xml:space="preserve">
+    <value>Package integrity</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_Description" xml:space="preserve">
+    <value>Downloads are verified before install.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoStart_Label" xml:space="preserve">
+    <value>Auto-start</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoStart_Description" xml:space="preserve">
+    <value>Start this engine automatically when the app launches.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoCheck_Label" xml:space="preserve">
+    <value>Auto-check for updates</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoCheck_Description" xml:space="preserve">
+    <value>Check GitHub for a new engine version on startup.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoUpdate_Label" xml:space="preserve">
+    <value>Auto-update</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoUpdate_Description" xml:space="preserve">
+    <value>Automatically download and install new engine versions.</value>
+  </data>
+
+  <data name="ConfigView_CLIProxy_AuthFolder_Label" xml:space="preserve">
+    <value>Auth files location</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AuthFolder_Description" xml:space="preserve">
+    <value>OAuth tokens and custom provider keys are stored in the app auth folder.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AuthFolder_Open" xml:space="preserve">
+    <value>Open Folder</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ApiKeys_Label" xml:space="preserve">
+    <value>API keys</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ApiKeys_Description" xml:space="preserve">
+    <value>Keys accepted by CLIProxyAPI clients. Agent setup uses the default key.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ApiKeys_Manage" xml:space="preserve">
+    <value>Manage</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ResetCredentials_Label" xml:space="preserve">
+    <value>Reset all credentials</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ResetCredentials_Description" xml:space="preserve">
+    <value>Backs up and removes Tunnel Agent-managed OAuth tokens and API keys.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ResetCredentials_Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+
+  <data name="ConfigView_CLIProxy_RoutingStrategy_Label" xml:space="preserve">
+    <value>Routing strategy</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RoutingStrategy_Description" xml:space="preserve">
+    <value>How requests are distributed across multiple accounts or keys.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ListenPort_Label" xml:space="preserve">
+    <value>Listen port</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ListenPort_Description" xml:space="preserve">
+    <value>Localhost only. Restart required to apply.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ListenPort_Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+
+  <data name="ConfigView_CLIProxy_LogsAutoRefresh_Label" xml:space="preserve">
+    <value>Auto-refresh</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsAutoRefresh_Description" xml:space="preserve">
+    <value>Automatically poll for new log entries in the Logs screen.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsRefreshInterval_Label" xml:space="preserve">
+    <value>Refresh interval</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsRefreshInterval_Description" xml:space="preserve">
+    <value>How often to check for new entries.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsRefreshInterval_Seconds" xml:space="preserve">
+    <value>{0} seconds</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       CONFIGURATION VIEW - PERPLEXITY
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ConfigView_Perplexity_Title" xml:space="preserve">
+    <value>Perplexity</value>
+  </data>
+  <data name="ConfigView_Perplexity_Subtitle" xml:space="preserve">
+    <value>Engine version, port, and session settings.</value>
+  </data>
+  <data name="ConfigView_Perplexity_UpdateSuccess" xml:space="preserve">
+    <value>Successfully updated to {0}</value>
+  </data>
+
+  <data name="ConfigView_Perplexity_Engine_Label" xml:space="preserve">
+    <value>Perplexity WebUI Scraper</value>
+  </data>
+  <data name="ConfigView_Perplexity_Engine_Installed" xml:space="preserve">
+    <value>Installed: {0}</value>
+  </data>
+  <data name="ConfigView_Perplexity_Engine_Available" xml:space="preserve">
+    <value>{0} available</value>
+  </data>
+  <data name="ConfigView_Perplexity_Engine_Check" xml:space="preserve">
+    <value>Check</value>
+  </data>
+  <data name="ConfigView_Perplexity_Engine_UpdateNow" xml:space="preserve">
+    <value>Update now</value>
+  </data>
+
+  <data name="ConfigView_Perplexity_AccountsFolder_Label" xml:space="preserve">
+    <value>Accounts location</value>
+  </data>
+  <data name="ConfigView_Perplexity_AccountsFolder_Description" xml:space="preserve">
+    <value>Session token files are stored in the app settings folder under perplexity-accounts/.</value>
+  </data>
+  <data name="ConfigView_Perplexity_AccountsFolder_Open" xml:space="preserve">
+    <value>Open Folder</value>
+  </data>
+  <data name="ConfigView_Perplexity_ResetAccounts_Label" xml:space="preserve">
+    <value>Reset session accounts</value>
+  </data>
+  <data name="ConfigView_Perplexity_ResetAccounts_Description" xml:space="preserve">
+    <value>Removes all saved Perplexity WebUI session tokens.</value>
+  </data>
+  <data name="ConfigView_Perplexity_ResetAccounts_Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+
+  <data name="ConfigView_Perplexity_ListenPort_Label" xml:space="preserve">
+    <value>Listen port</value>
+  </data>
+  <data name="ConfigView_Perplexity_ListenPort_Description" xml:space="preserve">
+    <value>Localhost only. Restart required to apply.</value>
+  </data>
+  <data name="ConfigView_Perplexity_ListenPort_Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       MISCELLANEOUS
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="Toast_NoUpdateAvailable" xml:space="preserve">
+    <value>No updates available. You are on the latest version.</value>
+  </data>
+  <data name="Toast_AppNoUpdateAvailable" xml:space="preserve">
+    <value>Tunnel Agent is up to date.</value>
+  </data>
+  <data name="Toast_Downloading" xml:space="preserve">
+    <value>Downloading… {0}%</value>
+  </data>
+
+  <data name="ConfigView_General_Language_Label" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="ConfigView_General_Language_Description" xml:space="preserve">
+    <value>Choose the display language.</value>
+  </data>
+  <data name="Dialog_Common_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Dialog_Common_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="QuotaProvidersView_Title" xml:space="preserve">
+    <value>Quota Providers</value>
+  </data>
+  <data name="QuotaProvidersView_Subtitle" xml:space="preserve">
+    <value>Standalone accounts with local quota tracking.</value>
+  </data>
+  <data name="QuotaProvidersView_ScanTooltip" xml:space="preserve">
+    <value>Scan for quota providers</value>
+  </data>
+  <data name="QuotaProvidersView_DetectedChip" xml:space="preserve">
+    <value>detected</value>
+  </data>
+  <data name="QuotaProvidersView_Scanning" xml:space="preserve">
+    <value>scanning…</value>
+  </data>
+  <data name="QuotaProvidersView_NotDetected" xml:space="preserve">
+    <value>Not detected. Install or sign in to</value>
+  </data>
+  <data name="TrayUsagePopup_Title" xml:space="preserve">
+    <value>Tunnel Agent — Usage</value>
+  </data>
+  <data name="TrayUsagePopup_RefreshQuotaTooltip" xml:space="preserve">
+    <value>Refresh quota</value>
+  </data>
+  <data name="TrayUsagePopup_OpenAppTooltip" xml:space="preserve">
+    <value>Open app</value>
+  </data>
+  <data name="TrayUsagePopup_Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="TrayUsagePopup_HomeSubtitle" xml:space="preserve">
+    <value>Engine status and usage at a glance</value>
+  </data>
+  <data name="TrayUsagePopup_Usage" xml:space="preserve">
+    <value>Usage</value>
+  </data>
+  <data name="TrayUsagePopup_UsageSubtitle" xml:space="preserve">
+    <value>AI subscription quotas at a glance</value>
+  </data>
+  <data name="TrayUsagePopup_ListeningOnPort" xml:space="preserve">
+    <value>Listening on port </value>
+  </data>
+  <data name="TrayUsagePopup_StartTooltip" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="TrayUsagePopup_StopTooltip" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="TrayUsagePopup_RestartTooltip" xml:space="preserve">
+    <value>Restart</value>
+  </data>
+  <data name="TrayUsagePopup_CopyEndpointTooltip" xml:space="preserve">
+    <value>Copy endpoint</value>
+  </data>
+  <data name="TrayUsagePopup_RefreshAllTooltip" xml:space="preserve">
+    <value>Refresh all</value>
+  </data>
+  <data name="TrayUsagePopup_NoAccountsToShow" xml:space="preserve">
+    <value>No accounts to show</value>
+  </data>
+  <data name="TrayUsagePopup_ConfigurationTooltip" xml:space="preserve">
+    <value>Configuration</value>
+  </data>
+  <data name="AgentConfigOverlay_AgentsSectionLabel" xml:space="preserve">
+    <value>AGENTS</value>
+  </data>
+  <data name="AgentConfigOverlay_ConfiguredChip" xml:space="preserve">
+    <value>Configured</value>
+  </data>
+  <data name="AgentConfigOverlay_InstalledChip" xml:space="preserve">
+    <value>Installed</value>
+  </data>
+  <data name="AgentConfigOverlay_NotInstalledAgentsHint" xml:space="preserve">
+    <value>{0} agent(s) not installed — install them to configure.</value>
+  </data>
+  <data name="AgentConfigOverlay_ConfigModeSectionLabel" xml:space="preserve">
+    <value>CONFIG MODE</value>
+  </data>
+  <data name="AgentConfigOverlay_AutomaticModeButton" xml:space="preserve">
+    <value>Automatic</value>
+  </data>
+  <data name="AgentConfigOverlay_ManualModeButton" xml:space="preserve">
+    <value>Manual</value>
+  </data>
+  <data name="AgentConfigOverlay_AutomaticModeDescription" xml:space="preserve">
+    <value>Writes config files directly. A backup is created before any changes.</value>
+  </data>
+  <data name="AgentConfigOverlay_ManualModeDescription" xml:space="preserve">
+    <value>Preview the config and copy it manually to the target location.</value>
+  </data>
+  <data name="AgentConfigOverlay_AmpAccessTokenLabel" xml:space="preserve">
+    <value>Amp access token</value>
+  </data>
+  <data name="AgentConfigOverlay_AmpAccessTokenWatermark" xml:space="preserve">
+    <value>your-amp-access-token</value>
+  </data>
+  <data name="AgentConfigOverlay_ShowHideKeyTooltip" xml:space="preserve">
+    <value>Show/hide key</value>
+  </data>
+  <data name="AgentConfigOverlay_AmpAccessTokenHelp" xml:space="preserve">
+    <value>Used to authenticate the Amp CLI. Get it from ampcode.com/settings</value>
+  </data>
+  <data name="AgentConfigOverlay_ModelsEmptyState" xml:space="preserve">
+    <value>Start an engine to load available models.</value>
+  </data>
+  <data name="AgentConfigOverlay_SearchModelsWatermark" xml:space="preserve">
+    <value>Search models</value>
+  </data>
+  <data name="AgentConfigOverlay_SelectAllModels" xml:space="preserve">
+    <value>Select all</value>
+  </data>
+  <data name="AgentConfigOverlay_NoModelSearchResults" xml:space="preserve">
+    <value>No models match your search.</value>
+  </data>
+  <data name="AgentConfigOverlay_ProxyEndpointSectionLabel" xml:space="preserve">
+    <value>PROXY ENDPOINT</value>
+  </data>
+  <data name="AgentConfigOverlay_ConfigPreviewSectionLabel" xml:space="preserve">
+    <value>CONFIG PREVIEW</value>
+  </data>
+  <data name="AgentConfigOverlay_CancelButton" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="AgentConfigOverlay_CopyAllButton" xml:space="preserve">
+    <value>Copy All</value>
+  </data>
+  <data name="AgentConfigOverlay_DoneButton" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="ApiKeysOverlay_Title" xml:space="preserve">
+    <value>CLIProxyAPI keys</value>
+  </data>
+  <data name="ApiKeysOverlay_Description" xml:space="preserve">
+    <value>Keys accepted by CLIProxyAPI clients. Agent setup uses the default key; leave empty for no auth.</value>
+  </data>
+  <data name="ApiKeysOverlay_DefaultChip" xml:space="preserve">
+    <value>default</value>
+  </data>
+  <data name="ApiKeysOverlay_UseButton" xml:space="preserve">
+    <value>Use</value>
+  </data>
+  <data name="ApiKeysOverlay_RemoveKeyTooltip" xml:space="preserve">
+    <value>Remove key</value>
+  </data>
+  <data name="ApiKeysOverlay_AddKeyLabel" xml:space="preserve">
+    <value>Add key</value>
+  </data>
+  <data name="ApiKeysOverlay_ShowHideKeyTooltip" xml:space="preserve">
+    <value>Show/hide key</value>
+  </data>
+  <data name="ApiKeysOverlay_CloseButton" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="ApiKeysOverlay_AddKeyButton" xml:space="preserve">
+    <value>Add key</value>
+  </data>
+  <data name="Agent_claude-code_Description" xml:space="preserve">
+    <value>Anthropic's official CLI coding agent.</value>
+  </data>
+  <data name="Agent_codex_Description" xml:space="preserve">
+    <value>OpenAI Codex command-line interface.</value>
+  </data>
+  <data name="Agent_gemini-cli_Description" xml:space="preserve">
+    <value>Google Gemini CLI coding agent.</value>
+  </data>
+  <data name="Agent_amp_Description" xml:space="preserve">
+    <value>Sourcegraph's Amp coding assistant.</value>
+  </data>
+  <data name="Agent_opencode_Description" xml:space="preserve">
+    <value>Open-source AI coding agent.</value>
+  </data>
+  <data name="Agent_aider_Description" xml:space="preserve">
+    <value>AI pair programming in the terminal. Install via pip.</value>
+  </data>
+  <data name="Agent_pi_Description" xml:space="preserve">
+    <value>Pi coding agent by pi.dev.</value>
+  </data>
+  <data name="Agent_factory-droid_Description" xml:space="preserve">
+    <value>Factory's AI coding agent.</value>
+  </data>
+  <data name="AgentsView_Agent_ConfigureButton" xml:space="preserve">
+    <value>Configure</value>
+  </data>
+  <data name="AgentsView_Agent_ReconfigureButton" xml:space="preserve">
+    <value>Reconfigure</value>
+  </data>
+  <data name="Provider_cliproxyapi_Description" xml:space="preserve">
+    <value>Unified proxy for OAuth and OpenAI-compatible upstream providers.</value>
+  </data>
+  <data name="Provider_perplexity-webui-scraper_Description" xml:space="preserve">
+    <value>OpenAI-compatible local API backed by Perplexity WebUI sessions.</value>
+  </data>
+  <data name="ProvidersView_Provider_ConnectedAccountSingular" xml:space="preserve">
+    <value>{0} connected account</value>
+  </data>
+  <data name="ProvidersView_Provider_ConnectedAccountPlural" xml:space="preserve">
+    <value>{0} connected accounts</value>
+  </data>
+  <data name="AgentConfigOverlay_BulkTitle" xml:space="preserve">
+    <value>Configure Agents</value>
+  </data>
+  <data name="AgentConfigOverlay_SingleTitle" xml:space="preserve">
+    <value>Configure {0}</value>
+  </data>
+  <data name="AgentConfigOverlay_SingleFallbackTitle" xml:space="preserve">
+    <value>Configure Agent</value>
+  </data>
+  <data name="AgentConfigOverlay_BulkDescription" xml:space="preserve">
+    <value>Choose installed agents, then apply shared config.</value>
+  </data>
+  <data name="AgentConfigOverlay_ApplyButton" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="AgentConfigOverlay_ApplySelectedButton" xml:space="preserve">
+    <value>Apply ({0})</value>
+  </data>
+</root>

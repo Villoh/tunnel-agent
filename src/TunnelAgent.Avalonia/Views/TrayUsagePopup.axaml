@@ -3,10 +3,11 @@
         xmlns:vm="using:TunnelAgent.ViewModels"
         xmlns:cv="using:TunnelAgent.Converters"
         xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+        xmlns:l="using:TunnelAgent.Services"
         x:Class="TunnelAgent.Views.TrayUsagePopup"
         x:Name="Root"
         x:DataType="vm:MainWindowViewModel"
-        Title="Tunnel Agent — Usage"
+        Title="{l:Loc TrayUsagePopup_Title}"
         Width="460" Height="540"
         CanResize="False"
         ShowInTaskbar="False"
@@ -49,7 +50,7 @@
                                 Classes="icon engine-restart"
                                 Margin="6,0,0,0"
                                 Width="24" Height="24"
-                                ToolTip.Tip="Refresh quota"
+                                ToolTip.Tip="{l:Loc TrayUsagePopup_RefreshQuotaTooltip}"
                                 Click="OnRefreshQuota"
                                 Tag="{Binding}">
                             <lucide:PackIconLucide Kind="RefreshCw" Width="13" Height="13"
@@ -142,7 +143,7 @@
                 <!-- Open app (bottom) -->
                 <Button DockPanel.Dock="Bottom"
                         Classes="rail"
-                        ToolTip.Tip="Open app"
+                        ToolTip.Tip="{l:Loc TrayUsagePopup_OpenAppTooltip}"
                         ToolTip.Placement="Right"
                         ToolTip.HorizontalOffset="8"
                         Click="OnOpenMainWindow"
@@ -180,7 +181,7 @@
                             <!-- Home / engines -->
                             <Button x:Name="HomeButton"
                                     Classes="rail"
-                                    ToolTip.Tip="Home"
+                                    ToolTip.Tip="{l:Loc TrayUsagePopup_Home}"
                                     Click="OnHomeClick">
                                 <Panel Width="34" Height="34">
                                     <lucide:PackIconLucide Kind="House" Width="18" Height="18"
@@ -229,14 +230,14 @@
                 <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="16,14,12,10">
                     <StackPanel VerticalAlignment="Center"
                                 IsVisible="{Binding TrayHomeSelected}">
-                        <TextBlock Text="Home" Classes="page-title" FontSize="16" />
-                        <TextBlock Text="Engine status and usage at a glance"
+                        <TextBlock Text="{l:Loc TrayUsagePopup_Home}" Classes="page-title" FontSize="16" />
+                        <TextBlock Text="{l:Loc TrayUsagePopup_HomeSubtitle}"
                                    Classes="page-sub" FontSize="11" />
                     </StackPanel>
                     <StackPanel VerticalAlignment="Center"
                                 IsVisible="{Binding TrayHomeSelected, Converter={StaticResource InvertBool}}">
-                        <TextBlock Text="Usage" Classes="page-title" FontSize="16" />
-                        <TextBlock Text="AI subscription quotas at a glance"
+                        <TextBlock Text="{l:Loc TrayUsagePopup_Usage}" Classes="page-title" FontSize="16" />
+                        <TextBlock Text="{l:Loc TrayUsagePopup_UsageSubtitle}"
                                    Classes="page-sub" FontSize="11" />
                     </StackPanel>
                 </Grid>
@@ -297,27 +298,27 @@
                                     <StackPanel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
                                         <TextBlock Classes="row-label" Text="CLIProxyAPI" />
                                         <TextBlock Classes="row-desc">
-                                            <Run Text="Listening on port " />
+                                            <Run Text="{l:Loc TrayUsagePopup_ListeningOnPort}" />
                                             <Run Text="{Binding CliProxyPort}" />
                                         </TextBlock>
                                     </StackPanel>
                                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
                                         <Panel Width="26" Height="26">
                                             <Button Classes="icon-btn engine-action start" Tag="cliproxyapi" Click="OnEngineStart"
-                                                    ToolTip.Tip="Start"
+                                                    ToolTip.Tip="{l:Loc TrayUsagePopup_StartTooltip}"
                                                     Opacity="{Binding CliProxyServerState, Converter={StaticResource StateToOpacity}, ConverterParameter=Invert}"
                                                     IsHitTestVisible="{Binding CliProxyServerState, Converter={StaticResource StateIsRunning}, ConverterParameter=Invert}">
                                                 <lucide:PackIconLucide Kind="Play" Width="12" Height="12" Margin="1,0,0,0" />
                                             </Button>
                                             <Button Classes="icon-btn engine-action stop" Tag="cliproxyapi" Click="OnEngineStop"
-                                                    ToolTip.Tip="Stop"
+                                                    ToolTip.Tip="{l:Loc TrayUsagePopup_StopTooltip}"
                                                     Opacity="{Binding CliProxyServerState, Converter={StaticResource StateToOpacity}}"
                                                     IsHitTestVisible="{Binding CliProxyServerState, Converter={StaticResource StateIsRunning}}">
                                                 <lucide:PackIconLucide Kind="Square" Width="10" Height="10" />
                                             </Button>
                                         </Panel>
                                         <Button Classes="icon engine-restart" Tag="cliproxyapi" Click="OnEngineRestart"
-                                                ToolTip.Tip="Restart"
+                                                ToolTip.Tip="{l:Loc TrayUsagePopup_RestartTooltip}"
                                                 IsEnabled="{Binding CliProxyServerState, Converter={StaticResource StateIsRunning}}">
                                             <lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14" />
                                         </Button>
@@ -334,7 +335,7 @@
                                     </Border>
                                     <Button Classes="icon-btn copy-endpoint"
                                             Tag="{Binding CliProxyEndpointUrl}"
-                                            ToolTip.Tip="Copy endpoint"
+                                            ToolTip.Tip="{l:Loc TrayUsagePopup_CopyEndpointTooltip}"
                                             Click="OnCopyEndpoint">
                                         <Panel>
                                             <lucide:PackIconLucide Classes="copy" Kind="Copy" Width="13" Height="13" />
@@ -359,27 +360,27 @@
                                     <StackPanel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
                                         <TextBlock Classes="row-label" Text="Perplexity" />
                                         <TextBlock Classes="row-desc">
-                                            <Run Text="Listening on port " />
+                                            <Run Text="{l:Loc TrayUsagePopup_ListeningOnPort}" />
                                             <Run Text="{Binding PerplexityPort}" />
                                         </TextBlock>
                                     </StackPanel>
                                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
                                         <Panel Width="26" Height="26">
                                             <Button Classes="icon-btn engine-action start" Tag="perplexity-webui-scraper" Click="OnEngineStart"
-                                                    ToolTip.Tip="Start"
+                                                    ToolTip.Tip="{l:Loc TrayUsagePopup_StartTooltip}"
                                                     Opacity="{Binding PerplexityServerState, Converter={StaticResource StateToOpacity}, ConverterParameter=Invert}"
                                                     IsHitTestVisible="{Binding PerplexityServerState, Converter={StaticResource StateIsRunning}, ConverterParameter=Invert}">
                                                 <lucide:PackIconLucide Kind="Play" Width="12" Height="12" Margin="1,0,0,0" />
                                             </Button>
                                             <Button Classes="icon-btn engine-action stop" Tag="perplexity-webui-scraper" Click="OnEngineStop"
-                                                    ToolTip.Tip="Stop"
+                                                    ToolTip.Tip="{l:Loc TrayUsagePopup_StopTooltip}"
                                                     Opacity="{Binding PerplexityServerState, Converter={StaticResource StateToOpacity}}"
                                                     IsHitTestVisible="{Binding PerplexityServerState, Converter={StaticResource StateIsRunning}}">
                                                 <lucide:PackIconLucide Kind="Square" Width="10" Height="10" />
                                             </Button>
                                         </Panel>
                                         <Button Classes="icon engine-restart" Tag="perplexity-webui-scraper" Click="OnEngineRestart"
-                                                ToolTip.Tip="Restart"
+                                                ToolTip.Tip="{l:Loc TrayUsagePopup_RestartTooltip}"
                                                 IsEnabled="{Binding PerplexityServerState, Converter={StaticResource StateIsRunning}}">
                                             <lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14" />
                                         </Button>
@@ -396,7 +397,7 @@
                                     </Border>
                                     <Button Classes="icon-btn copy-endpoint"
                                             Tag="{Binding PerplexityEndpointUrl}"
-                                            ToolTip.Tip="Copy endpoint"
+                                            ToolTip.Tip="{l:Loc TrayUsagePopup_CopyEndpointTooltip}"
                                             Click="OnCopyEndpoint">
                                         <Panel>
                                             <lucide:PackIconLucide Classes="copy" Kind="Copy" Width="13" Height="13" />
@@ -409,12 +410,12 @@
 
                         <!-- Usage section -->
                         <Grid ColumnDefinitions="*,Auto" Margin="2,8,0,0">
-                            <TextBlock Text="Usage" Classes="section-label" Margin="0"
+                            <TextBlock Text="{l:Loc TrayUsagePopup_Usage}" Classes="section-label" Margin="0"
                                        VerticalAlignment="Center" />
                             <Button Grid.Column="1"
                                     Classes="icon"
                                     VerticalAlignment="Center"
-                                    ToolTip.Tip="Refresh all"
+                                    ToolTip.Tip="{l:Loc TrayUsagePopup_RefreshAllTooltip}"
                                     IsEnabled="{Binding HasQuotaAccounts}"
                                     Click="OnRefreshAll">
                                 <lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14"
@@ -429,7 +430,7 @@
                                 <lucide:PackIconLucide Kind="UserRoundX" Width="26" Height="26"
                                                        Foreground="{DynamicResource FgFaintBrush}"
                                                        HorizontalAlignment="Center" />
-                                <TextBlock Classes="row-label" Text="No accounts to show"
+                                <TextBlock Classes="row-label" Text="{l:Loc TrayUsagePopup_NoAccountsToShow}"
                                            HorizontalAlignment="Center" />
                                 <TextBlock Classes="row-desc"
                                            Text="{Binding QuotaEmptyStateText}"
@@ -487,7 +488,7 @@
                         </TextBlock>
                         <Button Grid.Column="1"
                                 Classes="icon"
-                                ToolTip.Tip="Configuration"
+                                ToolTip.Tip="{l:Loc TrayUsagePopup_ConfigurationTooltip}"
                                 ToolTip.Placement="Top"
                                 ToolTip.VerticalOffset="-8"
                                 Click="OnOpenConfig">

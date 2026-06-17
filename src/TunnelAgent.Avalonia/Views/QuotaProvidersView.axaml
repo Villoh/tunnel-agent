@@ -4,6 +4,7 @@
              xmlns:cv="using:TunnelAgent.Converters"
              xmlns:si="using:IconPacks.Avalonia.SimpleIcons"
              xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+             xmlns:l="using:TunnelAgent.Services"
              x:Class="TunnelAgent.Views.QuotaProvidersView"
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Resources>
@@ -16,12 +17,12 @@
 
         <Grid Margin="0,0,0,16" ColumnDefinitions="*,Auto">
             <StackPanel>
-                <TextBlock Classes="page-title" Text="Quota Providers" />
-                <TextBlock Classes="page-sub" Text="Standalone accounts with local quota tracking." />
+                <TextBlock Classes="page-title" Text="{l:Loc QuotaProvidersView_Title}" />
+                <TextBlock Classes="page-sub" Text="{l:Loc QuotaProvidersView_Subtitle}" />
             </StackPanel>
             <Button Grid.Column="1"
                     Classes="icon-btn"
-                    ToolTip.Tip="Scan for quota providers"
+                    ToolTip.Tip="{l:Loc QuotaProvidersView_ScanTooltip}"
                     VerticalAlignment="Bottom"
                     Command="{Binding ScanQuotaProvidersCommand}">
                 <lucide:PackIconLucide Kind="ScanSearch" Width="14" Height="14"
@@ -62,11 +63,11 @@
                                     <TextBlock Classes="row-label" Text="{Binding Name}" />
                                     <Border Classes="chip" Background="{DynamicResource AccentSoftBrush}"
                                             IsVisible="{Binding IsDetected}">
-                                        <TextBlock Text="detected" Foreground="{DynamicResource AccentBrush}" />
+                                        <TextBlock Text="{l:Loc QuotaProvidersView_DetectedChip}" Foreground="{DynamicResource AccentBrush}" />
                                     </Border>
                                     <Border Classes="chip" Background="#14000000"
                                             IsVisible="{Binding IsScanning}">
-                                        <TextBlock Text="scanning…" Foreground="{DynamicResource FgMutedBrush}" />
+                                        <TextBlock Text="{l:Loc QuotaProvidersView_Scanning}" Foreground="{DynamicResource FgMutedBrush}" />
                                     </Border>
                                 </StackPanel>
                                 <!-- Detected: show email or plan, Undetected: show description -->
@@ -77,7 +78,7 @@
                                 <TextBlock Classes="row-desc"
                                            IsVisible="{Binding IsDetected, Converter={StaticResource InvertBool}}"
                                            Foreground="{DynamicResource FgMutedBrush}">
-                                    <Run Text="Not detected. Install or sign in to" />
+                                    <Run Text="{l:Loc QuotaProvidersView_NotDetected}" />
                                     <Run Text="{Binding Name}" />
                                 </TextBlock>
                             </StackPanel>
