@@ -1057,7 +1057,11 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         _ => "Stopped"
     };
 
-    private void UpdateBadgeState() => ConfigHasBadge = (FocusedConfigEngine.UpdateAvailable && !AutoUpdate) || AppUpdateAvailable;
+    private void UpdateBadgeState()
+    {
+        var anyEngineUpdateAvailable = _engineRegistry.Engines.Any(engine => engine.UpdateAvailable);
+        ConfigHasBadge = (anyEngineUpdateAvailable && !AutoUpdate) || AppUpdateAvailable;
+    }
 
     private void RefreshSettingsBindings()
     {

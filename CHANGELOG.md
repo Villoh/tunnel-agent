@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Engine update toast layout** (`Views/MainWindow.axaml`): the toast title can wrap to two lines so longer localized titles (for example Spanish) are not clipped.
 
+### Fixed
+
+- **Configuration update badge** (`MainWindowViewModel`): the orange update indicator now stays visible when any managed engine has an available update, instead of disappearing when switching focus to another engine tab.
+
 ## [0.6.3] - 2026-06-17
 
 ### Changed
