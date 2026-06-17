@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Tray usage popup primary action** (`Views/TrayUsagePopup.axaml`): **Open app** moved from the footer to the bottom of the left rail (always visible) as the popup's primary action, and **Configuration** moved to the footer, since opening the full app is the more common action.
 
-- **Tray usage popup quota navigation** (`Views/TrayUsagePopup.axaml(.cs)`, `MainWindowViewModel`): the left rail now offers a permanent **Usage** button plus the per-provider icons. **Usage** opens an aggregated view listing every connected provider with accounts — each as a section (icon + name) with its accounts, plan badges and quota bars — while each provider icon still drills into that single provider. When no accounts are connected only **Usage** remains and it shows a **No accounts to show** empty state, matching the main Quota window (previously the Usage view was unreachable with no accounts, so the popup showed nothing). A new `TrayUsageAllSelected` flag distinguishes the aggregated view from a single selected provider.
+- **Tray usage popup Home view** (`Views/TrayUsagePopup.axaml(.cs)`, `MainWindowViewModel`): the popup now opens on **Home**, which combines the engine status/controls with a **Usage** section below listing every connected provider and its quota usage (plan badge, usage bars, per-account and refresh-all controls), or a **No accounts to show** empty state when nothing is connected. The separate Usage rail button was dropped — the per-provider rail icons still drill into a single provider's quota. This makes Home a single at-a-glance dashboard and matches the main Quota window's empty state.
 
 ### Fixed
 

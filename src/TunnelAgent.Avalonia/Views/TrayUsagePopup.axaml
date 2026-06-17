@@ -188,17 +188,6 @@
                                 </Panel>
                             </Button>
 
-                            <!-- Usage / quotas (all connected providers) -->
-                            <Button x:Name="UsageButton"
-                                    Classes="rail"
-                                    ToolTip.Tip="Usage"
-                                    Click="OnUsageClick">
-                                <Panel Width="34" Height="34">
-                                    <lucide:PackIconLucide Kind="ChartBar" Width="18" Height="18"
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Panel>
-                            </Button>
-
                             <!-- One button per connected provider -->
                             <ItemsControl x:Name="ProviderItems" ItemsSource="{Binding QuotaProvidersForRail}">
                                 <ItemsControl.ItemTemplate>
@@ -239,27 +228,17 @@
                 <!-- Header -->
                 <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="16,14,12,10">
                     <StackPanel VerticalAlignment="Center"
+                                IsVisible="{Binding TrayHomeSelected}">
+                        <TextBlock Text="Home" Classes="page-title" FontSize="16" />
+                        <TextBlock Text="Engine status and usage at a glance"
+                                   Classes="page-sub" FontSize="11" />
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Center"
                                 IsVisible="{Binding TrayHomeSelected, Converter={StaticResource InvertBool}}">
                         <TextBlock Text="Usage" Classes="page-title" FontSize="16" />
                         <TextBlock Text="AI subscription quotas at a glance"
                                    Classes="page-sub" FontSize="11" />
                     </StackPanel>
-                    <StackPanel VerticalAlignment="Center"
-                                IsVisible="{Binding TrayHomeSelected}">
-                        <TextBlock Text="Engines" Classes="page-title" FontSize="16" />
-                        <TextBlock Text="Local engine status and controls"
-                                   Classes="page-sub" FontSize="11" />
-                    </StackPanel>
-                    <Button Grid.Column="1"
-                            Classes="icon"
-                            VerticalAlignment="Center"
-                            ToolTip.Tip="Refresh all"
-                            IsVisible="{Binding TrayHomeSelected, Converter={StaticResource InvertBool}}"
-                            IsEnabled="{Binding HasQuotaAccounts}"
-                            Click="OnRefreshAll">
-                        <lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14"
-                                               Classes.spin="{Binding IsRefreshingAllQuotaProviders}" />
-                    </Button>
                 </Grid>
 
                 <!-- Selected provider quota -->
@@ -269,86 +248,31 @@
                               HorizontalScrollBarVisibility="Disabled"
                               VerticalScrollBarVisibility="Auto">
                     <StackPanel Spacing="0" Margin="14,0,16,0">
-
-                        <!-- Empty: no connected accounts at all -->
-                        <Border Classes="card" Padding="20" Margin="0,4,0,0"
-                                IsVisible="{Binding HasQuotaAccounts, Converter={StaticResource InvertBool}}">
-                            <StackPanel Spacing="8" HorizontalAlignment="Center">
-                                <lucide:PackIconLucide Kind="UserRoundX" Width="26" Height="26"
-                                                       Foreground="{DynamicResource FgFaintBrush}"
-                                                       HorizontalAlignment="Center" />
-                                <TextBlock Classes="row-label" Text="No accounts to show"
-                                           HorizontalAlignment="Center" />
-                                <TextBlock Classes="row-desc"
-                                           Text="{Binding QuotaEmptyStateText}"
-                                           TextAlignment="Center" TextWrapping="Wrap" MaxWidth="260" />
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Aggregated: all connected providers (Usage button) -->
-                        <ItemsControl ItemsSource="{Binding QuotaProvidersForRail}"
-                                      IsVisible="{Binding TrayUsageAllSelected}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="vm:ProviderViewModel">
-                                    <StackPanel Spacing="0">
-                                        <!-- Provider header -->
-                                        <StackPanel Orientation="Horizontal" Spacing="9" Margin="0,8,0,10"
-                                                    VerticalAlignment="Center">
-                                            <Panel Width="24" Height="24">
-                                                <Image Source="{Binding SvgIcon}"
-                                                       Width="22" Height="22" Stretch="Uniform"
-                                                       IsVisible="{Binding HasSvgIcon}" />
-                                                <Border IsVisible="{Binding HasSvgIcon, Converter={StaticResource InvertBool}}"
-                                                        Width="24" Height="24" CornerRadius="7"
-                                                        Background="{Binding LogoColor, Converter={StaticResource HexBrush}}">
-                                                    <TextBlock Text="{Binding Initials}" Foreground="White"
-                                                               FontSize="10" FontWeight="SemiBold"
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                </Border>
-                                            </Panel>
-                                            <TextBlock Text="{Binding Name}"
-                                                       FontSize="15" FontWeight="SemiBold"
-                                                       Foreground="{DynamicResource FgBrush}"
-                                                       VerticalAlignment="Center" />
-                                        </StackPanel>
-
-                                        <!-- Provider accounts -->
-                                        <ItemsControl ItemsSource="{Binding Accounts}"
-                                                      ItemTemplate="{StaticResource QuotaAccountCard}" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-
-                        <!-- Single provider (provider rail button) -->
-                        <StackPanel Spacing="0"
-                                    IsVisible="{Binding TrayUsageAllSelected, Converter={StaticResource InvertBool}}">
-                            <!-- Selected provider header -->
-                            <StackPanel Orientation="Horizontal" Spacing="9" Margin="0,8,0,12"
-                                        VerticalAlignment="Center"
-                                        IsVisible="{Binding HasSelectedQuotaAccounts}">
-                                <Panel Width="24" Height="24">
-                                    <Image Source="{Binding SelectedQuotaProvider.SvgIcon}"
-                                           Width="22" Height="22" Stretch="Uniform"
-                                           IsVisible="{Binding SelectedQuotaProvider.HasSvgIcon}" />
-                                    <Border IsVisible="{Binding !SelectedQuotaProvider.HasSvgIcon}"
-                                            Width="24" Height="24" CornerRadius="7"
-                                            Background="{Binding SelectedQuotaProvider.LogoColor, Converter={StaticResource HexBrush}}">
-                                        <TextBlock Text="{Binding SelectedQuotaProvider.Initials}" Foreground="White"
-                                                   FontSize="10" FontWeight="SemiBold"
-                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    </Border>
-                                </Panel>
-                                <TextBlock Text="{Binding SelectedQuotaProvider.Name}"
-                                           FontSize="15" FontWeight="SemiBold"
-                                           Foreground="{DynamicResource FgBrush}"
-                                           VerticalAlignment="Center" />
-                            </StackPanel>
-
-                            <!-- Selected provider accounts -->
-                            <ItemsControl ItemsSource="{Binding SelectedQuotaAccounts}"
-                                          ItemTemplate="{StaticResource QuotaAccountCard}" />
+                        <!-- Selected provider header -->
+                        <StackPanel Orientation="Horizontal" Spacing="9" Margin="0,8,0,12"
+                                    VerticalAlignment="Center"
+                                    IsVisible="{Binding HasSelectedQuotaAccounts}">
+                            <Panel Width="24" Height="24">
+                                <Image Source="{Binding SelectedQuotaProvider.SvgIcon}"
+                                       Width="22" Height="22" Stretch="Uniform"
+                                       IsVisible="{Binding SelectedQuotaProvider.HasSvgIcon}" />
+                                <Border IsVisible="{Binding !SelectedQuotaProvider.HasSvgIcon}"
+                                        Width="24" Height="24" CornerRadius="7"
+                                        Background="{Binding SelectedQuotaProvider.LogoColor, Converter={StaticResource HexBrush}}">
+                                    <TextBlock Text="{Binding SelectedQuotaProvider.Initials}" Foreground="White"
+                                               FontSize="10" FontWeight="SemiBold"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                            </Panel>
+                            <TextBlock Text="{Binding SelectedQuotaProvider.Name}"
+                                       FontSize="15" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource FgBrush}"
+                                       VerticalAlignment="Center" />
                         </StackPanel>
+
+                        <!-- Selected provider accounts -->
+                        <ItemsControl ItemsSource="{Binding SelectedQuotaAccounts}"
+                                      ItemTemplate="{StaticResource QuotaAccountCard}" />
                     </StackPanel>
                 </ScrollViewer>
 
@@ -482,6 +406,70 @@
                                 </StackPanel>
                             </StackPanel>
                         </Border>
+
+                        <!-- Usage section -->
+                        <Grid ColumnDefinitions="*,Auto" Margin="2,8,0,0">
+                            <TextBlock Text="Usage" Classes="section-label" Margin="0"
+                                       VerticalAlignment="Center" />
+                            <Button Grid.Column="1"
+                                    Classes="icon"
+                                    VerticalAlignment="Center"
+                                    ToolTip.Tip="Refresh all"
+                                    IsEnabled="{Binding HasQuotaAccounts}"
+                                    Click="OnRefreshAll">
+                                <lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14"
+                                                       Classes.spin="{Binding IsRefreshingAllQuotaProviders}" />
+                            </Button>
+                        </Grid>
+
+                        <!-- Empty: no connected accounts at all -->
+                        <Border Classes="card" Padding="20"
+                                IsVisible="{Binding HasQuotaAccounts, Converter={StaticResource InvertBool}}">
+                            <StackPanel Spacing="8" HorizontalAlignment="Center">
+                                <lucide:PackIconLucide Kind="UserRoundX" Width="26" Height="26"
+                                                       Foreground="{DynamicResource FgFaintBrush}"
+                                                       HorizontalAlignment="Center" />
+                                <TextBlock Classes="row-label" Text="No accounts to show"
+                                           HorizontalAlignment="Center" />
+                                <TextBlock Classes="row-desc"
+                                           Text="{Binding QuotaEmptyStateText}"
+                                           TextAlignment="Center" TextWrapping="Wrap" MaxWidth="260" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Aggregated: all connected providers -->
+                        <ItemsControl ItemsSource="{Binding QuotaProvidersForRail}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ProviderViewModel">
+                                    <StackPanel Spacing="0">
+                                        <!-- Provider header -->
+                                        <StackPanel Orientation="Horizontal" Spacing="9" Margin="0,2,0,10"
+                                                    VerticalAlignment="Center">
+                                            <Panel Width="24" Height="24">
+                                                <Image Source="{Binding SvgIcon}"
+                                                       Width="22" Height="22" Stretch="Uniform"
+                                                       IsVisible="{Binding HasSvgIcon}" />
+                                                <Border IsVisible="{Binding HasSvgIcon, Converter={StaticResource InvertBool}}"
+                                                        Width="24" Height="24" CornerRadius="7"
+                                                        Background="{Binding LogoColor, Converter={StaticResource HexBrush}}">
+                                                    <TextBlock Text="{Binding Initials}" Foreground="White"
+                                                               FontSize="10" FontWeight="SemiBold"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                            </Panel>
+                                            <TextBlock Text="{Binding Name}"
+                                                       FontSize="15" FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource FgBrush}"
+                                                       VerticalAlignment="Center" />
+                                        </StackPanel>
+
+                                        <!-- Provider accounts -->
+                                        <ItemsControl ItemsSource="{Binding Accounts}"
+                                                      ItemTemplate="{StaticResource QuotaAccountCard}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
                 </ScrollViewer>
 

@@ -1752,25 +1752,14 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         FocusedConfigEngineId = EngineCatalog.CliProxyApi.Id;
     }
 
-    /// <summary>True when the tray usage popup is showing the Home (engines) view instead of provider quota.</summary>
-    [ObservableProperty] private bool _trayHomeSelected;
-
-    /// <summary>True when the tray usage popup is showing the aggregated Usage view (all connected providers) instead of a single provider.</summary>
-    [ObservableProperty] private bool _trayUsageAllSelected;
-
-    [RelayCommand]
-    private void SelectTrayUsageAll()
-    {
-        TrayHomeSelected = false;
-        TrayUsageAllSelected = true;
-    }
+    /// <summary>True when the tray usage popup is showing the Home view (engines + aggregated usage) instead of a single provider's quota.</summary>
+    [ObservableProperty] private bool _trayHomeSelected = true;
 
     [RelayCommand]
     private void SelectQuotaProvider(ProviderViewModel provider)
     {
         if (!IsQuotaSupportedProvider(provider) && !StandaloneQuotaProviders.Contains(provider)) return;
         TrayHomeSelected = false;
-        TrayUsageAllSelected = false;
         SelectedQuotaProvider = provider;
     }
 
