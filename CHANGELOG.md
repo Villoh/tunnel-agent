@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.3] - 2026-06-17
+
 ### Changed
 
 - **Tray usage popup primary action** (`Views/TrayUsagePopup.axaml`): **Open app** moved from the footer to the bottom of the left rail (always visible) as the popup's primary action, and **Configuration** moved to the footer, since opening the full app is the more common action.
