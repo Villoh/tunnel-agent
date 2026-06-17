@@ -33,6 +33,10 @@ public sealed class LocalizationService : INotifyPropertyChanged
     [
         new LanguageOption("en-US", "English"),
         new LanguageOption("es-ES", "Español"),
+        new LanguageOption("fr-FR", "Français"),
+        new LanguageOption("de-DE", "Deutsch"),
+        new LanguageOption("zh-CN", "简体中文"),
+        new LanguageOption("ja-JP", "日本語"),
     ];
 
     /// <summary>Returns the localized string for <paramref name="key"/>, or <c>[key]</c> when missing.</summary>

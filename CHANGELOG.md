@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Spanish localization and language selector** (`Resources/Strings*.resx`, `Services/LocalizationService.cs`, `Services/LocExtension.cs`, `Views/*.axaml`): added runtime English/Spanish localization across the Avalonia UI, including the new **Language** combo under Configuration → General → Theme, persisted language preference, localized formatted strings, provider/agent descriptions, tray popup, overlays, dialogs, and quota/provider views.
+- **Runtime localization and language selector** (`Resources/Strings*.resx`, `Services/LocalizationService.cs`, `Services/LocExtension.cs`, `Views/*.axaml`): added runtime localization across the Avalonia UI for English, Spanish, French, German, Simplified Chinese, and Japanese, including the new **Language** combo under Configuration → General → Theme, persisted language preference, localized formatted strings, provider/agent descriptions, tray popup, overlays, dialogs, and quota/provider views.
 
 ### Changed
 
@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Configuration update badge** (`MainWindowViewModel`): the orange update indicator now stays visible when any managed engine has an available update, instead of disappearing when switching focus to another engine tab.
+
+- **Sliding tab localization refresh** (`Controls/SlidingTabBar.cs`): tab titles and tooltips now stay bound to their localized headers, so configuration tabs such as **General** update when the language changes.
 
 ## [0.6.3] - 2026-06-17
 

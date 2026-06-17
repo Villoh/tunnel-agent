@@ -5,6 +5,7 @@ using Avalonia.Animation;
 using Avalonia.Animation.Easings;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
+using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Controls.Presenters;
@@ -156,7 +157,8 @@ public class SlidingTabBar : Panel
             var tab = Tabs[i];
             var idx = i;
 
-            var label = new TextBlock { Text = tab.Header, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis };
+            var label = new TextBlock { VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis };
+            label.Bind(TextBlock.TextProperty, new Binding(nameof(SlidingTab.Header)) { Source = tab });
             Control content = label;
             PackIconSimpleIcons? icon = null;
             Path? customPath = null;
@@ -200,7 +202,7 @@ public class SlidingTabBar : Panel
                 FontSize = 13,
                 Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand),
                 [Grid.ColumnProperty] = idx,
-                [ToolTip.TipProperty] = tab.Header,
+                [!ToolTip.TipProperty] = new Binding(nameof(SlidingTab.Header)) { Source = tab },
             };
 
             // Subtle hover/press — same feel as sidebar buttons
