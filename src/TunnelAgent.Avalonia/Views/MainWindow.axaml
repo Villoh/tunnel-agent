@@ -705,7 +705,10 @@
                     Width="400">
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Grid.Column="0" Spacing="2">
-                        <TextBlock Classes="row-label" Text="{l:Loc Toast_EngineUpdateAvailable_Title}"/>
+                        <TextBlock Classes="row-label"
+                                   Text="{l:Loc Toast_EngineUpdateAvailable_Title}"
+                                   TextWrapping="Wrap"
+                                   MaxLines="2" />
                         <TextBlock Classes="row-desc"
                                    Text="{Binding UpdateToastText}" />
                     </StackPanel>

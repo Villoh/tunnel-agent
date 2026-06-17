@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Localization infrastructure** (`Resources/Strings*.resx`, `Services/LocExtension.cs`): replaced hardcoded UI text with `{l:Loc ...}` / `{l:LocFormat ...}` bindings backed by resx resources, with live refresh when the selected language changes.
 
+- **Engine update toast layout** (`Views/MainWindow.axaml`): the toast title can wrap to two lines so longer localized titles (for example Spanish) are not clipped.
+
 ## [0.6.3] - 2026-06-17
 
 ### Changed
