@@ -109,7 +109,7 @@
                                 </StackPanel>
                                 <ComboBox Grid.Column="1" ItemsSource="{Binding ThemeModes}"
                                           SelectedItem="{Binding SelectedThemeMode, Mode=TwoWay}"
-                                          Width="110" Height="26" MinHeight="0" Padding="8,0" VerticalContentAlignment="Center">
+                                          Width="140" Height="26" MinHeight="0" Padding="8,0" VerticalContentAlignment="Center">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding Display}" />
@@ -125,7 +125,7 @@
                                 </StackPanel>
                                 <ComboBox Grid.Column="1" ItemsSource="{Binding SupportedLanguages}"
                                           SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}"
-                                          Width="110" Height="26" MinHeight="0" Padding="8,0" VerticalContentAlignment="Center" />
+                                          Width="140" Height="26" MinHeight="0" Padding="8,0" VerticalContentAlignment="Center" />
                             </Grid>
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
