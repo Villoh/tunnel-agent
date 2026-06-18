@@ -1019,4 +1019,37 @@
   <data name="AgentConfigOverlay_ApplySelectedButton" xml:space="preserve">
     <value>Apply ({0})</value>
   </data>
+  <data name="Quota_ResetInNow" xml:space="preserve">
+    <value>Resets now</value>
+  </data>
+  <data name="Quota_ResetInDaysHours" xml:space="preserve">
+    <value>Resets in {0}d {1}h</value>
+  </data>
+  <data name="Quota_ResetInHoursMinutes" xml:space="preserve">
+    <value>Resets in {0}h {1}m</value>
+  </data>
+  <data name="Quota_ResetInMinutes" xml:space="preserve">
+    <value>Resets in {0}m</value>
+  </data>
+  <data name="AgentConfigOverlay_ModelsSelectedLabel" xml:space="preserve">
+    <value>Models {0} of {1} selected</value>
+  </data>
+  <data name="LogsView_Requests_AllProviders" xml:space="preserve">
+    <value>All Providers</value>
+  </data>
+  <data name="ConfigView_General_Theme_System" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="ConfigView_General_Theme_Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="ConfigView_General_Theme_Dark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RoutingStrategy_RoundRobin" xml:space="preserve">
+    <value>Round Robin (even distribution)</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RoutingStrategy_FillFirst" xml:space="preserve">
+    <value>Fill First (use first account until limit)</value>
+  </data>
 </root>

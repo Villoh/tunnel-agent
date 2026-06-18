@@ -71,7 +71,7 @@
     <value>配额</value>
   </data>
   <data name="Sidebar_Agents" xml:space="preserve">
-    <value>Agent</value>
+    <value>智能体</value>
   </data>
   <data name="Sidebar_Logs" xml:space="preserve">
     <value>日志</value>
@@ -378,7 +378,7 @@
        AGENTS VIEW
        ═══════════════════════════════════════════════════════════════════════════ -->
   <data name="AgentsView_Title" xml:space="preserve">
-    <value>Agent</value>
+    <value>智能体</value>
   </data>
   <data name="AgentsView_Subtitle" xml:space="preserve">
     <value>将每个 CLI 工具路由到已连接的提供商。</value>
@@ -387,7 +387,7 @@
     <value>批量配置</value>
   </data>
   <data name="AgentsView_DetectAgentsTooltip" xml:space="preserve">
-    <value>检测 Agent</value>
+    <value>检测智能体</value>
   </data>
   <data name="AgentsView_InstalledChip" xml:space="preserve">
     <value>已安装</value>
@@ -673,7 +673,7 @@
     <value>API 密钥</value>
   </data>
   <data name="ConfigView_CLIProxy_ApiKeys_Description" xml:space="preserve">
-    <value>CLIProxyAPI 客户端接受的密钥。Agent 设置使用默认密钥。</value>
+    <value>CLIProxyAPI 客户端接受的密钥。智能体设置使用默认密钥。</value>
   </data>
   <data name="ConfigView_CLIProxy_ApiKeys_Manage" xml:space="preserve">
     <value>管理</value>
@@ -867,7 +867,7 @@
     <value>配置</value>
   </data>
   <data name="AgentConfigOverlay_AgentsSectionLabel" xml:space="preserve">
-    <value>Agent</value>
+    <value>智能体</value>
   </data>
   <data name="AgentConfigOverlay_ConfiguredChip" xml:space="preserve">
     <value>已配置</value>
@@ -876,7 +876,7 @@
     <value>已安装</value>
   </data>
   <data name="AgentConfigOverlay_NotInstalledAgentsHint" xml:space="preserve">
-    <value>{0} 个 Agent 未安装 — 安装后才能配置。</value>
+    <value>{0} 个智能体未安装 — 安装后才能配置。</value>
   </data>
   <data name="AgentConfigOverlay_ConfigModeSectionLabel" xml:space="preserve">
     <value>配置模式</value>
@@ -936,7 +936,7 @@
     <value>CLIProxyAPI 密钥</value>
   </data>
   <data name="ApiKeysOverlay_Description" xml:space="preserve">
-    <value>CLIProxyAPI 客户端接受的密钥。Agent 设置使用默认密钥；留空表示无认证。</value>
+    <value>CLIProxyAPI 客户端接受的密钥。智能体设置使用默认密钥；留空表示无认证。</value>
   </data>
   <data name="ApiKeysOverlay_DefaultChip" xml:space="preserve">
     <value>默认</value>
@@ -960,28 +960,28 @@
     <value>添加密钥</value>
   </data>
   <data name="Agent_claude-code_Description" xml:space="preserve">
-    <value>Anthropic 官方 CLI 编码 Agent。</value>
+    <value>Anthropic 官方 CLI 编程智能体。</value>
   </data>
   <data name="Agent_codex_Description" xml:space="preserve">
     <value>OpenAI Codex 命令行界面。</value>
   </data>
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
-    <value>Google Gemini CLI 编码 Agent。</value>
+    <value>Google Gemini CLI 编程智能体。</value>
   </data>
   <data name="Agent_amp_Description" xml:space="preserve">
     <value>Sourcegraph 的 Amp 编码助手。</value>
   </data>
   <data name="Agent_opencode_Description" xml:space="preserve">
-    <value>开源 AI 编码 Agent。</value>
+    <value>开源 AI 编程智能体。</value>
   </data>
   <data name="Agent_aider_Description" xml:space="preserve">
     <value>终端中的 AI 结对编程。通过 pip 安装。</value>
   </data>
   <data name="Agent_pi_Description" xml:space="preserve">
-    <value>pi.dev 的 Pi 编码 Agent。</value>
+    <value>pi.dev 的 Pi 编程智能体。</value>
   </data>
   <data name="Agent_factory-droid_Description" xml:space="preserve">
-    <value>Factory 的 AI 编码 Agent。</value>
+    <value>Factory 的 AI 编程智能体。</value>
   </data>
   <data name="AgentsView_Agent_ConfigureButton" xml:space="preserve">
     <value>配置</value>
@@ -1002,21 +1002,54 @@
     <value>{0} 个已连接账户</value>
   </data>
   <data name="AgentConfigOverlay_BulkTitle" xml:space="preserve">
-    <value>配置 Agent</value>
+    <value>配置智能体</value>
   </data>
   <data name="AgentConfigOverlay_SingleTitle" xml:space="preserve">
     <value>配置 {0}</value>
   </data>
   <data name="AgentConfigOverlay_SingleFallbackTitle" xml:space="preserve">
-    <value>配置 Agent</value>
+    <value>配置智能体</value>
   </data>
   <data name="AgentConfigOverlay_BulkDescription" xml:space="preserve">
-    <value>选择已安装的 Agent，然后应用共享配置。</value>
+    <value>选择已安装的智能体，然后应用共享配置。</value>
   </data>
   <data name="AgentConfigOverlay_ApplyButton" xml:space="preserve">
     <value>应用</value>
   </data>
   <data name="AgentConfigOverlay_ApplySelectedButton" xml:space="preserve">
     <value>应用（{0}）</value>
+  </data>
+  <data name="Quota_ResetInNow" xml:space="preserve">
+    <value>现在重置</value>
+  </data>
+  <data name="Quota_ResetInDaysHours" xml:space="preserve">
+    <value>{0}天{1}小时后重置</value>
+  </data>
+  <data name="Quota_ResetInHoursMinutes" xml:space="preserve">
+    <value>{0}小时{1}分钟后重置</value>
+  </data>
+  <data name="Quota_ResetInMinutes" xml:space="preserve">
+    <value>{0}分钟后重置</value>
+  </data>
+  <data name="AgentConfigOverlay_ModelsSelectedLabel" xml:space="preserve">
+    <value>已选择 {0}/{1} 个模型</value>
+  </data>
+  <data name="LogsView_Requests_AllProviders" xml:space="preserve">
+    <value>所有提供商</value>
+  </data>
+  <data name="ConfigView_General_Theme_System" xml:space="preserve">
+    <value>系统</value>
+  </data>
+  <data name="ConfigView_General_Theme_Light" xml:space="preserve">
+    <value>浅色</value>
+  </data>
+  <data name="ConfigView_General_Theme_Dark" xml:space="preserve">
+    <value>深色</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RoutingStrategy_RoundRobin" xml:space="preserve">
+    <value>轮询（均匀分配）</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RoutingStrategy_FillFirst" xml:space="preserve">
+    <value>优先填充（先使用第一个账户直到达到限制）</value>
   </data>
 </root>

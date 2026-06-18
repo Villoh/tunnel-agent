@@ -33,10 +33,19 @@ public sealed class LocalizationService : INotifyPropertyChanged
     [
         new LanguageOption("en-US", "English"),
         new LanguageOption("es-ES", "Español"),
+        new LanguageOption("pt-PT", "Português"),
         new LanguageOption("fr-FR", "Français"),
         new LanguageOption("de-DE", "Deutsch"),
         new LanguageOption("zh-CN", "简体中文"),
         new LanguageOption("ja-JP", "日本語"),
+        new LanguageOption("ar-SA", "العربية"),
+    ];
+
+    public static IReadOnlyList<ThemeModeOption> SupportedThemeModes { get; } =
+    [
+        new ThemeModeOption("system", "ConfigView_General_Theme_System"),
+        new ThemeModeOption("light", "ConfigView_General_Theme_Light"),
+        new ThemeModeOption("dark", "ConfigView_General_Theme_Dark"),
     ];
 
     /// <summary>Returns the localized string for <paramref name="key"/>, or <c>[key]</c> when missing.</summary>
@@ -100,5 +109,17 @@ public sealed class LocalizationService : INotifyPropertyChanged
 /// <summary>A selectable UI language. <see cref="ToString"/> returns the display name for combo boxes.</summary>
 public sealed record LanguageOption(string Code, string Display)
 {
+    public override string ToString() => Display;
+}
+
+public sealed class ThemeModeOption(string value, string displayKey) : INotifyPropertyChanged
+{
+    public string Value { get; } = value;
+    public string Display => LocalizationService.Instance.GetString(displayKey);
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public void Refresh() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Display)));
+
     public override string ToString() => Display;
 }

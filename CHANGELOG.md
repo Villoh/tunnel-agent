@@ -9,11 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Runtime localization and language selector** (`Resources/Strings*.resx`, `Services/LocalizationService.cs`, `Services/LocExtension.cs`, `Views/*.axaml`): added runtime localization across the Avalonia UI for English, Spanish, French, German, Simplified Chinese, and Japanese, including the new **Language** combo under Configuration → General → Theme, persisted language preference, localized formatted strings, provider/agent descriptions, tray popup, overlays, dialogs, and quota/provider views.
+- **Runtime localization and language selector** (`Resources/Strings*.resx`, `Services/LocalizationService.cs`, `Services/LocExtension.cs`, `Views/*.axaml`): added runtime localization across the Avalonia UI for English, Spanish, Portuguese (Portugal), French, German, Simplified Chinese, Japanese, and Arabic, including the new **Language** combo under Configuration → General → Theme, persisted language preference, localized formatted strings, provider/agent descriptions, tray popup, overlays, dialogs, and quota/provider views.
 
 ### Changed
 
 - **Localization infrastructure** (`Resources/Strings*.resx`, `Services/LocExtension.cs`): replaced hardcoded UI text with `{l:Loc ...}` / `{l:LocFormat ...}` bindings backed by resx resources, with live refresh when the selected language changes.
+
+- **Localized configuration combo boxes** (`MainWindowViewModel`, `ConfigurationView.axaml`): theme mode and routing strategy combo boxes now display localized labels while preserving their stored internal values.
 
 - **Engine update toast layout** (`Views/MainWindow.axaml`): the toast title can wrap to two lines so longer localized titles (for example Spanish) are not clipped.
 
@@ -22,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Configuration update badge** (`MainWindowViewModel`): the orange update indicator now stays visible when any managed engine has an available update, instead of disappearing when switching focus to another engine tab.
 
 - **Sliding tab localization refresh** (`Controls/SlidingTabBar.cs`): tab titles and tooltips now stay bound to their localized headers, so configuration tabs such as **General** update when the language changes.
+
+- **Runtime localization gaps** (`LogsViewModel`, `QuotaFetchService`, `ProviderViewModel`): provider filters, quota reset countdowns, model selection labels, Chinese agent labels, and generated provider/agent texts now refresh correctly when the language changes.
 
 ## [0.6.3] - 2026-06-17
 

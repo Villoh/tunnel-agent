@@ -995,4 +995,37 @@
   <data name="AgentConfigOverlay_ApplySelectedButton" xml:space="preserve">
     <value>Aplicar ({0})</value>
   </data>
+  <data name="Quota_ResetInNow" xml:space="preserve">
+    <value>Se reinicia ahora</value>
+  </data>
+  <data name="Quota_ResetInDaysHours" xml:space="preserve">
+    <value>Se reinicia en {0}d {1}h</value>
+  </data>
+  <data name="Quota_ResetInHoursMinutes" xml:space="preserve">
+    <value>Se reinicia en {0}h {1}m</value>
+  </data>
+  <data name="Quota_ResetInMinutes" xml:space="preserve">
+    <value>Se reinicia en {0}m</value>
+  </data>
+  <data name="AgentConfigOverlay_ModelsSelectedLabel" xml:space="preserve">
+    <value>Modelos {0} de {1} seleccionados</value>
+  </data>
+  <data name="LogsView_Requests_AllProviders" xml:space="preserve">
+    <value>Todos los proveedores</value>
+  </data>
+  <data name="ConfigView_General_Theme_System" xml:space="preserve">
+    <value>Sistema</value>
+  </data>
+  <data name="ConfigView_General_Theme_Light" xml:space="preserve">
+    <value>Claro</value>
+  </data>
+  <data name="ConfigView_General_Theme_Dark" xml:space="preserve">
+    <value>Oscuro</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RoutingStrategy_RoundRobin" xml:space="preserve">
+    <value>Round Robin (distribución uniforme)</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RoutingStrategy_FillFirst" xml:space="preserve">
+    <value>Llenar primero (usar la primera cuenta hasta el límite)</value>
+  </data>
 </root>

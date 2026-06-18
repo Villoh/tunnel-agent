@@ -30,6 +30,16 @@ public sealed record CliProxyApiKeyViewModel(string Value, bool IsDefault)
     public bool CanSetDefault => !IsDefault;
 }
 
+public sealed class RoutingStrategyOption(RoutingStrategy value, string displayKey) : ObservableObject
+{
+    public RoutingStrategy Value { get; } = value;
+    public string Display => LocalizationService.Instance.GetString(displayKey);
+
+    public void Refresh() => OnPropertyChanged(nameof(Display));
+
+    public override string ToString() => Display;
+}
+
 public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
 {
     private readonly LocalizationService _localization;
@@ -270,6 +280,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         _localization.SetCulture(languageCode);
         _selectedLanguage = LocalizationService.SupportedLanguages.FirstOrDefault(l => l.Code == languageCode)
             ?? LocalizationService.SupportedLanguages[0];
+        _selectedThemeMode = ThemeModes.First(mode => mode.Value == NormalizeThemeMode(_settings.Current.ThemeMode));
+        _selectedRoutingStrategy = RoutingStrategies.First(strategy => strategy.Value == _settings.Current.RoutingStrategy);
         _engineRegistry = engineRegistry ?? new EngineRegistryService(settings);
         _configService = new ConfigService(settings);
         var engineConfig = _configService;
@@ -425,7 +437,10 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
             OnPropertyChanged(nameof(AllVisibleModelsSelected));
         }
     }
-    public string ModelsExpanderLabel         => $"Models {SelectableModels.Count(m => m.IsSelected)} of {SelectableModels.Count} selected";
+    public string ModelsExpanderLabel => _localization.GetString(
+        "AgentConfigOverlay_ModelsSelectedLabel",
+        SelectableModels.Count(m => m.IsSelected),
+        SelectableModels.Count);
     public int AgentConfigSelectedCount       => IsAgentConfigBulkMode
         ? Agents.Count(a => a.IsSelectedForConfig && a.Installed)
         : AgentConfigTarget?.Installed == true ? 1 : 0;
@@ -519,10 +534,22 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
             _settings.Current.ThemeMode = normalized;
             _settings.Save();
             OnPropertyChanged();
+            SelectedThemeMode = ThemeModes.First(mode => mode.Value == normalized);
         }
     }
 
-    public static string[] ThemeModes { get; } = { "system", "light", "dark" };
+    public IReadOnlyList<ThemeModeOption> ThemeModes => LocalizationService.SupportedThemeModes;
+
+    private ThemeModeOption _selectedThemeMode = LocalizationService.SupportedThemeModes[0];
+    public ThemeModeOption SelectedThemeMode
+    {
+        get => _selectedThemeMode;
+        set
+        {
+            if (value != null && SetProperty(ref _selectedThemeMode, value))
+                ThemeMode = value.Value;
+        }
+    }
 
     public IReadOnlyList<LanguageOption> SupportedLanguages => LocalizationService.SupportedLanguages;
 
@@ -541,6 +568,13 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
                 OnPropertyChanged(nameof(AgentConfigApplyLabel));
                 OnPropertyChanged(nameof(AgentConfigDialogTitle));
                 OnPropertyChanged(nameof(AgentConfigDialogDescription));
+                OnPropertyChanged(nameof(ModelsExpanderLabel));
+                foreach (var mode in ThemeModes)
+                    mode.Refresh();
+                foreach (var strategy in RoutingStrategies)
+                    strategy.Refresh();
+                OnPropertyChanged(nameof(SelectedThemeMode));
+                OnPropertyChanged(nameof(SelectedRoutingStrategy));
             }
         }
     }
@@ -606,10 +640,32 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     public RoutingStrategy RoutingStrategy
     {
         get => _settings.Current.RoutingStrategy;
-        set { _settings.Current.RoutingStrategy = value; _settings.Save(); OnPropertyChanged(); }
+        set
+        {
+            if (_settings.Current.RoutingStrategy == value) return;
+            _settings.Current.RoutingStrategy = value;
+            _settings.Save();
+            OnPropertyChanged();
+            SelectedRoutingStrategy = RoutingStrategies.First(strategy => strategy.Value == value);
+        }
     }
 
-    public static RoutingStrategy[] RoutingStrategies { get; } = { RoutingStrategy.RoundRobin, RoutingStrategy.FillFirst };
+    public IReadOnlyList<RoutingStrategyOption> RoutingStrategies { get; } =
+    [
+        new RoutingStrategyOption(RoutingStrategy.RoundRobin, "ConfigView_CLIProxy_RoutingStrategy_RoundRobin"),
+        new RoutingStrategyOption(RoutingStrategy.FillFirst, "ConfigView_CLIProxy_RoutingStrategy_FillFirst"),
+    ];
+
+    private RoutingStrategyOption _selectedRoutingStrategy = null!;
+    public RoutingStrategyOption SelectedRoutingStrategy
+    {
+        get => _selectedRoutingStrategy;
+        set
+        {
+            if (value != null && SetProperty(ref _selectedRoutingStrategy, value))
+                RoutingStrategy = value.Value;
+        }
+    }
 
     public ServerState ServerState => ToServerState(EngineState);
 

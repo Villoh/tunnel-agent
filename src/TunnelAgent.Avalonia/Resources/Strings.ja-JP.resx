@@ -1019,4 +1019,37 @@
   <data name="AgentConfigOverlay_ApplySelectedButton" xml:space="preserve">
     <value>適用 ({0})</value>
   </data>
+  <data name="Quota_ResetInNow" xml:space="preserve">
+    <value>今すぐリセット</value>
+  </data>
+  <data name="Quota_ResetInDaysHours" xml:space="preserve">
+    <value>{0}日{1}時間後にリセット</value>
+  </data>
+  <data name="Quota_ResetInHoursMinutes" xml:space="preserve">
+    <value>{0}時間{1}分後にリセット</value>
+  </data>
+  <data name="Quota_ResetInMinutes" xml:space="preserve">
+    <value>{0}分後にリセット</value>
+  </data>
+  <data name="AgentConfigOverlay_ModelsSelectedLabel" xml:space="preserve">
+    <value>{1} 個中 {0} 個のモデルを選択済み</value>
+  </data>
+  <data name="LogsView_Requests_AllProviders" xml:space="preserve">
+    <value>すべてのプロバイダー</value>
+  </data>
+  <data name="ConfigView_General_Theme_System" xml:space="preserve">
+    <value>システム</value>
+  </data>
+  <data name="ConfigView_General_Theme_Light" xml:space="preserve">
+    <value>ライト</value>
+  </data>
+  <data name="ConfigView_General_Theme_Dark" xml:space="preserve">
+    <value>ダーク</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RoutingStrategy_RoundRobin" xml:space="preserve">
+    <value>ラウンドロビン（均等配分）</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RoutingStrategy_FillFirst" xml:space="preserve">
+    <value>先に埋める（上限まで最初のアカウントを使用）</value>
+  </data>
 </root>

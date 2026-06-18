@@ -19,7 +19,12 @@ public partial class QuotaBarViewModel : ViewModelBase
     [ObservableProperty] private string _title = "";
 
     /// <summary>Reset countdown text shown below the bar, e.g. "Resets in 5d 12h".</summary>
-    [ObservableProperty] private string _resetIn = "";
+    private string _resetIn = "";
+    public string ResetIn
+    {
+        get => LocalizeResetIn(_resetIn);
+        set => SetProperty(ref _resetIn, value);
+    }
 
     /// <summary>0–1 fraction consumed.</summary>
     [ObservableProperty] private double _used;
@@ -27,7 +32,25 @@ public partial class QuotaBarViewModel : ViewModelBase
     /// <summary>Right-side label, e.g. "22% used".</summary>
     public string UsedLabel => $"{Used * 100:0}% used";
 
+    public QuotaBarViewModel()
+    {
+        LocalizationService.Instance.PropertyChanged += (_, _) => OnPropertyChanged(nameof(ResetIn));
+    }
+
     partial void OnUsedChanged(double value) => OnPropertyChanged(nameof(UsedLabel));
+
+    private static string LocalizeResetIn(string value)
+    {
+        if (!value.StartsWith("loc:", StringComparison.Ordinal))
+            return value;
+
+        var parts = value[4..].Split('|');
+        if (parts.Length == 0 || string.IsNullOrEmpty(parts[0]))
+            return "";
+
+        var args = parts.Skip(1).Select(p => int.TryParse(p, out var n) ? (object)n : p).ToArray();
+        return LocalizationService.Instance.GetString(parts[0], args);
+    }
 }
 
 // ── Account slot ─────────────────────────────────────────────────────────────

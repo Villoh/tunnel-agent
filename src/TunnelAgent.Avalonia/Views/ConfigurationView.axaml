@@ -9,7 +9,6 @@
              x:DataType="vm:MainWindowViewModel">
     <UserControl.Resources>
         <cv:EngineStateToTextConverter x:Key="EngineStateToText" />
-        <cv:RoutingStrategyToStringConverter x:Key="RoutingStrategyToString" />
         <cv:SectionEqualsConverter x:Key="SectionEq" />
     </UserControl.Resources>
 
@@ -109,8 +108,14 @@
                                     <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_General_Theme_Description}"/>
                                 </StackPanel>
                                 <ComboBox Grid.Column="1" ItemsSource="{Binding ThemeModes}"
-                                          SelectedItem="{Binding ThemeMode, Mode=TwoWay}"
-                                          Width="110" Height="26" MinHeight="0" Padding="8,0" VerticalContentAlignment="Center" />
+                                          SelectedItem="{Binding SelectedThemeMode, Mode=TwoWay}"
+                                          Width="110" Height="26" MinHeight="0" Padding="8,0" VerticalContentAlignment="Center">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Display}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
                             </Grid>
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
@@ -294,12 +299,12 @@
                                     <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_RoutingStrategy_Description}"/>
                                 </StackPanel>
                                 <ComboBox Grid.Column="1" ItemsSource="{Binding RoutingStrategies}" Cursor="Hand"
-                                          SelectedItem="{Binding RoutingStrategy, Mode=TwoWay}"
+                                          SelectedItem="{Binding SelectedRoutingStrategy, Mode=TwoWay}"
                                           Width="250" Height="26" MinHeight="0" Padding="8,0"
                                           VerticalAlignment="Center" VerticalContentAlignment="Center">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding ., Converter={StaticResource RoutingStrategyToString}}" />
+                                            <TextBlock Text="{Binding Display}" />
                                         </DataTemplate>
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>

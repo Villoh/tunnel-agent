@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using TunnelAgent.Services;
 
 namespace TunnelAgent.ViewModels;
 
@@ -52,10 +53,18 @@ public partial class LogsViewModel : ViewModelBase
 
     // ── Requests tab ─────────────────────────────────────────────────────
     public ObservableCollection<RequestLogEntry> FilteredEntries { get; } = new();
-    public ObservableCollection<string> ProviderOptions { get; } = new() { "All Providers" };
+    public ObservableCollection<string> ProviderOptions { get; } = new();
+    private string _allProvidersLabel = LocalizationService.Instance.GetString("LogsView_Requests_AllProviders");
 
     [ObservableProperty] private string _searchText       = "";
-    [ObservableProperty] private string _selectedProvider = "All Providers";
+    [ObservableProperty] private string _selectedProvider = "";
+
+    public LogsViewModel()
+    {
+        ProviderOptions.Add(_allProvidersLabel);
+        _selectedProvider = _allProvidersLabel;
+        LocalizationService.Instance.PropertyChanged += OnLocalizationChanged;
+    }
 
     // Pagination
     [ObservableProperty] private int _currentPage = 1;
@@ -138,8 +147,8 @@ public partial class LogsViewModel : ViewModelBase
         _allProxyLines.Clear();
         _filteredAll.Clear();
         ProviderOptions.Clear();
-        ProviderOptions.Add("All Providers");
-        SelectedProvider = "All Providers";
+        ProviderOptions.Add(_allProvidersLabel);
+        SelectedProvider = _allProvidersLabel;
         FilteredEntries.Clear();
         ProxyLogLines.Clear();
         CurrentPage = 1;
@@ -173,9 +182,21 @@ public partial class LogsViewModel : ViewModelBase
         var toRemove = existing.Where(p => !providers.Contains(p, StringComparer.OrdinalIgnoreCase)).ToList();
         foreach (var p in toRemove) ProviderOptions.Remove(p);
 
-        if (SelectedProvider != "All Providers" &&
+        if (SelectedProvider != _allProvidersLabel &&
             !providers.Contains(SelectedProvider, StringComparer.OrdinalIgnoreCase))
-            SelectedProvider = "All Providers";
+            SelectedProvider = _allProvidersLabel;
+    }
+
+    private void OnLocalizationChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        var wasAllProvidersSelected = SelectedProvider == _allProvidersLabel;
+        _allProvidersLabel = LocalizationService.Instance.GetString("LogsView_Requests_AllProviders");
+        if (ProviderOptions.Count == 0)
+            ProviderOptions.Add(_allProvidersLabel);
+        else
+            ProviderOptions[0] = _allProvidersLabel;
+        if (wasAllProvidersSelected)
+            SelectedProvider = _allProvidersLabel;
     }
 
     // ── Filtering + pagination ────────────────────────────────────────────
@@ -183,7 +204,7 @@ public partial class LogsViewModel : ViewModelBase
     private void ApplyFilter()
     {
         var q          = SearchText.Trim();
-        var byProvider = SelectedProvider != "All Providers";
+        var byProvider = SelectedProvider != _allProvidersLabel;
 
         var filtered = _allEntries.AsEnumerable();
 

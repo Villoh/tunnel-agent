@@ -1661,10 +1661,13 @@ public sealed class QuotaFetchService
 
     private static string FormatDiff(TimeSpan diff)
     {
-        if (diff <= TimeSpan.Zero) return "Resets in Now";
-        if (diff.TotalDays >= 1)  return $"Resets in {(int)diff.TotalDays}d {diff.Hours}h";
-        if (diff.TotalHours >= 1) return $"Resets in {(int)diff.TotalHours}h {diff.Minutes}m";
-        return $"Resets in {diff.Minutes}m";
+        if (diff <= TimeSpan.Zero)
+            return "loc:Quota_ResetInNow";
+        if (diff.TotalDays >= 1)
+            return $"loc:Quota_ResetInDaysHours|{(int)diff.TotalDays}|{diff.Hours}";
+        if (diff.TotalHours >= 1)
+            return $"loc:Quota_ResetInHoursMinutes|{(int)diff.TotalHours}|{diff.Minutes}";
+        return $"loc:Quota_ResetInMinutes|{diff.Minutes}";
     }
 
 }
