@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-06-18
+
 ### Added
 
 - **Additional UI languages** (`Resources/Strings.it-IT.resx`, `Strings.uk-UA.resx`, `Strings.ru-RU.resx`, `Strings.hi-IN.resx`, `Strings.ko-KR.resx`, `Strings.tr-TR.resx`, `Services/LocalizationService.cs`): added Italian, Ukrainian, Russian, Hindi, Korean, and Turkish translations to the **Language** combo, bringing the localized UI to 14 languages.
@@ -800,7 +802,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.6.2...HEAD
+[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/Villoh/tunnel-agent/compare/v0.6.3...v0.7.0
+[0.6.3]: https://github.com/Villoh/tunnel-agent/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/Villoh/tunnel-agent/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/Villoh/tunnel-agent/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Villoh/tunnel-agent/compare/v0.5.10...v0.6.0
