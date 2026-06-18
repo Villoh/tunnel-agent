@@ -7,6 +7,7 @@ using Xunit;
 using TunnelAgent.Core.Engine;
 namespace TunnelAgent.Tests;
 
+[Collection("Localization")]
 public sealed class ViewModelTests
 {
     [Fact]

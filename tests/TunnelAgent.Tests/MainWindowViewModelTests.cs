@@ -9,6 +9,7 @@ using TunnelAgent.Core.Engine;
 using TunnelAgent.Infrastructure.Engine;
 namespace TunnelAgent.Tests;
 
+[Collection("Localization")]
 public sealed class MainWindowViewModelTests
 {
     [Fact]
