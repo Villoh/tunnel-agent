@@ -298,7 +298,7 @@
                                     <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_RoutingStrategy_Label}"/>
                                     <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_RoutingStrategy_Description}"/>
                                 </StackPanel>
-                                <ComboBox Grid.Column="1" ItemsSource="{Binding RoutingStrategies}" Cursor="Hand"
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding RoutingStrategyOptions}" Cursor="Hand"
                                           SelectedItem="{Binding SelectedRoutingStrategy, Mode=TwoWay}"
                                           Width="250" Height="26" MinHeight="0" Padding="8,0"
                                           VerticalAlignment="Center" VerticalContentAlignment="Center">

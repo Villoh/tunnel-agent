@@ -281,7 +281,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         _selectedLanguage = LocalizationService.SupportedLanguages.FirstOrDefault(l => l.Code == languageCode)
             ?? LocalizationService.SupportedLanguages[0];
         _selectedThemeMode = ThemeModes.First(mode => mode.Value == NormalizeThemeMode(_settings.Current.ThemeMode));
-        _selectedRoutingStrategy = RoutingStrategies.First(strategy => strategy.Value == _settings.Current.RoutingStrategy);
+        _selectedRoutingStrategy = RoutingStrategyOptions.First(strategy => strategy.Value == _settings.Current.RoutingStrategy);
         _engineRegistry = engineRegistry ?? new EngineRegistryService(settings);
         _configService = new ConfigService(settings);
         var engineConfig = _configService;
@@ -571,7 +571,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
                 OnPropertyChanged(nameof(ModelsExpanderLabel));
                 foreach (var mode in ThemeModes)
                     mode.Refresh();
-                foreach (var strategy in RoutingStrategies)
+                foreach (var strategy in RoutingStrategyOptions)
                     strategy.Refresh();
                 OnPropertyChanged(nameof(SelectedThemeMode));
                 OnPropertyChanged(nameof(SelectedRoutingStrategy));
@@ -646,11 +646,13 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
             _settings.Current.RoutingStrategy = value;
             _settings.Save();
             OnPropertyChanged();
-            SelectedRoutingStrategy = RoutingStrategies.First(strategy => strategy.Value == value);
+            SelectedRoutingStrategy = RoutingStrategyOptions.First(strategy => strategy.Value == value);
         }
     }
 
-    public IReadOnlyList<RoutingStrategyOption> RoutingStrategies { get; } =
+    public static RoutingStrategy[] RoutingStrategies { get; } = { RoutingStrategy.RoundRobin, RoutingStrategy.FillFirst };
+
+    public IReadOnlyList<RoutingStrategyOption> RoutingStrategyOptions { get; } =
     [
         new RoutingStrategyOption(RoutingStrategy.RoundRobin, "ConfigView_CLIProxy_RoutingStrategy_RoundRobin"),
         new RoutingStrategyOption(RoutingStrategy.FillFirst, "ConfigView_CLIProxy_RoutingStrategy_FillFirst"),
