@@ -69,6 +69,7 @@ public sealed class MainWindowViewModelTests
     public async Task InitializeAsync_UsesSystemLanguage_WhenSettingIsNull()
     {
         var previousCulture = CultureInfo.CurrentUICulture;
+        var previousLocalization = LocalizationService.Instance.CurrentCulture;
         try
         {
             CultureInfo.CurrentUICulture = new CultureInfo("es-MX");
@@ -93,29 +94,39 @@ public sealed class MainWindowViewModelTests
         finally
         {
             CultureInfo.CurrentUICulture = previousCulture;
+            LocalizationService.Instance.SetCulture(previousLocalization.Name);
         }
     }
 
     [Fact]
     public async Task SelectedLanguage_SystemDefault_SavesNullLanguage()
     {
-        using var temp = new TestTempDirectory();
-        var settings = new SettingsService(temp.File("settings.json"));
-        await settings.LoadAsync();
-        settings.Current.Language = "es-ES";
-        var registry = new EngineRegistryService(settings);
-        var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
+        var previousLocalization = LocalizationService.Instance.CurrentCulture;
+        try
+        {
+            using var temp = new TestTempDirectory();
+            var settings = new SettingsService(temp.File("settings.json"));
+            await settings.LoadAsync();
+            settings.Current.Language = "es-ES";
+            var registry = new EngineRegistryService(settings);
+            var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
 
-        vm.SelectedLanguage = LocalizationService.SupportedLanguages[0];
+            vm.SelectedLanguage = LocalizationService.SupportedLanguages[0];
 
-        Assert.Null(settings.Current.Language);
-        Assert.Equal(LocalizationService.SystemLanguageCode, vm.SelectedLanguage.Code);
+            Assert.Null(settings.Current.Language);
+            Assert.Equal(LocalizationService.SystemLanguageCode, vm.SelectedLanguage.Code);
+        }
+        finally
+        {
+            LocalizationService.Instance.SetCulture(previousLocalization.Name);
+        }
     }
 
     [Fact]
     public async Task InitializeAsync_KeepsSavedLanguage_WhenSystemLanguageChanges()
     {
         var previousCulture = CultureInfo.CurrentUICulture;
+        var previousLocalization = LocalizationService.Instance.CurrentCulture;
         try
         {
             using var temp = new TestTempDirectory();
@@ -142,6 +153,7 @@ public sealed class MainWindowViewModelTests
         finally
         {
             CultureInfo.CurrentUICulture = previousCulture;
+            LocalizationService.Instance.SetCulture(previousLocalization.Name);
         }
     }
 
