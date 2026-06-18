@@ -71,7 +71,6 @@ public sealed class ConfigServiceTests
         await settings.LoadAsync();
         var inlineKey = string.Concat("inline", "-key");
         var disabledKey = string.Concat("disabled", "-key");
-        var fileKey = string.Concat("file", "-key");
         settings.Current.Providers.Add(new ProviderSettings
         {
             Id = "local-ai",
@@ -80,26 +79,98 @@ public sealed class ConfigServiceTests
             DisplayName = "Local AI",
             Accounts =
             [
-                new ProviderAccountSettings { ApiKey = inlineKey },
-                new ProviderAccountSettings { ApiKey = disabledKey, Disabled = true }
+                new ProviderAccountSettings { ApiKey = inlineKey, Label = "Primary" },
+                new ProviderAccountSettings { ApiKey = inlineKey, Label = "Duplicate" },
+                new ProviderAccountSettings { ApiKey = disabledKey, Label = "Backup", Disabled = true }
             ]
         });
-        var store = new CustomProviderCredentialStore(authDir);
-        store.Save("local-ai", fileKey, "File");
-        store.Save("local-ai", inlineKey, "Duplicate");
-        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir, store);
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir);
 
         await config.WriteConfigAsync();
 
         var yaml = await File.ReadAllTextAsync(config.ConfigPath);
         Assert.Contains("openai-compatibility:", yaml);
         Assert.Contains("  - name: local-ai", yaml);
-        Assert.Contains("    display-name: \"Local AI\"", yaml);
+        Assert.DoesNotContain("display-name:", yaml);
+        Assert.Contains("    disabled: false", yaml);
         Assert.Contains("    base-url: \"https://local.example/v1\"", yaml);
         Assert.Contains($"      - api-key: \"{inlineKey}\"", yaml);
-        Assert.Contains($"      - api-key: \"{fileKey}\"", yaml);
-        Assert.DoesNotContain(disabledKey, yaml);
+        Assert.Contains("        label: \"Primary\"", yaml);
+        Assert.Contains($"      - api-key: \"{disabledKey}\"", yaml);
+        Assert.Contains("        label: \"Backup\"", yaml);
         Assert.Equal(1, CountOccurrences(yaml, inlineKey));
+    }
+
+    [Fact]
+    public async Task WriteConfigAsync_DisabledCustomProvider_IsKeptInConfig()
+    {
+        using var temp = new TestTempDirectory();
+        var settings = new SettingsService(temp.File("settings.json"));
+        await settings.LoadAsync();
+        settings.Current.Providers.Add(new ProviderSettings
+        {
+            Id = "openrouter",
+            Enabled = false,
+            Kind = ProviderKind.OpenAICompatibility,
+            BaseUrl = "https://openrouter.ai/api/v1",
+            Accounts = [new ProviderAccountSettings { ApiKey = "sk-or-test", Label = "OpenRouter" }]
+        });
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
+
+        await config.WriteConfigAsync();
+
+        var yaml = await File.ReadAllTextAsync(config.ConfigPath);
+        Assert.Contains("openai-compatibility:", yaml);
+        Assert.Contains("  - name: openrouter", yaml);
+        Assert.Contains("    disabled: true", yaml);
+        Assert.Contains("      - api-key: \"sk-or-test\"", yaml);
+        Assert.Contains("        label: \"OpenRouter\"", yaml);
+    }
+
+    [Fact]
+    public async Task WriteConfigAsync_NativeApiKeyProviders_WriteClaudeAndGeminiBlocks()
+    {
+        using var temp = new TestTempDirectory();
+        var authDir = temp.File("auth");
+        var settings = new SettingsService(temp.File("settings.json"));
+        await settings.LoadAsync();
+        settings.Current.Providers.Add(new ProviderSettings
+        {
+            Id = "claude",
+            Enabled = true,
+            Kind = ProviderKind.ClaudeApiKey,
+            Accounts = [new ProviderAccountSettings { ApiKey = "sk-ant-test" }]
+        });
+        settings.Current.Providers.Add(new ProviderSettings
+        {
+            Id = "gemini-cli",
+            Enabled = true,
+            Kind = ProviderKind.GeminiApiKey,
+            BaseUrl = "https://generativelanguage.googleapis.com",
+            Accounts =
+            [
+                new ProviderAccountSettings { ApiKey = "AIza-test" }
+            ]
+        });
+        settings.Current.Providers.Add(new ProviderSettings
+        {
+            Id = "codex",
+            Enabled = true,
+            Kind = ProviderKind.CodexApiKey,
+            Accounts = [new ProviderAccountSettings { ApiKey = "sk-codex-test" }]
+        });
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir);
+
+        await config.WriteConfigAsync();
+
+        var yaml = await File.ReadAllTextAsync(config.ConfigPath);
+        Assert.Contains("claude-api-key:", yaml);
+        Assert.Contains("  - api-key: \"sk-ant-test\"", yaml);
+        Assert.Contains("gemini-api-key:", yaml);
+        Assert.Contains("  - api-key: \"AIza-test\"", yaml);
+        Assert.Contains("    base-url: \"https://generativelanguage.googleapis.com\"", yaml);
+        Assert.Contains("codex-api-key:", yaml);
+        Assert.Contains("  - api-key: \"sk-codex-test\"", yaml);
     }
 
     private static int CountOccurrences(string text, string value)

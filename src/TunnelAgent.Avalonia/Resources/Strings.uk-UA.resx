@@ -157,6 +157,69 @@
   <data name="Dialog_AddAccount_Add" xml:space="preserve">
     <value>Додати обліковий запис</value>
   </data>
+  <data name="Dialog_AddAccount_HeaderTitle" xml:space="preserve">
+    <value>Додати обліковий запис</value>
+  </data>
+  <data name="Dialog_AddAccount_ModeDescription" xml:space="preserve">
+    <value>Виберіть, як Tunnel Agent має автентифікувати цього постачальника.</value>
+  </data>
+  <data name="Dialog_AddAccount_OAuthOption" xml:space="preserve">
+    <value>Вхід через OAuth</value>
+  </data>
+  <data name="Dialog_AddAccount_OAuthOptionDesc" xml:space="preserve">
+    <value>Використовувати вхід через браузер CLIProxyAPI та локальні токени OAuth.</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyOption" xml:space="preserve">
+    <value>API-ключ</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyOptionDesc" xml:space="preserve">
+    <value>Використовувати ключ висхідного постачальника. Базова URL-адреса необов'язкова.</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyDescription" xml:space="preserve">
+    <value>Додати обліковий запис з API-ключем висхідного постачальника.</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyTitle" xml:space="preserve">
+    <value>Додати API-ключ</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyAdd" xml:space="preserve">
+    <value>Додати API-ключ</value>
+  </data>
+  <data name="Dialog_EditApiKey_Title" xml:space="preserve">
+    <value>Редагувати API-ключ</value>
+  </data>
+  <data name="Dialog_EditApiKey_Save" xml:space="preserve">
+    <value>Зберегти</value>
+  </data>
+  <data name="ProvidersView_Provider_AddApiKeyTooltip" xml:space="preserve">
+    <value>Додати API-ключ</value>
+  </data>
+  <data name="Dialog_AddAccount_BaseUrlHint" xml:space="preserve">
+    <value>Залиште порожнім, щоб використовувати типову кінцеву точку CLIProxyAPI для цього постачальника.</value>
+  </data>
+  <data name="ProvidersView_Provider_EditAccountTooltip" xml:space="preserve">
+    <value>Редагувати обліковий запис API-ключа</value>
+  </data>
+  <data name="ProvidersView_AddCustomProvider" xml:space="preserve">
+    <value>Додати власного постачальника</value>
+  </data>
+  <data name="ProvidersView_Provider_RemoveProviderTooltip" xml:space="preserve">
+    <value>Видалити постачальника</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_Title" xml:space="preserve">
+    <value>Додати власного постачальника</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_Description" xml:space="preserve">
+    <value>Додайте OpenAI-сумісного постачальника (OpenRouter, LiteLLM, локальний, …).</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_NameLabel" xml:space="preserve">
+    <value>Ім'я</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_NamePlaceholder" xml:space="preserve">
+    <value>openrouter</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_Add" xml:space="preserve">
+    <value>Додати постачальника</value>
+  </data>
 
   <data name="Dialog_AddPerplexity_Title" xml:space="preserve">
     <value>Додати обліковий запис Perplexity</value>

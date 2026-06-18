@@ -21,9 +21,9 @@ public sealed class ProviderCatalogService : IDisposable
 
     private static readonly ProviderMeta[] BuiltinOAuthProviders =
     [
-        new("claude",         "Claude Code",    "Anthropic models via OAuth."),
-        new("codex",          "OpenAI Codex",   "OpenAI Codex via ChatGPT plan."),
-        new("gemini-cli",     "Gemini CLI",     "Google Gemini via OAuth."),
+        new("claude",         "Claude",         "Anthropic models via OAuth or API key."),
+        new("codex",          "OpenAI",         "OpenAI models via OAuth or API key."),
+        new("gemini-cli",     "Gemini",         "Google Gemini via OAuth or API key."),
         new("kimi",           "Kimi",           "Moonshot AI via OAuth."),
         new("antigravity",    "Antigravity",    "Antigravity AI via OAuth."),
         new("xai",            "xAI",            "Grok models via xAI OAuth."),
@@ -45,6 +45,8 @@ public sealed class ProviderCatalogService : IDisposable
     public List<ProviderViewModel> Providers { get; } = [];
 
     public event EventHandler? ProvidersRefreshed;
+    /// <summary>Raised when the provider list itself changes (provider added/removed), so the UI rebinds.</summary>
+    public event EventHandler? ProvidersRebuilt;
     /// <summary>Raised when a provider transitions from no accounts to having at least one.</summary>
     public event EventHandler<string>? ProviderFirstConnected;
 
@@ -71,6 +73,8 @@ public sealed class ProviderCatalogService : IDisposable
     /// </summary>
     public async Task InitializeAsync()
     {
+        await MigrateLegacyCredentialStoreAsync();
+
         var fromConfig = await _config.ReadProviderSettingsFromConfigAsync();
         foreach (var provider in fromConfig)
         {
@@ -84,6 +88,7 @@ public sealed class ProviderCatalogService : IDisposable
             existing.Enabled = provider.Enabled;
             if (!string.IsNullOrWhiteSpace(provider.BaseUrl)) existing.BaseUrl = provider.BaseUrl;
             if (!string.IsNullOrWhiteSpace(provider.DisplayName)) existing.DisplayName = provider.DisplayName;
+            existing.Kind = provider.Kind;
         }
         BuildProviderList();
     }
@@ -91,19 +96,24 @@ public sealed class ProviderCatalogService : IDisposable
     // ── Public API ────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Add an account to a custom provider. Creates the provider settings entry
-    /// if not present, saves the credential file, rewrites config.yaml.
-    /// Returns false if the account already exists.
+    /// Add an API-key account to a provider. Persists it in proxy-config.yaml
+    /// (the credential store for upstream provider keys). Returns false if the
+    /// account already exists.
     /// </summary>
     public async Task<bool> AddAccountAsync(
         string providerId, string baseUrl, string apiKey,
-        string? label = null, string? displayName = null)
+        string? label = null, string? displayName = null) =>
+        await AddAccountAsync(providerId, baseUrl, apiKey, label, displayName, GetDefaultKind(providerId));
+
+    public async Task<bool> AddAccountAsync(
+        string providerId, string baseUrl, string apiKey,
+        string? label, string? displayName, ProviderKind kind)
     {
         // Ensure provider settings entry exists
-        var ps = _settings.Current.Providers.FirstOrDefault(p => p.Id == providerId);
+        var ps = _settings.Current.Providers.FirstOrDefault(p => p.Id == providerId && p.Kind == kind);
         if (ps is null)
         {
-            ps = new ProviderSettings { Id = providerId, Enabled = true, BaseUrl = baseUrl, DisplayName = displayName ?? "" };
+            ps = new ProviderSettings { Id = providerId, Enabled = true, BaseUrl = baseUrl, DisplayName = displayName ?? "", Kind = kind };
             _settings.Current.Providers.Add(ps);
         }
         else if (!string.IsNullOrEmpty(baseUrl))
@@ -111,7 +121,18 @@ public sealed class ProviderCatalogService : IDisposable
             ps.BaseUrl = baseUrl;
         }
 
-        var (_, created) = _store.Save(providerId, apiKey, label);
+        var created = true;
+        var existing = ps.Accounts.FirstOrDefault(a => a.ApiKey == apiKey);
+        if (existing is not null)
+        {
+            created = false;
+            existing.Disabled = false;
+            if (!string.IsNullOrWhiteSpace(label)) existing.Label = label!;
+        }
+        else
+        {
+            ps.Accounts.Add(new ProviderAccountSettings { ApiKey = apiKey, Label = label ?? "" });
+        }
         _settings.Save();
 
         await _config.WriteConfigAsync();
@@ -120,12 +141,57 @@ public sealed class ProviderCatalogService : IDisposable
         return created;
     }
 
-    /// <summary>Remove one account from a custom provider and rewrite config.yaml.</summary>
+    /// <summary>Remove one API-key account from a provider and rewrite config.yaml.</summary>
     public async Task RemoveAccountAsync(string providerId, string apiKey)
     {
-        _store.Delete(providerId, apiKey);
+        foreach (var ps in _settings.Current.Providers.Where(p => p.Id == providerId))
+            ps.Accounts.RemoveAll(a => a.ApiKey == apiKey);
+        _settings.Save();
         await _config.WriteConfigAsync();
         _watcher.NotifyNow();
+    }
+
+    /// <summary>
+    /// Add a custom OpenAI-compatible provider (name + base-url + api key) to
+    /// proxy-config.yaml under <c>openai-compatibility</c>, then rebuild the list.
+    /// </summary>
+    public async Task AddCustomProviderAsync(string name, string baseUrl, string apiKey, string? label)
+    {
+        var id = UniqueProviderId(name);
+        var ps = new ProviderSettings
+        {
+            Id = id,
+            Enabled = true,
+            Kind = ProviderKind.OpenAICompatibility,
+            BaseUrl = baseUrl,
+            Accounts = [new ProviderAccountSettings { ApiKey = apiKey, Label = label ?? "" }]
+        };
+        _settings.Current.Providers.Add(ps);
+        _settings.Save();
+        await _config.WriteConfigAsync();
+        BuildProviderList();
+        ProvidersRebuilt?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>Remove an entire custom provider (settings + config.yaml) and rebuild the list.</summary>
+    public async Task RemoveCustomProviderAsync(string providerId)
+    {
+        _settings.Current.Providers.RemoveAll(p => p.Id == providerId && p.Kind == ProviderKind.OpenAICompatibility);
+        _settings.Save();
+        await _config.WriteConfigAsync();
+        BuildProviderList();
+        ProvidersRebuilt?.Invoke(this, EventArgs.Empty);
+    }
+
+    private string UniqueProviderId(string name)
+    {
+        var slug = System.Text.RegularExpressions.Regex.Replace(name.ToLowerInvariant(), @"[^a-z0-9]+", "-").Trim('-');
+        if (string.IsNullOrEmpty(slug)) slug = "provider";
+        var id = slug;
+        var n = 2;
+        while (_settings.Current.Providers.Any(p => p.Id == id))
+            id = $"{slug}-{n++}";
+        return id;
     }
 
     /// <summary>
@@ -184,6 +250,7 @@ public sealed class ProviderCatalogService : IDisposable
     {
         if (!Directory.Exists(authDir)) yield break;
 
+        // Legacy upstream-key json store (now stored in proxy-config.yaml) — clean up if present.
         foreach (var file in Directory.GetFiles(authDir, "openai-compat-*.json"))
             yield return file;
 
@@ -203,7 +270,6 @@ public sealed class ProviderCatalogService : IDisposable
         {
             if (Path.GetFileName(file).StartsWith("openai-compat-", StringComparison.OrdinalIgnoreCase))
                 continue;
-
             yield return file;
         }
     }
@@ -247,92 +313,98 @@ public sealed class ProviderCatalogService : IDisposable
 
     // ── Internal ─────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// One-time migration: imports upstream API keys from the legacy
+    /// openai-compat-*.json files into proxy-config.yaml (the correct store),
+    /// then deletes the json files. No-op when none exist.
+    /// </summary>
+    private async Task MigrateLegacyCredentialStoreAsync()
+    {
+        var records = _store.LoadAll();
+        if (records.Count == 0) return;
+
+        foreach (var group in records.GroupBy(r => r.ProviderId))
+        {
+            var kind = GetDefaultKind(group.Key);
+            var ps = _settings.Current.Providers.FirstOrDefault(p => p.Id == group.Key && p.Kind == kind);
+            if (ps is null)
+            {
+                ps = new ProviderSettings { Id = group.Key, Enabled = true, Kind = kind };
+                _settings.Current.Providers.Add(ps);
+            }
+            foreach (var r in group)
+            {
+                if (ps.Accounts.Any(a => a.ApiKey == r.ApiKey)) continue;
+                ps.Accounts.Add(new ProviderAccountSettings { ApiKey = r.ApiKey, Label = r.Label, Disabled = r.IsDisabled });
+            }
+        }
+
+        _settings.Save();
+        await _config.WriteConfigAsync();
+
+        foreach (var r in records)
+            try { File.Delete(r.FilePath); } catch { }
+    }
+
     private void BuildProviderList()
     {
         Providers.Clear();
 
         var oauthAccounts    = _oauthDetector.GetAccounts();
-        var customCredentials = _store.LoadAll()
-            .GroupBy(r => r.ProviderId)
-            .ToDictionary(g => g.Key, g => g.ToList());
 
         // 1. Built-in OAuth providers
         foreach (var meta in BuiltinOAuthProviders)
         {
-            var ps       = _settings.Current.Providers.FirstOrDefault(p => p.Id == meta.Id);
+            var ps       = _settings.Current.Providers.FirstOrDefault(p => p.Id == meta.Id && p.Kind == GetDefaultKind(meta.Id));
             var accounts        = oauthAccounts.TryGetValue(meta.Id, out var accs) ? accs : [];
+            var keyRecords      = ApiKeyAccountsFor(meta.Id, GetDefaultKind(meta.Id));
             var hasAccts        = accounts.Count > 0;
-            var hasActiveAccts  = accounts.Any(a => !a.IsDisabled);
+            var hasActiveAccts  = accounts.Any(a => !a.IsDisabled) || keyRecords.Any(a => !a.Disabled);
             // Only respect saved enabled=true if there are actually active accounts
             var enabled  = hasActiveAccts && (ps?.Enabled ?? true);
 
             var icon = ProviderIconRegistry.Get(meta.Id);
-            var vm = new ProviderViewModel(meta.Id, meta.Name, icon.IconKind, icon.LogoColor, meta.Description, isOAuth: true, customIconData: icon.CustomIconData)
+            var vm = new ProviderViewModel(meta.Id, meta.Name, icon.IconKind, icon.LogoColor, meta.Description, isOAuth: true, customIconData: icon.CustomIconData, supportsApiKey: SupportsNativeApiKey(meta.Id))
             {
                 IsEnabled = enabled,
                 Connected = hasAccts,
+                ApiKeyBaseUrl = ps?.BaseUrl ?? "",
             };
 
             SyncOAuthAccounts(vm, accounts);
+            if (vm.SupportsApiKey) SyncCustomAccounts(vm, keyRecords);
             WireEvents(vm);
             Providers.Add(vm);
         }
 
-        // 2. Custom providers from settings
-        foreach (var ps in _settings.Current.Providers.Where(p => !string.IsNullOrEmpty(p.BaseUrl)))
+        // 2. Custom OpenAI-compatible providers from settings
+        foreach (var ps in _settings.Current.Providers.Where(p => p.Kind == ProviderKind.OpenAICompatibility && !string.IsNullOrEmpty(p.BaseUrl)))
         {
             if (Providers.Any(p => p.Id == ps.Id)) continue; // skip if already added
 
-            var vm = BuildCustomProviderViewModel(ps, customCredentials);
-            WireEvents(vm);
-            Providers.Add(vm);
-        }
-
-        // 3. Custom providers discovered from credential store (not yet in settings)
-        foreach (var (providerId, records) in customCredentials)
-        {
-            if (Providers.Any(p => p.Id == providerId)) continue;
-
-            var ps = new ProviderSettings { Id = providerId, Enabled = true };
-            _settings.Current.Providers.Add(ps);
-
-            var vm = new ProviderViewModel(
-                providerId, TitleCase(providerId),
-                PackIconSimpleIconsKind.OpenAi, "#555555",
-                "Custom OpenAI-compatible provider.", isOAuth: false)
-            {
-                IsEnabled = true
-            };
-
-            foreach (var r in records)
-                vm.Accounts.Add(new ProviderAccountViewModel(r.ProviderId, r.ApiKey, r.Label, r.IsDisabled));
-
-            vm.RefreshAccountCount();
+            var vm = BuildCustomProviderViewModel(ps);
             WireEvents(vm);
             Providers.Add(vm);
         }
     }
 
-    private ProviderViewModel BuildCustomProviderViewModel(
-        ProviderSettings ps,
-        Dictionary<string, List<ProviderCredentialRecord>> customCredentials)
+    private List<ProviderAccountSettings> ApiKeyAccountsFor(string providerId, ProviderKind kind) =>
+        _settings.Current.Providers.FirstOrDefault(p => p.Id == providerId && p.Kind == kind)?.Accounts
+            .Where(a => !string.IsNullOrWhiteSpace(a.ApiKey)).ToList() ?? [];
+
+    private ProviderViewModel BuildCustomProviderViewModel(ProviderSettings ps)
     {
         var name = string.IsNullOrEmpty(ps.DisplayName) ? TitleCase(ps.Id) : ps.DisplayName;
         var vm   = new ProviderViewModel(
             ps.Id, name,
             PackIconSimpleIconsKind.OpenAi, "#555555",
-            $"Custom provider — {ps.BaseUrl}", isOAuth: false)
+            $"Custom provider — {ps.BaseUrl}", isOAuth: false, supportsApiKey: true)
         {
-            IsEnabled = ps.Enabled
+            IsEnabled = ps.Enabled,
+            ApiKeyBaseUrl = ps.BaseUrl
         };
 
-        if (customCredentials.TryGetValue(ps.Id, out var records))
-        {
-            foreach (var r in records)
-                vm.Accounts.Add(new ProviderAccountViewModel(r.ProviderId, r.ApiKey, r.Label, r.IsDisabled));
-        }
-
-        vm.RefreshAccountCount();
+        SyncCustomAccounts(vm, ApiKeyAccountsFor(ps.Id, ProviderKind.OpenAICompatibility));
         return vm;
     }
 
@@ -347,33 +419,30 @@ public sealed class ProviderCatalogService : IDisposable
         Dispatcher.UIThread.Post(() =>
         {
             var oauthAccounts = _oauthDetector.GetAccounts();
-            var customCreds   = _store.LoadAll()
-                .GroupBy(r => r.ProviderId)
-                .ToDictionary(g => g.Key, g => g.ToList());
 
             // Update OAuth providers
             var newlyConnected = new List<string>();
-            foreach (var vm in Providers.Where(p => p.IsOAuth))
+            foreach (var vm in Providers.Where(p => p.SupportsOAuth))
             {
                 var accounts     = oauthAccounts.TryGetValue(vm.Id, out var accs) ? accs : [];
+                var keyRecords   = ApiKeyAccountsFor(vm.Id, GetDefaultKind(vm.Id));
                 var hasAccts     = accounts.Count > 0;
+                var hasAnyAccts  = hasAccts || keyRecords.Count > 0;
                 var wasConnected = vm.Connected;
                 vm.Connected     = hasAccts;
                 // Auto-enable on first account added; auto-disable when last account removed
                 if (!wasConnected && hasAccts) { vm.IsEnabled = true; newlyConnected.Add(vm.Id); }
-                else if (!hasAccts)            vm.IsEnabled = false;
+                else if (!hasAnyAccts)          vm.IsEnabled = false;
                 SyncOAuthAccounts(vm, accounts);
+                if (vm.SupportsApiKey) SyncCustomAccounts(vm, keyRecords);
             }
             // Raise after SyncOAuthAccounts so vm.Accounts is already populated
             foreach (var id in newlyConnected)
                 ProviderFirstConnected?.Invoke(this, id);
 
             // Update custom provider account lists
-            foreach (var vm in Providers.Where(p => !p.IsOAuth))
-            {
-                var records = customCreds.TryGetValue(vm.Id, out var r) ? r : [];
-                SyncCustomAccounts(vm, records);
-            }
+            foreach (var vm in Providers.Where(p => !p.SupportsOAuth))
+                SyncCustomAccounts(vm, ApiKeyAccountsFor(vm.Id, ProviderKind.OpenAICompatibility));
 
             ProvidersRefreshed?.Invoke(this, EventArgs.Empty);
         });
@@ -383,7 +452,7 @@ public sealed class ProviderCatalogService : IDisposable
     {
         // Remove stale (keyed by email)
         var toRemove = vm.Accounts
-            .Where(a => !accounts.Any(r => r.Email == a.Email))
+            .Where(a => !a.IsCustomKey && !accounts.Any(r => r.Email == a.Email))
             .ToList();
         foreach (var a in toRemove) vm.Accounts.Remove(a);
 
@@ -401,7 +470,7 @@ public sealed class ProviderCatalogService : IDisposable
         }
 
         // Update disabled state — preserve PlanBadge if already enriched by QuotaFetchService
-        foreach (var a in vm.Accounts)
+        foreach (var a in vm.Accounts.Where(a => !a.IsCustomKey))
         {
             var match = accounts.FirstOrDefault(r => r.Email == a.Email);
             if (match is not null)
@@ -415,31 +484,28 @@ public sealed class ProviderCatalogService : IDisposable
         vm.RefreshAccountCount();
     }
 
-    private void SyncCustomAccounts(ProviderViewModel vm, List<ProviderCredentialRecord> records)
+    private void SyncCustomAccounts(ProviderViewModel vm, List<ProviderAccountSettings> records)
     {
         // Remove stale
         var toRemove = vm.Accounts
-            .Where(a => !records.Any(r => r.ApiKey == a.ApiKey))
+            .Where(a => a.IsCustomKey && !records.Any(r => r.ApiKey == a.ApiKey))
             .ToList();
         foreach (var a in toRemove) vm.Accounts.Remove(a);
 
         // Add new
         foreach (var r in records.Where(r => !vm.Accounts.Any(a => a.ApiKey == r.ApiKey)))
         {
-            var acct = new ProviderAccountViewModel(r.ProviderId, r.ApiKey, r.Label, r.IsDisabled)
+            var acct = new ProviderAccountViewModel(vm.Id, r.ApiKey, r.Label, isDisabled: false)
             {
                 IsProviderEnabled = vm.IsEnabled,
+                ProviderBaseUrl = vm.ApiKeyBaseUrl,
             };
-            WireAccountDisable(acct, vm);
             vm.Accounts.Add(acct);
         }
 
-        // Update disabled state
-        foreach (var a in vm.Accounts)
-        {
-            var match = records.FirstOrDefault(r => r.ApiKey == a.ApiKey);
-            if (match is not null) a.IsDisabled = match.IsDisabled;
-        }
+        // API-key accounts cannot be disabled individually in CLIProxyAPI config.
+        foreach (var a in vm.Accounts.Where(a => a.IsCustomKey))
+            a.IsDisabled = false;
 
         vm.RefreshAccountCount();
     }
@@ -449,7 +515,12 @@ public sealed class ProviderCatalogService : IDisposable
         acct.IsDisabledChanged += async (_, disabled) =>
         {
             if (acct.IsCustomKey)
-                _store.SetDisabled(acct.ProviderId, acct.ApiKey, disabled);
+            {
+                foreach (var ps in _settings.Current.Providers.Where(p => p.Id == acct.ProviderId))
+                    foreach (var a in ps.Accounts.Where(a => a.ApiKey == acct.ApiKey))
+                        a.Disabled = disabled;
+                _settings.Save();
+            }
             else
                 _oauthDetector.SetDisabled(acct.ProviderId, acct.Email, disabled);
 
@@ -466,6 +537,17 @@ public sealed class ProviderCatalogService : IDisposable
             await _config.WriteConfigAsync();
         };
     }
+
+    public static ProviderKind GetDefaultKind(string providerId) => providerId switch
+    {
+        "claude" => ProviderKind.ClaudeApiKey,
+        "gemini-cli" => ProviderKind.GeminiApiKey,
+        "codex" => ProviderKind.CodexApiKey,
+        _ => ProviderKind.OpenAICompatibility
+    };
+
+    private static bool SupportsNativeApiKey(string providerId) =>
+        GetDefaultKind(providerId) is ProviderKind.ClaudeApiKey or ProviderKind.GeminiApiKey or ProviderKind.CodexApiKey;
 
     private static string TitleCase(string id) =>
         System.Text.RegularExpressions.Regex.Replace(id, @"[^A-Za-z0-9]+", " ") is { } s

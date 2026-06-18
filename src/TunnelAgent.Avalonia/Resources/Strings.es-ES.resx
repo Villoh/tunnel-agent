@@ -153,6 +153,69 @@
   <data name="Dialog_AddAccount_Add" xml:space="preserve">
     <value>Agregar Cuenta</value>
   </data>
+  <data name="Dialog_AddAccount_HeaderTitle" xml:space="preserve">
+    <value>Añadir cuenta</value>
+  </data>
+  <data name="Dialog_AddAccount_ModeDescription" xml:space="preserve">
+    <value>Elige cómo debe autenticar Tunnel Agent este proveedor.</value>
+  </data>
+  <data name="Dialog_AddAccount_OAuthOption" xml:space="preserve">
+    <value>Inicio de sesión OAuth</value>
+  </data>
+  <data name="Dialog_AddAccount_OAuthOptionDesc" xml:space="preserve">
+    <value>Usa el inicio de sesión del navegador de CLIProxyAPI y tokens OAuth locales.</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyOption" xml:space="preserve">
+    <value>Clave API</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyOptionDesc" xml:space="preserve">
+    <value>Usa una clave del proveedor upstream. La URL base es opcional.</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyDescription" xml:space="preserve">
+    <value>Añade una cuenta de clave API upstream para este proveedor.</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyTitle" xml:space="preserve">
+    <value>Añadir clave API</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyAdd" xml:space="preserve">
+    <value>Añadir clave API</value>
+  </data>
+  <data name="Dialog_EditApiKey_Title" xml:space="preserve">
+    <value>Editar clave API</value>
+  </data>
+  <data name="Dialog_EditApiKey_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="ProvidersView_Provider_AddApiKeyTooltip" xml:space="preserve">
+    <value>Añadir clave API</value>
+  </data>
+  <data name="Dialog_AddAccount_BaseUrlHint" xml:space="preserve">
+    <value>Déjalo vacío para usar el endpoint predeterminado de CLIProxyAPI para este proveedor.</value>
+  </data>
+  <data name="ProvidersView_Provider_EditAccountTooltip" xml:space="preserve">
+    <value>Editar cuenta de clave API</value>
+  </data>
+  <data name="ProvidersView_AddCustomProvider" xml:space="preserve">
+    <value>Añadir proveedor personalizado</value>
+  </data>
+  <data name="ProvidersView_Provider_RemoveProviderTooltip" xml:space="preserve">
+    <value>Eliminar proveedor</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_Title" xml:space="preserve">
+    <value>Añadir proveedor personalizado</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_Description" xml:space="preserve">
+    <value>Añade un proveedor compatible con OpenAI (OpenRouter, LiteLLM, local, …).</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_NameLabel" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_NamePlaceholder" xml:space="preserve">
+    <value>openrouter</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_Add" xml:space="preserve">
+    <value>Añadir proveedor</value>
+  </data>
 
   <data name="Dialog_AddPerplexity_Title" xml:space="preserve">
     <value>Agregar cuenta de Perplexity</value>

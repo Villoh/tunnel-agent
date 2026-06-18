@@ -166,6 +166,14 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
 
     [ObservableProperty] private bool _showAddAccountDialog;
     [ObservableProperty] private ProviderViewModel? _addAccountTarget;
+    [ObservableProperty] private bool _showAddAccountModeDialog;
+    [ObservableProperty] private bool _addAccountUseApiKey;
+    [ObservableProperty] private bool _showAddCustomProviderDialog;
+    [ObservableProperty] private string _customProviderNameDraft = "";
+    [ObservableProperty] private string _customProviderBaseUrlDraft = "";
+    [ObservableProperty] private string _customProviderApiKeyDraft = "";
+    [ObservableProperty] private string _customProviderApiKeyLabelDraft = "";
+    [ObservableProperty] private bool _showCustomProviderApiKey;
     [ObservableProperty] private bool _showPerplexityAccountDialog;
     [ObservableProperty] private string _perplexitySessionTokenDraft = "";
     [ObservableProperty] private bool _isPerplexityTokenGenerationMode;
@@ -228,7 +236,19 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     [ObservableProperty] private string _apiKeyDraft = "";
     [ObservableProperty] private bool _showApiKeyDraft;
     [ObservableProperty] private string _addAccountApiKeyDraft = "";
+    [ObservableProperty] private string _addAccountBaseUrlDraft = "";
+    [ObservableProperty] private string _addAccountLabelDraft = "";
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ApiKeyDialogTitle))]
+    [NotifyPropertyChangedFor(nameof(ApiKeyDialogApplyText))]
+    private ProviderAccountViewModel? _editApiAccountTarget;
     [ObservableProperty] private bool _showAddAccountApiKey;
+    public string ApiKeyDialogTitle => EditApiAccountTarget is null
+        ? Localization.GetString("Dialog_AddAccount_ApiKeyTitle")
+        : Localization.GetString("Dialog_EditApiKey_Title");
+    public string ApiKeyDialogApplyText => EditApiAccountTarget is null
+        ? Localization.GetString("Dialog_AddAccount_ApiKeyAdd")
+        : Localization.GetString("Dialog_EditApiKey_Save");
     [ObservableProperty] private bool _showPerplexitySessionToken;
     [ObservableProperty] private bool _isModelsExpanded;
     [ObservableProperty] private string _modelSearchText = "";
@@ -331,6 +351,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
             engine.StateChanged += OnAnyEngineStateChanged;
 
         _catalog.ProvidersRefreshed    += OnProvidersRefreshed;
+        _catalog.ProvidersRebuilt      += OnProvidersRebuilt;
         _catalog.ProviderFirstConnected += OnProviderFirstConnected;
         _perplexityAccounts.AccountsChanged += OnPerplexityAccountsChanged;
 
@@ -394,13 +415,15 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     public bool IsLaunchAtLoginSupported => _launchAtLogin.IsSupported;
     public int ConnectedProviderCount => Providers.Count(p => p.Connected || p.ActiveAccountCount > 0);
     public IEnumerable<ProviderViewModel> QuotaProviders => Providers.Where(IsQuotaSupportedProvider).Concat(StandaloneQuotaProviders);
+    private static IEnumerable<ProviderAccountViewModel> QuotaAccountsFor(ProviderViewModel provider) =>
+        provider.Accounts.Where(a => !a.IsCustomKey);
     /// <summary>Quota providers that actually have at least one connected account — used by the tray usage popup.</summary>
-    public IEnumerable<ProviderViewModel> QuotaProvidersForRail => QuotaProviders.Where(p => p.Accounts.Any());
-    public int QuotaProviderCount => QuotaProviders.Count(p => p.Accounts.Any());
-    public IEnumerable<ProviderAccountViewModel> SelectedQuotaAccounts => SelectedQuotaProvider?.Accounts ?? Enumerable.Empty<ProviderAccountViewModel>();
+    public IEnumerable<ProviderViewModel> QuotaProvidersForRail => QuotaProviders.Where(p => QuotaAccountsFor(p).Any());
+    public int QuotaProviderCount => QuotaProviders.Count(p => QuotaAccountsFor(p).Any());
+    public IEnumerable<ProviderAccountViewModel> SelectedQuotaAccounts => SelectedQuotaProvider is null ? Enumerable.Empty<ProviderAccountViewModel>() : QuotaAccountsFor(SelectedQuotaProvider);
     public bool HasQuotaProviders => QuotaProviders.Any();
-    public bool HasQuotaAccounts => QuotaProviders.Any(p => p.Accounts.Any());
-    public bool HasAnyQuotaData => QuotaProviders.SelectMany(p => p.Accounts).Any(a => a.HasQuota);
+    public bool HasQuotaAccounts => QuotaProviders.Any(p => QuotaAccountsFor(p).Any());
+    public bool HasAnyQuotaData => QuotaProviders.SelectMany(QuotaAccountsFor).Any(a => a.HasQuota);
     public bool HasSelectedQuotaAccounts => SelectedQuotaAccounts.Any();
     public bool ShowQuotaAccountEmptyState => HasQuotaProviders && !HasSelectedQuotaAccounts;
     public string QuotaEmptyStateText => HasQuotaProviders
@@ -884,12 +907,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
             var perplexityAccountsTask = Task.Run(() => _perplexityAccounts.InitializeAsync(legacyPerplexityAccounts));
             await Task.WhenAll(catalogTask, perplexityAccountsTask);
 
-            Providers.Clear();
-            foreach (var vm in _catalog.Providers)
-            {
-                vm.AddAccountRequested += OnAddAccountRequested;
-                Providers.Add(vm);
-            }
+            RebindProviders();
             OnPropertyChanged(nameof(ConnectedProviderCount));
             RefreshQuotaNavigation();
 
@@ -998,6 +1016,27 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
             PropagateEmailMasking(MaskEmails);
         });
 
+    private void OnProvidersRebuilt(object? sender, EventArgs e) =>
+        Dispatcher.UIThread.Post(() =>
+        {
+            RebindProviders();
+            OnPropertyChanged(nameof(ConnectedProviderCount));
+            RefreshQuotaNavigation();
+            PropagateEmailMasking(MaskEmails);
+        });
+
+    private void RebindProviders()
+    {
+        foreach (var existing in Providers)
+            existing.AddAccountRequested -= OnAddAccountRequested;
+        Providers.Clear();
+        foreach (var vm in _catalog.Providers)
+        {
+            vm.AddAccountRequested += OnAddAccountRequested;
+            Providers.Add(vm);
+        }
+    }
+
     private void OnProviderFirstConnected(object? sender, string providerId)
     {
         if (!QuotaSupportedProviderIds.Contains(providerId)) return;
@@ -1005,7 +1044,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         var provider = Providers.FirstOrDefault(p => p.Id == providerId)
                     ?? StandaloneQuotaProviders.FirstOrDefault(p => p.Id == providerId);
         if (provider is null) return;
-        var accounts = provider.Accounts.ToList();
+        var accounts = QuotaAccountsFor(provider).ToList();
         _ = Task.Run(async () =>
         {
             foreach (var account in accounts)
@@ -1314,7 +1353,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         IsRefreshingAllQuotaProviders = true;
         try
         {
-            foreach (var account in QuotaProviders.SelectMany(p => p.Accounts).ToList())
+            foreach (var account in QuotaProviders.SelectMany(QuotaAccountsFor).ToList())
                 await RefreshQuotaAsync(account);
         }
         finally
@@ -1330,8 +1369,13 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         {
             AddAccountTarget = vm;
             AddAccountApiKeyDraft = "";
+            AddAccountBaseUrlDraft = vm.ApiKeyBaseUrl;
+            AddAccountLabelDraft = "";
+            EditApiAccountTarget = null;
             ShowAddAccountApiKey = false;
-            ShowAddAccountDialog = true;
+            AddAccountUseApiKey = vm.SupportsApiKey && !vm.SupportsOAuth;
+            ShowAddAccountModeDialog = vm.HasMultipleAddModes;
+            ShowAddAccountDialog = !vm.HasMultipleAddModes;
         }
     }
 
@@ -1339,8 +1383,23 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     {
         ShowAddAccountDialog = false;
         AddAccountApiKeyDraft = "";
+        AddAccountBaseUrlDraft = "";
+        AddAccountLabelDraft = "";
         ShowAddAccountApiKey = false;
-        await _catalog.AddAccountAsync(providerId, baseUrl, apiKey, label);
+        var kind = AddAccountUseApiKey ? ProviderCatalogService.GetDefaultKind(providerId) : ProviderKind.OpenAICompatibility;
+        if (EditApiAccountTarget is { } existing)
+        {
+            await _catalog.RemoveAccountAsync(existing.ProviderId, existing.ApiKey);
+            EditApiAccountTarget = null;
+        }
+        var created = await _catalog.AddAccountAsync(providerId, baseUrl, apiKey, label, null, kind);
+        if (!created)
+        {
+            OAuthStatusIsError = true;
+            OAuthStatusMessage = "API key already exists.";
+            ShowOAuthStatus = true;
+            _ = Task.Delay(4000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowOAuthStatus = false));
+        }
         OnPropertyChanged(nameof(ConnectedProviderCount));
         PropagateEmailMasking(MaskEmails);
     }
@@ -1719,8 +1778,95 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     private void DismissAddAccountDialog()
     {
         ShowAddAccountDialog = false;
+        ShowAddAccountModeDialog = false;
         AddAccountApiKeyDraft = "";
+        AddAccountBaseUrlDraft = "";
+        AddAccountLabelDraft = "";
+        EditApiAccountTarget = null;
         ShowAddAccountApiKey = false;
+    }
+
+    [RelayCommand]
+    private void OpenAddCustomProvider()
+    {
+        CustomProviderNameDraft = "";
+        CustomProviderBaseUrlDraft = "";
+        CustomProviderApiKeyDraft = "";
+        CustomProviderApiKeyLabelDraft = "";
+        ShowCustomProviderApiKey = false;
+        ShowAddCustomProviderDialog = true;
+    }
+
+    [RelayCommand]
+    private void DismissAddCustomProvider()
+    {
+        ShowAddCustomProviderDialog = false;
+        CustomProviderNameDraft = "";
+        CustomProviderBaseUrlDraft = "";
+        CustomProviderApiKeyDraft = "";
+        CustomProviderApiKeyLabelDraft = "";
+        ShowCustomProviderApiKey = false;
+    }
+
+    [RelayCommand] private void ToggleCustomProviderApiKeyVisibility() => ShowCustomProviderApiKey = !ShowCustomProviderApiKey;
+
+    [RelayCommand]
+    private async Task ConfirmAddCustomProvider()
+    {
+        var name = CustomProviderNameDraft.Trim();
+        var baseUrl = CustomProviderBaseUrlDraft.Trim();
+        var apiKey = CustomProviderApiKeyDraft.Trim();
+        var label = CustomProviderApiKeyLabelDraft.Trim();
+        if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(baseUrl) || string.IsNullOrEmpty(apiKey)) return;
+
+        ShowAddCustomProviderDialog = false;
+        await _catalog.AddCustomProviderAsync(name, baseUrl, apiKey, string.IsNullOrEmpty(label) ? null : label);
+        CustomProviderNameDraft = "";
+        CustomProviderBaseUrlDraft = "";
+        CustomProviderApiKeyDraft = "";
+        CustomProviderApiKeyLabelDraft = "";
+        ShowCustomProviderApiKey = false;
+        OnPropertyChanged(nameof(ConnectedProviderCount));
+    }
+
+    [RelayCommand]
+    private async Task RemoveCustomProvider(ProviderViewModel provider)
+    {
+        if (provider is null) return;
+        await _catalog.RemoveCustomProviderAsync(provider.Id);
+        OnPropertyChanged(nameof(ConnectedProviderCount));
+    }
+
+    [RelayCommand]
+    private void EditApiAccount(ProviderAccountViewModel account)
+    {
+        var provider = Providers.FirstOrDefault(p => p.Id == account.ProviderId)
+            ?? StandaloneQuotaProviders.FirstOrDefault(p => p.Id == account.ProviderId);
+        AddAccountTarget = provider;
+        EditApiAccountTarget = account;
+        AddAccountUseApiKey = true;
+        AddAccountApiKeyDraft = account.ApiKey;
+        AddAccountBaseUrlDraft = provider?.ApiKeyBaseUrl ?? "";
+        AddAccountLabelDraft = account.Label;
+        ShowAddAccountApiKey = false;
+        ShowAddAccountModeDialog = false;
+        ShowAddAccountDialog = true;
+    }
+
+    [RelayCommand]
+    private void AddAccountWithApiKey()
+    {
+        AddAccountUseApiKey = true;
+        ShowAddAccountModeDialog = false;
+        ShowAddAccountDialog = true;
+    }
+
+    [RelayCommand]
+    private async Task AddAccountWithOAuth()
+    {
+        if (AddAccountTarget is null) return;
+        ShowAddAccountModeDialog = false;
+        await ConnectOAuthAsync(AddAccountTarget.Id);
     }
 
     [RelayCommand] private void ToggleApiKeyDraftVisibility() => ShowApiKeyDraft = !ShowApiKeyDraft;
@@ -2713,6 +2859,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
             engine.StateChanged -= OnAnyEngineStateChanged;
 
         _catalog.ProvidersRefreshed    -= OnProvidersRefreshed;
+        _catalog.ProvidersRebuilt      -= OnProvidersRebuilt;
         _catalog.ProviderFirstConnected -= OnProviderFirstConnected;
         _perplexityAccounts.AccountsChanged -= OnPerplexityAccountsChanged;
         _logs.EntriesLoaded -= OnLogEntriesLoaded;

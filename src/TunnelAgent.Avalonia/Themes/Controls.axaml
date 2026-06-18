@@ -525,6 +525,12 @@
     <Style Selector="Button.provider-row:pressed /template/ ContentPresenter">
         <Setter Property="Background" Value="#10FFFFFF" />
     </Style>
+    <Style Selector="Button.provider-row.add-provider-row:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#0F000000" />
+    </Style>
+    <Style Selector="Button.provider-row.add-provider-row:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="#16000000" />
+    </Style>
 
     <!-- Spinning refresh icon -->
     <Style Selector="lucide|PackIconLucide.spin">

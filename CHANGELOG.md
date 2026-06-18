@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Upstream API key providers** (`ProviderCatalogService`, `ConfigService`, `ProvidersView`, `MainWindow`): added native API-key flows for Claude, OpenAI, and Gemini plus custom OpenAI-compatible providers stored in `proxy-config.yaml`, with add/edit dialogs, duplicate-key toast feedback, custom-provider add/remove actions, and localized UI strings.
+
+### Changed
+
+- **Provider credentials source of truth** (`ConfigService`, `ProviderCatalogService`): upstream provider API keys, labels, base URLs, disabled custom providers, and OpenAI-compatible provider entries now round-trip through `proxy-config.yaml`; legacy `openai-compat-*.json` files are migrated and removed.
+- **Provider/account display** (`ProviderViewModel`, `ProvidersView`): built-in providers now display as Claude, OpenAI, and Gemini, API-key rows show label plus provider base URL instead of exposing the raw/masked key, and per-key enable toggles are hidden for API-key credentials that CLIProxyAPI cannot disable individually.
+
+### Fixed
+
+- **Quota account filtering** (`MainWindowViewModel`, `QuotaFetchService`): API-key accounts are excluded from OAuth quota views and refresh loops so they no longer collide with OAuth token lookup or appear as quota-capable accounts.
+- **Debug diagnostics startup** (`MainWindow.axaml.cs`): debug builds now initialize Avalonia diagnostics conditionally so release deployments do not require the diagnostics assembly.
+
 ## [0.7.2] - 2026-06-18
 
 ### Changed

@@ -157,6 +157,69 @@
   <data name="Dialog_AddAccount_Add" xml:space="preserve">
     <value>Ajouter compte</value>
   </data>
+  <data name="Dialog_AddAccount_HeaderTitle" xml:space="preserve">
+    <value>Ajouter un compte</value>
+  </data>
+  <data name="Dialog_AddAccount_ModeDescription" xml:space="preserve">
+    <value>Choisissez comment Tunnel Agent doit authentifier ce fournisseur.</value>
+  </data>
+  <data name="Dialog_AddAccount_OAuthOption" xml:space="preserve">
+    <value>Connexion OAuth</value>
+  </data>
+  <data name="Dialog_AddAccount_OAuthOptionDesc" xml:space="preserve">
+    <value>Utiliser la connexion par navigateur de CLIProxyAPI et les jetons OAuth locaux.</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyOption" xml:space="preserve">
+    <value>Clé API</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyOptionDesc" xml:space="preserve">
+    <value>Utiliser une clé de fournisseur en amont. L'URL de base est facultative.</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyDescription" xml:space="preserve">
+    <value>Ajouter un compte de clé API en amont pour ce fournisseur.</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyTitle" xml:space="preserve">
+    <value>Ajouter une clé API</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyAdd" xml:space="preserve">
+    <value>Ajouter une clé API</value>
+  </data>
+  <data name="Dialog_EditApiKey_Title" xml:space="preserve">
+    <value>Modifier la clé API</value>
+  </data>
+  <data name="Dialog_EditApiKey_Save" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="ProvidersView_Provider_AddApiKeyTooltip" xml:space="preserve">
+    <value>Ajouter une clé API</value>
+  </data>
+  <data name="Dialog_AddAccount_BaseUrlHint" xml:space="preserve">
+    <value>Laisser vide pour utiliser le point de terminaison par défaut de CLIProxyAPI pour ce fournisseur.</value>
+  </data>
+  <data name="ProvidersView_Provider_EditAccountTooltip" xml:space="preserve">
+    <value>Modifier le compte de clé API</value>
+  </data>
+  <data name="ProvidersView_AddCustomProvider" xml:space="preserve">
+    <value>Ajouter un fournisseur personnalisé</value>
+  </data>
+  <data name="ProvidersView_Provider_RemoveProviderTooltip" xml:space="preserve">
+    <value>Supprimer le fournisseur</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_Title" xml:space="preserve">
+    <value>Ajouter un fournisseur personnalisé</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_Description" xml:space="preserve">
+    <value>Ajouter un fournisseur compatible OpenAI (OpenRouter, LiteLLM, local, …).</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_NameLabel" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_NamePlaceholder" xml:space="preserve">
+    <value>openrouter</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_Add" xml:space="preserve">
+    <value>Ajouter le fournisseur</value>
+  </data>
 
   <data name="Dialog_AddPerplexity_Title" xml:space="preserve">
     <value>Ajouter compte Perplexity</value>

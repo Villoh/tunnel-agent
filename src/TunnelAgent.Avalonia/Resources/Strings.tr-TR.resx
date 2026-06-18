@@ -157,6 +157,69 @@
   <data name="Dialog_AddAccount_Add" xml:space="preserve">
     <value>Hesap Ekle</value>
   </data>
+  <data name="Dialog_AddAccount_HeaderTitle" xml:space="preserve">
+    <value>Hesap ekle</value>
+  </data>
+  <data name="Dialog_AddAccount_ModeDescription" xml:space="preserve">
+    <value>Tunnel Agent'ın bu sağlayıcının kimliğini nasıl doğrulayacağını seçin.</value>
+  </data>
+  <data name="Dialog_AddAccount_OAuthOption" xml:space="preserve">
+    <value>OAuth ile oturum açma</value>
+  </data>
+  <data name="Dialog_AddAccount_OAuthOptionDesc" xml:space="preserve">
+    <value>CLIProxyAPI tarayıcı oturumunu ve yerel OAuth belirteçlerini kullanın.</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyOption" xml:space="preserve">
+    <value>API anahtarı</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyOptionDesc" xml:space="preserve">
+    <value>Bir üst sağlayıcı anahtarı kullanın. Temel URL isteğe bağlıdır.</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyDescription" xml:space="preserve">
+    <value>Bu sağlayıcı için bir üst API anahtarı hesabı ekleyin.</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyTitle" xml:space="preserve">
+    <value>API anahtarı ekle</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyAdd" xml:space="preserve">
+    <value>API anahtarı ekle</value>
+  </data>
+  <data name="Dialog_EditApiKey_Title" xml:space="preserve">
+    <value>API anahtarını düzenle</value>
+  </data>
+  <data name="Dialog_EditApiKey_Save" xml:space="preserve">
+    <value>Kaydet</value>
+  </data>
+  <data name="ProvidersView_Provider_AddApiKeyTooltip" xml:space="preserve">
+    <value>API anahtarı ekle</value>
+  </data>
+  <data name="Dialog_AddAccount_BaseUrlHint" xml:space="preserve">
+    <value>Bu sağlayıcı için CLIProxyAPI varsayılan uç noktasını kullanmak üzere boş bırakın.</value>
+  </data>
+  <data name="ProvidersView_Provider_EditAccountTooltip" xml:space="preserve">
+    <value>API anahtarı hesabını düzenle</value>
+  </data>
+  <data name="ProvidersView_AddCustomProvider" xml:space="preserve">
+    <value>Özel sağlayıcı ekle</value>
+  </data>
+  <data name="ProvidersView_Provider_RemoveProviderTooltip" xml:space="preserve">
+    <value>Sağlayıcıyı kaldır</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_Title" xml:space="preserve">
+    <value>Özel sağlayıcı ekle</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_Description" xml:space="preserve">
+    <value>OpenAI uyumlu bir sağlayıcı ekleyin (OpenRouter, LiteLLM, yerel, …).</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_NameLabel" xml:space="preserve">
+    <value>Ad</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_NamePlaceholder" xml:space="preserve">
+    <value>openrouter</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_Add" xml:space="preserve">
+    <value>Sağlayıcı ekle</value>
+  </data>
 
   <data name="Dialog_AddPerplexity_Title" xml:space="preserve">
     <value>Perplexity hesabı ekle</value>

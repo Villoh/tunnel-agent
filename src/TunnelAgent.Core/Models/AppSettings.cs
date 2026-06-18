@@ -11,6 +11,14 @@ public sealed class ProviderAccountSettings
     public bool   Disabled { get; set; } = false;
 }
 
+public enum ProviderKind
+{
+    OpenAICompatibility,
+    ClaudeApiKey,
+    GeminiApiKey,
+    CodexApiKey
+}
+
 /// <summary>Persisted state for one provider entry (OAuth or custom).</summary>
 public sealed class ProviderSettings
 {
@@ -20,8 +28,11 @@ public sealed class ProviderSettings
     /// <summary>False = excluded from config.yaml (oauth-excluded-models / omitted from openai-compatibility).</summary>
     public bool Enabled { get; set; } = true;
 
-    /// <summary>Base URL for custom OpenAI-compat providers. Empty for OAuth providers.</summary>
+    /// <summary>Base URL for API-key providers. Empty uses CLIProxyAPI defaults when supported.</summary>
     public string BaseUrl { get; set; } = "";
+
+    /// <summary>YAML block used when this provider has upstream API-key accounts.</summary>
+    public ProviderKind Kind { get; set; } = ProviderKind.OpenAICompatibility;
 
     /// <summary>Friendly display name override (empty = use catalog default).</summary>
     public string DisplayName { get; set; } = "";

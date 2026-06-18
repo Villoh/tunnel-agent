@@ -157,6 +157,69 @@
   <data name="Dialog_AddAccount_Add" xml:space="preserve">
     <value>खाता जोड़ें</value>
   </data>
+  <data name="Dialog_AddAccount_HeaderTitle" xml:space="preserve">
+    <value>खाता जोड़ें</value>
+  </data>
+  <data name="Dialog_AddAccount_ModeDescription" xml:space="preserve">
+    <value>चुनें कि Tunnel Agent इस प्रदाता को कैसे प्रमाणित करे।</value>
+  </data>
+  <data name="Dialog_AddAccount_OAuthOption" xml:space="preserve">
+    <value>OAuth लॉगिन</value>
+  </data>
+  <data name="Dialog_AddAccount_OAuthOptionDesc" xml:space="preserve">
+    <value>CLIProxyAPI ब्राउज़र लॉगिन और स्थानीय OAuth टोकन का उपयोग करें।</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyOption" xml:space="preserve">
+    <value>API कुंजी</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyOptionDesc" xml:space="preserve">
+    <value>अपस्ट्रीम प्रदाता कुंजी का उपयोग करें। बेस URL वैकल्पिक है।</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyDescription" xml:space="preserve">
+    <value>इस प्रदाता के लिए एक अपस्ट्रीम API कुंजी खाता जोड़ें।</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyTitle" xml:space="preserve">
+    <value>API कुंजी जोड़ें</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyAdd" xml:space="preserve">
+    <value>API कुंजी जोड़ें</value>
+  </data>
+  <data name="Dialog_EditApiKey_Title" xml:space="preserve">
+    <value>API कुंजी संपादित करें</value>
+  </data>
+  <data name="Dialog_EditApiKey_Save" xml:space="preserve">
+    <value>सहेजें</value>
+  </data>
+  <data name="ProvidersView_Provider_AddApiKeyTooltip" xml:space="preserve">
+    <value>API कुंजी जोड़ें</value>
+  </data>
+  <data name="Dialog_AddAccount_BaseUrlHint" xml:space="preserve">
+    <value>इस प्रदाता के लिए CLIProxyAPI डिफ़ॉल्ट एंडपॉइंट का उपयोग करने हेतु खाली छोड़ें।</value>
+  </data>
+  <data name="ProvidersView_Provider_EditAccountTooltip" xml:space="preserve">
+    <value>API कुंजी खाता संपादित करें</value>
+  </data>
+  <data name="ProvidersView_AddCustomProvider" xml:space="preserve">
+    <value>कस्टम प्रदाता जोड़ें</value>
+  </data>
+  <data name="ProvidersView_Provider_RemoveProviderTooltip" xml:space="preserve">
+    <value>प्रदाता हटाएं</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_Title" xml:space="preserve">
+    <value>कस्टम प्रदाता जोड़ें</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_Description" xml:space="preserve">
+    <value>एक OpenAI-संगत प्रदाता जोड़ें (OpenRouter, LiteLLM, स्थानीय, …)।</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_NameLabel" xml:space="preserve">
+    <value>नाम</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_NamePlaceholder" xml:space="preserve">
+    <value>openrouter</value>
+  </data>
+  <data name="Dialog_AddCustomProvider_Add" xml:space="preserve">
+    <value>प्रदाता जोड़ें</value>
+  </data>
 
   <data name="Dialog_AddPerplexity_Title" xml:space="preserve">
     <value>Perplexity खाता जोड़ें</value>

@@ -36,8 +36,20 @@ public sealed class QuotaFetchService
         CancellationToken ct = default) =>
         FetchAccountAsync(providerId, account, ct);
 
-    private Task FetchAccountAsync(string providerId, ProviderAccountViewModel account, CancellationToken ct) =>
-        providerId switch
+    private Task FetchAccountAsync(string providerId, ProviderAccountViewModel account, CancellationToken ct)
+    {
+        if (account.IsCustomKey)
+        {
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                account.PlanBadge = "";
+                account.QuotaBars.Clear();
+                account.QuotaFetchedEmpty = true;
+            });
+            return Task.CompletedTask;
+        }
+
+        return providerId switch
         {
             "claude"         => FetchClaudeAsync(account, ct),
             "codex"          => FetchCodexAsync(account, ct),
@@ -49,6 +61,7 @@ public sealed class QuotaFetchService
             "trae"           => FetchTraeAsync(account, ct),
             _                => Task.CompletedTask,
         };
+    }
 
     // ── Claude ───────────────────────────────────────────────────────────────
     // GET https://api.anthropic.com/api/oauth/usage
@@ -1620,6 +1633,7 @@ public sealed class QuotaFetchService
 
     private string? ReadAccessToken(string prefix, string email)
     {
+        if (string.IsNullOrWhiteSpace(email)) return null;
         if (!Directory.Exists(_authDir)) return null;
         foreach (var file in Directory.GetFiles(_authDir, $"{prefix}-{email}*.json"))
         {

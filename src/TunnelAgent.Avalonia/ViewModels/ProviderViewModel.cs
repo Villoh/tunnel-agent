@@ -62,6 +62,7 @@ public partial class ProviderAccountViewModel : ViewModelBase
 
     [ObservableProperty] private string _label;
     [ObservableProperty] private bool   _isDisabled;
+    [ObservableProperty] private string _providerBaseUrl = "";
 
     public event System.EventHandler<bool>? IsDisabledChanged;
     partial void OnIsDisabledChanged(bool value) => IsDisabledChanged?.Invoke(this, value);
@@ -140,6 +141,7 @@ public partial class ProviderViewModel : ViewModelBase
     public string? CustomIconData { get; }
     public bool HasCustomIcon => CustomIconData is not null;
     public string LogoColor   { get; }
+    public string ApiKeyBaseUrl { get; set; } = "";
     private readonly string _descriptionFallback;
     public string Description => GetLocalizedDescription();
 
@@ -217,8 +219,20 @@ public partial class ProviderViewModel : ViewModelBase
         Avalonia.Application.Current?.ActualThemeVariant == ThemeVariant.Dark
         || Avalonia.Application.Current?.RequestedThemeVariant == ThemeVariant.Dark;
 
-    /// <summary>True = provider type uses OAuth (no API keys to manage).</summary>
-    public bool IsOAuth { get; }
+    /// <summary>True = provider supports OAuth login.</summary>
+    public bool SupportsOAuth { get; }
+
+    /// <summary>True = provider supports upstream API-key accounts.</summary>
+    public bool SupportsApiKey { get; }
+
+    /// <summary>Back-compat display helper: provider supports OAuth.</summary>
+    public bool IsOAuth => SupportsOAuth;
+
+    public bool HasOnlyOAuth => SupportsOAuth && !SupportsApiKey;
+    public bool HasSingleAddMode => SupportsOAuth != SupportsApiKey;
+    public bool HasMultipleAddModes => SupportsOAuth && SupportsApiKey;
+    /// <summary>Custom OpenAI-compatible provider added by the user (not a built-in).</summary>
+    public bool IsCustomProvider => SupportsApiKey && !SupportsOAuth;
 
     /// <summary>Provider is included in config.yaml (not excluded).</summary>
     [ObservableProperty] private bool _isEnabled = true;
@@ -269,7 +283,7 @@ public partial class ProviderViewModel : ViewModelBase
         "#888888";                            // muted grey
 
     /// <summary>True when the expand chevron should be visible (has accounts to show).</summary>
-    public bool HasAccounts => Accounts.Count > 0 || (IsOAuth && Connected);
+    public bool HasAccounts => Accounts.Count > 0 || (SupportsOAuth && Connected);
 
     partial void OnIsEnabledChanged(bool value)
     {
@@ -296,14 +310,16 @@ public partial class ProviderViewModel : ViewModelBase
         string id, string name,
         PackIconSimpleIconsKind iconKind, string logoColor,
         string description, bool isOAuth = false,
-        string? customIconData = null)
+        string? customIconData = null,
+        bool supportsApiKey = false)
     {
         Id             = id;
         Name           = name;
         IconKind       = iconKind;
         LogoColor      = logoColor;
         _descriptionFallback = description;
-        IsOAuth        = isOAuth;
+        SupportsOAuth  = isOAuth;
+        SupportsApiKey = supportsApiKey;
         CustomIconData = customIconData;
         LocalizationService.Instance.PropertyChanged += OnLocalizationChanged;
         InitProviderSvg();

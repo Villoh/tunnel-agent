@@ -420,37 +420,142 @@
                         IsVisible="{Binding ShowApiKeysDialog}"
                         ZIndex="50" />
 
-        <!-- Add CLIProxy account dialog -->
-        <Border IsVisible="{Binding ShowAddAccountDialog}" Background="#88000000"
-                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50">
-            <Border Classes="card" MaxWidth="420" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24">
+        <!-- Add CLIProxy account mode dialog -->
+        <Border x:Name="AddAccountModeOverlay" IsVisible="{Binding ShowAddAccountModeDialog}" Background="#88000000"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50"
+                KeyDown="OnAddAccountModeDialogKeyDown" Focusable="True"
+                PointerPressed="OnAddAccountOverlayPressed">
+            <Border Classes="card" Width="480" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24"
+                    PointerPressed="OnDialogCardPressed">
                 <StackPanel Spacing="14">
-                    <TextBlock Classes="row-label" FontSize="15" Text="{l:LocFormat Key=Dialog_AddAccount_Title, Path=AddAccountTarget.Name}" />
-                    <StackPanel Spacing="4" IsVisible="{Binding AddAccountTarget.IsOAuth, Converter={StaticResource InvertBool}, FallbackValue=False}">
-                        <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddAccount_BaseUrlLabel}" />
-                        <TextBox x:Name="BaseUrlBox" Classes="app" Watermark="{l:Loc Dialog_AddAccount_BaseUrlPlaceholder}" />
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Grid.Column="0" Spacing="3">
+                            <TextBlock Classes="row-label" FontSize="16" Text="{l:Loc Dialog_AddAccount_HeaderTitle}" />
+                            <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddAccount_ModeDescription}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Classes="icon" Command="{Binding DismissAddAccountDialogCommand}" VerticalAlignment="Top">
+                            <lucide:PackIconLucide Kind="X" Width="14" Height="14" />
+                        </Button>
+                    </Grid>
+                    <Border Classes="row-divider" />
+                    <StackPanel Spacing="8">
+                        <Button Classes="app" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="12,8" Command="{Binding AddAccountWithOAuthCommand}">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <Border Grid.Column="0" Classes="provider-logo" Background="{DynamicResource AccentSoftBrush}" Width="34" Height="34" Margin="0,0,12,0">
+                                    <lucide:PackIconLucide Kind="CircleUserRound" Width="19" Height="19" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Spacing="2">
+                                    <TextBlock Classes="row-label" Text="{l:Loc Dialog_AddAccount_OAuthOption}" />
+                                    <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddAccount_OAuthOptionDesc}" />
+                                </StackPanel>
+                                <lucide:PackIconLucide Grid.Column="2" Kind="ChevronRight" Width="16" Height="16" Foreground="{DynamicResource FgMutedBrush}" VerticalAlignment="Center" />
+                            </Grid>
+                        </Button>
+                        <Button Classes="app" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="12,8" Command="{Binding AddAccountWithApiKeyCommand}">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <Border Grid.Column="0" Classes="provider-logo" Background="{DynamicResource AccentSoftBrush}" Width="34" Height="34" Margin="0,0,12,0">
+                                    <lucide:PackIconLucide Kind="KeyRound" Width="19" Height="19" Foreground="{DynamicResource AccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Spacing="2">
+                                    <TextBlock Classes="row-label" Text="{l:Loc Dialog_AddAccount_ApiKeyOption}" />
+                                    <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddAccount_ApiKeyOptionDesc}" />
+                                </StackPanel>
+                                <lucide:PackIconLucide Grid.Column="2" Kind="ChevronRight" Width="16" Height="16" Foreground="{DynamicResource FgMutedBrush}" VerticalAlignment="Center" />
+                            </Grid>
+                        </Button>
                     </StackPanel>
-                    <StackPanel Spacing="4">
-                        <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddAccount_ApiKeyLabel}" />
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBox Grid.Column="0" x:Name="ApiKeyBox" Classes="app"
-                                     PasswordChar="{Binding ShowAddAccountApiKey, Converter={StaticResource SecretPasswordChar}}"
-                                     Watermark="{l:Loc Dialog_AddAccount_ApiKeyPlaceholder}"
-                                     Text="{Binding AddAccountApiKeyDraft, Mode=TwoWay}" />
-                            <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0"
-                                    ToolTip.Tip="{l:Loc Dialog_AddAccount_ShowHideTooltip}"
-                                    Command="{Binding ToggleAddAccountApiKeyVisibilityCommand}">
-                                <lucide:PackIconLucide Kind="{Binding ShowAddAccountApiKey, Converter={StaticResource EyeIcon}}" Width="14" Height="14" />
-                            </Button>
-                        </Grid>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- Add CLIProxy account dialog -->
+        <Border x:Name="AddAccountOverlay" IsVisible="{Binding ShowAddAccountDialog}" Background="#88000000"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50"
+                KeyDown="OnAddAccountDialogKeyDown" Focusable="True"
+                PointerPressed="OnAddAccountOverlayPressed">
+            <Border Classes="card" Width="480" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24"
+                    PointerPressed="OnDialogCardPressed">
+                <StackPanel Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Grid.Column="0" Spacing="3">
+                            <TextBlock Classes="row-label" FontSize="16" Text="{Binding ApiKeyDialogTitle}" />
+                            <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddAccount_ApiKeyDescription}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Classes="icon" Command="{Binding DismissAddAccountDialogCommand}" VerticalAlignment="Top">
+                            <lucide:PackIconLucide Kind="X" Width="14" Height="14" />
+                        </Button>
+                    </Grid>
+                    <Border Classes="row-divider" />
+                    <StackPanel Spacing="10">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="section-label" Text="{l:Loc Dialog_AddAccount_ApiKeyLabel}" />
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBox Grid.Column="0" x:Name="ApiKeyBox" Classes="app" PasswordChar="{Binding ShowAddAccountApiKey, Converter={StaticResource SecretPasswordChar}}" Watermark="{l:Loc Dialog_AddAccount_ApiKeyPlaceholder}" Text="{Binding AddAccountApiKeyDraft, Mode=TwoWay}" />
+                                <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0" ToolTip.Tip="{l:Loc Dialog_AddAccount_ShowHideTooltip}" Command="{Binding ToggleAddAccountApiKeyVisibilityCommand}">
+                                    <lucide:PackIconLucide Kind="{Binding ShowAddAccountApiKey, Converter={StaticResource EyeIcon}}" Width="14" Height="14" />
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="section-label" Text="{l:Loc Dialog_AddAccount_LabelLabel}" />
+                            <TextBox x:Name="LabelBox" Classes="app" Watermark="{l:Loc Dialog_AddAccount_LabelPlaceholder}" Text="{Binding AddAccountLabelDraft, Mode=TwoWay}" />
+                        </StackPanel>
                     </StackPanel>
-                    <StackPanel Spacing="4">
-                        <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddAccount_LabelLabel}" />
-                        <TextBox x:Name="LabelBox" Classes="app" Watermark="{l:Loc Dialog_AddAccount_LabelPlaceholder}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
+                    <Border Classes="row-divider" />
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
                         <Button Classes="app" Content="{l:Loc Dialog_AddAccount_Cancel}" Command="{Binding DismissAddAccountDialogCommand}" />
-                        <Button Classes="app primary" Content="{l:Loc Dialog_AddAccount_Add}" Click="OnConfirmAddAccount" />
+                        <Button Classes="app primary" Content="{Binding ApiKeyDialogApplyText}" Click="OnConfirmAddAccount" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- Add custom OpenAI-compatible provider dialog -->
+        <Border x:Name="AddCustomProviderOverlay" IsVisible="{Binding ShowAddCustomProviderDialog}" Background="#88000000"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50"
+                KeyDown="OnAddCustomProviderDialogKeyDown" Focusable="True"
+                PointerPressed="OnAddCustomProviderOverlayPressed">
+            <Border Classes="card" Width="480" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24"
+                    PointerPressed="OnDialogCardPressed">
+                <StackPanel Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Grid.Column="0" Spacing="3">
+                            <TextBlock Classes="row-label" FontSize="16" Text="{l:Loc Dialog_AddCustomProvider_Title}" />
+                            <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddCustomProvider_Description}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Classes="icon" Command="{Binding DismissAddCustomProviderCommand}" VerticalAlignment="Top">
+                            <lucide:PackIconLucide Kind="X" Width="14" Height="14" />
+                        </Button>
+                    </Grid>
+                    <Border Classes="row-divider" />
+                    <StackPanel Spacing="10">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="section-label" Text="{l:Loc Dialog_AddCustomProvider_NameLabel}" />
+                            <TextBox Classes="app" Watermark="{l:Loc Dialog_AddCustomProvider_NamePlaceholder}" Text="{Binding CustomProviderNameDraft, Mode=TwoWay}" />
+                        </StackPanel>
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="section-label" Text="{l:Loc Dialog_AddAccount_BaseUrlLabel}" />
+                            <TextBox Classes="app" Watermark="{l:Loc Dialog_AddAccount_BaseUrlPlaceholder}" Text="{Binding CustomProviderBaseUrlDraft, Mode=TwoWay}" />
+                        </StackPanel>
+                        <Border Classes="row-divider" Margin="0,4,0,2" />
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="section-label" Text="{l:Loc Dialog_AddAccount_ApiKeyLabel}" />
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBox Grid.Column="0" Classes="app" PasswordChar="{Binding ShowCustomProviderApiKey, Converter={StaticResource SecretPasswordChar}}" Watermark="{l:Loc Dialog_AddAccount_ApiKeyPlaceholder}" Text="{Binding CustomProviderApiKeyDraft, Mode=TwoWay}" />
+                                <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0" ToolTip.Tip="{l:Loc Dialog_AddAccount_ShowHideTooltip}" Command="{Binding ToggleCustomProviderApiKeyVisibilityCommand}">
+                                    <lucide:PackIconLucide Kind="{Binding ShowCustomProviderApiKey, Converter={StaticResource EyeIcon}}" Width="14" Height="14" />
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="section-label" Text="{l:Loc Dialog_AddAccount_LabelLabel}" />
+                            <TextBox Classes="app" Watermark="{l:Loc Dialog_AddAccount_LabelPlaceholder}" Text="{Binding CustomProviderApiKeyLabelDraft, Mode=TwoWay}" />
+                        </StackPanel>
+                    </StackPanel>
+                    <Border Classes="row-divider" />
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                        <Button Classes="app" Content="{l:Loc Dialog_AddAccount_Cancel}" Command="{Binding DismissAddCustomProviderCommand}" />
+                        <Button Classes="app primary" Content="{l:Loc Dialog_AddCustomProvider_Add}" Command="{Binding ConfirmAddCustomProviderCommand}" />
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -465,7 +570,12 @@
                     PointerPressed="OnDialogCardPressed">
                 <Grid>
                     <StackPanel Spacing="14" IsVisible="{Binding IsPerplexityTokenGenerationMode, Converter={StaticResource InvertBool}}">
-                        <TextBlock Classes="row-label" FontSize="15" Text="{l:Loc Dialog_AddPerplexity_Title}" />
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Classes="row-label" FontSize="15" Text="{l:Loc Dialog_AddPerplexity_Title}" VerticalAlignment="Center" />
+                            <Button Grid.Column="1" Classes="icon" Command="{Binding DismissPerplexityAccountDialogCommand}" VerticalAlignment="Center">
+                                <lucide:PackIconLucide Kind="X" Width="14" Height="14" />
+                            </Button>
+                        </Grid>
                         <StackPanel Spacing="4">
                             <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddPerplexity_LabelLabel}" />
                             <TextBox x:Name="PerplexityLabelBox" Classes="app" Watermark="{l:Loc Dialog_AddPerplexity_LabelPlaceholder}"
@@ -496,9 +606,12 @@
                     </StackPanel>
 
                     <StackPanel Spacing="14" IsVisible="{Binding IsPerplexityTokenGenerationMode}">
-                        <Grid ColumnDefinitions="*,Auto">
+                        <Grid ColumnDefinitions="*,Auto,Auto">
                             <TextBlock Grid.Column="0" Classes="row-label" FontSize="15" Text="{l:Loc Dialog_GeneratePerplexityToken_Title}" />
-                            <TextBlock Grid.Column="1" Classes="row-desc" Text="{Binding PerplexityTokenStepLabel}" />
+                            <TextBlock Grid.Column="1" Classes="row-desc" Text="{Binding PerplexityTokenStepLabel}" Margin="0,0,8,0" />
+                            <Button Grid.Column="2" Classes="icon" Command="{Binding DismissPerplexityAccountDialogCommand}" VerticalAlignment="Top">
+                                <lucide:PackIconLucide Kind="X" Width="14" Height="14" />
+                            </Button>
                         </Grid>
                         <TextBlock Classes="row-desc" Text="{Binding PerplexityTokenPrompt}" TextWrapping="Wrap"
                                    IsVisible="{Binding !PerplexityTokenHasError}" />
@@ -534,10 +647,15 @@
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50"
                 PointerPressed="OnEditPerplexityLabelOverlayPressed"
                 KeyDown="OnEditPerplexityLabelKeyDown" Focusable="True">
-            <Border Classes="card" MaxWidth="420" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24"
+            <Border Classes="card" Width="480" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24"
                     PointerPressed="OnDialogCardPressed">
                 <StackPanel Spacing="14">
-                    <TextBlock Classes="row-label" FontSize="15" Text="{l:Loc Dialog_EditPerplexityLabel_Title}" />
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Classes="row-label" FontSize="15" Text="{l:Loc Dialog_EditPerplexityLabel_Title}" VerticalAlignment="Center" />
+                        <Button Grid.Column="1" Classes="icon" Command="{Binding DismissEditPerplexityLabelDialogCommand}" VerticalAlignment="Center">
+                            <lucide:PackIconLucide Kind="X" Width="14" Height="14" />
+                        </Button>
+                    </Grid>
                     <StackPanel Spacing="4">
                         <TextBlock Classes="row-desc" Text="{l:Loc Dialog_EditPerplexityLabel_LabelLabel}" />
                         <TextBox x:Name="EditPerplexityLabelBox" Classes="app" Watermark="{l:Loc Dialog_EditPerplexityLabel_LabelPlaceholder}"

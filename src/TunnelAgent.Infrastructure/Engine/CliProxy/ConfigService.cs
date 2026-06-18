@@ -21,13 +21,12 @@ public sealed class ConfigService
     private static readonly IPlatformInfo Platform = IPlatformInfo.Current;
 
     private readonly SettingsService _settings;
-    private readonly CustomProviderCredentialStore _credentialStore;
     private readonly string _authDir;
 
     public string ConfigPath { get; }
 
     public ConfigService(SettingsService settings)
-        : this(settings, null, null, null) { }
+        : this(settings, null, null) { }
 
     public ConfigService(
         SettingsService settings,
@@ -37,7 +36,6 @@ public sealed class ConfigService
     {
         _settings        = settings;
         _authDir         = authDir ?? Platform.AuthDirectory;
-        _credentialStore = credentialStore ?? new CustomProviderCredentialStore(_authDir);
         ConfigPath       = configPath ?? Path.Combine(Platform.SettingsDirectory, "proxy-config.yaml");
     }
 
@@ -71,24 +69,84 @@ public sealed class ConfigService
             if (line.Trim() == "openai-compatibility:")
             {
                 ProviderSettings? current = null;
+                ProviderAccountSettings? currentAccount = null;
                 for (i++; i < lines.Length && (lines[i].StartsWith("  ") || string.IsNullOrWhiteSpace(lines[i])); i++)
                 {
                     var t = lines[i].Trim();
                     if (t.StartsWith("- name:", System.StringComparison.Ordinal))
                     {
                         if (current is not null && !string.IsNullOrWhiteSpace(current.Id)) result.Add(current);
-                        current = new ProviderSettings { Id = Unyaml(t[7..].Trim()), Enabled = true };
+                        current = new ProviderSettings { Id = Unyaml(t[7..].Trim()), Enabled = true, Kind = ProviderKind.OpenAICompatibility };
+                        currentAccount = null;
                     }
                     else if (current is not null && t.StartsWith("display-name:", System.StringComparison.Ordinal))
                     {
                         current.DisplayName = Unyaml(t[13..].Trim());
                     }
+                    else if (current is not null && t.StartsWith("disabled:", System.StringComparison.Ordinal))
+                    {
+                        current.Enabled = !string.Equals(Unyaml(t[9..].Trim()), "true", StringComparison.OrdinalIgnoreCase);
+                    }
                     else if (current is not null && t.StartsWith("base-url:", System.StringComparison.Ordinal))
                     {
                         current.BaseUrl = Unyaml(t[9..].Trim());
                     }
+                    else if (current is not null && t.StartsWith("- api-key:", System.StringComparison.Ordinal))
+                    {
+                        var key = Unyaml(t[10..].Trim());
+                        if (!string.IsNullOrWhiteSpace(key))
+                        {
+                            currentAccount = new ProviderAccountSettings { ApiKey = key };
+                            current.Accounts.Add(currentAccount);
+                        }
+                    }
+                    else if (currentAccount is not null && t.StartsWith("label:", System.StringComparison.Ordinal))
+                    {
+                        currentAccount.Label = Unyaml(t[6..].Trim());
+                    }
                 }
                 if (current is not null && !string.IsNullOrWhiteSpace(current.Id)) result.Add(current);
+                i--;
+                continue;
+            }
+
+            var apiKeyKind = line.Trim() switch
+            {
+                "claude-api-key:" => ProviderKind.ClaudeApiKey,
+                "gemini-api-key:" => ProviderKind.GeminiApiKey,
+                "codex-api-key:"  => ProviderKind.CodexApiKey,
+                _ => (ProviderKind?)null
+            };
+            if (apiKeyKind is { } kind)
+            {
+                var id = kind switch
+                {
+                    ProviderKind.ClaudeApiKey => "claude",
+                    ProviderKind.CodexApiKey  => "codex",
+                    _ => "gemini-cli"
+                };
+                var current = new ProviderSettings { Id = id, Enabled = true, Kind = kind };
+                ProviderAccountSettings? currentAccount = null;
+                for (i++; i < lines.Length && (lines[i].StartsWith("  ") || string.IsNullOrWhiteSpace(lines[i])); i++)
+                {
+                    var t = lines[i].Trim();
+                    if (t.StartsWith("- api-key:", System.StringComparison.Ordinal))
+                    {
+                        var key = Unyaml(t[10..].Trim());
+                        if (!string.IsNullOrWhiteSpace(key))
+                        {
+                            currentAccount = new ProviderAccountSettings { ApiKey = key };
+                            current.Accounts.Add(currentAccount);
+                        }
+                    }
+                    else if (currentAccount is not null && t.StartsWith("label:", System.StringComparison.Ordinal))
+                    {
+                        currentAccount.Label = Unyaml(t[6..].Trim());
+                    }
+                    else if (t.StartsWith("base-url:", System.StringComparison.Ordinal))
+                        current.BaseUrl = Unyaml(t[9..].Trim());
+                }
+                result.Add(current);
                 i--;
             }
         }
@@ -222,6 +280,8 @@ public sealed class ConfigService
                 sb.Append(entry);
         }
 
+        AppendNativeApiKeyProviders(sb, s);
+
         return sb.ToString();
     }
 
@@ -246,19 +306,22 @@ public sealed class ConfigService
     {
         var entries = new List<string>();
 
-        foreach (var ps in s.Providers.Where(p => p.Enabled && !string.IsNullOrEmpty(p.BaseUrl)))
+        foreach (var ps in s.Providers.Where(p => p.Kind == ProviderKind.OpenAICompatibility && !string.IsNullOrEmpty(p.BaseUrl)))
         {
-            var dedupKeys = GetActiveProviderKeys(ps);
+            var dedupKeys = GetActiveProviderKeyEntries(ps);
             if (dedupKeys.Count == 0) continue;
 
             var sb = new StringBuilder();
             sb.AppendLine($"  - name: {YamlKey(ps.Id)}");
-            if (!string.IsNullOrEmpty(ps.DisplayName))
-                sb.AppendLine($"    display-name: {YamlQuote(ps.DisplayName)}");
+            sb.AppendLine($"    disabled: {(!ps.Enabled).ToString().ToLowerInvariant()}");
             sb.AppendLine($"    base-url: {YamlQuote(ps.BaseUrl)}");
             sb.AppendLine($"    api-key-entries:");
             foreach (var key in dedupKeys)
-                sb.AppendLine($"      - api-key: {YamlQuote(key)}");
+            {
+                sb.AppendLine($"      - api-key: {YamlQuote(key.ApiKey)}");
+                if (!string.IsNullOrWhiteSpace(key.Label))
+                    sb.AppendLine($"        label: {YamlQuote(key.Label)}");
+            }
 
             entries.Add(sb.ToString());
         }
@@ -266,21 +329,42 @@ public sealed class ConfigService
         return entries;
     }
 
-    private List<string> GetActiveProviderKeys(ProviderSettings ps)
+    private void AppendNativeApiKeyProviders(StringBuilder sb, AppSettings s)
     {
-        var activeKeys = new List<string>();
+        AppendNativeApiKeyProvider(sb, s, ProviderKind.ClaudeApiKey, "claude-api-key");
+        AppendNativeApiKeyProvider(sb, s, ProviderKind.GeminiApiKey, "gemini-api-key");
+        AppendNativeApiKeyProvider(sb, s, ProviderKind.CodexApiKey, "codex-api-key");
+    }
 
-        activeKeys.AddRange(ps.Accounts
-            .Where(a => !a.Disabled && !string.IsNullOrWhiteSpace(a.ApiKey))
-            .Select(a => a.ApiKey));
+    private void AppendNativeApiKeyProvider(StringBuilder sb, AppSettings s, ProviderKind kind, string blockName)
+    {
+        var providers = s.Providers.Where(p => p.Enabled && p.Kind == kind).ToList();
+        var entries = providers
+            .SelectMany(ps => GetActiveProviderKeyEntries(ps).Select(key => (key.ApiKey, key.Label, ps.BaseUrl)))
+            .GroupBy(x => x.ApiKey)
+            .Select(g => g.First())
+            .ToList();
+        if (entries.Count == 0) return;
 
-        activeKeys.AddRange(_credentialStore
-            .LoadForProvider(ps.Id)
-            .Where(r => !r.IsDisabled)
-            .Select(r => r.ApiKey));
+        sb.AppendLine($"{blockName}:");
+        foreach (var (apiKey, label, baseUrl) in entries)
+        {
+            sb.AppendLine($"  - api-key: {YamlQuote(apiKey)}");
+            if (!string.IsNullOrWhiteSpace(label))
+                sb.AppendLine($"    label: {YamlQuote(label)}");
+            if (!string.IsNullOrWhiteSpace(baseUrl))
+                sb.AppendLine($"    base-url: {YamlQuote(baseUrl)}");
+        }
+        sb.AppendLine();
+    }
 
+    private static List<ProviderAccountSettings> GetActiveProviderKeyEntries(ProviderSettings ps)
+    {
         var seen = new HashSet<string>();
-        return activeKeys.Where(k => seen.Add(k)).ToList();
+        return ps.Accounts
+            .Where(a => !string.IsNullOrWhiteSpace(a.ApiKey))
+            .Where(a => seen.Add(a.ApiKey))
+            .ToList();
     }
 
     // ── Existing config readers ─────────────────────────────────────────────

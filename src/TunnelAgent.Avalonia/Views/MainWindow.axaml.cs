@@ -25,7 +25,11 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
+#if DEBUG
+        InitializeComponent(true, false);
+#else
         InitializeComponent();
+#endif
         if (OperatingSystem.IsLinux())
             SystemDecorations = SystemDecorations.None;
         DataContextChanged += OnDataContextChanged;
@@ -79,6 +83,12 @@ public partial class MainWindow : Window
         }
         else if (args.PropertyName == nameof(MainWindowViewModel.ShowApiKeysDialog) && vm.ShowApiKeysDialog)
             Dispatcher.UIThread.Post(() => EnsureApiKeysOverlay(vm).FocusOverlay(), DispatcherPriority.Input);
+        else if (args.PropertyName == nameof(MainWindowViewModel.ShowAddAccountModeDialog) && vm.ShowAddAccountModeDialog)
+            Dispatcher.UIThread.Post(() => AddAccountModeOverlay.Focus(), DispatcherPriority.Input);
+        else if (args.PropertyName == nameof(MainWindowViewModel.ShowAddAccountDialog) && vm.ShowAddAccountDialog)
+            Dispatcher.UIThread.Post(() => AddAccountOverlay.Focus(), DispatcherPriority.Input);
+        else if (args.PropertyName == nameof(MainWindowViewModel.ShowAddCustomProviderDialog) && vm.ShowAddCustomProviderDialog)
+            Dispatcher.UIThread.Post(() => AddCustomProviderOverlay.Focus(), DispatcherPriority.Input);
         else if (args.PropertyName == nameof(MainWindowViewModel.ShowPerplexityAccountDialog) && vm.ShowPerplexityAccountDialog)
             Dispatcher.UIThread.Post(() => PerplexityAccountOverlay.Focus(), DispatcherPriority.Input);
         else if (args.PropertyName == nameof(MainWindowViewModel.ShowAgentConfigDialog) && vm.ShowAgentConfigDialog)
@@ -232,22 +242,23 @@ public partial class MainWindow : Window
         };
     }
 
-    private async void OnConfirmAddAccount(object? sender, RoutedEventArgs e)
+    private async void OnConfirmAddAccount(object? sender, RoutedEventArgs e) =>
+        await ConfirmAddAccountFromInputsAsync();
+
+    private async Task ConfirmAddAccountFromInputsAsync()
     {
         if (DataContext is not MainWindowViewModel vm) return;
         if (vm.AddAccountTarget is not { } target) return;
 
-        var baseUrl = BaseUrlBox.Text?.Trim() ?? "";
+        var baseUrl = vm.AddAccountBaseUrlDraft.Trim();
         var apiKey = ApiKeyBox.Text?.Trim() ?? "";
         var label = LabelBox.Text?.Trim();
         if (string.IsNullOrEmpty(apiKey)) return;
 
-        var effectiveBaseUrl = string.IsNullOrEmpty(baseUrl) ? target.Description : baseUrl;
         ApiKeyBox.Text = "";
-        BaseUrlBox.Text = "";
         LabelBox.Text = "";
 
-        await vm.ConfirmAddAccountAsync(target.Id, effectiveBaseUrl, apiKey, string.IsNullOrEmpty(label) ? null : label);
+        await vm.ConfirmAddAccountAsync(target.Id, baseUrl, apiKey, string.IsNullOrEmpty(label) ? null : label);
     }
 
     private async void OnConfirmPerplexityAccount(object? sender, RoutedEventArgs e) =>
@@ -338,6 +349,31 @@ public partial class MainWindow : Window
         if (DataContext is MainWindowViewModel vm) vm.DismissApiKeysCommand.Execute(null);
     }
 
+    private void OnAddAccountOverlayPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm) vm.DismissAddAccountDialogCommand.Execute(null);
+    }
+
+    private void OnAddCustomProviderOverlayPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm) vm.DismissAddCustomProviderCommand.Execute(null);
+    }
+
+    private void OnAddCustomProviderDialogKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            vm.DismissAddCustomProviderCommand.Execute(null);
+        }
+        else if (e.Key == Key.Enter)
+        {
+            e.Handled = true;
+            vm.ConfirmAddCustomProviderCommand.Execute(null);
+        }
+    }
+
     private void OnPerplexityAccountOverlayPressed(object? sender, PointerPressedEventArgs e)
     {
         if (DataContext is MainWindowViewModel vm) vm.DismissPerplexityAccountDialogCommand.Execute(null);
@@ -387,6 +423,36 @@ public partial class MainWindow : Window
         {
             e.Handled = true;
             vm.DismissApiKeysCommand.Execute(null);
+        }
+    }
+
+    private async void OnAddAccountModeDialogKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            vm.DismissAddAccountDialogCommand.Execute(null);
+        }
+        else if (e.Key == Key.Enter)
+        {
+            e.Handled = true;
+            vm.AddAccountWithApiKeyCommand.Execute(null);
+        }
+    }
+
+    private async void OnAddAccountDialogKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            vm.DismissAddAccountDialogCommand.Execute(null);
+        }
+        else if (e.Key == Key.Enter)
+        {
+            e.Handled = true;
+            await ConfirmAddAccountFromInputsAsync();
         }
     }
 

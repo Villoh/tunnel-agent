@@ -18,11 +18,16 @@
     <Border Classes="card" Width="480" MaxHeight="560" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0"
             PointerPressed="OnDialogCardPressed">
         <Grid RowDefinitions="Auto,*,Auto">
-            <StackPanel Grid.Row="0" Margin="24,20,24,14" Spacing="4">
-                <TextBlock Classes="row-label" FontSize="15" Text="{l:Loc ApiKeysOverlay_Title}" />
-                <TextBlock Classes="row-desc" TextWrapping="Wrap"
-                           Text="{l:Loc ApiKeysOverlay_Description}" />
-            </StackPanel>
+            <Grid Grid.Row="0" Margin="24,20,24,14" ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Classes="row-label" FontSize="15" Text="{l:Loc ApiKeysOverlay_Title}" />
+                    <TextBlock Classes="row-desc" TextWrapping="Wrap"
+                               Text="{l:Loc ApiKeysOverlay_Description}" />
+                </StackPanel>
+                <Button Grid.Column="1" Classes="icon" Command="{Binding DismissApiKeysCommand}" VerticalAlignment="Top">
+                    <lucide:PackIconLucide Kind="X" Width="14" Height="14" />
+                </Button>
+            </Grid>
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                 <StackPanel Spacing="12" Margin="24,0,24,0">
                     <ItemsControl ItemsSource="{Binding CliProxyApiKeys}">
