@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text.Json;
 using IconPacks.Avalonia.SimpleIcons;
 using TunnelAgent.Services;
 using TunnelAgent.ViewModels;
@@ -61,6 +63,36 @@ public sealed class MainWindowViewModelTests
         Assert.Equal(2, strategies.Length);
         Assert.Contains(RoutingStrategy.RoundRobin, strategies);
         Assert.Contains(RoutingStrategy.FillFirst, strategies);
+    }
+
+    [Fact]
+    public async Task InitializeAsync_PersistsDetectedLanguage_WhenSettingIsNull()
+    {
+        var previousCulture = CultureInfo.CurrentUICulture;
+        try
+        {
+            CultureInfo.CurrentUICulture = new CultureInfo("es-MX");
+
+            using var temp = new TestTempDirectory();
+            var settingsPath = temp.File("settings.json");
+            var settings = new SettingsService(settingsPath);
+            await settings.LoadAsync();
+            Assert.Null(settings.Current.Language);
+
+            var registry = new EngineRegistryService(settings);
+            var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
+            await vm.InitializeAsync();
+
+            Assert.Equal("es-ES", settings.Current.Language);
+            Assert.Equal("es-ES", vm.SelectedLanguage.Code);
+
+            using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(settingsPath));
+            Assert.Equal("es-ES", doc.RootElement.GetProperty("Language").GetString());
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previousCulture;
+        }
     }
 
     [Fact]

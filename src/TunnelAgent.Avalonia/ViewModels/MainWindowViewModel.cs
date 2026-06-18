@@ -859,6 +859,17 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         try
         {
             await Task.Run(_settings.LoadAsync);
+            var languageCode = _settings.Current.Language ?? GetSystemLanguageOrEnglish();
+            if (_settings.Current.Language is null)
+            {
+                _settings.Current.Language = languageCode;
+                await _settings.SaveImmediateAsync();
+            }
+            _localization.SetCulture(languageCode);
+            _selectedLanguage = LocalizationService.SupportedLanguages.FirstOrDefault(l => l.Code == languageCode)
+                ?? LocalizationService.SupportedLanguages[0];
+            OnPropertyChanged(nameof(SelectedLanguage));
+
             _ = ObserveStartupTaskAsync(Task.Run(ReconcileLaunchAtLoginAsync));
             NormalizeActiveEngineSetting();
             RefreshSettingsBindings();

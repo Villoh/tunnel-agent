@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Detected language persistence** (`MainWindowViewModel`, `SettingsService`): first-run system language detection is now saved to `settings.json` instead of leaving `Language` as `null`, keeping the selected **Language** combo and persisted settings in sync.
+
 ## [0.7.0] - 2026-06-18
 
 ### Added
