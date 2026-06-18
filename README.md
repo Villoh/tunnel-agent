@@ -95,6 +95,19 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 
 > These IDEs are only used for quota usage monitoring. They cannot be used as providers for the proxy.
 
+### Agents
+
+| Agent         | Config method                                                     |
+| ------------- | ----------------------------------------------------------------- |
+| Claude Code   | `~/.claude/settings.json`                                         |
+| Codex CLI     | `~/.codex/config.toml` + `auth.json`                              |
+| Gemini CLI    | Environment variables                                             |
+| Amp           | `~/.config/amp/settings.json` + `~/.local/share/amp/secrets.json` |
+| OpenCode      | `~/.config/opencode/opencode.json`                                |
+| Pi            | `~/.pi/agent/models.json`                                         |
+| Factory Droid | `~/.factory/settings.json`                                        |
+| Aider         | Environment variables                                             |
+
 ### Languages
 
 The interface is fully localized with runtime language switching (Configuration → General → Language). The app auto-detects your system language on first launch and falls back to English.
@@ -109,19 +122,6 @@ The interface is fully localized with runtime language switching (Configuration 
 | 简体中文  | `zh-CN` |
 | 日本語    | `ja-JP` |
 | العربية   | `ar-SA` |
-
-### Agents
-
-| Agent         | Config method                                                     |
-| ------------- | ----------------------------------------------------------------- |
-| Claude Code   | `~/.claude/settings.json`                                         |
-| Codex CLI     | `~/.codex/config.toml` + `auth.json`                              |
-| Gemini CLI    | Environment variables                                             |
-| Amp           | `~/.config/amp/settings.json` + `~/.local/share/amp/secrets.json` |
-| OpenCode      | `~/.config/opencode/opencode.json`                                |
-| Pi            | `~/.pi/agent/models.json`                                         |
-| Factory Droid | `~/.factory/settings.json`                                        |
-| Aider         | Environment variables                                             |
 
 ## Installation
 
