@@ -211,6 +211,18 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     [ObservableProperty] private bool _showConfigurationStatus;
     [ObservableProperty] private bool _configurationStatusIsError;
     [ObservableProperty] private string _configurationStatusMessage = "";
+    public bool ShowConfigurationInfoStatus => ShowConfigurationStatus && !ConfigurationStatusIsError;
+    public bool ShowConfigurationErrorStatus => ShowConfigurationStatus && ConfigurationStatusIsError;
+    partial void OnShowConfigurationStatusChanged(bool value)
+    {
+        OnPropertyChanged(nameof(ShowConfigurationInfoStatus));
+        OnPropertyChanged(nameof(ShowConfigurationErrorStatus));
+    }
+    partial void OnConfigurationStatusIsErrorChanged(bool value)
+    {
+        OnPropertyChanged(nameof(ShowConfigurationInfoStatus));
+        OnPropertyChanged(nameof(ShowConfigurationErrorStatus));
+    }
     [ObservableProperty] private bool _showResetCredentialsDialog;
     [ObservableProperty] private bool _showApiKeysDialog;
     [ObservableProperty] private string _apiKeyDraft = "";
@@ -489,6 +501,16 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         {
             var runtime = _settings.Current.GetOrAddEngine(FocusedConfigEngineId, FocusedConfigEngine.Definition.DefaultPort);
             if (runtime.Port == value) return;
+            if (IsPortUsedByOtherEngine(value, FocusedConfigEngineId))
+            {
+                ConfigurationStatusIsError = true;
+                ConfigurationStatusMessage = _localization.GetString("ConfigView_PortConflict", value, GetOtherEngineDisplayName(FocusedConfigEngineId));
+                ShowConfigurationStatus = true;
+                _editablePort = runtime.Port;
+                OnPropertyChanged(nameof(EditablePort));
+                OnPropertyChanged(nameof(CanApplyPort));
+                return;
+            }
             runtime.Port = value;
             if (string.Equals(FocusedConfigEngineId, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase))
                 ConfigureLogsService(value);
@@ -501,14 +523,29 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         }
     }
 
+    private decimal? _editablePort;
     public decimal? EditablePort
     {
-        get => Port;
+        get => _editablePort ?? Port;
         set
         {
-            if (value is null) return;
-            Port = decimal.ToInt32(value.Value);
+            if (SetProperty(ref _editablePort, value))
+                OnPropertyChanged(nameof(CanApplyPort));
         }
+    }
+
+    public bool CanApplyPort => EditablePort is { } value
+        && value == decimal.Truncate(value)
+        && value is >= 1 and <= 65535
+        && decimal.ToInt32(value) != Port;
+
+    [RelayCommand]
+    private void ApplyPort()
+    {
+        if (!CanApplyPort || EditablePort is null)
+            return;
+
+        Port = decimal.ToInt32(EditablePort.Value);
     }
 
     public bool LaunchAtLogin
@@ -745,6 +782,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         OnPropertyChanged(nameof(ActiveEngineName));
         OnPropertyChanged(nameof(ActiveEngineDescription));
         OnPropertyChanged(nameof(AuthFilesDescription));
+        ResetEditablePort();
         OnPropertyChanged(nameof(IsCliProxyFocused));
         OnPropertyChanged(nameof(IsPerplexityFocused));
     }
@@ -769,6 +807,21 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         runtime.PreferredVersion = VersionsEqual(value.TagName, latestTag) ? string.Empty : value.TagName;
         _settings.Save();
     }
+
+    private void ResetEditablePort()
+    {
+        _editablePort = Port;
+        OnPropertyChanged(nameof(EditablePort));
+        OnPropertyChanged(nameof(CanApplyPort));
+    }
+
+    private bool IsPortUsedByOtherEngine(int port, string currentEngineId) => _engineRegistry.Engines.Any(engine =>
+        !string.Equals(engine.Definition.Id, currentEngineId, StringComparison.OrdinalIgnoreCase) &&
+        _settings.Current.GetOrAddEngine(engine.Definition.Id, engine.Definition.DefaultPort).Port == port);
+
+    private string GetOtherEngineDisplayName(string currentEngineId) => _engineRegistry.Engines
+        .FirstOrDefault(engine => !string.Equals(engine.Definition.Id, currentEngineId, StringComparison.OrdinalIgnoreCase))
+        ?.Definition.DisplayName ?? _localization.GetString("ConfigView_OtherEngine");
 
     private static string NormalizeThemeMode(string? value) => value?.ToLowerInvariant() switch
     {
@@ -1088,6 +1141,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         OnPropertyChanged(nameof(EndpointUrl));
         OnPropertyChanged(nameof(Port));
         OnPropertyChanged(nameof(EditablePort));
+        OnPropertyChanged(nameof(CanApplyPort));
         OnPropertyChanged(nameof(EngineAutoStart));
     }
 
@@ -1701,7 +1755,12 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         DismissEditPerplexityLabelDialog();
     }
 
-    [RelayCommand] private void ResetPort() => Port = FocusedConfigEngine.Definition.DefaultPort;
+    [RelayCommand]
+    private void ResetPort()
+    {
+        Port = FocusedConfigEngine.Definition.DefaultPort;
+        ResetEditablePort();
+    }
 
     [RelayCommand]
     private void FocusCliProxy()

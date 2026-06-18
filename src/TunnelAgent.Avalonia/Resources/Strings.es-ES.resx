@@ -1028,4 +1028,13 @@
   <data name="ConfigView_CLIProxy_RoutingStrategy_FillFirst" xml:space="preserve">
     <value>Llenar primero (usar la primera cuenta hasta el límite)</value>
   </data>
+  <data name="ConfigView_PortConflict" xml:space="preserve">
+    <value>El puerto {0} ya lo usa {1}. Elige otro puerto.</value>
+  </data>
+  <data name="ConfigView_OtherEngine" xml:space="preserve">
+    <value>otro motor</value>
+  </data>
+  <data name="ConfigView_ListenPort_Apply" xml:space="preserve">
+    <value>Aplicar</value>
+  </data>
 </root>

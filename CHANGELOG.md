@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Localized configuration combo boxes** (`MainWindowViewModel`, `ConfigurationView.axaml`): theme mode and routing strategy combo boxes now display localized labels while preserving their stored internal values.
 
+- **Listen port editing** (`MainWindowViewModel`, `ConfigurationView.axaml`): the listen port is now edited as a draft and applied with an explicit **Apply** button (enabled only for a valid, changed port) instead of saving on every keystroke; the row is laid out as port, Apply, then Reset.
+
 - **Engine update toast layout** (`Views/MainWindow.axaml`): the toast title can wrap to two lines so longer localized titles (for example Spanish) are not clipped.
 
 ### Fixed
@@ -26,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Sliding tab localization refresh** (`Controls/SlidingTabBar.cs`): tab titles and tooltips now stay bound to their localized headers, so configuration tabs such as **General** update when the language changes.
 
 - **Runtime localization gaps** (`LogsViewModel`, `QuotaFetchService`, `ProviderViewModel`): provider filters, quota reset countdowns, model selection labels, Chinese agent labels, and generated provider/agent texts now refresh correctly when the language changes.
+
+- **Duplicate engine port** (`MainWindowViewModel`, `ConfigurationView.axaml`): applying a listen port already used by the other engine is now blocked and surfaces an error toast instead of silently allowing a conflict.
 
 ## [0.6.3] - 2026-06-17
 

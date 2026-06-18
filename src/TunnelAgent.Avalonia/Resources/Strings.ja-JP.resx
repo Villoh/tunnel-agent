@@ -1052,4 +1052,13 @@
   <data name="ConfigView_CLIProxy_RoutingStrategy_FillFirst" xml:space="preserve">
     <value>先に埋める（上限まで最初のアカウントを使用）</value>
   </data>
+  <data name="ConfigView_PortConflict" xml:space="preserve">
+    <value>ポート {0} はすでに {1} で使用されています。別のポートを選択してください。</value>
+  </data>
+  <data name="ConfigView_OtherEngine" xml:space="preserve">
+    <value>別のエンジン</value>
+  </data>
+  <data name="ConfigView_ListenPort_Apply" xml:space="preserve">
+    <value>適用</value>
+  </data>
 </root>

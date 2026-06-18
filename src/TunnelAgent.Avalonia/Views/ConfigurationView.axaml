@@ -27,7 +27,7 @@
                 </ctrl:SlidingTabBar>
 
                 <!-- ── Status banner ──────────────────────────────────── -->
-                <Border IsVisible="{Binding ShowConfigurationStatus}" Classes="card" Padding="14,10" Margin="0,0,0,12">
+                <Border IsVisible="{Binding ShowConfigurationInfoStatus}" Classes="card" Padding="14,10" Margin="0,0,0,12">
                     <Grid ColumnDefinitions="*,Auto">
                         <TextBlock Grid.Column="0" Text="{Binding ConfigurationStatusMessage}"
                                    TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource FgBrush}" />
@@ -316,10 +316,13 @@
                                     <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_ListenPort_Description}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                    <Button Classes="app" Content="{l:Loc ConfigView_CLIProxy_ListenPort_Reset}" Command="{Binding ResetPortCommand}" />
                                     <TextBox Classes="app" Text="{Binding EditablePort, Mode=TwoWay}"
                                              Width="70" Height="24" MinHeight="0" Padding="8,0" MaxLength="5"
                                              VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                    <Button Classes="app primary" Content="{l:Loc ConfigView_ListenPort_Apply}"
+                                            Command="{Binding ApplyPortCommand}"
+                                            IsEnabled="{Binding CanApplyPort}" />
+                                    <Button Classes="app" Content="{l:Loc ConfigView_CLIProxy_ListenPort_Reset}" Command="{Binding ResetPortCommand}" />
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -516,10 +519,13 @@
                                     <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_Perplexity_ListenPort_Description}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                    <Button Classes="app" Content="{l:Loc ConfigView_Perplexity_ListenPort_Reset}" Command="{Binding ResetPortCommand}" />
                                     <TextBox Classes="app" Text="{Binding EditablePort, Mode=TwoWay}"
                                              Width="70" Height="24" MinHeight="0" Padding="8,0" MaxLength="5"
                                              VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                    <Button Classes="app primary" Content="{l:Loc ConfigView_ListenPort_Apply}"
+                                            Command="{Binding ApplyPortCommand}"
+                                            IsEnabled="{Binding CanApplyPort}" />
+                                    <Button Classes="app" Content="{l:Loc ConfigView_Perplexity_ListenPort_Reset}" Command="{Binding ResetPortCommand}" />
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -528,6 +534,21 @@
 
             </StackPanel>
         </ScrollViewer>
+
+        <!-- Configuration error toast -->
+        <Border IsVisible="{Binding ShowConfigurationErrorStatus}" Classes="card" MaxWidth="430"
+                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,12,12,0" Padding="14,10" ZIndex="11"
+                BorderBrush="{DynamicResource ErrBrush}" BorderThickness="1">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Text="{Binding ConfigurationStatusMessage}"
+                           TextWrapping="Wrap" FontSize="12" VerticalAlignment="Center"
+                           Foreground="{DynamicResource ErrBrush}" MaxWidth="360" />
+                <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0" VerticalAlignment="Top"
+                        Command="{Binding DismissConfigurationStatusCommand}">
+                    <lucide:PackIconLucide Kind="X" Width="12" Height="12" Foreground="{DynamicResource FgMutedBrush}" />
+                </Button>
+            </Grid>
+        </Border>
 
         <!-- No update toast -->
         <Border IsVisible="{Binding ShowNoUpdateToast}" Classes="card" MaxWidth="400"

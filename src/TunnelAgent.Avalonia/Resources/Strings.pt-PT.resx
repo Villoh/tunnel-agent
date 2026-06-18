@@ -1052,4 +1052,13 @@
   <data name="ConfigView_CLIProxy_RoutingStrategy_FillFirst" xml:space="preserve">
     <value>Preencher primeiro (usar primeira conta até ao limite)</value>
   </data>
+  <data name="ConfigView_PortConflict" xml:space="preserve">
+    <value>A porta {0} já está a ser usada por {1}. Escolhe outra porta.</value>
+  </data>
+  <data name="ConfigView_OtherEngine" xml:space="preserve">
+    <value>outro motor</value>
+  </data>
+  <data name="ConfigView_ListenPort_Apply" xml:space="preserve">
+    <value>Aplicar</value>
+  </data>
 </root>

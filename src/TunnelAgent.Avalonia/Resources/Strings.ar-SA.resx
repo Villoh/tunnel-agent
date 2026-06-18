@@ -1052,4 +1052,13 @@
   <data name="ConfigView_CLIProxy_RoutingStrategy_FillFirst" xml:space="preserve">
     <value>ملء الأول (استخدم أول حساب حتى الحد)</value>
   </data>
+  <data name="ConfigView_PortConflict" xml:space="preserve">
+    <value>المنفذ {0} مستخدم بالفعل بواسطة {1}. اختر منفذًا آخر.</value>
+  </data>
+  <data name="ConfigView_OtherEngine" xml:space="preserve">
+    <value>محرك آخر</value>
+  </data>
+  <data name="ConfigView_ListenPort_Apply" xml:space="preserve">
+    <value>تطبيق</value>
+  </data>
 </root>

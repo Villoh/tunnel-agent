@@ -1052,4 +1052,13 @@
   <data name="ConfigView_CLIProxy_RoutingStrategy_FillFirst" xml:space="preserve">
     <value>优先填充（先使用第一个账户直到达到限制）</value>
   </data>
+  <data name="ConfigView_PortConflict" xml:space="preserve">
+    <value>端口 {0} 已被 {1} 使用。请选择其他端口。</value>
+  </data>
+  <data name="ConfigView_OtherEngine" xml:space="preserve">
+    <value>其他引擎</value>
+  </data>
+  <data name="ConfigView_ListenPort_Apply" xml:space="preserve">
+    <value>应用</value>
+  </data>
 </root>
