@@ -37,6 +37,7 @@
 ## Features
 
 - 🖥️ **Native Windows Experience**: clean Avalonia UI that respects your system theme and keeps local engine management in one place
+- 🌍 **Multi-Language UI (i18n)**: fully localized interface with runtime language switching across 8 languages, auto-detecting your system language on first launch
 - 🔀 **Multi-Engine Control**: run and manage both CLIProxyAPI and Perplexity from the same desktop app, with per-engine configuration, endpoint controls, and status
 - 🚀 **One-Click Server Management**: start and stop each local engine directly from the Providers view
 - 🔐 **Credential Storage**: secure handling for OAuth tokens, custom provider API keys, and file-based Perplexity session accounts stored under Tunnel Agent settings
@@ -86,26 +87,41 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 
 ### IDE Quota Tracking (Monitor Only)
 
-| IDE    | Description                                        |
-| ------ | -------------------------------------------------- |
-| Cursor | Auto-detected when installed and logged in         |
-| Kiro   | Auto-detected when installed and logged in         |
-| Trae   | Auto-detected when installed and logged in         |
+| IDE    | Description                                |
+| ------ | ------------------------------------------ |
+| Cursor | Auto-detected when installed and logged in |
+| Kiro   | Auto-detected when installed and logged in |
+| Trae   | Auto-detected when installed and logged in |
 
 > These IDEs are only used for quota usage monitoring. They cannot be used as providers for the proxy.
 
+### Languages
+
+The interface is fully localized with runtime language switching (Configuration → General → Language). The app auto-detects your system language on first launch and falls back to English.
+
+| Language  | Locale  |
+| --------- | ------- |
+| English   | `en-US` |
+| Español   | `es-ES` |
+| Português | `pt-PT` |
+| Français  | `fr-FR` |
+| Deutsch   | `de-DE` |
+| 简体中文  | `zh-CN` |
+| 日本語    | `ja-JP` |
+| العربية   | `ar-SA` |
+
 ### Agents
 
-| Agent           | Config method                  |
-| --------------- | ------------------------------ |
-| Claude Code     | `~/.claude/settings.json`      |
-| Codex CLI       | `~/.codex/config.toml` + `auth.json` |
-| Gemini CLI      | Environment variables          |
-| Amp             | `~/.config/amp/settings.json` + `~/.local/share/amp/secrets.json` |
-| OpenCode        | `~/.config/opencode/opencode.json` |
-| Pi              | `~/.pi/agent/models.json`      |
-| Factory Droid   | `~/.factory/settings.json`     |
-| Aider           | Environment variables          |
+| Agent         | Config method                                                     |
+| ------------- | ----------------------------------------------------------------- |
+| Claude Code   | `~/.claude/settings.json`                                         |
+| Codex CLI     | `~/.codex/config.toml` + `auth.json`                              |
+| Gemini CLI    | Environment variables                                             |
+| Amp           | `~/.config/amp/settings.json` + `~/.local/share/amp/secrets.json` |
+| OpenCode      | `~/.config/opencode/opencode.json`                                |
+| Pi            | `~/.pi/agent/models.json`                                         |
+| Factory Droid | `~/.factory/settings.json`                                        |
+| Aider         | Environment variables                                             |
 
 ## Installation
 
@@ -114,6 +130,7 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 **Portable:** download `TunnelAgent-x.y.z-win-x64-portable.zip`, extract it, and run `TunnelAgent.exe`. No installation required.
 
 **Scoop:**
+
 ```powershell
 scoop bucket add villoh https://github.com/Villoh/scoop-bucket
 scoop install tunnel-agent
