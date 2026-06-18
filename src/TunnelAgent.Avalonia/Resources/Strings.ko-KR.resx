@@ -1,0 +1,1064 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- Microsoft ResX File, format version 2.0 -->
+  <!-- To add a localized resource simply add an entry to this file and recompile. -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata" type="xsd:string" minOccurs="0" />
+          <xsd:element name="assembly" type="xsd:string" minOccurs="0" />
+          <xsd:element name="data" type="xsd:string" minOccurs="0" msdata:Attributes="xml:space preserve" />
+          <xsd:element name="resheader" type="xsd:string" minOccurs="0" />
+        </xsd:choice>
+        <xsd:attribute name="version" type="xsd:decimal" use="required" />
+      </xsd:complexType>
+    </xsd:element>
+    <xsd:element name="resheader">
+      <xsd:complexType>
+        <xsd:sequence>
+          <xsd:element name="value" type="xsd:string" minOccurs="0" />
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" use="required" />
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       MAIN WINDOW - Window Title & Toolbar
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="App_Title" xml:space="preserve">
+    <value>Tunnel Agent</value>
+  </data>
+  <data name="MainWindow_MinimizeTooltip" xml:space="preserve">
+    <value>최소화</value>
+  </data>
+  <data name="MainWindow_MaximizeTooltip" xml:space="preserve">
+    <value>최대화 / 복원</value>
+  </data>
+  <data name="MainWindow_CloseTooltip" xml:space="preserve">
+    <value>닫기</value>
+  </data>
+
+  <!-- Sidebar Navigation -->
+  <data name="Sidebar_Logo_App" xml:space="preserve">
+    <value>Tunnel</value>
+  </data>
+  <data name="Sidebar_Logo_Agent" xml:space="preserve">
+    <value>Agent</value>
+  </data>
+  <data name="Sidebar_ToggleSidebarTooltip" xml:space="preserve">
+    <value>사이드바 전환</value>
+  </data>
+  <data name="Sidebar_Providers" xml:space="preserve">
+    <value>공급자</value>
+  </data>
+  <data name="Sidebar_Quota" xml:space="preserve">
+    <value>할당량</value>
+  </data>
+  <data name="Sidebar_Agents" xml:space="preserve">
+    <value>에이전트</value>
+  </data>
+  <data name="Sidebar_Logs" xml:space="preserve">
+    <value>로그</value>
+  </data>
+  <data name="Sidebar_Configuration" xml:space="preserve">
+    <value>설정</value>
+  </data>
+  <data name="Sidebar_Status" xml:space="preserve">
+    <value>상태</value>
+  </data>
+  <data name="Sidebar_CLIProxyAPI" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="Sidebar_Perplexity" xml:space="preserve">
+    <value>Perplexity</value>
+  </data>
+  <data name="Sidebar_Version" xml:space="preserve">
+    <value>v{0} · MIT</value>
+  </data>
+  <data name="Sidebar_ReportIssue" xml:space="preserve">
+    <value>문제 신고</value>
+  </data>
+  <data name="Sidebar_ToggleThemeTooltip" xml:space="preserve">
+    <value>라이트 / 다크 모드 전환</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       MAIN WINDOW - Dialogs
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="Dialog_DeleteLogFile_Title" xml:space="preserve">
+    <value>로그 파일을 삭제할까요?</value>
+  </data>
+  <data name="Dialog_DeleteLogFile_Description" xml:space="preserve">
+    <value>디스크에 있는 CLIProxyAPI 로그 파일을 영구적으로 삭제합니다. 화면이 지워지고 프록시가 실행되면 새 항목이 표시됩니다.</value>
+  </data>
+  <data name="Dialog_DeleteLogFile_Cancel" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="Dialog_DeleteLogFile_Delete" xml:space="preserve">
+    <value>로그 파일 삭제</value>
+  </data>
+
+  <data name="Dialog_ResetCredentials_Title" xml:space="preserve">
+    <value>모든 자격 증명을 초기화할까요?</value>
+  </data>
+  <data name="Dialog_ResetCredentials_Description" xml:space="preserve">
+    <value>Tunnel Agent가 관리하는 OAuth 토큰과 사용자 지정 공급자 키를 백업한 후 제거합니다. auth 폴더의 다른 JSON 파일은 보존됩니다.</value>
+  </data>
+  <data name="Dialog_ResetCredentials_Cancel" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="Dialog_ResetCredentials_Reset" xml:space="preserve">
+    <value>자격 증명 초기화</value>
+  </data>
+
+  <data name="Dialog_AddAccount_Title" xml:space="preserve">
+    <value>계정 추가 — {0}</value>
+  </data>
+  <data name="Dialog_AddAccount_BaseUrlLabel" xml:space="preserve">
+    <value>Base URL</value>
+  </data>
+  <data name="Dialog_AddAccount_BaseUrlPlaceholder" xml:space="preserve">
+    <value>https://api.example.com/v1</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyLabel" xml:space="preserve">
+    <value>API 키</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyPlaceholder" xml:space="preserve">
+    <value>sk-...</value>
+  </data>
+  <data name="Dialog_AddAccount_ShowHideTooltip" xml:space="preserve">
+    <value>키 표시/숨김</value>
+  </data>
+  <data name="Dialog_AddAccount_LabelLabel" xml:space="preserve">
+    <value>레이블 (선택 사항)</value>
+  </data>
+  <data name="Dialog_AddAccount_LabelPlaceholder" xml:space="preserve">
+    <value>내 계정</value>
+  </data>
+  <data name="Dialog_AddAccount_Cancel" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="Dialog_AddAccount_Add" xml:space="preserve">
+    <value>계정 추가</value>
+  </data>
+
+  <data name="Dialog_AddPerplexity_Title" xml:space="preserve">
+    <value>Perplexity 계정 추가</value>
+  </data>
+  <data name="Dialog_AddPerplexity_LabelLabel" xml:space="preserve">
+    <value>레이블 (선택 사항)</value>
+  </data>
+  <data name="Dialog_AddPerplexity_LabelPlaceholder" xml:space="preserve">
+    <value>기본</value>
+  </data>
+  <data name="Dialog_AddPerplexity_TokenLabel" xml:space="preserve">
+    <value>세션 토큰</value>
+  </data>
+  <data name="Dialog_AddPerplexity_TokenPlaceholder" xml:space="preserve">
+    <value>pplx-session-token</value>
+  </data>
+  <data name="Dialog_AddPerplexity_ShowHideTooltip" xml:space="preserve">
+    <value>토큰 표시/숨김</value>
+  </data>
+  <data name="Dialog_AddPerplexity_Description" xml:space="preserve">
+    <value>Perplexity WebUI 세션 토큰을 붙여넣거나 이메일 인증을 통해 생성하세요.</value>
+  </data>
+  <data name="Dialog_AddPerplexity_GenerateToken" xml:space="preserve">
+    <value>토큰 생성</value>
+  </data>
+  <data name="Dialog_AddPerplexity_Cancel" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="Dialog_AddPerplexity_Save" xml:space="preserve">
+    <value>계정 저장</value>
+  </data>
+
+  <data name="Dialog_GeneratePerplexityToken_Title" xml:space="preserve">
+    <value>Perplexity 토큰 생성</value>
+  </data>
+  <data name="Dialog_GeneratePerplexityToken_Failed" xml:space="preserve">
+    <value>토큰 생성에 실패했습니다</value>
+  </data>
+  <data name="Dialog_GeneratePerplexityToken_Back" xml:space="preserve">
+    <value>뒤로</value>
+  </data>
+
+  <data name="Dialog_EditPerplexityLabel_Title" xml:space="preserve">
+    <value>Perplexity 계정 레이블 편집</value>
+  </data>
+  <data name="Dialog_EditPerplexityLabel_LabelLabel" xml:space="preserve">
+    <value>레이블</value>
+  </data>
+  <data name="Dialog_EditPerplexityLabel_LabelPlaceholder" xml:space="preserve">
+    <value>기본</value>
+  </data>
+  <data name="Dialog_EditPerplexityLabel_Cancel" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="Dialog_EditPerplexityLabel_Save" xml:space="preserve">
+    <value>저장</value>
+  </data>
+
+  <data name="Dialog_ResetPerplexity_Title" xml:space="preserve">
+    <value>Perplexity 계정을 초기화할까요?</value>
+  </data>
+  <data name="Dialog_ResetPerplexity_Description" xml:space="preserve">
+    <value>저장된 모든 Perplexity WebUI 세션 토큰 파일을 백업한 후 제거합니다.</value>
+  </data>
+  <data name="Dialog_ResetPerplexity_Cancel" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="Dialog_ResetPerplexity_Reset" xml:space="preserve">
+    <value>계정 초기화</value>
+  </data>
+
+  <data name="Dialog_GeminiLogin_Title" xml:space="preserve">
+    <value>Gemini 계정 추가</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode_Text" xml:space="preserve">
+    <value>Gemini의 인증 방식을 선택하세요.</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode1_Title" xml:space="preserve">
+    <value>Code Assist</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode1_Desc" xml:space="preserve">
+    <value>GCP 프로젝트, 수동 선택</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode2_Title" xml:space="preserve">
+    <value>Google One</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode2_Desc" xml:space="preserve">
+    <value>개인 계정, 프로젝트 자동 검색</value>
+  </data>
+  <data name="Dialog_GeminiLogin_Cancel" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="Dialog_GeminiLogin_Connect" xml:space="preserve">
+    <value>연결</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       TOAST NOTIFICATIONS
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="Toast_AppUpdateAvailable_Title" xml:space="preserve">
+    <value>Tunnel Agent 업데이트 사용 가능</value>
+  </data>
+  <data name="Toast_AppUpdateAvailable_Version" xml:space="preserve">
+    <value>버전 {0}을(를) 다운로드할 수 있습니다.</value>
+  </data>
+  <data name="Toast_AppUpdateAvailable_Download" xml:space="preserve">
+    <value>다운로드</value>
+  </data>
+  <data name="Toast_AppUpdateAvailable_Dismiss" xml:space="preserve">
+    <value>닫기</value>
+  </data>
+
+  <data name="Toast_EngineUpdateAvailable_Title" xml:space="preserve">
+    <value>엔진 업데이트 사용 가능</value>
+  </data>
+  <data name="Toast_EngineUpdateAvailable_Update" xml:space="preserve">
+    <value>업데이트</value>
+  </data>
+  <data name="Toast_EngineUpdateAvailable_Dismiss" xml:space="preserve">
+    <value>닫기</value>
+  </data>
+
+  <data name="Toast_ManagementKeyRepaired" xml:space="preserve">
+    <value>CLIProxyAPI 관리 키가 복구되어 적용되었습니다.</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       PROVIDERS VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ProvidersView_TabCLIProxyAPI" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="ProvidersView_TabPerplexity" xml:space="preserve">
+    <value>Perplexity</value>
+  </data>
+  <data name="ProvidersView_Title" xml:space="preserve">
+    <value>서비스</value>
+  </data>
+  <data name="ProvidersView_CopyEndpointTooltip" xml:space="preserve">
+    <value>엔드포인트 복사</value>
+  </data>
+  <data name="ProvidersView_StartServerTooltip" xml:space="preserve">
+    <value>서버 시작</value>
+  </data>
+  <data name="ProvidersView_StopServerTooltip" xml:space="preserve">
+    <value>서버 중지</value>
+  </data>
+  <data name="ProvidersView_ListeningOn" xml:space="preserve">
+    <value>수신 포트 </value>
+  </data>
+
+  <data name="ProvidersView_PerplexitySection_Title" xml:space="preserve">
+    <value>Perplexity 세션 계정</value>
+  </data>
+  <data name="ProvidersView_PerplexitySection_Description" xml:space="preserve">
+    <value>Perplexity WebUI Scraper에서 사용하는 저장된 WebUI 세션 토큰입니다.</value>
+  </data>
+  <data name="ProvidersView_PerplexitySection_AddTooltip" xml:space="preserve">
+    <value>계정 추가</value>
+  </data>
+  <data name="ProvidersView_PerplexitySection_NoAccounts" xml:space="preserve">
+    <value>아직 계정이 없습니다</value>
+  </data>
+  <data name="ProvidersView_PerplexityAccount_MakeDefault" xml:space="preserve">
+    <value>기본으로 설정</value>
+  </data>
+  <data name="ProvidersView_PerplexityAccount_EditLabelTooltip" xml:space="preserve">
+    <value>레이블 편집</value>
+  </data>
+  <data name="ProvidersView_PerplexityAccount_RemoveTooltip" xml:space="preserve">
+    <value>계정 제거</value>
+  </data>
+  <data name="ProvidersView_PerplexityAccount_DefaultBadge" xml:space="preserve">
+    <value>기본</value>
+  </data>
+
+  <data name="ProvidersView_Provider_EnableDisableTooltip" xml:space="preserve">
+    <value>이 계정 사용 / 사용 안 함</value>
+  </data>
+  <data name="ProvidersView_Provider_Disabled" xml:space="preserve">
+    <value>사용 안 함</value>
+  </data>
+  <data name="ProvidersView_Provider_Connecting" xml:space="preserve">
+    <value>연결 중…</value>
+  </data>
+  <data name="ProvidersView_Provider_AddAccountTooltip" xml:space="preserve">
+    <value>계정 추가</value>
+  </data>
+  <data name="ProvidersView_Provider_RemoveAllTooltip" xml:space="preserve">
+    <value>모든 계정 제거</value>
+  </data>
+  <data name="ProvidersView_Provider_AddAccountButton" xml:space="preserve">
+    <value>계정 추가</value>
+  </data>
+  <data name="ProvidersView_Provider_RemoveAccountTooltip" xml:space="preserve">
+    <value>계정 제거</value>
+  </data>
+
+  <data name="ProvidersView_Models_Section" xml:space="preserve">
+    <value>사용 가능한 모델</value>
+  </data>
+  <data name="ProvidersView_Models_Title" xml:space="preserve">
+    <value>사용 가능한 모델</value>
+  </data>
+  <data name="ProvidersView_Models_Description" xml:space="preserve">
+    <value>실행 중인 엔진에서 제공하는 모델입니다.</value>
+  </data>
+  <data name="ProvidersView_Models_TotalCount" xml:space="preserve">
+    <value>총 {0}개</value>
+  </data>
+  <data name="ProvidersView_Models_EmptyState" xml:space="preserve">
+    <value>엔진을 시작하면 사용 가능한 모델이 표시됩니다</value>
+  </data>
+  <data name="ProvidersView_Models_ModelCount" xml:space="preserve">
+    <value>모델 {0}개</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       AGENTS VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="AgentsView_Title" xml:space="preserve">
+    <value>에이전트</value>
+  </data>
+  <data name="AgentsView_Subtitle" xml:space="preserve">
+    <value>각 CLI 도구를 연결된 공급자를 통해 라우팅하세요.</value>
+  </data>
+  <data name="AgentsView_ConfigureMultipleTooltip" xml:space="preserve">
+    <value>여러 개 구성</value>
+  </data>
+  <data name="AgentsView_DetectAgentsTooltip" xml:space="preserve">
+    <value>에이전트 감지</value>
+  </data>
+  <data name="AgentsView_InstalledChip" xml:space="preserve">
+    <value>설치됨</value>
+  </data>
+  <data name="AgentsView_ConfiguredChip" xml:space="preserve">
+    <value>구성됨</value>
+  </data>
+  <data name="AgentsView_InstalledSection" xml:space="preserve">
+    <value>설치됨</value>
+  </data>
+  <data name="AgentsView_NotInstalledSection" xml:space="preserve">
+    <value>설치되지 않음</value>
+  </data>
+  <data name="AgentsView_Agent_ConfiguredBadge" xml:space="preserve">
+    <value>구성됨</value>
+  </data>
+  <data name="AgentsView_Agent_InstalledBadge" xml:space="preserve">
+    <value>설치됨</value>
+  </data>
+  <data name="AgentsView_Agent_DocsTooltip" xml:space="preserve">
+    <value>문서 보기</value>
+  </data>
+  <data name="AgentsView_Agent_ConfigureTooltip" xml:space="preserve">
+    <value>구성</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       LOGS VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="LogsView_Title" xml:space="preserve">
+    <value>로그</value>
+  </data>
+  <data name="LogsView_Subtitle" xml:space="preserve">
+    <value>로컬 프록시를 통해 라우팅된 요청 트래픽입니다.</value>
+  </data>
+  <data name="LogsView_ExportTooltip" xml:space="preserve">
+    <value>로그 내보내기</value>
+  </data>
+  <data name="LogsView_RefreshTooltip" xml:space="preserve">
+    <value>새로 고침</value>
+  </data>
+  <data name="LogsView_ClearViewTooltip" xml:space="preserve">
+    <value>화면 지우기</value>
+  </data>
+  <data name="LogsView_DeleteLogFileTooltip" xml:space="preserve">
+    <value>로그 파일 삭제</value>
+  </data>
+  <data name="LogsView_TabRequests" xml:space="preserve">
+    <value>요청</value>
+  </data>
+  <data name="LogsView_TabProxyLogs" xml:space="preserve">
+    <value>프록시 로그</value>
+  </data>
+  <data name="LogsView_Requests_Total" xml:space="preserve">
+    <value>전체</value>
+  </data>
+  <data name="LogsView_Requests_Success" xml:space="preserve">
+    <value>성공</value>
+  </data>
+  <data name="LogsView_Requests_AvgTime" xml:space="preserve">
+    <value>평균 시간</value>
+  </data>
+  <data name="LogsView_Requests_ProviderLabel" xml:space="preserve">
+    <value>공급자</value>
+  </data>
+  <data name="LogsView_Requests_SearchPlaceholder" xml:space="preserve">
+    <value>요청 검색...</value>
+  </data>
+  <data name="LogsView_Requests_EmptyTitle" xml:space="preserve">
+    <value>아직 요청이 없습니다.</value>
+  </data>
+  <data name="LogsView_Requests_EmptyDescription" xml:space="preserve">
+    <value>프록시를 시작하고 요청을 보내세요.</value>
+  </data>
+  <data name="LogsView_Requests_PageLabel" xml:space="preserve">
+    <value>{1} 중 {0} 페이지</value>
+  </data>
+  <data name="LogsView_Requests_PrevButton" xml:space="preserve">
+    <value>&lt;- 이전</value>
+  </data>
+  <data name="LogsView_Requests_NextButton" xml:space="preserve">
+    <value>다음 -&gt;</value>
+  </data>
+
+  <data name="LogsView_ProxyLogs_SearchPlaceholder" xml:space="preserve">
+    <value>로그 검색...</value>
+  </data>
+  <data name="LogsView_ProxyLogs_EmptyTitle" xml:space="preserve">
+    <value>아직 로그 줄이 없습니다.</value>
+  </data>
+  <data name="LogsView_ProxyLogs_EmptyDescription" xml:space="preserve">
+    <value>프록시를 시작하면 출력이 표시됩니다.</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       QUOTA VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="QuotaView_Title" xml:space="preserve">
+    <value>할당량</value>
+  </data>
+  <data name="QuotaView_Subtitle" xml:space="preserve">
+    <value>지원되는 CLIProxyAPI 계정의 할당량 사용량을 추적합니다.</value>
+  </data>
+  <data name="QuotaView_RefreshAllTooltip" xml:space="preserve">
+    <value>모든 할당량 공급자 새로 고침</value>
+  </data>
+  <data name="QuotaView_NoProviders_Title" xml:space="preserve">
+    <value>할당량 공급자 없음</value>
+  </data>
+  <data name="QuotaView_NoAccounts_Title" xml:space="preserve">
+    <value>표시할 계정 없음</value>
+  </data>
+  <data name="QuotaView_Account_RefreshTooltip" xml:space="preserve">
+    <value>할당량 새로 고침</value>
+  </data>
+  <data name="QuotaView_Account_UsageSection" xml:space="preserve">
+    <value>사용량</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       ACTIVITY VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ActivityView_Title" xml:space="preserve">
+    <value>최근 활동</value>
+  </data>
+  <data name="ActivityView_Subtitle" xml:space="preserve">
+    <value>로컬 프록시가 처리하여 연결된 공급자로 라우팅한 요청입니다.</value>
+  </data>
+  <data name="ActivityView_ClearButton" xml:space="preserve">
+    <value>지우기</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       CONFIGURATION VIEW - GENERAL
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ConfigView_TabGeneral" xml:space="preserve">
+    <value>일반</value>
+  </data>
+  <data name="ConfigView_TabCLIProxyAPI" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_TabPerplexity" xml:space="preserve">
+    <value>Perplexity</value>
+  </data>
+
+  <data name="ConfigView_General_Title" xml:space="preserve">
+    <value>일반</value>
+  </data>
+  <data name="ConfigView_General_Subtitle" xml:space="preserve">
+    <value>앱 모양 및 시작 설정입니다.</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgentSection" xml:space="preserve">
+    <value>TUNNEL AGENT</value>
+  </data>
+  <data name="ConfigView_General_AppSection" xml:space="preserve">
+    <value>앱</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Label" xml:space="preserve">
+    <value>Tunnel Agent</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Installed" xml:space="preserve">
+    <value>설치됨: {0}</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Available" xml:space="preserve">
+    <value>{0} 사용 가능</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Check" xml:space="preserve">
+    <value>확인</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Download" xml:space="preserve">
+    <value>다운로드</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_AutoCheck_Label" xml:space="preserve">
+    <value>앱 업데이트 자동 확인</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_AutoCheck_Description" xml:space="preserve">
+    <value>시작할 때 GitHub에서 새 Tunnel Agent 버전을 확인합니다.</value>
+  </data>
+
+  <data name="ConfigView_General_LaunchAtLogin_Label" xml:space="preserve">
+    <value>로그인 시 실행</value>
+  </data>
+  <data name="ConfigView_General_LaunchAtLogin_Description" xml:space="preserve">
+    <value>자동으로 시작하고 시스템 트레이에 머무릅니다.</value>
+  </data>
+  <data name="ConfigView_General_Theme_Label" xml:space="preserve">
+    <value>테마</value>
+  </data>
+  <data name="ConfigView_General_Theme_Description" xml:space="preserve">
+    <value>시스템 테마를 따르거나 라이트/다크 모드를 강제합니다.</value>
+  </data>
+  <data name="ConfigView_General_MaskEmails_Label" xml:space="preserve">
+    <value>민감한 정보 숨기기</value>
+  </data>
+  <data name="ConfigView_General_MaskEmails_Description" xml:space="preserve">
+    <value>계정 이메일 주소를 점으로 대체하여 비공개로 유지합니다.</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       CONFIGURATION VIEW - CLIPROXY
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ConfigView_CLIProxy_Title" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Subtitle" xml:space="preserve">
+    <value>엔진 버전, 네트워크 및 업데이트 설정입니다.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_UpdateSuccess" xml:space="preserve">
+    <value>{0}(으)로 성공적으로 업데이트되었습니다</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineSection" xml:space="preserve">
+    <value>엔진</value>
+  </data>
+  <data name="ConfigView_CLIProxy_SecuritySection" xml:space="preserve">
+    <value>보안</value>
+  </data>
+  <data name="ConfigView_CLIProxy_NetworkSection" xml:space="preserve">
+    <value>네트워크</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsSection" xml:space="preserve">
+    <value>로그</value>
+  </data>
+
+  <data name="ConfigView_CLIProxy_Engine_Label" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Engine_Installed" xml:space="preserve">
+    <value>설치됨: {0}</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Engine_Available" xml:space="preserve">
+    <value>{0} 사용 가능</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Engine_Check" xml:space="preserve">
+    <value>확인</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Engine_UpdateNow" xml:space="preserve">
+    <value>지금 업데이트</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_Label" xml:space="preserve">
+    <value>엔진 버전</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_Reload" xml:space="preserve">
+    <value>다시 로드</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_Install" xml:space="preserve">
+    <value>설치</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_Label" xml:space="preserve">
+    <value>패키지 무결성</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_Description" xml:space="preserve">
+    <value>다운로드는 설치 전에 검증됩니다.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoStart_Label" xml:space="preserve">
+    <value>자동 시작</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoStart_Description" xml:space="preserve">
+    <value>앱이 실행될 때 이 엔진을 자동으로 시작합니다.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoCheck_Label" xml:space="preserve">
+    <value>업데이트 자동 확인</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoCheck_Description" xml:space="preserve">
+    <value>시작할 때 GitHub에서 새 엔진 버전을 확인합니다.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoUpdate_Label" xml:space="preserve">
+    <value>자동 업데이트</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoUpdate_Description" xml:space="preserve">
+    <value>새 엔진 버전을 자동으로 다운로드하고 설치합니다.</value>
+  </data>
+
+  <data name="ConfigView_CLIProxy_AuthFolder_Label" xml:space="preserve">
+    <value>인증 파일 위치</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AuthFolder_Description" xml:space="preserve">
+    <value>OAuth 토큰과 사용자 지정 공급자 키는 앱 auth 폴더에 저장됩니다.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AuthFolder_Open" xml:space="preserve">
+    <value>폴더 열기</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ApiKeys_Label" xml:space="preserve">
+    <value>API 키</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ApiKeys_Description" xml:space="preserve">
+    <value>CLIProxyAPI 클라이언트가 허용하는 키입니다. 에이전트 설정에는 기본 키가 사용됩니다.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ApiKeys_Manage" xml:space="preserve">
+    <value>관리</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ResetCredentials_Label" xml:space="preserve">
+    <value>모든 자격 증명 초기화</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ResetCredentials_Description" xml:space="preserve">
+    <value>Tunnel Agent가 관리하는 OAuth 토큰과 API 키를 백업한 후 제거합니다.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ResetCredentials_Reset" xml:space="preserve">
+    <value>초기화</value>
+  </data>
+
+  <data name="ConfigView_CLIProxy_RoutingStrategy_Label" xml:space="preserve">
+    <value>라우팅 전략</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RoutingStrategy_Description" xml:space="preserve">
+    <value>여러 계정 또는 키에 요청을 분산하는 방식입니다.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ListenPort_Label" xml:space="preserve">
+    <value>수신 포트</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ListenPort_Description" xml:space="preserve">
+    <value>localhost 전용. 적용하려면 다시 시작해야 합니다.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ListenPort_Reset" xml:space="preserve">
+    <value>초기화</value>
+  </data>
+
+  <data name="ConfigView_CLIProxy_LogsAutoRefresh_Label" xml:space="preserve">
+    <value>자동 새로 고침</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsAutoRefresh_Description" xml:space="preserve">
+    <value>로그 화면에서 새 로그 항목을 자동으로 폴링합니다.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsRefreshInterval_Label" xml:space="preserve">
+    <value>새로 고침 간격</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsRefreshInterval_Description" xml:space="preserve">
+    <value>새 항목을 확인하는 빈도입니다.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsRefreshInterval_Seconds" xml:space="preserve">
+    <value>{0}초</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       CONFIGURATION VIEW - PERPLEXITY
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ConfigView_Perplexity_Title" xml:space="preserve">
+    <value>Perplexity</value>
+  </data>
+  <data name="ConfigView_Perplexity_Subtitle" xml:space="preserve">
+    <value>엔진 버전, 포트 및 세션 설정입니다.</value>
+  </data>
+  <data name="ConfigView_Perplexity_UpdateSuccess" xml:space="preserve">
+    <value>{0}(으)로 성공적으로 업데이트되었습니다</value>
+  </data>
+
+  <data name="ConfigView_Perplexity_Engine_Label" xml:space="preserve">
+    <value>Perplexity WebUI Scraper</value>
+  </data>
+  <data name="ConfigView_Perplexity_Engine_Installed" xml:space="preserve">
+    <value>설치됨: {0}</value>
+  </data>
+  <data name="ConfigView_Perplexity_Engine_Available" xml:space="preserve">
+    <value>{0} 사용 가능</value>
+  </data>
+  <data name="ConfigView_Perplexity_Engine_Check" xml:space="preserve">
+    <value>확인</value>
+  </data>
+  <data name="ConfigView_Perplexity_Engine_UpdateNow" xml:space="preserve">
+    <value>지금 업데이트</value>
+  </data>
+
+  <data name="ConfigView_Perplexity_AccountsFolder_Label" xml:space="preserve">
+    <value>계정 위치</value>
+  </data>
+  <data name="ConfigView_Perplexity_AccountsFolder_Description" xml:space="preserve">
+    <value>세션 토큰 파일은 앱 설정 폴더의 perplexity-accounts/ 아래에 저장됩니다.</value>
+  </data>
+  <data name="ConfigView_Perplexity_AccountsFolder_Open" xml:space="preserve">
+    <value>폴더 열기</value>
+  </data>
+  <data name="ConfigView_Perplexity_ResetAccounts_Label" xml:space="preserve">
+    <value>세션 계정 초기화</value>
+  </data>
+  <data name="ConfigView_Perplexity_ResetAccounts_Description" xml:space="preserve">
+    <value>저장된 모든 Perplexity WebUI 세션 토큰을 제거합니다.</value>
+  </data>
+  <data name="ConfigView_Perplexity_ResetAccounts_Reset" xml:space="preserve">
+    <value>초기화</value>
+  </data>
+
+  <data name="ConfigView_Perplexity_ListenPort_Label" xml:space="preserve">
+    <value>수신 포트</value>
+  </data>
+  <data name="ConfigView_Perplexity_ListenPort_Description" xml:space="preserve">
+    <value>localhost 전용. 적용하려면 다시 시작해야 합니다.</value>
+  </data>
+  <data name="ConfigView_Perplexity_ListenPort_Reset" xml:space="preserve">
+    <value>초기화</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       MISCELLANEOUS
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="Toast_NoUpdateAvailable" xml:space="preserve">
+    <value>사용 가능한 업데이트가 없습니다. 최신 버전을 사용 중입니다.</value>
+  </data>
+  <data name="Toast_AppNoUpdateAvailable" xml:space="preserve">
+    <value>Tunnel Agent가 최신 상태입니다.</value>
+  </data>
+  <data name="Toast_Downloading" xml:space="preserve">
+    <value>다운로드 중… {0}%</value>
+  </data>
+
+  <data name="ConfigView_General_Language_Label" xml:space="preserve">
+    <value>언어</value>
+  </data>
+  <data name="ConfigView_General_Language_Description" xml:space="preserve">
+    <value>표시 언어를 선택하세요.</value>
+  </data>
+  <data name="Dialog_Common_Close" xml:space="preserve">
+    <value>닫기</value>
+  </data>
+  <data name="Dialog_Common_Cancel" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="QuotaProvidersView_Title" xml:space="preserve">
+    <value>할당량 공급자</value>
+  </data>
+  <data name="QuotaProvidersView_Subtitle" xml:space="preserve">
+    <value>로컬 할당량 추적이 가능한 독립형 계정입니다.</value>
+  </data>
+  <data name="QuotaProvidersView_ScanTooltip" xml:space="preserve">
+    <value>할당량 공급자 검색</value>
+  </data>
+  <data name="QuotaProvidersView_DetectedChip" xml:space="preserve">
+    <value>감지됨</value>
+  </data>
+  <data name="QuotaProvidersView_Scanning" xml:space="preserve">
+    <value>검색 중…</value>
+  </data>
+  <data name="QuotaProvidersView_NotDetected" xml:space="preserve">
+    <value>감지되지 않음. 설치하거나 다음에 로그인하세요</value>
+  </data>
+  <data name="TrayUsagePopup_Title" xml:space="preserve">
+    <value>Tunnel Agent — 사용량</value>
+  </data>
+  <data name="TrayUsagePopup_RefreshQuotaTooltip" xml:space="preserve">
+    <value>할당량 새로 고침</value>
+  </data>
+  <data name="TrayUsagePopup_OpenAppTooltip" xml:space="preserve">
+    <value>앱 열기</value>
+  </data>
+  <data name="TrayUsagePopup_Home" xml:space="preserve">
+    <value>홈</value>
+  </data>
+  <data name="TrayUsagePopup_HomeSubtitle" xml:space="preserve">
+    <value>엔진 상태와 사용량을 한눈에</value>
+  </data>
+  <data name="TrayUsagePopup_Usage" xml:space="preserve">
+    <value>사용량</value>
+  </data>
+  <data name="TrayUsagePopup_UsageSubtitle" xml:space="preserve">
+    <value>AI 구독 할당량을 한눈에</value>
+  </data>
+  <data name="TrayUsagePopup_ListeningOnPort" xml:space="preserve">
+    <value>수신 포트 </value>
+  </data>
+  <data name="TrayUsagePopup_StartTooltip" xml:space="preserve">
+    <value>시작</value>
+  </data>
+  <data name="TrayUsagePopup_StopTooltip" xml:space="preserve">
+    <value>중지</value>
+  </data>
+  <data name="TrayUsagePopup_RestartTooltip" xml:space="preserve">
+    <value>다시 시작</value>
+  </data>
+  <data name="TrayUsagePopup_CopyEndpointTooltip" xml:space="preserve">
+    <value>엔드포인트 복사</value>
+  </data>
+  <data name="TrayUsagePopup_RefreshAllTooltip" xml:space="preserve">
+    <value>모두 새로 고침</value>
+  </data>
+  <data name="TrayUsagePopup_NoAccountsToShow" xml:space="preserve">
+    <value>표시할 계정 없음</value>
+  </data>
+  <data name="TrayUsagePopup_ConfigurationTooltip" xml:space="preserve">
+    <value>설정</value>
+  </data>
+  <data name="AgentConfigOverlay_AgentsSectionLabel" xml:space="preserve">
+    <value>에이전트</value>
+  </data>
+  <data name="AgentConfigOverlay_ConfiguredChip" xml:space="preserve">
+    <value>구성됨</value>
+  </data>
+  <data name="AgentConfigOverlay_InstalledChip" xml:space="preserve">
+    <value>설치됨</value>
+  </data>
+  <data name="AgentConfigOverlay_NotInstalledAgentsHint" xml:space="preserve">
+    <value>{0}개 에이전트가 설치되지 않았습니다 — 구성하려면 설치하세요.</value>
+  </data>
+  <data name="AgentConfigOverlay_ConfigModeSectionLabel" xml:space="preserve">
+    <value>구성 모드</value>
+  </data>
+  <data name="AgentConfigOverlay_AutomaticModeButton" xml:space="preserve">
+    <value>자동</value>
+  </data>
+  <data name="AgentConfigOverlay_ManualModeButton" xml:space="preserve">
+    <value>수동</value>
+  </data>
+  <data name="AgentConfigOverlay_AutomaticModeDescription" xml:space="preserve">
+    <value>구성 파일을 직접 작성합니다. 변경 전에 백업이 생성됩니다.</value>
+  </data>
+  <data name="AgentConfigOverlay_ManualModeDescription" xml:space="preserve">
+    <value>구성을 미리 보고 대상 위치에 수동으로 복사합니다.</value>
+  </data>
+  <data name="AgentConfigOverlay_AmpAccessTokenLabel" xml:space="preserve">
+    <value>Amp 액세스 토큰</value>
+  </data>
+  <data name="AgentConfigOverlay_AmpAccessTokenWatermark" xml:space="preserve">
+    <value>your-amp-access-token</value>
+  </data>
+  <data name="AgentConfigOverlay_ShowHideKeyTooltip" xml:space="preserve">
+    <value>키 표시/숨김</value>
+  </data>
+  <data name="AgentConfigOverlay_AmpAccessTokenHelp" xml:space="preserve">
+    <value>Amp CLI 인증에 사용됩니다. ampcode.com/settings에서 가져오세요</value>
+  </data>
+  <data name="AgentConfigOverlay_ModelsEmptyState" xml:space="preserve">
+    <value>엔진을 시작하면 사용 가능한 모델이 로드됩니다.</value>
+  </data>
+  <data name="AgentConfigOverlay_SearchModelsWatermark" xml:space="preserve">
+    <value>모델 검색</value>
+  </data>
+  <data name="AgentConfigOverlay_SelectAllModels" xml:space="preserve">
+    <value>모두 선택</value>
+  </data>
+  <data name="AgentConfigOverlay_NoModelSearchResults" xml:space="preserve">
+    <value>검색과 일치하는 모델이 없습니다.</value>
+  </data>
+  <data name="AgentConfigOverlay_ProxyEndpointSectionLabel" xml:space="preserve">
+    <value>프록시 엔드포인트</value>
+  </data>
+  <data name="AgentConfigOverlay_ConfigPreviewSectionLabel" xml:space="preserve">
+    <value>구성 미리 보기</value>
+  </data>
+  <data name="AgentConfigOverlay_CancelButton" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="AgentConfigOverlay_CopyAllButton" xml:space="preserve">
+    <value>모두 복사</value>
+  </data>
+  <data name="AgentConfigOverlay_DoneButton" xml:space="preserve">
+    <value>완료</value>
+  </data>
+  <data name="ApiKeysOverlay_Title" xml:space="preserve">
+    <value>CLIProxyAPI 키</value>
+  </data>
+  <data name="ApiKeysOverlay_Description" xml:space="preserve">
+    <value>CLIProxyAPI 클라이언트가 허용하는 키입니다. 에이전트 설정에는 기본 키가 사용되며, 비워 두면 인증이 없습니다.</value>
+  </data>
+  <data name="ApiKeysOverlay_DefaultChip" xml:space="preserve">
+    <value>기본</value>
+  </data>
+  <data name="ApiKeysOverlay_UseButton" xml:space="preserve">
+    <value>사용</value>
+  </data>
+  <data name="ApiKeysOverlay_RemoveKeyTooltip" xml:space="preserve">
+    <value>키 제거</value>
+  </data>
+  <data name="ApiKeysOverlay_AddKeyLabel" xml:space="preserve">
+    <value>키 추가</value>
+  </data>
+  <data name="ApiKeysOverlay_ShowHideKeyTooltip" xml:space="preserve">
+    <value>키 표시/숨김</value>
+  </data>
+  <data name="ApiKeysOverlay_CloseButton" xml:space="preserve">
+    <value>닫기</value>
+  </data>
+  <data name="ApiKeysOverlay_AddKeyButton" xml:space="preserve">
+    <value>키 추가</value>
+  </data>
+  <data name="Agent_claude-code_Description" xml:space="preserve">
+    <value>Anthropic의 공식 CLI 코딩 에이전트입니다.</value>
+  </data>
+  <data name="Agent_codex_Description" xml:space="preserve">
+    <value>OpenAI Codex 명령줄 인터페이스입니다.</value>
+  </data>
+  <data name="Agent_gemini-cli_Description" xml:space="preserve">
+    <value>Google Gemini CLI 코딩 에이전트입니다.</value>
+  </data>
+  <data name="Agent_amp_Description" xml:space="preserve">
+    <value>Sourcegraph의 Amp 코딩 어시스턴트입니다.</value>
+  </data>
+  <data name="Agent_opencode_Description" xml:space="preserve">
+    <value>오픈 소스 AI 코딩 에이전트입니다.</value>
+  </data>
+  <data name="Agent_aider_Description" xml:space="preserve">
+    <value>터미널에서의 AI 페어 프로그래밍. pip로 설치하세요.</value>
+  </data>
+  <data name="Agent_pi_Description" xml:space="preserve">
+    <value>pi.dev의 Pi 코딩 에이전트입니다.</value>
+  </data>
+  <data name="Agent_factory-droid_Description" xml:space="preserve">
+    <value>Factory의 AI 코딩 에이전트입니다.</value>
+  </data>
+  <data name="AgentsView_Agent_ConfigureButton" xml:space="preserve">
+    <value>구성</value>
+  </data>
+  <data name="AgentsView_Agent_ReconfigureButton" xml:space="preserve">
+    <value>다시 구성</value>
+  </data>
+  <data name="Provider_cliproxyapi_Description" xml:space="preserve">
+    <value>OAuth 및 OpenAI 호환 업스트림 공급자를 위한 통합 프록시입니다.</value>
+  </data>
+  <data name="Provider_perplexity-webui-scraper_Description" xml:space="preserve">
+    <value>Perplexity WebUI 세션을 기반으로 하는 OpenAI 호환 로컬 API입니다.</value>
+  </data>
+  <data name="ProvidersView_Provider_ConnectedAccountSingular" xml:space="preserve">
+    <value>연결된 계정 {0}개</value>
+  </data>
+  <data name="ProvidersView_Provider_ConnectedAccountPlural" xml:space="preserve">
+    <value>연결된 계정 {0}개</value>
+  </data>
+  <data name="AgentConfigOverlay_BulkTitle" xml:space="preserve">
+    <value>에이전트 구성</value>
+  </data>
+  <data name="AgentConfigOverlay_SingleTitle" xml:space="preserve">
+    <value>{0} 구성</value>
+  </data>
+  <data name="AgentConfigOverlay_SingleFallbackTitle" xml:space="preserve">
+    <value>에이전트 구성</value>
+  </data>
+  <data name="AgentConfigOverlay_BulkDescription" xml:space="preserve">
+    <value>설치된 에이전트를 선택한 다음 공유 구성을 적용하세요.</value>
+  </data>
+  <data name="AgentConfigOverlay_ApplyButton" xml:space="preserve">
+    <value>적용</value>
+  </data>
+  <data name="AgentConfigOverlay_ApplySelectedButton" xml:space="preserve">
+    <value>적용 ({0})</value>
+  </data>
+  <data name="Quota_ResetInNow" xml:space="preserve">
+    <value>지금 초기화</value>
+  </data>
+  <data name="Quota_ResetInDaysHours" xml:space="preserve">
+    <value>{0}일 {1}시간 후 초기화</value>
+  </data>
+  <data name="Quota_ResetInHoursMinutes" xml:space="preserve">
+    <value>{0}시간 {1}분 후 초기화</value>
+  </data>
+  <data name="Quota_ResetInMinutes" xml:space="preserve">
+    <value>{0}분 후 초기화</value>
+  </data>
+  <data name="AgentConfigOverlay_ModelsSelectedLabel" xml:space="preserve">
+    <value>모델 {1}개 중 {0}개 선택됨</value>
+  </data>
+  <data name="LogsView_Requests_AllProviders" xml:space="preserve">
+    <value>모든 공급자</value>
+  </data>
+  <data name="ConfigView_General_Theme_System" xml:space="preserve">
+    <value>시스템</value>
+  </data>
+  <data name="ConfigView_General_Theme_Light" xml:space="preserve">
+    <value>라이트</value>
+  </data>
+  <data name="ConfigView_General_Theme_Dark" xml:space="preserve">
+    <value>다크</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RoutingStrategy_RoundRobin" xml:space="preserve">
+    <value>라운드 로빈 (균등 분배)</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RoutingStrategy_FillFirst" xml:space="preserve">
+    <value>채우기 우선 (한도까지 첫 번째 계정 사용)</value>
+  </data>
+  <data name="ConfigView_PortConflict" xml:space="preserve">
+    <value>포트 {0}은(는) 이미 {1}에서 사용 중입니다. 다른 포트를 선택하세요.</value>
+  </data>
+  <data name="ConfigView_OtherEngine" xml:space="preserve">
+    <value>다른 엔진</value>
+  </data>
+  <data name="ConfigView_ListenPort_Apply" xml:space="preserve">
+    <value>적용</value>
+  </data>
+</root>

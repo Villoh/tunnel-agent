@@ -1,0 +1,1064 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- Microsoft ResX File, format version 2.0 -->
+  <!-- To add a localized resource simply add an entry to this file and recompile. -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata" type="xsd:string" minOccurs="0" />
+          <xsd:element name="assembly" type="xsd:string" minOccurs="0" />
+          <xsd:element name="data" type="xsd:string" minOccurs="0" msdata:Attributes="xml:space preserve" />
+          <xsd:element name="resheader" type="xsd:string" minOccurs="0" />
+        </xsd:choice>
+        <xsd:attribute name="version" type="xsd:decimal" use="required" />
+      </xsd:complexType>
+    </xsd:element>
+    <xsd:element name="resheader">
+      <xsd:complexType>
+        <xsd:sequence>
+          <xsd:element name="value" type="xsd:string" minOccurs="0" />
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" use="required" />
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       MAIN WINDOW - Window Title & Toolbar
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="App_Title" xml:space="preserve">
+    <value>Tunnel Agent</value>
+  </data>
+  <data name="MainWindow_MinimizeTooltip" xml:space="preserve">
+    <value>मिनिमाइज़ करें</value>
+  </data>
+  <data name="MainWindow_MaximizeTooltip" xml:space="preserve">
+    <value>मैक्सिमाइज़ करें / रिस्टोर करें</value>
+  </data>
+  <data name="MainWindow_CloseTooltip" xml:space="preserve">
+    <value>बंद करें</value>
+  </data>
+
+  <!-- Sidebar Navigation -->
+  <data name="Sidebar_Logo_App" xml:space="preserve">
+    <value>Tunnel</value>
+  </data>
+  <data name="Sidebar_Logo_Agent" xml:space="preserve">
+    <value>Agent</value>
+  </data>
+  <data name="Sidebar_ToggleSidebarTooltip" xml:space="preserve">
+    <value>साइडबार टॉगल करें</value>
+  </data>
+  <data name="Sidebar_Providers" xml:space="preserve">
+    <value>प्रोवाइडर</value>
+  </data>
+  <data name="Sidebar_Quota" xml:space="preserve">
+    <value>कोटा</value>
+  </data>
+  <data name="Sidebar_Agents" xml:space="preserve">
+    <value>एजेंट</value>
+  </data>
+  <data name="Sidebar_Logs" xml:space="preserve">
+    <value>लॉग</value>
+  </data>
+  <data name="Sidebar_Configuration" xml:space="preserve">
+    <value>कॉन्फ़िगरेशन</value>
+  </data>
+  <data name="Sidebar_Status" xml:space="preserve">
+    <value>स्थिति</value>
+  </data>
+  <data name="Sidebar_CLIProxyAPI" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="Sidebar_Perplexity" xml:space="preserve">
+    <value>Perplexity</value>
+  </data>
+  <data name="Sidebar_Version" xml:space="preserve">
+    <value>v{0} · MIT</value>
+  </data>
+  <data name="Sidebar_ReportIssue" xml:space="preserve">
+    <value>समस्या की रिपोर्ट करें</value>
+  </data>
+  <data name="Sidebar_ToggleThemeTooltip" xml:space="preserve">
+    <value>लाइट / डार्क मोड टॉगल करें</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       MAIN WINDOW - Dialogs
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="Dialog_DeleteLogFile_Title" xml:space="preserve">
+    <value>लॉग फ़ाइल हटाएँ?</value>
+  </data>
+  <data name="Dialog_DeleteLogFile_Description" xml:space="preserve">
+    <value>यह डिस्क पर मौजूद CLIProxyAPI लॉग फ़ाइल को स्थायी रूप से हटा देता है। व्यू साफ़ हो जाएगा और प्रॉक्सी चलने पर नई प्रविष्टियाँ दिखाई देंगी।</value>
+  </data>
+  <data name="Dialog_DeleteLogFile_Cancel" xml:space="preserve">
+    <value>रद्द करें</value>
+  </data>
+  <data name="Dialog_DeleteLogFile_Delete" xml:space="preserve">
+    <value>लॉग फ़ाइल हटाएँ</value>
+  </data>
+
+  <data name="Dialog_ResetCredentials_Title" xml:space="preserve">
+    <value>सभी क्रेडेंशियल रीसेट करें?</value>
+  </data>
+  <data name="Dialog_ResetCredentials_Description" xml:space="preserve">
+    <value>यह Tunnel Agent द्वारा प्रबंधित OAuth टोकन और कस्टम प्रोवाइडर कुंजियों का बैकअप लेकर उन्हें हटा देता है। auth फ़ोल्डर की अन्य JSON फ़ाइलें सुरक्षित रहती हैं।</value>
+  </data>
+  <data name="Dialog_ResetCredentials_Cancel" xml:space="preserve">
+    <value>रद्द करें</value>
+  </data>
+  <data name="Dialog_ResetCredentials_Reset" xml:space="preserve">
+    <value>क्रेडेंशियल रीसेट करें</value>
+  </data>
+
+  <data name="Dialog_AddAccount_Title" xml:space="preserve">
+    <value>खाता जोड़ें — {0}</value>
+  </data>
+  <data name="Dialog_AddAccount_BaseUrlLabel" xml:space="preserve">
+    <value>Base URL</value>
+  </data>
+  <data name="Dialog_AddAccount_BaseUrlPlaceholder" xml:space="preserve">
+    <value>https://api.example.com/v1</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyLabel" xml:space="preserve">
+    <value>API कुंजी</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyPlaceholder" xml:space="preserve">
+    <value>sk-...</value>
+  </data>
+  <data name="Dialog_AddAccount_ShowHideTooltip" xml:space="preserve">
+    <value>कुंजी दिखाएँ/छिपाएँ</value>
+  </data>
+  <data name="Dialog_AddAccount_LabelLabel" xml:space="preserve">
+    <value>लेबल (वैकल्पिक)</value>
+  </data>
+  <data name="Dialog_AddAccount_LabelPlaceholder" xml:space="preserve">
+    <value>मेरा खाता</value>
+  </data>
+  <data name="Dialog_AddAccount_Cancel" xml:space="preserve">
+    <value>रद्द करें</value>
+  </data>
+  <data name="Dialog_AddAccount_Add" xml:space="preserve">
+    <value>खाता जोड़ें</value>
+  </data>
+
+  <data name="Dialog_AddPerplexity_Title" xml:space="preserve">
+    <value>Perplexity खाता जोड़ें</value>
+  </data>
+  <data name="Dialog_AddPerplexity_LabelLabel" xml:space="preserve">
+    <value>लेबल (वैकल्पिक)</value>
+  </data>
+  <data name="Dialog_AddPerplexity_LabelPlaceholder" xml:space="preserve">
+    <value>प्राथमिक</value>
+  </data>
+  <data name="Dialog_AddPerplexity_TokenLabel" xml:space="preserve">
+    <value>सत्र टोकन</value>
+  </data>
+  <data name="Dialog_AddPerplexity_TokenPlaceholder" xml:space="preserve">
+    <value>pplx-session-token</value>
+  </data>
+  <data name="Dialog_AddPerplexity_ShowHideTooltip" xml:space="preserve">
+    <value>टोकन दिखाएँ/छिपाएँ</value>
+  </data>
+  <data name="Dialog_AddPerplexity_Description" xml:space="preserve">
+    <value>अपना Perplexity WebUI सत्र टोकन पेस्ट करें, या ईमेल सत्यापन के ज़रिए एक टोकन जनरेट करें।</value>
+  </data>
+  <data name="Dialog_AddPerplexity_GenerateToken" xml:space="preserve">
+    <value>टोकन जनरेट करें</value>
+  </data>
+  <data name="Dialog_AddPerplexity_Cancel" xml:space="preserve">
+    <value>रद्द करें</value>
+  </data>
+  <data name="Dialog_AddPerplexity_Save" xml:space="preserve">
+    <value>खाता सहेजें</value>
+  </data>
+
+  <data name="Dialog_GeneratePerplexityToken_Title" xml:space="preserve">
+    <value>Perplexity टोकन जनरेट करें</value>
+  </data>
+  <data name="Dialog_GeneratePerplexityToken_Failed" xml:space="preserve">
+    <value>टोकन जनरेशन विफल रहा</value>
+  </data>
+  <data name="Dialog_GeneratePerplexityToken_Back" xml:space="preserve">
+    <value>वापस</value>
+  </data>
+
+  <data name="Dialog_EditPerplexityLabel_Title" xml:space="preserve">
+    <value>Perplexity खाता लेबल संपादित करें</value>
+  </data>
+  <data name="Dialog_EditPerplexityLabel_LabelLabel" xml:space="preserve">
+    <value>लेबल</value>
+  </data>
+  <data name="Dialog_EditPerplexityLabel_LabelPlaceholder" xml:space="preserve">
+    <value>प्राथमिक</value>
+  </data>
+  <data name="Dialog_EditPerplexityLabel_Cancel" xml:space="preserve">
+    <value>रद्द करें</value>
+  </data>
+  <data name="Dialog_EditPerplexityLabel_Save" xml:space="preserve">
+    <value>सहेजें</value>
+  </data>
+
+  <data name="Dialog_ResetPerplexity_Title" xml:space="preserve">
+    <value>Perplexity खाते रीसेट करें?</value>
+  </data>
+  <data name="Dialog_ResetPerplexity_Description" xml:space="preserve">
+    <value>यह सभी सहेजी गई Perplexity WebUI सत्र टोकन फ़ाइलों का बैकअप लेकर उन्हें हटा देता है।</value>
+  </data>
+  <data name="Dialog_ResetPerplexity_Cancel" xml:space="preserve">
+    <value>रद्द करें</value>
+  </data>
+  <data name="Dialog_ResetPerplexity_Reset" xml:space="preserve">
+    <value>खाते रीसेट करें</value>
+  </data>
+
+  <data name="Dialog_GeminiLogin_Title" xml:space="preserve">
+    <value>Gemini खाता जोड़ें</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode_Text" xml:space="preserve">
+    <value>चुनें कि Gemini को कैसे प्रमाणित होना चाहिए।</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode1_Title" xml:space="preserve">
+    <value>Code Assist</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode1_Desc" xml:space="preserve">
+    <value>GCP प्रोजेक्ट, मैनुअल चयन</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode2_Title" xml:space="preserve">
+    <value>Google One</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode2_Desc" xml:space="preserve">
+    <value>व्यक्तिगत खाता, प्रोजेक्ट स्वतः खोजें</value>
+  </data>
+  <data name="Dialog_GeminiLogin_Cancel" xml:space="preserve">
+    <value>रद्द करें</value>
+  </data>
+  <data name="Dialog_GeminiLogin_Connect" xml:space="preserve">
+    <value>कनेक्ट करें</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       TOAST NOTIFICATIONS
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="Toast_AppUpdateAvailable_Title" xml:space="preserve">
+    <value>Tunnel Agent अपडेट उपलब्ध है</value>
+  </data>
+  <data name="Toast_AppUpdateAvailable_Version" xml:space="preserve">
+    <value>वर्शन {0} डाउनलोड के लिए तैयार है।</value>
+  </data>
+  <data name="Toast_AppUpdateAvailable_Download" xml:space="preserve">
+    <value>डाउनलोड करें</value>
+  </data>
+  <data name="Toast_AppUpdateAvailable_Dismiss" xml:space="preserve">
+    <value>खारिज करें</value>
+  </data>
+
+  <data name="Toast_EngineUpdateAvailable_Title" xml:space="preserve">
+    <value>इंजन अपडेट उपलब्ध है</value>
+  </data>
+  <data name="Toast_EngineUpdateAvailable_Update" xml:space="preserve">
+    <value>अपडेट करें</value>
+  </data>
+  <data name="Toast_EngineUpdateAvailable_Dismiss" xml:space="preserve">
+    <value>खारिज करें</value>
+  </data>
+
+  <data name="Toast_ManagementKeyRepaired" xml:space="preserve">
+    <value>CLIProxyAPI प्रबंधन कुंजी की मरम्मत कर लागू कर दी गई।</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       PROVIDERS VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ProvidersView_TabCLIProxyAPI" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="ProvidersView_TabPerplexity" xml:space="preserve">
+    <value>Perplexity</value>
+  </data>
+  <data name="ProvidersView_Title" xml:space="preserve">
+    <value>सेवाएँ</value>
+  </data>
+  <data name="ProvidersView_CopyEndpointTooltip" xml:space="preserve">
+    <value>एंडपॉइंट कॉपी करें</value>
+  </data>
+  <data name="ProvidersView_StartServerTooltip" xml:space="preserve">
+    <value>सर्वर शुरू करें</value>
+  </data>
+  <data name="ProvidersView_StopServerTooltip" xml:space="preserve">
+    <value>सर्वर रोकें</value>
+  </data>
+  <data name="ProvidersView_ListeningOn" xml:space="preserve">
+    <value>इस पोर्ट पर सुन रहा है </value>
+  </data>
+
+  <data name="ProvidersView_PerplexitySection_Title" xml:space="preserve">
+    <value>Perplexity सत्र खाते</value>
+  </data>
+  <data name="ProvidersView_PerplexitySection_Description" xml:space="preserve">
+    <value>Perplexity WebUI Scraper द्वारा उपयोग किए जाने वाले सहेजे गए WebUI सत्र टोकन।</value>
+  </data>
+  <data name="ProvidersView_PerplexitySection_AddTooltip" xml:space="preserve">
+    <value>खाता जोड़ें</value>
+  </data>
+  <data name="ProvidersView_PerplexitySection_NoAccounts" xml:space="preserve">
+    <value>अभी तक कोई खाता नहीं</value>
+  </data>
+  <data name="ProvidersView_PerplexityAccount_MakeDefault" xml:space="preserve">
+    <value>डिफ़ॉल्ट बनाएँ</value>
+  </data>
+  <data name="ProvidersView_PerplexityAccount_EditLabelTooltip" xml:space="preserve">
+    <value>लेबल संपादित करें</value>
+  </data>
+  <data name="ProvidersView_PerplexityAccount_RemoveTooltip" xml:space="preserve">
+    <value>खाता हटाएँ</value>
+  </data>
+  <data name="ProvidersView_PerplexityAccount_DefaultBadge" xml:space="preserve">
+    <value>डिफ़ॉल्ट</value>
+  </data>
+
+  <data name="ProvidersView_Provider_EnableDisableTooltip" xml:space="preserve">
+    <value>इस खाते को सक्षम / अक्षम करें</value>
+  </data>
+  <data name="ProvidersView_Provider_Disabled" xml:space="preserve">
+    <value>अक्षम</value>
+  </data>
+  <data name="ProvidersView_Provider_Connecting" xml:space="preserve">
+    <value>कनेक्ट हो रहा है…</value>
+  </data>
+  <data name="ProvidersView_Provider_AddAccountTooltip" xml:space="preserve">
+    <value>खाता जोड़ें</value>
+  </data>
+  <data name="ProvidersView_Provider_RemoveAllTooltip" xml:space="preserve">
+    <value>सभी खाते हटाएँ</value>
+  </data>
+  <data name="ProvidersView_Provider_AddAccountButton" xml:space="preserve">
+    <value>खाता जोड़ें</value>
+  </data>
+  <data name="ProvidersView_Provider_RemoveAccountTooltip" xml:space="preserve">
+    <value>खाता हटाएँ</value>
+  </data>
+
+  <data name="ProvidersView_Models_Section" xml:space="preserve">
+    <value>उपलब्ध मॉडल</value>
+  </data>
+  <data name="ProvidersView_Models_Title" xml:space="preserve">
+    <value>उपलब्ध मॉडल</value>
+  </data>
+  <data name="ProvidersView_Models_Description" xml:space="preserve">
+    <value>चल रहे इंजन द्वारा प्रदर्शित मॉडल।</value>
+  </data>
+  <data name="ProvidersView_Models_TotalCount" xml:space="preserve">
+    <value>कुल {0}</value>
+  </data>
+  <data name="ProvidersView_Models_EmptyState" xml:space="preserve">
+    <value>उपलब्ध मॉडल देखने के लिए इंजन शुरू करें</value>
+  </data>
+  <data name="ProvidersView_Models_ModelCount" xml:space="preserve">
+    <value>{0} मॉडल</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       AGENTS VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="AgentsView_Title" xml:space="preserve">
+    <value>एजेंट</value>
+  </data>
+  <data name="AgentsView_Subtitle" xml:space="preserve">
+    <value>प्रत्येक CLI टूल को किसी कनेक्ट किए गए प्रोवाइडर के ज़रिए रूट करें।</value>
+  </data>
+  <data name="AgentsView_ConfigureMultipleTooltip" xml:space="preserve">
+    <value>एकाधिक कॉन्फ़िगर करें</value>
+  </data>
+  <data name="AgentsView_DetectAgentsTooltip" xml:space="preserve">
+    <value>एजेंट का पता लगाएँ</value>
+  </data>
+  <data name="AgentsView_InstalledChip" xml:space="preserve">
+    <value>इंस्टॉल किया गया</value>
+  </data>
+  <data name="AgentsView_ConfiguredChip" xml:space="preserve">
+    <value>कॉन्फ़िगर किया गया</value>
+  </data>
+  <data name="AgentsView_InstalledSection" xml:space="preserve">
+    <value>इंस्टॉल किया गया</value>
+  </data>
+  <data name="AgentsView_NotInstalledSection" xml:space="preserve">
+    <value>इंस्टॉल नहीं किया गया</value>
+  </data>
+  <data name="AgentsView_Agent_ConfiguredBadge" xml:space="preserve">
+    <value>कॉन्फ़िगर किया गया</value>
+  </data>
+  <data name="AgentsView_Agent_InstalledBadge" xml:space="preserve">
+    <value>इंस्टॉल किया गया</value>
+  </data>
+  <data name="AgentsView_Agent_DocsTooltip" xml:space="preserve">
+    <value>दस्तावेज़ देखें</value>
+  </data>
+  <data name="AgentsView_Agent_ConfigureTooltip" xml:space="preserve">
+    <value>कॉन्फ़िगर करें</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       LOGS VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="LogsView_Title" xml:space="preserve">
+    <value>लॉग</value>
+  </data>
+  <data name="LogsView_Subtitle" xml:space="preserve">
+    <value>लोकल प्रॉक्सी के ज़रिए रूट किया गया रिक्वेस्ट ट्रैफ़िक।</value>
+  </data>
+  <data name="LogsView_ExportTooltip" xml:space="preserve">
+    <value>लॉग एक्सपोर्ट करें</value>
+  </data>
+  <data name="LogsView_RefreshTooltip" xml:space="preserve">
+    <value>रीफ़्रेश करें</value>
+  </data>
+  <data name="LogsView_ClearViewTooltip" xml:space="preserve">
+    <value>व्यू साफ़ करें</value>
+  </data>
+  <data name="LogsView_DeleteLogFileTooltip" xml:space="preserve">
+    <value>लॉग फ़ाइल हटाएँ</value>
+  </data>
+  <data name="LogsView_TabRequests" xml:space="preserve">
+    <value>रिक्वेस्ट</value>
+  </data>
+  <data name="LogsView_TabProxyLogs" xml:space="preserve">
+    <value>प्रॉक्सी लॉग</value>
+  </data>
+  <data name="LogsView_Requests_Total" xml:space="preserve">
+    <value>कुल</value>
+  </data>
+  <data name="LogsView_Requests_Success" xml:space="preserve">
+    <value>सफल</value>
+  </data>
+  <data name="LogsView_Requests_AvgTime" xml:space="preserve">
+    <value>औसत समय</value>
+  </data>
+  <data name="LogsView_Requests_ProviderLabel" xml:space="preserve">
+    <value>प्रोवाइडर</value>
+  </data>
+  <data name="LogsView_Requests_SearchPlaceholder" xml:space="preserve">
+    <value>रिक्वेस्ट खोजें...</value>
+  </data>
+  <data name="LogsView_Requests_EmptyTitle" xml:space="preserve">
+    <value>अभी तक कोई रिक्वेस्ट नहीं।</value>
+  </data>
+  <data name="LogsView_Requests_EmptyDescription" xml:space="preserve">
+    <value>प्रॉक्सी शुरू करें और कोई रिक्वेस्ट भेजें।</value>
+  </data>
+  <data name="LogsView_Requests_PageLabel" xml:space="preserve">
+    <value>{1} में से पेज {0}</value>
+  </data>
+  <data name="LogsView_Requests_PrevButton" xml:space="preserve">
+    <value>&lt;- पिछला</value>
+  </data>
+  <data name="LogsView_Requests_NextButton" xml:space="preserve">
+    <value>अगला -&gt;</value>
+  </data>
+
+  <data name="LogsView_ProxyLogs_SearchPlaceholder" xml:space="preserve">
+    <value>लॉग खोजें...</value>
+  </data>
+  <data name="LogsView_ProxyLogs_EmptyTitle" xml:space="preserve">
+    <value>अभी तक कोई लॉग लाइन नहीं।</value>
+  </data>
+  <data name="LogsView_ProxyLogs_EmptyDescription" xml:space="preserve">
+    <value>आउटपुट देखने के लिए प्रॉक्सी शुरू करें।</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       QUOTA VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="QuotaView_Title" xml:space="preserve">
+    <value>कोटा</value>
+  </data>
+  <data name="QuotaView_Subtitle" xml:space="preserve">
+    <value>समर्थित CLIProxyAPI खातों के लिए कोटा उपयोग ट्रैक करें।</value>
+  </data>
+  <data name="QuotaView_RefreshAllTooltip" xml:space="preserve">
+    <value>सभी कोटा प्रोवाइडर रीफ़्रेश करें</value>
+  </data>
+  <data name="QuotaView_NoProviders_Title" xml:space="preserve">
+    <value>कोई कोटा प्रोवाइडर नहीं</value>
+  </data>
+  <data name="QuotaView_NoAccounts_Title" xml:space="preserve">
+    <value>दिखाने के लिए कोई खाता नहीं</value>
+  </data>
+  <data name="QuotaView_Account_RefreshTooltip" xml:space="preserve">
+    <value>कोटा रीफ़्रेश करें</value>
+  </data>
+  <data name="QuotaView_Account_UsageSection" xml:space="preserve">
+    <value>उपयोग</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       ACTIVITY VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ActivityView_Title" xml:space="preserve">
+    <value>हाल की गतिविधि</value>
+  </data>
+  <data name="ActivityView_Subtitle" xml:space="preserve">
+    <value>लोकल प्रॉक्सी द्वारा संभाली गई और कनेक्ट किए गए प्रोवाइडरों को रूट की गई रिक्वेस्ट।</value>
+  </data>
+  <data name="ActivityView_ClearButton" xml:space="preserve">
+    <value>साफ़ करें</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       CONFIGURATION VIEW - GENERAL
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ConfigView_TabGeneral" xml:space="preserve">
+    <value>सामान्य</value>
+  </data>
+  <data name="ConfigView_TabCLIProxyAPI" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_TabPerplexity" xml:space="preserve">
+    <value>Perplexity</value>
+  </data>
+
+  <data name="ConfigView_General_Title" xml:space="preserve">
+    <value>सामान्य</value>
+  </data>
+  <data name="ConfigView_General_Subtitle" xml:space="preserve">
+    <value>ऐप का स्वरूप और स्टार्टअप।</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgentSection" xml:space="preserve">
+    <value>TUNNEL AGENT</value>
+  </data>
+  <data name="ConfigView_General_AppSection" xml:space="preserve">
+    <value>ऐप</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Label" xml:space="preserve">
+    <value>Tunnel Agent</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Installed" xml:space="preserve">
+    <value>इंस्टॉल किया गया: {0}</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Available" xml:space="preserve">
+    <value>{0} उपलब्ध</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Check" xml:space="preserve">
+    <value>जाँचें</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Download" xml:space="preserve">
+    <value>डाउनलोड करें</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_AutoCheck_Label" xml:space="preserve">
+    <value>ऐप अपडेट के लिए स्वतः जाँच करें</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_AutoCheck_Description" xml:space="preserve">
+    <value>स्टार्टअप पर नए Tunnel Agent वर्शन के लिए GitHub जाँचें।</value>
+  </data>
+
+  <data name="ConfigView_General_LaunchAtLogin_Label" xml:space="preserve">
+    <value>लॉगिन पर लॉन्च करें</value>
+  </data>
+  <data name="ConfigView_General_LaunchAtLogin_Description" xml:space="preserve">
+    <value>स्वचालित रूप से शुरू करें और सिस्टम ट्रे में बने रहें।</value>
+  </data>
+  <data name="ConfigView_General_Theme_Label" xml:space="preserve">
+    <value>थीम</value>
+  </data>
+  <data name="ConfigView_General_Theme_Description" xml:space="preserve">
+    <value>सिस्टम थीम का अनुसरण करें या लाइट/डार्क मोड लागू करें।</value>
+  </data>
+  <data name="ConfigView_General_MaskEmails_Label" xml:space="preserve">
+    <value>संवेदनशील जानकारी छिपाएँ</value>
+  </data>
+  <data name="ConfigView_General_MaskEmails_Description" xml:space="preserve">
+    <value>खातों के ईमेल पतों को निजी रखने के लिए उन्हें डॉट्स से बदल देता है।</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       CONFIGURATION VIEW - CLIPROXY
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ConfigView_CLIProxy_Title" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Subtitle" xml:space="preserve">
+    <value>इंजन वर्शन, नेटवर्क, और अपडेट सेटिंग्स।</value>
+  </data>
+  <data name="ConfigView_CLIProxy_UpdateSuccess" xml:space="preserve">
+    <value>सफलतापूर्वक {0} पर अपडेट किया गया</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineSection" xml:space="preserve">
+    <value>इंजन</value>
+  </data>
+  <data name="ConfigView_CLIProxy_SecuritySection" xml:space="preserve">
+    <value>सुरक्षा</value>
+  </data>
+  <data name="ConfigView_CLIProxy_NetworkSection" xml:space="preserve">
+    <value>नेटवर्क</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsSection" xml:space="preserve">
+    <value>लॉग</value>
+  </data>
+
+  <data name="ConfigView_CLIProxy_Engine_Label" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Engine_Installed" xml:space="preserve">
+    <value>इंस्टॉल किया गया: {0}</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Engine_Available" xml:space="preserve">
+    <value>{0} उपलब्ध</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Engine_Check" xml:space="preserve">
+    <value>जाँचें</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Engine_UpdateNow" xml:space="preserve">
+    <value>अभी अपडेट करें</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_Label" xml:space="preserve">
+    <value>इंजन वर्शन</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_Reload" xml:space="preserve">
+    <value>रीलोड करें</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_Install" xml:space="preserve">
+    <value>इंस्टॉल करें</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_Label" xml:space="preserve">
+    <value>पैकेज अखंडता</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_Description" xml:space="preserve">
+    <value>इंस्टॉल से पहले डाउनलोड सत्यापित किए जाते हैं।</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoStart_Label" xml:space="preserve">
+    <value>ऑटो-स्टार्ट</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoStart_Description" xml:space="preserve">
+    <value>ऐप लॉन्च होने पर इस इंजन को स्वचालित रूप से शुरू करें।</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoCheck_Label" xml:space="preserve">
+    <value>अपडेट के लिए स्वतः जाँच करें</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoCheck_Description" xml:space="preserve">
+    <value>स्टार्टअप पर नए इंजन वर्शन के लिए GitHub जाँचें।</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoUpdate_Label" xml:space="preserve">
+    <value>ऑटो-अपडेट</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoUpdate_Description" xml:space="preserve">
+    <value>नए इंजन वर्शन स्वचालित रूप से डाउनलोड और इंस्टॉल करें।</value>
+  </data>
+
+  <data name="ConfigView_CLIProxy_AuthFolder_Label" xml:space="preserve">
+    <value>Auth फ़ाइलों का स्थान</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AuthFolder_Description" xml:space="preserve">
+    <value>OAuth टोकन और कस्टम प्रोवाइडर कुंजियाँ ऐप के auth फ़ोल्डर में संग्रहित होती हैं।</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AuthFolder_Open" xml:space="preserve">
+    <value>फ़ोल्डर खोलें</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ApiKeys_Label" xml:space="preserve">
+    <value>API कुंजियाँ</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ApiKeys_Description" xml:space="preserve">
+    <value>CLIProxyAPI क्लाइंट द्वारा स्वीकृत कुंजियाँ। एजेंट सेटअप डिफ़ॉल्ट कुंजी का उपयोग करता है।</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ApiKeys_Manage" xml:space="preserve">
+    <value>प्रबंधित करें</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ResetCredentials_Label" xml:space="preserve">
+    <value>सभी क्रेडेंशियल रीसेट करें</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ResetCredentials_Description" xml:space="preserve">
+    <value>Tunnel Agent द्वारा प्रबंधित OAuth टोकन और API कुंजियों का बैकअप लेकर उन्हें हटाता है।</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ResetCredentials_Reset" xml:space="preserve">
+    <value>रीसेट करें</value>
+  </data>
+
+  <data name="ConfigView_CLIProxy_RoutingStrategy_Label" xml:space="preserve">
+    <value>रूटिंग रणनीति</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RoutingStrategy_Description" xml:space="preserve">
+    <value>रिक्वेस्ट एकाधिक खातों या कुंजियों में कैसे वितरित की जाती हैं।</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ListenPort_Label" xml:space="preserve">
+    <value>लिसन पोर्ट</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ListenPort_Description" xml:space="preserve">
+    <value>केवल localhost। लागू करने के लिए रीस्टार्ट आवश्यक है।</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ListenPort_Reset" xml:space="preserve">
+    <value>रीसेट करें</value>
+  </data>
+
+  <data name="ConfigView_CLIProxy_LogsAutoRefresh_Label" xml:space="preserve">
+    <value>ऑटो-रीफ़्रेश</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsAutoRefresh_Description" xml:space="preserve">
+    <value>लॉग स्क्रीन में नई लॉग प्रविष्टियों के लिए स्वचालित रूप से पोल करें।</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsRefreshInterval_Label" xml:space="preserve">
+    <value>रीफ़्रेश अंतराल</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsRefreshInterval_Description" xml:space="preserve">
+    <value>नई प्रविष्टियों की जाँच कितनी बार करनी है।</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsRefreshInterval_Seconds" xml:space="preserve">
+    <value>{0} सेकंड</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       CONFIGURATION VIEW - PERPLEXITY
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ConfigView_Perplexity_Title" xml:space="preserve">
+    <value>Perplexity</value>
+  </data>
+  <data name="ConfigView_Perplexity_Subtitle" xml:space="preserve">
+    <value>इंजन वर्शन, पोर्ट, और सत्र सेटिंग्स।</value>
+  </data>
+  <data name="ConfigView_Perplexity_UpdateSuccess" xml:space="preserve">
+    <value>सफलतापूर्वक {0} पर अपडेट किया गया</value>
+  </data>
+
+  <data name="ConfigView_Perplexity_Engine_Label" xml:space="preserve">
+    <value>Perplexity WebUI Scraper</value>
+  </data>
+  <data name="ConfigView_Perplexity_Engine_Installed" xml:space="preserve">
+    <value>इंस्टॉल किया गया: {0}</value>
+  </data>
+  <data name="ConfigView_Perplexity_Engine_Available" xml:space="preserve">
+    <value>{0} उपलब्ध</value>
+  </data>
+  <data name="ConfigView_Perplexity_Engine_Check" xml:space="preserve">
+    <value>जाँचें</value>
+  </data>
+  <data name="ConfigView_Perplexity_Engine_UpdateNow" xml:space="preserve">
+    <value>अभी अपडेट करें</value>
+  </data>
+
+  <data name="ConfigView_Perplexity_AccountsFolder_Label" xml:space="preserve">
+    <value>खातों का स्थान</value>
+  </data>
+  <data name="ConfigView_Perplexity_AccountsFolder_Description" xml:space="preserve">
+    <value>सत्र टोकन फ़ाइलें ऐप सेटिंग्स फ़ोल्डर में perplexity-accounts/ के अंतर्गत संग्रहित होती हैं।</value>
+  </data>
+  <data name="ConfigView_Perplexity_AccountsFolder_Open" xml:space="preserve">
+    <value>फ़ोल्डर खोलें</value>
+  </data>
+  <data name="ConfigView_Perplexity_ResetAccounts_Label" xml:space="preserve">
+    <value>सत्र खाते रीसेट करें</value>
+  </data>
+  <data name="ConfigView_Perplexity_ResetAccounts_Description" xml:space="preserve">
+    <value>सभी सहेजे गए Perplexity WebUI सत्र टोकन हटाता है।</value>
+  </data>
+  <data name="ConfigView_Perplexity_ResetAccounts_Reset" xml:space="preserve">
+    <value>रीसेट करें</value>
+  </data>
+
+  <data name="ConfigView_Perplexity_ListenPort_Label" xml:space="preserve">
+    <value>लिसन पोर्ट</value>
+  </data>
+  <data name="ConfigView_Perplexity_ListenPort_Description" xml:space="preserve">
+    <value>केवल localhost। लागू करने के लिए रीस्टार्ट आवश्यक है।</value>
+  </data>
+  <data name="ConfigView_Perplexity_ListenPort_Reset" xml:space="preserve">
+    <value>रीसेट करें</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       MISCELLANEOUS
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="Toast_NoUpdateAvailable" xml:space="preserve">
+    <value>कोई अपडेट उपलब्ध नहीं। आप नवीनतम वर्शन पर हैं।</value>
+  </data>
+  <data name="Toast_AppNoUpdateAvailable" xml:space="preserve">
+    <value>Tunnel Agent अद्यतित है।</value>
+  </data>
+  <data name="Toast_Downloading" xml:space="preserve">
+    <value>डाउनलोड हो रहा है… {0}%</value>
+  </data>
+
+  <data name="ConfigView_General_Language_Label" xml:space="preserve">
+    <value>भाषा</value>
+  </data>
+  <data name="ConfigView_General_Language_Description" xml:space="preserve">
+    <value>प्रदर्शन भाषा चुनें।</value>
+  </data>
+  <data name="Dialog_Common_Close" xml:space="preserve">
+    <value>बंद करें</value>
+  </data>
+  <data name="Dialog_Common_Cancel" xml:space="preserve">
+    <value>रद्द करें</value>
+  </data>
+  <data name="QuotaProvidersView_Title" xml:space="preserve">
+    <value>कोटा प्रोवाइडर</value>
+  </data>
+  <data name="QuotaProvidersView_Subtitle" xml:space="preserve">
+    <value>लोकल कोटा ट्रैकिंग वाले स्वतंत्र खाते।</value>
+  </data>
+  <data name="QuotaProvidersView_ScanTooltip" xml:space="preserve">
+    <value>कोटा प्रोवाइडर के लिए स्कैन करें</value>
+  </data>
+  <data name="QuotaProvidersView_DetectedChip" xml:space="preserve">
+    <value>पता चला</value>
+  </data>
+  <data name="QuotaProvidersView_Scanning" xml:space="preserve">
+    <value>स्कैन हो रहा है…</value>
+  </data>
+  <data name="QuotaProvidersView_NotDetected" xml:space="preserve">
+    <value>पता नहीं चला। इसे इंस्टॉल करें या साइन इन करें</value>
+  </data>
+  <data name="TrayUsagePopup_Title" xml:space="preserve">
+    <value>Tunnel Agent — उपयोग</value>
+  </data>
+  <data name="TrayUsagePopup_RefreshQuotaTooltip" xml:space="preserve">
+    <value>कोटा रीफ़्रेश करें</value>
+  </data>
+  <data name="TrayUsagePopup_OpenAppTooltip" xml:space="preserve">
+    <value>ऐप खोलें</value>
+  </data>
+  <data name="TrayUsagePopup_Home" xml:space="preserve">
+    <value>होम</value>
+  </data>
+  <data name="TrayUsagePopup_HomeSubtitle" xml:space="preserve">
+    <value>एक नज़र में इंजन स्थिति और उपयोग</value>
+  </data>
+  <data name="TrayUsagePopup_Usage" xml:space="preserve">
+    <value>उपयोग</value>
+  </data>
+  <data name="TrayUsagePopup_UsageSubtitle" xml:space="preserve">
+    <value>एक नज़र में AI सब्सक्रिप्शन कोटा</value>
+  </data>
+  <data name="TrayUsagePopup_ListeningOnPort" xml:space="preserve">
+    <value>इस पोर्ट पर सुन रहा है </value>
+  </data>
+  <data name="TrayUsagePopup_StartTooltip" xml:space="preserve">
+    <value>शुरू करें</value>
+  </data>
+  <data name="TrayUsagePopup_StopTooltip" xml:space="preserve">
+    <value>रोकें</value>
+  </data>
+  <data name="TrayUsagePopup_RestartTooltip" xml:space="preserve">
+    <value>रीस्टार्ट करें</value>
+  </data>
+  <data name="TrayUsagePopup_CopyEndpointTooltip" xml:space="preserve">
+    <value>एंडपॉइंट कॉपी करें</value>
+  </data>
+  <data name="TrayUsagePopup_RefreshAllTooltip" xml:space="preserve">
+    <value>सभी रीफ़्रेश करें</value>
+  </data>
+  <data name="TrayUsagePopup_NoAccountsToShow" xml:space="preserve">
+    <value>दिखाने के लिए कोई खाता नहीं</value>
+  </data>
+  <data name="TrayUsagePopup_ConfigurationTooltip" xml:space="preserve">
+    <value>कॉन्फ़िगरेशन</value>
+  </data>
+  <data name="AgentConfigOverlay_AgentsSectionLabel" xml:space="preserve">
+    <value>एजेंट</value>
+  </data>
+  <data name="AgentConfigOverlay_ConfiguredChip" xml:space="preserve">
+    <value>कॉन्फ़िगर किया गया</value>
+  </data>
+  <data name="AgentConfigOverlay_InstalledChip" xml:space="preserve">
+    <value>इंस्टॉल किया गया</value>
+  </data>
+  <data name="AgentConfigOverlay_NotInstalledAgentsHint" xml:space="preserve">
+    <value>{0} एजेंट इंस्टॉल नहीं किए गए — कॉन्फ़िगर करने के लिए उन्हें इंस्टॉल करें।</value>
+  </data>
+  <data name="AgentConfigOverlay_ConfigModeSectionLabel" xml:space="preserve">
+    <value>कॉन्फ़िग मोड</value>
+  </data>
+  <data name="AgentConfigOverlay_AutomaticModeButton" xml:space="preserve">
+    <value>स्वचालित</value>
+  </data>
+  <data name="AgentConfigOverlay_ManualModeButton" xml:space="preserve">
+    <value>मैनुअल</value>
+  </data>
+  <data name="AgentConfigOverlay_AutomaticModeDescription" xml:space="preserve">
+    <value>कॉन्फ़िग फ़ाइलें सीधे लिखता है। किसी भी बदलाव से पहले बैकअप बनाया जाता है।</value>
+  </data>
+  <data name="AgentConfigOverlay_ManualModeDescription" xml:space="preserve">
+    <value>कॉन्फ़िग का पूर्वावलोकन करें और इसे मैन्युअल रूप से लक्षित स्थान पर कॉपी करें।</value>
+  </data>
+  <data name="AgentConfigOverlay_AmpAccessTokenLabel" xml:space="preserve">
+    <value>Amp ऐक्सेस टोकन</value>
+  </data>
+  <data name="AgentConfigOverlay_AmpAccessTokenWatermark" xml:space="preserve">
+    <value>your-amp-access-token</value>
+  </data>
+  <data name="AgentConfigOverlay_ShowHideKeyTooltip" xml:space="preserve">
+    <value>कुंजी दिखाएँ/छिपाएँ</value>
+  </data>
+  <data name="AgentConfigOverlay_AmpAccessTokenHelp" xml:space="preserve">
+    <value>Amp CLI को प्रमाणित करने के लिए उपयोग किया जाता है। इसे ampcode.com/settings से प्राप्त करें</value>
+  </data>
+  <data name="AgentConfigOverlay_ModelsEmptyState" xml:space="preserve">
+    <value>उपलब्ध मॉडल लोड करने के लिए कोई इंजन शुरू करें।</value>
+  </data>
+  <data name="AgentConfigOverlay_SearchModelsWatermark" xml:space="preserve">
+    <value>मॉडल खोजें</value>
+  </data>
+  <data name="AgentConfigOverlay_SelectAllModels" xml:space="preserve">
+    <value>सभी चुनें</value>
+  </data>
+  <data name="AgentConfigOverlay_NoModelSearchResults" xml:space="preserve">
+    <value>आपकी खोज से कोई मॉडल मेल नहीं खाता।</value>
+  </data>
+  <data name="AgentConfigOverlay_ProxyEndpointSectionLabel" xml:space="preserve">
+    <value>प्रॉक्सी एंडपॉइंट</value>
+  </data>
+  <data name="AgentConfigOverlay_ConfigPreviewSectionLabel" xml:space="preserve">
+    <value>कॉन्फ़िग पूर्वावलोकन</value>
+  </data>
+  <data name="AgentConfigOverlay_CancelButton" xml:space="preserve">
+    <value>रद्द करें</value>
+  </data>
+  <data name="AgentConfigOverlay_CopyAllButton" xml:space="preserve">
+    <value>सभी कॉपी करें</value>
+  </data>
+  <data name="AgentConfigOverlay_DoneButton" xml:space="preserve">
+    <value>हो गया</value>
+  </data>
+  <data name="ApiKeysOverlay_Title" xml:space="preserve">
+    <value>CLIProxyAPI कुंजियाँ</value>
+  </data>
+  <data name="ApiKeysOverlay_Description" xml:space="preserve">
+    <value>CLIProxyAPI क्लाइंट द्वारा स्वीकृत कुंजियाँ। एजेंट सेटअप डिफ़ॉल्ट कुंजी का उपयोग करता है; बिना auth के लिए खाली छोड़ें।</value>
+  </data>
+  <data name="ApiKeysOverlay_DefaultChip" xml:space="preserve">
+    <value>डिफ़ॉल्ट</value>
+  </data>
+  <data name="ApiKeysOverlay_UseButton" xml:space="preserve">
+    <value>उपयोग करें</value>
+  </data>
+  <data name="ApiKeysOverlay_RemoveKeyTooltip" xml:space="preserve">
+    <value>कुंजी हटाएँ</value>
+  </data>
+  <data name="ApiKeysOverlay_AddKeyLabel" xml:space="preserve">
+    <value>कुंजी जोड़ें</value>
+  </data>
+  <data name="ApiKeysOverlay_ShowHideKeyTooltip" xml:space="preserve">
+    <value>कुंजी दिखाएँ/छिपाएँ</value>
+  </data>
+  <data name="ApiKeysOverlay_CloseButton" xml:space="preserve">
+    <value>बंद करें</value>
+  </data>
+  <data name="ApiKeysOverlay_AddKeyButton" xml:space="preserve">
+    <value>कुंजी जोड़ें</value>
+  </data>
+  <data name="Agent_claude-code_Description" xml:space="preserve">
+    <value>Anthropic का आधिकारिक CLI कोडिंग एजेंट।</value>
+  </data>
+  <data name="Agent_codex_Description" xml:space="preserve">
+    <value>OpenAI Codex कमांड-लाइन इंटरफ़ेस।</value>
+  </data>
+  <data name="Agent_gemini-cli_Description" xml:space="preserve">
+    <value>Google Gemini CLI कोडिंग एजेंट।</value>
+  </data>
+  <data name="Agent_amp_Description" xml:space="preserve">
+    <value>Sourcegraph का Amp कोडिंग असिस्टेंट।</value>
+  </data>
+  <data name="Agent_opencode_Description" xml:space="preserve">
+    <value>ओपन-सोर्स AI कोडिंग एजेंट।</value>
+  </data>
+  <data name="Agent_aider_Description" xml:space="preserve">
+    <value>टर्मिनल में AI पेयर प्रोग्रामिंग। pip के ज़रिए इंस्टॉल करें।</value>
+  </data>
+  <data name="Agent_pi_Description" xml:space="preserve">
+    <value>pi.dev द्वारा Pi कोडिंग एजेंट।</value>
+  </data>
+  <data name="Agent_factory-droid_Description" xml:space="preserve">
+    <value>Factory का AI कोडिंग एजेंट।</value>
+  </data>
+  <data name="AgentsView_Agent_ConfigureButton" xml:space="preserve">
+    <value>कॉन्फ़िगर करें</value>
+  </data>
+  <data name="AgentsView_Agent_ReconfigureButton" xml:space="preserve">
+    <value>पुनः कॉन्फ़िगर करें</value>
+  </data>
+  <data name="Provider_cliproxyapi_Description" xml:space="preserve">
+    <value>OAuth और OpenAI-संगत अपस्ट्रीम प्रोवाइडरों के लिए एकीकृत प्रॉक्सी।</value>
+  </data>
+  <data name="Provider_perplexity-webui-scraper_Description" xml:space="preserve">
+    <value>Perplexity WebUI सत्रों द्वारा समर्थित OpenAI-संगत लोकल API।</value>
+  </data>
+  <data name="ProvidersView_Provider_ConnectedAccountSingular" xml:space="preserve">
+    <value>{0} कनेक्ट किया गया खाता</value>
+  </data>
+  <data name="ProvidersView_Provider_ConnectedAccountPlural" xml:space="preserve">
+    <value>{0} कनेक्ट किए गए खाते</value>
+  </data>
+  <data name="AgentConfigOverlay_BulkTitle" xml:space="preserve">
+    <value>एजेंट कॉन्फ़िगर करें</value>
+  </data>
+  <data name="AgentConfigOverlay_SingleTitle" xml:space="preserve">
+    <value>{0} कॉन्फ़िगर करें</value>
+  </data>
+  <data name="AgentConfigOverlay_SingleFallbackTitle" xml:space="preserve">
+    <value>एजेंट कॉन्फ़िगर करें</value>
+  </data>
+  <data name="AgentConfigOverlay_BulkDescription" xml:space="preserve">
+    <value>इंस्टॉल किए गए एजेंट चुनें, फिर साझा कॉन्फ़िग लागू करें।</value>
+  </data>
+  <data name="AgentConfigOverlay_ApplyButton" xml:space="preserve">
+    <value>लागू करें</value>
+  </data>
+  <data name="AgentConfigOverlay_ApplySelectedButton" xml:space="preserve">
+    <value>लागू करें ({0})</value>
+  </data>
+  <data name="Quota_ResetInNow" xml:space="preserve">
+    <value>अभी रीसेट होता है</value>
+  </data>
+  <data name="Quota_ResetInDaysHours" xml:space="preserve">
+    <value>{0}दि {1}घं में रीसेट होता है</value>
+  </data>
+  <data name="Quota_ResetInHoursMinutes" xml:space="preserve">
+    <value>{0}घं {1}मि में रीसेट होता है</value>
+  </data>
+  <data name="Quota_ResetInMinutes" xml:space="preserve">
+    <value>{0}मि में रीसेट होता है</value>
+  </data>
+  <data name="AgentConfigOverlay_ModelsSelectedLabel" xml:space="preserve">
+    <value>{1} में से {0} मॉडल चुने गए</value>
+  </data>
+  <data name="LogsView_Requests_AllProviders" xml:space="preserve">
+    <value>सभी प्रोवाइडर</value>
+  </data>
+  <data name="ConfigView_General_Theme_System" xml:space="preserve">
+    <value>सिस्टम</value>
+  </data>
+  <data name="ConfigView_General_Theme_Light" xml:space="preserve">
+    <value>लाइट</value>
+  </data>
+  <data name="ConfigView_General_Theme_Dark" xml:space="preserve">
+    <value>डार्क</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RoutingStrategy_RoundRobin" xml:space="preserve">
+    <value>Round Robin (समान वितरण)</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RoutingStrategy_FillFirst" xml:space="preserve">
+    <value>Fill First (सीमा तक पहले खाते का उपयोग करें)</value>
+  </data>
+  <data name="ConfigView_PortConflict" xml:space="preserve">
+    <value>पोर्ट {0} पहले से {1} द्वारा उपयोग में है। कोई दूसरा पोर्ट चुनें।</value>
+  </data>
+  <data name="ConfigView_OtherEngine" xml:space="preserve">
+    <value>अन्य इंजन</value>
+  </data>
+  <data name="ConfigView_ListenPort_Apply" xml:space="preserve">
+    <value>लागू करें</value>
+  </data>
+</root>

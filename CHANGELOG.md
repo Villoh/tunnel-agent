@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Additional UI languages** (`Resources/Strings.it-IT.resx`, `Strings.uk-UA.resx`, `Strings.ru-RU.resx`, `Strings.hi-IN.resx`, `Strings.ko-KR.resx`, `Strings.tr-TR.resx`, `Services/LocalizationService.cs`): added Italian, Ukrainian, Russian, Hindi, Korean, and Turkish translations to the **Language** combo, bringing the localized UI to 14 languages.
+
 - **Runtime localization and language selector** (`Resources/Strings*.resx`, `Services/LocalizationService.cs`, `Services/LocExtension.cs`, `Views/*.axaml`): added runtime localization across the Avalonia UI for English, Spanish, Portuguese (Portugal), French, German, Simplified Chinese, Japanese, and Arabic, including the new **Language** combo under Configuration → General → Theme, persisted language preference, localized formatted strings, provider/agent descriptions, tray popup, overlays, dialogs, and quota/provider views.
 
 ### Changed

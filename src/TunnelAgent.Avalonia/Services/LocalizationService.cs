@@ -34,11 +34,17 @@ public sealed class LocalizationService : INotifyPropertyChanged
         new LanguageOption("en-US", "English"),
         new LanguageOption("es-ES", "Español"),
         new LanguageOption("pt-PT", "Português"),
+        new LanguageOption("it-IT", "Italiano"),
         new LanguageOption("fr-FR", "Français"),
         new LanguageOption("de-DE", "Deutsch"),
         new LanguageOption("zh-CN", "简体中文"),
         new LanguageOption("ja-JP", "日本語"),
         new LanguageOption("ar-SA", "العربية"),
+        new LanguageOption("uk-UA", "Українська"),
+        new LanguageOption("ru-RU", "Русский"),
+        new LanguageOption("hi-IN", "हिन्दी"),
+        new LanguageOption("ko-KR", "한국어"),
+        new LanguageOption("tr-TR", "Türkçe"),
     ];
 
     public static IReadOnlyList<ThemeModeOption> SupportedThemeModes { get; } =

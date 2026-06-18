@@ -1,0 +1,1064 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- Microsoft ResX File, format version 2.0 -->
+  <!-- To add a localized resource simply add an entry to this file and recompile. -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata" type="xsd:string" minOccurs="0" />
+          <xsd:element name="assembly" type="xsd:string" minOccurs="0" />
+          <xsd:element name="data" type="xsd:string" minOccurs="0" msdata:Attributes="xml:space preserve" />
+          <xsd:element name="resheader" type="xsd:string" minOccurs="0" />
+        </xsd:choice>
+        <xsd:attribute name="version" type="xsd:decimal" use="required" />
+      </xsd:complexType>
+    </xsd:element>
+    <xsd:element name="resheader">
+      <xsd:complexType>
+        <xsd:sequence>
+          <xsd:element name="value" type="xsd:string" minOccurs="0" />
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" use="required" />
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       MAIN WINDOW - Window Title & Toolbar
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="App_Title" xml:space="preserve">
+    <value>Tunnel Agent</value>
+  </data>
+  <data name="MainWindow_MinimizeTooltip" xml:space="preserve">
+    <value>Simge durumuna küçült</value>
+  </data>
+  <data name="MainWindow_MaximizeTooltip" xml:space="preserve">
+    <value>Büyüt / Geri yükle</value>
+  </data>
+  <data name="MainWindow_CloseTooltip" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+
+  <!-- Sidebar Navigation -->
+  <data name="Sidebar_Logo_App" xml:space="preserve">
+    <value>Tunnel</value>
+  </data>
+  <data name="Sidebar_Logo_Agent" xml:space="preserve">
+    <value>Agent</value>
+  </data>
+  <data name="Sidebar_ToggleSidebarTooltip" xml:space="preserve">
+    <value>Kenar çubuğunu aç/kapat</value>
+  </data>
+  <data name="Sidebar_Providers" xml:space="preserve">
+    <value>Sağlayıcılar</value>
+  </data>
+  <data name="Sidebar_Quota" xml:space="preserve">
+    <value>Kota</value>
+  </data>
+  <data name="Sidebar_Agents" xml:space="preserve">
+    <value>Aracılar</value>
+  </data>
+  <data name="Sidebar_Logs" xml:space="preserve">
+    <value>Günlükler</value>
+  </data>
+  <data name="Sidebar_Configuration" xml:space="preserve">
+    <value>Yapılandırma</value>
+  </data>
+  <data name="Sidebar_Status" xml:space="preserve">
+    <value>DURUM</value>
+  </data>
+  <data name="Sidebar_CLIProxyAPI" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="Sidebar_Perplexity" xml:space="preserve">
+    <value>Perplexity</value>
+  </data>
+  <data name="Sidebar_Version" xml:space="preserve">
+    <value>v{0} · MIT</value>
+  </data>
+  <data name="Sidebar_ReportIssue" xml:space="preserve">
+    <value>Sorun bildir</value>
+  </data>
+  <data name="Sidebar_ToggleThemeTooltip" xml:space="preserve">
+    <value>Açık / koyu modu değiştir</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       MAIN WINDOW - Dialogs
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="Dialog_DeleteLogFile_Title" xml:space="preserve">
+    <value>Günlük dosyası silinsin mi?</value>
+  </data>
+  <data name="Dialog_DeleteLogFile_Description" xml:space="preserve">
+    <value>Bu işlem, diskteki CLIProxyAPI günlük dosyasını kalıcı olarak siler. Görünüm temizlenir ve proxy çalıştıkça yeni girdiler görünür.</value>
+  </data>
+  <data name="Dialog_DeleteLogFile_Cancel" xml:space="preserve">
+    <value>İptal</value>
+  </data>
+  <data name="Dialog_DeleteLogFile_Delete" xml:space="preserve">
+    <value>Günlük dosyasını sil</value>
+  </data>
+
+  <data name="Dialog_ResetCredentials_Title" xml:space="preserve">
+    <value>Tüm kimlik bilgileri sıfırlansın mı?</value>
+  </data>
+  <data name="Dialog_ResetCredentials_Description" xml:space="preserve">
+    <value>Bu işlem, Tunnel Agent tarafından yönetilen OAuth belirteçlerini ve özel sağlayıcı anahtarlarını yedekler ve kaldırır. Auth klasöründeki diğer JSON dosyaları korunur.</value>
+  </data>
+  <data name="Dialog_ResetCredentials_Cancel" xml:space="preserve">
+    <value>İptal</value>
+  </data>
+  <data name="Dialog_ResetCredentials_Reset" xml:space="preserve">
+    <value>Kimlik bilgilerini sıfırla</value>
+  </data>
+
+  <data name="Dialog_AddAccount_Title" xml:space="preserve">
+    <value>Hesap ekle — {0}</value>
+  </data>
+  <data name="Dialog_AddAccount_BaseUrlLabel" xml:space="preserve">
+    <value>Temel URL</value>
+  </data>
+  <data name="Dialog_AddAccount_BaseUrlPlaceholder" xml:space="preserve">
+    <value>https://api.example.com/v1</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyLabel" xml:space="preserve">
+    <value>API Anahtarı</value>
+  </data>
+  <data name="Dialog_AddAccount_ApiKeyPlaceholder" xml:space="preserve">
+    <value>sk-...</value>
+  </data>
+  <data name="Dialog_AddAccount_ShowHideTooltip" xml:space="preserve">
+    <value>Anahtarı göster/gizle</value>
+  </data>
+  <data name="Dialog_AddAccount_LabelLabel" xml:space="preserve">
+    <value>Etiket (isteğe bağlı)</value>
+  </data>
+  <data name="Dialog_AddAccount_LabelPlaceholder" xml:space="preserve">
+    <value>Hesabım</value>
+  </data>
+  <data name="Dialog_AddAccount_Cancel" xml:space="preserve">
+    <value>İptal</value>
+  </data>
+  <data name="Dialog_AddAccount_Add" xml:space="preserve">
+    <value>Hesap Ekle</value>
+  </data>
+
+  <data name="Dialog_AddPerplexity_Title" xml:space="preserve">
+    <value>Perplexity hesabı ekle</value>
+  </data>
+  <data name="Dialog_AddPerplexity_LabelLabel" xml:space="preserve">
+    <value>Etiket (isteğe bağlı)</value>
+  </data>
+  <data name="Dialog_AddPerplexity_LabelPlaceholder" xml:space="preserve">
+    <value>Birincil</value>
+  </data>
+  <data name="Dialog_AddPerplexity_TokenLabel" xml:space="preserve">
+    <value>Oturum belirteci</value>
+  </data>
+  <data name="Dialog_AddPerplexity_TokenPlaceholder" xml:space="preserve">
+    <value>pplx-session-token</value>
+  </data>
+  <data name="Dialog_AddPerplexity_ShowHideTooltip" xml:space="preserve">
+    <value>Belirteci göster/gizle</value>
+  </data>
+  <data name="Dialog_AddPerplexity_Description" xml:space="preserve">
+    <value>Perplexity WebUI oturum belirtecinizi yapıştırın veya e-posta doğrulamasıyla bir tane oluşturun.</value>
+  </data>
+  <data name="Dialog_AddPerplexity_GenerateToken" xml:space="preserve">
+    <value>Belirteç Oluştur</value>
+  </data>
+  <data name="Dialog_AddPerplexity_Cancel" xml:space="preserve">
+    <value>İptal</value>
+  </data>
+  <data name="Dialog_AddPerplexity_Save" xml:space="preserve">
+    <value>Hesabı Kaydet</value>
+  </data>
+
+  <data name="Dialog_GeneratePerplexityToken_Title" xml:space="preserve">
+    <value>Perplexity belirteci oluştur</value>
+  </data>
+  <data name="Dialog_GeneratePerplexityToken_Failed" xml:space="preserve">
+    <value>Belirteç oluşturma başarısız oldu</value>
+  </data>
+  <data name="Dialog_GeneratePerplexityToken_Back" xml:space="preserve">
+    <value>Geri</value>
+  </data>
+
+  <data name="Dialog_EditPerplexityLabel_Title" xml:space="preserve">
+    <value>Perplexity hesap etiketini düzenle</value>
+  </data>
+  <data name="Dialog_EditPerplexityLabel_LabelLabel" xml:space="preserve">
+    <value>Etiket</value>
+  </data>
+  <data name="Dialog_EditPerplexityLabel_LabelPlaceholder" xml:space="preserve">
+    <value>Birincil</value>
+  </data>
+  <data name="Dialog_EditPerplexityLabel_Cancel" xml:space="preserve">
+    <value>İptal</value>
+  </data>
+  <data name="Dialog_EditPerplexityLabel_Save" xml:space="preserve">
+    <value>Kaydet</value>
+  </data>
+
+  <data name="Dialog_ResetPerplexity_Title" xml:space="preserve">
+    <value>Perplexity hesapları sıfırlansın mı?</value>
+  </data>
+  <data name="Dialog_ResetPerplexity_Description" xml:space="preserve">
+    <value>Bu işlem, kaydedilen tüm Perplexity WebUI oturum belirteci dosyalarını yedekler ve kaldırır.</value>
+  </data>
+  <data name="Dialog_ResetPerplexity_Cancel" xml:space="preserve">
+    <value>İptal</value>
+  </data>
+  <data name="Dialog_ResetPerplexity_Reset" xml:space="preserve">
+    <value>Hesapları sıfırla</value>
+  </data>
+
+  <data name="Dialog_GeminiLogin_Title" xml:space="preserve">
+    <value>Gemini hesabı ekle</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode_Text" xml:space="preserve">
+    <value>Gemini'nin nasıl kimlik doğrulaması yapacağını seçin.</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode1_Title" xml:space="preserve">
+    <value>Code Assist</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode1_Desc" xml:space="preserve">
+    <value>GCP projesi, manuel seçim</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode2_Title" xml:space="preserve">
+    <value>Google One</value>
+  </data>
+  <data name="Dialog_GeminiLogin_SelectMode2_Desc" xml:space="preserve">
+    <value>Kişisel hesap, projeyi otomatik keşfet</value>
+  </data>
+  <data name="Dialog_GeminiLogin_Cancel" xml:space="preserve">
+    <value>İptal</value>
+  </data>
+  <data name="Dialog_GeminiLogin_Connect" xml:space="preserve">
+    <value>Bağlan</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       TOAST NOTIFICATIONS
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="Toast_AppUpdateAvailable_Title" xml:space="preserve">
+    <value>Tunnel Agent güncellemesi mevcut</value>
+  </data>
+  <data name="Toast_AppUpdateAvailable_Version" xml:space="preserve">
+    <value>{0} sürümü indirilmeye hazır.</value>
+  </data>
+  <data name="Toast_AppUpdateAvailable_Download" xml:space="preserve">
+    <value>İndir</value>
+  </data>
+  <data name="Toast_AppUpdateAvailable_Dismiss" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+
+  <data name="Toast_EngineUpdateAvailable_Title" xml:space="preserve">
+    <value>Motor güncellemesi mevcut</value>
+  </data>
+  <data name="Toast_EngineUpdateAvailable_Update" xml:space="preserve">
+    <value>Güncelle</value>
+  </data>
+  <data name="Toast_EngineUpdateAvailable_Dismiss" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+
+  <data name="Toast_ManagementKeyRepaired" xml:space="preserve">
+    <value>CLIProxyAPI yönetim anahtarı onarıldı ve uygulandı.</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       PROVIDERS VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ProvidersView_TabCLIProxyAPI" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="ProvidersView_TabPerplexity" xml:space="preserve">
+    <value>Perplexity</value>
+  </data>
+  <data name="ProvidersView_Title" xml:space="preserve">
+    <value>Hizmetler</value>
+  </data>
+  <data name="ProvidersView_CopyEndpointTooltip" xml:space="preserve">
+    <value>Uç noktayı kopyala</value>
+  </data>
+  <data name="ProvidersView_StartServerTooltip" xml:space="preserve">
+    <value>Sunucuyu başlat</value>
+  </data>
+  <data name="ProvidersView_StopServerTooltip" xml:space="preserve">
+    <value>Sunucuyu durdur</value>
+  </data>
+  <data name="ProvidersView_ListeningOn" xml:space="preserve">
+    <value>Şu portu dinliyor: </value>
+  </data>
+
+  <data name="ProvidersView_PerplexitySection_Title" xml:space="preserve">
+    <value>Perplexity oturum hesapları</value>
+  </data>
+  <data name="ProvidersView_PerplexitySection_Description" xml:space="preserve">
+    <value>Perplexity WebUI Scraper tarafından kullanılan kaydedilmiş WebUI oturum belirteçleri.</value>
+  </data>
+  <data name="ProvidersView_PerplexitySection_AddTooltip" xml:space="preserve">
+    <value>Hesap ekle</value>
+  </data>
+  <data name="ProvidersView_PerplexitySection_NoAccounts" xml:space="preserve">
+    <value>Henüz hesap yok</value>
+  </data>
+  <data name="ProvidersView_PerplexityAccount_MakeDefault" xml:space="preserve">
+    <value>Varsayılan yap</value>
+  </data>
+  <data name="ProvidersView_PerplexityAccount_EditLabelTooltip" xml:space="preserve">
+    <value>Etiketi düzenle</value>
+  </data>
+  <data name="ProvidersView_PerplexityAccount_RemoveTooltip" xml:space="preserve">
+    <value>Hesabı kaldır</value>
+  </data>
+  <data name="ProvidersView_PerplexityAccount_DefaultBadge" xml:space="preserve">
+    <value>varsayılan</value>
+  </data>
+
+  <data name="ProvidersView_Provider_EnableDisableTooltip" xml:space="preserve">
+    <value>Bu hesabı etkinleştir / devre dışı bırak</value>
+  </data>
+  <data name="ProvidersView_Provider_Disabled" xml:space="preserve">
+    <value>devre dışı</value>
+  </data>
+  <data name="ProvidersView_Provider_Connecting" xml:space="preserve">
+    <value>bağlanıyor…</value>
+  </data>
+  <data name="ProvidersView_Provider_AddAccountTooltip" xml:space="preserve">
+    <value>Hesap ekle</value>
+  </data>
+  <data name="ProvidersView_Provider_RemoveAllTooltip" xml:space="preserve">
+    <value>Tüm hesapları kaldır</value>
+  </data>
+  <data name="ProvidersView_Provider_AddAccountButton" xml:space="preserve">
+    <value>Hesap Ekle</value>
+  </data>
+  <data name="ProvidersView_Provider_RemoveAccountTooltip" xml:space="preserve">
+    <value>Hesabı kaldır</value>
+  </data>
+
+  <data name="ProvidersView_Models_Section" xml:space="preserve">
+    <value>KULLANILABİLİR MODELLER</value>
+  </data>
+  <data name="ProvidersView_Models_Title" xml:space="preserve">
+    <value>Kullanılabilir modeller</value>
+  </data>
+  <data name="ProvidersView_Models_Description" xml:space="preserve">
+    <value>Çalışan motor tarafından sunulan modeller.</value>
+  </data>
+  <data name="ProvidersView_Models_TotalCount" xml:space="preserve">
+    <value>toplam {0}</value>
+  </data>
+  <data name="ProvidersView_Models_EmptyState" xml:space="preserve">
+    <value>Kullanılabilir modelleri görmek için motoru başlatın</value>
+  </data>
+  <data name="ProvidersView_Models_ModelCount" xml:space="preserve">
+    <value>{0} model</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       AGENTS VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="AgentsView_Title" xml:space="preserve">
+    <value>Aracılar</value>
+  </data>
+  <data name="AgentsView_Subtitle" xml:space="preserve">
+    <value>Her CLI aracını bağlı bir sağlayıcı üzerinden yönlendirin.</value>
+  </data>
+  <data name="AgentsView_ConfigureMultipleTooltip" xml:space="preserve">
+    <value>Birden fazlasını yapılandır</value>
+  </data>
+  <data name="AgentsView_DetectAgentsTooltip" xml:space="preserve">
+    <value>Aracıları algıla</value>
+  </data>
+  <data name="AgentsView_InstalledChip" xml:space="preserve">
+    <value>yüklü</value>
+  </data>
+  <data name="AgentsView_ConfiguredChip" xml:space="preserve">
+    <value>yapılandırıldı</value>
+  </data>
+  <data name="AgentsView_InstalledSection" xml:space="preserve">
+    <value>YÜKLÜ</value>
+  </data>
+  <data name="AgentsView_NotInstalledSection" xml:space="preserve">
+    <value>YÜKLÜ DEĞİL</value>
+  </data>
+  <data name="AgentsView_Agent_ConfiguredBadge" xml:space="preserve">
+    <value>Yapılandırıldı</value>
+  </data>
+  <data name="AgentsView_Agent_InstalledBadge" xml:space="preserve">
+    <value>Yüklü</value>
+  </data>
+  <data name="AgentsView_Agent_DocsTooltip" xml:space="preserve">
+    <value>Belgeleri görüntüle</value>
+  </data>
+  <data name="AgentsView_Agent_ConfigureTooltip" xml:space="preserve">
+    <value>Yapılandır</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       LOGS VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="LogsView_Title" xml:space="preserve">
+    <value>Günlükler</value>
+  </data>
+  <data name="LogsView_Subtitle" xml:space="preserve">
+    <value>Yerel proxy üzerinden yönlendirilen istek trafiği.</value>
+  </data>
+  <data name="LogsView_ExportTooltip" xml:space="preserve">
+    <value>Günlükleri dışa aktar</value>
+  </data>
+  <data name="LogsView_RefreshTooltip" xml:space="preserve">
+    <value>Yenile</value>
+  </data>
+  <data name="LogsView_ClearViewTooltip" xml:space="preserve">
+    <value>Görünümü temizle</value>
+  </data>
+  <data name="LogsView_DeleteLogFileTooltip" xml:space="preserve">
+    <value>Günlük dosyasını sil</value>
+  </data>
+  <data name="LogsView_TabRequests" xml:space="preserve">
+    <value>İstekler</value>
+  </data>
+  <data name="LogsView_TabProxyLogs" xml:space="preserve">
+    <value>Proxy Günlükleri</value>
+  </data>
+  <data name="LogsView_Requests_Total" xml:space="preserve">
+    <value>Toplam</value>
+  </data>
+  <data name="LogsView_Requests_Success" xml:space="preserve">
+    <value>Başarılı</value>
+  </data>
+  <data name="LogsView_Requests_AvgTime" xml:space="preserve">
+    <value>Ort. Süre</value>
+  </data>
+  <data name="LogsView_Requests_ProviderLabel" xml:space="preserve">
+    <value>Sağlayıcı</value>
+  </data>
+  <data name="LogsView_Requests_SearchPlaceholder" xml:space="preserve">
+    <value>İsteklerde ara...</value>
+  </data>
+  <data name="LogsView_Requests_EmptyTitle" xml:space="preserve">
+    <value>Henüz istek yok.</value>
+  </data>
+  <data name="LogsView_Requests_EmptyDescription" xml:space="preserve">
+    <value>Proxy'yi başlatın ve bir istek gönderin.</value>
+  </data>
+  <data name="LogsView_Requests_PageLabel" xml:space="preserve">
+    <value>Sayfa {0} / {1}</value>
+  </data>
+  <data name="LogsView_Requests_PrevButton" xml:space="preserve">
+    <value>&lt;- Önceki</value>
+  </data>
+  <data name="LogsView_Requests_NextButton" xml:space="preserve">
+    <value>Sonraki -&gt;</value>
+  </data>
+
+  <data name="LogsView_ProxyLogs_SearchPlaceholder" xml:space="preserve">
+    <value>Günlüklerde ara...</value>
+  </data>
+  <data name="LogsView_ProxyLogs_EmptyTitle" xml:space="preserve">
+    <value>Henüz günlük satırı yok.</value>
+  </data>
+  <data name="LogsView_ProxyLogs_EmptyDescription" xml:space="preserve">
+    <value>Çıktıyı görmek için proxy'yi başlatın.</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       QUOTA VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="QuotaView_Title" xml:space="preserve">
+    <value>Kota</value>
+  </data>
+  <data name="QuotaView_Subtitle" xml:space="preserve">
+    <value>Desteklenen CLIProxyAPI hesapları için kota kullanımını izleyin.</value>
+  </data>
+  <data name="QuotaView_RefreshAllTooltip" xml:space="preserve">
+    <value>Tüm kota sağlayıcılarını yenile</value>
+  </data>
+  <data name="QuotaView_NoProviders_Title" xml:space="preserve">
+    <value>Kota sağlayıcısı yok</value>
+  </data>
+  <data name="QuotaView_NoAccounts_Title" xml:space="preserve">
+    <value>Gösterilecek hesap yok</value>
+  </data>
+  <data name="QuotaView_Account_RefreshTooltip" xml:space="preserve">
+    <value>Kotayı yenile</value>
+  </data>
+  <data name="QuotaView_Account_UsageSection" xml:space="preserve">
+    <value>KULLANIM</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       ACTIVITY VIEW
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ActivityView_Title" xml:space="preserve">
+    <value>Son Etkinlik</value>
+  </data>
+  <data name="ActivityView_Subtitle" xml:space="preserve">
+    <value>Yerel proxy tarafından işlenen ve bağlı sağlayıcılara yönlendirilen istekler.</value>
+  </data>
+  <data name="ActivityView_ClearButton" xml:space="preserve">
+    <value>Temizle</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       CONFIGURATION VIEW - GENERAL
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ConfigView_TabGeneral" xml:space="preserve">
+    <value>Genel</value>
+  </data>
+  <data name="ConfigView_TabCLIProxyAPI" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_TabPerplexity" xml:space="preserve">
+    <value>Perplexity</value>
+  </data>
+
+  <data name="ConfigView_General_Title" xml:space="preserve">
+    <value>Genel</value>
+  </data>
+  <data name="ConfigView_General_Subtitle" xml:space="preserve">
+    <value>Uygulama görünümü ve başlangıç.</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgentSection" xml:space="preserve">
+    <value>TUNNEL AGENT</value>
+  </data>
+  <data name="ConfigView_General_AppSection" xml:space="preserve">
+    <value>UYGULAMA</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Label" xml:space="preserve">
+    <value>Tunnel Agent</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Installed" xml:space="preserve">
+    <value>Yüklü: {0}</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Available" xml:space="preserve">
+    <value>{0} mevcut</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Check" xml:space="preserve">
+    <value>Denetle</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_Download" xml:space="preserve">
+    <value>İndir</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_AutoCheck_Label" xml:space="preserve">
+    <value>Uygulama güncellemelerini otomatik denetle</value>
+  </data>
+  <data name="ConfigView_General_TunnelAgent_AutoCheck_Description" xml:space="preserve">
+    <value>Başlangıçta yeni bir Tunnel Agent sürümü için GitHub'ı denetle.</value>
+  </data>
+
+  <data name="ConfigView_General_LaunchAtLogin_Label" xml:space="preserve">
+    <value>Oturum açıldığında başlat</value>
+  </data>
+  <data name="ConfigView_General_LaunchAtLogin_Description" xml:space="preserve">
+    <value>Otomatik olarak başla ve sistem tepsisinde kal.</value>
+  </data>
+  <data name="ConfigView_General_Theme_Label" xml:space="preserve">
+    <value>Tema</value>
+  </data>
+  <data name="ConfigView_General_Theme_Description" xml:space="preserve">
+    <value>Sistem temasını izle ya da açık/koyu modu zorla.</value>
+  </data>
+  <data name="ConfigView_General_MaskEmails_Label" xml:space="preserve">
+    <value>Hassas bilgileri gizle</value>
+  </data>
+  <data name="ConfigView_General_MaskEmails_Description" xml:space="preserve">
+    <value>Gizli kalmaları için hesap e-posta adreslerini noktalarla değiştirir.</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       CONFIGURATION VIEW - CLIPROXY
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ConfigView_CLIProxy_Title" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Subtitle" xml:space="preserve">
+    <value>Motor sürümü, ağ ve güncelleme ayarları.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_UpdateSuccess" xml:space="preserve">
+    <value>{0} sürümüne başarıyla güncellendi</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineSection" xml:space="preserve">
+    <value>MOTOR</value>
+  </data>
+  <data name="ConfigView_CLIProxy_SecuritySection" xml:space="preserve">
+    <value>GÜVENLİK</value>
+  </data>
+  <data name="ConfigView_CLIProxy_NetworkSection" xml:space="preserve">
+    <value>AĞ</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsSection" xml:space="preserve">
+    <value>GÜNLÜKLER</value>
+  </data>
+
+  <data name="ConfigView_CLIProxy_Engine_Label" xml:space="preserve">
+    <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Engine_Installed" xml:space="preserve">
+    <value>Yüklü: {0}</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Engine_Available" xml:space="preserve">
+    <value>{0} mevcut</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Engine_Check" xml:space="preserve">
+    <value>Denetle</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Engine_UpdateNow" xml:space="preserve">
+    <value>Şimdi güncelle</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_Label" xml:space="preserve">
+    <value>Motor sürümü</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_Reload" xml:space="preserve">
+    <value>Yeniden yükle</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_Install" xml:space="preserve">
+    <value>Yükle</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_Label" xml:space="preserve">
+    <value>Paket bütünlüğü</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_Description" xml:space="preserve">
+    <value>İndirmeler kurulumdan önce doğrulanır.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoStart_Label" xml:space="preserve">
+    <value>Otomatik başlat</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoStart_Description" xml:space="preserve">
+    <value>Uygulama başlatıldığında bu motoru otomatik olarak başlat.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoCheck_Label" xml:space="preserve">
+    <value>Güncellemeleri otomatik denetle</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoCheck_Description" xml:space="preserve">
+    <value>Başlangıçta yeni bir motor sürümü için GitHub'ı denetle.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoUpdate_Label" xml:space="preserve">
+    <value>Otomatik güncelle</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AutoUpdate_Description" xml:space="preserve">
+    <value>Yeni motor sürümlerini otomatik olarak indir ve yükle.</value>
+  </data>
+
+  <data name="ConfigView_CLIProxy_AuthFolder_Label" xml:space="preserve">
+    <value>Auth dosyalarının konumu</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AuthFolder_Description" xml:space="preserve">
+    <value>OAuth belirteçleri ve özel sağlayıcı anahtarları, uygulamanın auth klasöründe saklanır.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_AuthFolder_Open" xml:space="preserve">
+    <value>Klasörü Aç</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ApiKeys_Label" xml:space="preserve">
+    <value>API anahtarları</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ApiKeys_Description" xml:space="preserve">
+    <value>CLIProxyAPI istemcileri tarafından kabul edilen anahtarlar. Aracı kurulumu varsayılan anahtarı kullanır.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ApiKeys_Manage" xml:space="preserve">
+    <value>Yönet</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ResetCredentials_Label" xml:space="preserve">
+    <value>Tüm kimlik bilgilerini sıfırla</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ResetCredentials_Description" xml:space="preserve">
+    <value>Tunnel Agent tarafından yönetilen OAuth belirteçlerini ve API anahtarlarını yedekler ve kaldırır.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ResetCredentials_Reset" xml:space="preserve">
+    <value>Sıfırla</value>
+  </data>
+
+  <data name="ConfigView_CLIProxy_RoutingStrategy_Label" xml:space="preserve">
+    <value>Yönlendirme stratejisi</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RoutingStrategy_Description" xml:space="preserve">
+    <value>İsteklerin birden fazla hesap veya anahtar arasında nasıl dağıtılacağı.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ListenPort_Label" xml:space="preserve">
+    <value>Dinleme portu</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ListenPort_Description" xml:space="preserve">
+    <value>Yalnızca localhost. Uygulamak için yeniden başlatma gerekir.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ListenPort_Reset" xml:space="preserve">
+    <value>Sıfırla</value>
+  </data>
+
+  <data name="ConfigView_CLIProxy_LogsAutoRefresh_Label" xml:space="preserve">
+    <value>Otomatik yenile</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsAutoRefresh_Description" xml:space="preserve">
+    <value>Günlükler ekranında yeni günlük girdilerini otomatik olarak yokla.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsRefreshInterval_Label" xml:space="preserve">
+    <value>Yenileme aralığı</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsRefreshInterval_Description" xml:space="preserve">
+    <value>Yeni girdilerin ne sıklıkta denetleneceği.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LogsRefreshInterval_Seconds" xml:space="preserve">
+    <value>{0} saniye</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       CONFIGURATION VIEW - PERPLEXITY
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ConfigView_Perplexity_Title" xml:space="preserve">
+    <value>Perplexity</value>
+  </data>
+  <data name="ConfigView_Perplexity_Subtitle" xml:space="preserve">
+    <value>Motor sürümü, port ve oturum ayarları.</value>
+  </data>
+  <data name="ConfigView_Perplexity_UpdateSuccess" xml:space="preserve">
+    <value>{0} sürümüne başarıyla güncellendi</value>
+  </data>
+
+  <data name="ConfigView_Perplexity_Engine_Label" xml:space="preserve">
+    <value>Perplexity WebUI Scraper</value>
+  </data>
+  <data name="ConfigView_Perplexity_Engine_Installed" xml:space="preserve">
+    <value>Yüklü: {0}</value>
+  </data>
+  <data name="ConfigView_Perplexity_Engine_Available" xml:space="preserve">
+    <value>{0} mevcut</value>
+  </data>
+  <data name="ConfigView_Perplexity_Engine_Check" xml:space="preserve">
+    <value>Denetle</value>
+  </data>
+  <data name="ConfigView_Perplexity_Engine_UpdateNow" xml:space="preserve">
+    <value>Şimdi güncelle</value>
+  </data>
+
+  <data name="ConfigView_Perplexity_AccountsFolder_Label" xml:space="preserve">
+    <value>Hesapların konumu</value>
+  </data>
+  <data name="ConfigView_Perplexity_AccountsFolder_Description" xml:space="preserve">
+    <value>Oturum belirteci dosyaları, uygulama ayarları klasöründeki perplexity-accounts/ altında saklanır.</value>
+  </data>
+  <data name="ConfigView_Perplexity_AccountsFolder_Open" xml:space="preserve">
+    <value>Klasörü Aç</value>
+  </data>
+  <data name="ConfigView_Perplexity_ResetAccounts_Label" xml:space="preserve">
+    <value>Oturum hesaplarını sıfırla</value>
+  </data>
+  <data name="ConfigView_Perplexity_ResetAccounts_Description" xml:space="preserve">
+    <value>Kaydedilen tüm Perplexity WebUI oturum belirteçlerini kaldırır.</value>
+  </data>
+  <data name="ConfigView_Perplexity_ResetAccounts_Reset" xml:space="preserve">
+    <value>Sıfırla</value>
+  </data>
+
+  <data name="ConfigView_Perplexity_ListenPort_Label" xml:space="preserve">
+    <value>Dinleme portu</value>
+  </data>
+  <data name="ConfigView_Perplexity_ListenPort_Description" xml:space="preserve">
+    <value>Yalnızca localhost. Uygulamak için yeniden başlatma gerekir.</value>
+  </data>
+  <data name="ConfigView_Perplexity_ListenPort_Reset" xml:space="preserve">
+    <value>Sıfırla</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       MISCELLANEOUS
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="Toast_NoUpdateAvailable" xml:space="preserve">
+    <value>Güncelleme yok. En son sürümü kullanıyorsunuz.</value>
+  </data>
+  <data name="Toast_AppNoUpdateAvailable" xml:space="preserve">
+    <value>Tunnel Agent güncel.</value>
+  </data>
+  <data name="Toast_Downloading" xml:space="preserve">
+    <value>İndiriliyor… %{0}</value>
+  </data>
+
+  <data name="ConfigView_General_Language_Label" xml:space="preserve">
+    <value>Dil</value>
+  </data>
+  <data name="ConfigView_General_Language_Description" xml:space="preserve">
+    <value>Görüntüleme dilini seçin.</value>
+  </data>
+  <data name="Dialog_Common_Close" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+  <data name="Dialog_Common_Cancel" xml:space="preserve">
+    <value>İptal</value>
+  </data>
+  <data name="QuotaProvidersView_Title" xml:space="preserve">
+    <value>Kota Sağlayıcıları</value>
+  </data>
+  <data name="QuotaProvidersView_Subtitle" xml:space="preserve">
+    <value>Yerel kota izleme özelliğine sahip bağımsız hesaplar.</value>
+  </data>
+  <data name="QuotaProvidersView_ScanTooltip" xml:space="preserve">
+    <value>Kota sağlayıcılarını tara</value>
+  </data>
+  <data name="QuotaProvidersView_DetectedChip" xml:space="preserve">
+    <value>algılandı</value>
+  </data>
+  <data name="QuotaProvidersView_Scanning" xml:space="preserve">
+    <value>taranıyor…</value>
+  </data>
+  <data name="QuotaProvidersView_NotDetected" xml:space="preserve">
+    <value>Algılanmadı. Şunu yükleyin veya oturum açın:</value>
+  </data>
+  <data name="TrayUsagePopup_Title" xml:space="preserve">
+    <value>Tunnel Agent — Kullanım</value>
+  </data>
+  <data name="TrayUsagePopup_RefreshQuotaTooltip" xml:space="preserve">
+    <value>Kotayı yenile</value>
+  </data>
+  <data name="TrayUsagePopup_OpenAppTooltip" xml:space="preserve">
+    <value>Uygulamayı aç</value>
+  </data>
+  <data name="TrayUsagePopup_Home" xml:space="preserve">
+    <value>Ana Sayfa</value>
+  </data>
+  <data name="TrayUsagePopup_HomeSubtitle" xml:space="preserve">
+    <value>Motor durumu ve kullanım özeti</value>
+  </data>
+  <data name="TrayUsagePopup_Usage" xml:space="preserve">
+    <value>Kullanım</value>
+  </data>
+  <data name="TrayUsagePopup_UsageSubtitle" xml:space="preserve">
+    <value>Yapay zeka abonelik kotalarına genel bakış</value>
+  </data>
+  <data name="TrayUsagePopup_ListeningOnPort" xml:space="preserve">
+    <value>Şu portu dinliyor: </value>
+  </data>
+  <data name="TrayUsagePopup_StartTooltip" xml:space="preserve">
+    <value>Başlat</value>
+  </data>
+  <data name="TrayUsagePopup_StopTooltip" xml:space="preserve">
+    <value>Durdur</value>
+  </data>
+  <data name="TrayUsagePopup_RestartTooltip" xml:space="preserve">
+    <value>Yeniden başlat</value>
+  </data>
+  <data name="TrayUsagePopup_CopyEndpointTooltip" xml:space="preserve">
+    <value>Uç noktayı kopyala</value>
+  </data>
+  <data name="TrayUsagePopup_RefreshAllTooltip" xml:space="preserve">
+    <value>Tümünü yenile</value>
+  </data>
+  <data name="TrayUsagePopup_NoAccountsToShow" xml:space="preserve">
+    <value>Gösterilecek hesap yok</value>
+  </data>
+  <data name="TrayUsagePopup_ConfigurationTooltip" xml:space="preserve">
+    <value>Yapılandırma</value>
+  </data>
+  <data name="AgentConfigOverlay_AgentsSectionLabel" xml:space="preserve">
+    <value>ARACILAR</value>
+  </data>
+  <data name="AgentConfigOverlay_ConfiguredChip" xml:space="preserve">
+    <value>Yapılandırıldı</value>
+  </data>
+  <data name="AgentConfigOverlay_InstalledChip" xml:space="preserve">
+    <value>Yüklü</value>
+  </data>
+  <data name="AgentConfigOverlay_NotInstalledAgentsHint" xml:space="preserve">
+    <value>{0} aracı yüklü değil — yapılandırmak için bunları yükleyin.</value>
+  </data>
+  <data name="AgentConfigOverlay_ConfigModeSectionLabel" xml:space="preserve">
+    <value>YAPILANDIRMA MODU</value>
+  </data>
+  <data name="AgentConfigOverlay_AutomaticModeButton" xml:space="preserve">
+    <value>Otomatik</value>
+  </data>
+  <data name="AgentConfigOverlay_ManualModeButton" xml:space="preserve">
+    <value>Manuel</value>
+  </data>
+  <data name="AgentConfigOverlay_AutomaticModeDescription" xml:space="preserve">
+    <value>Yapılandırma dosyalarını doğrudan yazar. Herhangi bir değişiklikten önce bir yedek oluşturulur.</value>
+  </data>
+  <data name="AgentConfigOverlay_ManualModeDescription" xml:space="preserve">
+    <value>Yapılandırmayı önizleyin ve hedef konuma manuel olarak kopyalayın.</value>
+  </data>
+  <data name="AgentConfigOverlay_AmpAccessTokenLabel" xml:space="preserve">
+    <value>Amp erişim belirteci</value>
+  </data>
+  <data name="AgentConfigOverlay_AmpAccessTokenWatermark" xml:space="preserve">
+    <value>your-amp-access-token</value>
+  </data>
+  <data name="AgentConfigOverlay_ShowHideKeyTooltip" xml:space="preserve">
+    <value>Anahtarı göster/gizle</value>
+  </data>
+  <data name="AgentConfigOverlay_AmpAccessTokenHelp" xml:space="preserve">
+    <value>Amp CLI'nin kimliğini doğrulamak için kullanılır. ampcode.com/settings adresinden alın</value>
+  </data>
+  <data name="AgentConfigOverlay_ModelsEmptyState" xml:space="preserve">
+    <value>Kullanılabilir modelleri yüklemek için bir motor başlatın.</value>
+  </data>
+  <data name="AgentConfigOverlay_SearchModelsWatermark" xml:space="preserve">
+    <value>Modellerde ara</value>
+  </data>
+  <data name="AgentConfigOverlay_SelectAllModels" xml:space="preserve">
+    <value>Tümünü seç</value>
+  </data>
+  <data name="AgentConfigOverlay_NoModelSearchResults" xml:space="preserve">
+    <value>Aramanızla eşleşen model yok.</value>
+  </data>
+  <data name="AgentConfigOverlay_ProxyEndpointSectionLabel" xml:space="preserve">
+    <value>PROXY UÇ NOKTASI</value>
+  </data>
+  <data name="AgentConfigOverlay_ConfigPreviewSectionLabel" xml:space="preserve">
+    <value>YAPILANDIRMA ÖNİZLEMESİ</value>
+  </data>
+  <data name="AgentConfigOverlay_CancelButton" xml:space="preserve">
+    <value>İptal</value>
+  </data>
+  <data name="AgentConfigOverlay_CopyAllButton" xml:space="preserve">
+    <value>Tümünü Kopyala</value>
+  </data>
+  <data name="AgentConfigOverlay_DoneButton" xml:space="preserve">
+    <value>Bitti</value>
+  </data>
+  <data name="ApiKeysOverlay_Title" xml:space="preserve">
+    <value>CLIProxyAPI anahtarları</value>
+  </data>
+  <data name="ApiKeysOverlay_Description" xml:space="preserve">
+    <value>CLIProxyAPI istemcileri tarafından kabul edilen anahtarlar. Aracı kurulumu varsayılan anahtarı kullanır; kimlik doğrulaması olmaması için boş bırakın.</value>
+  </data>
+  <data name="ApiKeysOverlay_DefaultChip" xml:space="preserve">
+    <value>varsayılan</value>
+  </data>
+  <data name="ApiKeysOverlay_UseButton" xml:space="preserve">
+    <value>Kullan</value>
+  </data>
+  <data name="ApiKeysOverlay_RemoveKeyTooltip" xml:space="preserve">
+    <value>Anahtarı kaldır</value>
+  </data>
+  <data name="ApiKeysOverlay_AddKeyLabel" xml:space="preserve">
+    <value>Anahtar ekle</value>
+  </data>
+  <data name="ApiKeysOverlay_ShowHideKeyTooltip" xml:space="preserve">
+    <value>Anahtarı göster/gizle</value>
+  </data>
+  <data name="ApiKeysOverlay_CloseButton" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+  <data name="ApiKeysOverlay_AddKeyButton" xml:space="preserve">
+    <value>Anahtar ekle</value>
+  </data>
+  <data name="Agent_claude-code_Description" xml:space="preserve">
+    <value>Anthropic'in resmi CLI kodlama aracısı.</value>
+  </data>
+  <data name="Agent_codex_Description" xml:space="preserve">
+    <value>OpenAI Codex komut satırı arayüzü.</value>
+  </data>
+  <data name="Agent_gemini-cli_Description" xml:space="preserve">
+    <value>Google Gemini CLI kodlama aracısı.</value>
+  </data>
+  <data name="Agent_amp_Description" xml:space="preserve">
+    <value>Sourcegraph'ın Amp kodlama asistanı.</value>
+  </data>
+  <data name="Agent_opencode_Description" xml:space="preserve">
+    <value>Açık kaynaklı yapay zeka kodlama aracısı.</value>
+  </data>
+  <data name="Agent_aider_Description" xml:space="preserve">
+    <value>Terminalde yapay zeka ile eşli programlama. pip ile yükleyin.</value>
+  </data>
+  <data name="Agent_pi_Description" xml:space="preserve">
+    <value>pi.dev tarafından geliştirilen Pi kodlama aracısı.</value>
+  </data>
+  <data name="Agent_factory-droid_Description" xml:space="preserve">
+    <value>Factory'nin yapay zeka kodlama aracısı.</value>
+  </data>
+  <data name="AgentsView_Agent_ConfigureButton" xml:space="preserve">
+    <value>Yapılandır</value>
+  </data>
+  <data name="AgentsView_Agent_ReconfigureButton" xml:space="preserve">
+    <value>Yeniden yapılandır</value>
+  </data>
+  <data name="Provider_cliproxyapi_Description" xml:space="preserve">
+    <value>OAuth ve OpenAI uyumlu yukarı akış sağlayıcıları için birleşik proxy.</value>
+  </data>
+  <data name="Provider_perplexity-webui-scraper_Description" xml:space="preserve">
+    <value>Perplexity WebUI oturumlarıyla desteklenen OpenAI uyumlu yerel API.</value>
+  </data>
+  <data name="ProvidersView_Provider_ConnectedAccountSingular" xml:space="preserve">
+    <value>{0} bağlı hesap</value>
+  </data>
+  <data name="ProvidersView_Provider_ConnectedAccountPlural" xml:space="preserve">
+    <value>{0} bağlı hesap</value>
+  </data>
+  <data name="AgentConfigOverlay_BulkTitle" xml:space="preserve">
+    <value>Aracıları Yapılandır</value>
+  </data>
+  <data name="AgentConfigOverlay_SingleTitle" xml:space="preserve">
+    <value>{0} Yapılandır</value>
+  </data>
+  <data name="AgentConfigOverlay_SingleFallbackTitle" xml:space="preserve">
+    <value>Aracıyı Yapılandır</value>
+  </data>
+  <data name="AgentConfigOverlay_BulkDescription" xml:space="preserve">
+    <value>Yüklü aracıları seçin, ardından ortak yapılandırmayı uygulayın.</value>
+  </data>
+  <data name="AgentConfigOverlay_ApplyButton" xml:space="preserve">
+    <value>Uygula</value>
+  </data>
+  <data name="AgentConfigOverlay_ApplySelectedButton" xml:space="preserve">
+    <value>Uygula ({0})</value>
+  </data>
+  <data name="Quota_ResetInNow" xml:space="preserve">
+    <value>Şimdi sıfırlanıyor</value>
+  </data>
+  <data name="Quota_ResetInDaysHours" xml:space="preserve">
+    <value>{0}g {1}s içinde sıfırlanır</value>
+  </data>
+  <data name="Quota_ResetInHoursMinutes" xml:space="preserve">
+    <value>{0}s {1}dk içinde sıfırlanır</value>
+  </data>
+  <data name="Quota_ResetInMinutes" xml:space="preserve">
+    <value>{0}dk içinde sıfırlanır</value>
+  </data>
+  <data name="AgentConfigOverlay_ModelsSelectedLabel" xml:space="preserve">
+    <value>{1} modelden {0} tanesi seçildi</value>
+  </data>
+  <data name="LogsView_Requests_AllProviders" xml:space="preserve">
+    <value>Tüm Sağlayıcılar</value>
+  </data>
+  <data name="ConfigView_General_Theme_System" xml:space="preserve">
+    <value>Sistem</value>
+  </data>
+  <data name="ConfigView_General_Theme_Light" xml:space="preserve">
+    <value>Açık</value>
+  </data>
+  <data name="ConfigView_General_Theme_Dark" xml:space="preserve">
+    <value>Koyu</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RoutingStrategy_RoundRobin" xml:space="preserve">
+    <value>Round Robin (eşit dağıtım)</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RoutingStrategy_FillFirst" xml:space="preserve">
+    <value>Fill First (limite kadar ilk hesabı kullan)</value>
+  </data>
+  <data name="ConfigView_PortConflict" xml:space="preserve">
+    <value>{0} portu zaten {1} tarafından kullanılıyor. Farklı bir port seçin.</value>
+  </data>
+  <data name="ConfigView_OtherEngine" xml:space="preserve">
+    <value>diğer motor</value>
+  </data>
+  <data name="ConfigView_ListenPort_Apply" xml:space="preserve">
+    <value>Uygula</value>
+  </data>
+</root>

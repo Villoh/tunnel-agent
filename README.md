@@ -112,16 +112,22 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 
 The interface is fully localized with runtime language switching (Configuration → General → Language). The app auto-detects your system language on first launch and falls back to English.
 
-| Language  | Locale  |
-| --------- | ------- |
-| English   | `en-US` |
-| Español   | `es-ES` |
-| Português | `pt-PT` |
-| Français  | `fr-FR` |
-| Deutsch   | `de-DE` |
-| 简体中文  | `zh-CN` |
-| 日本語    | `ja-JP` |
-| العربية   | `ar-SA` |
+| Language   | Locale  |
+| ---------- | ------- |
+| English    | `en-US` |
+| Español    | `es-ES` |
+| Português  | `pt-PT` |
+| Italiano   | `it-IT` |
+| Français   | `fr-FR` |
+| Deutsch    | `de-DE` |
+| 简体中文   | `zh-CN` |
+| 日本語     | `ja-JP` |
+| العربية    | `ar-SA` |
+| Українська | `uk-UA` |
+| Русский    | `ru-RU` |
+| हिन्दी     | `hi-IN` |
+| 한국어     | `ko-KR` |
+| Türkçe     | `tr-TR` |
 
 ## Installation
 
