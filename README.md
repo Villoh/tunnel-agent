@@ -93,6 +93,7 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 | Kiro   | Auto-detected when installed and logged in |
 | Trae   | Auto-detected when installed and logged in |
 
+> [!NOTE]
 > These IDEs are only used for quota usage monitoring. They cannot be used as providers for the proxy.
 
 ### Agents
@@ -128,6 +129,9 @@ The interface is fully localized with runtime language switching (Configuration 
 | हिन्दी     | `hi-IN` |
 | 한국어     | `ko-KR` |
 | Türkçe     | `tr-TR` |
+
+> [!NOTE]
+> Translations live in [`src/TunnelAgent.Avalonia/Resources/Strings*.resx`](src/TunnelAgent.Avalonia/Resources), one file per locale (e.g. `Strings.es-ES.resx`), with `Strings.resx` as the English base. To fix or improve a translation, edit the `<value>` text for the matching key in that locale's file (keep the `name` keys and any `{0}` placeholders unchanged) and open a PR. To add a new language, copy `Strings.resx` to `Strings.<locale>.resx`, translate the values, and register the locale in `LocalizationService.cs`.
 
 ## Installation
 
