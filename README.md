@@ -111,24 +111,25 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 
 ### Languages
 
-The interface is fully localized with runtime language switching (Configuration → General → Language). The app auto-detects your system language on first launch and falls back to English.
+The interface is fully localized with runtime language switching (Configuration → General → Language). Use **System default** to follow the current OS language, or pick a specific locale to keep a manual override.
 
-| Language   | Locale  |
-| ---------- | ------- |
-| English    | `en-US` |
-| Español    | `es-ES` |
-| Português  | `pt-PT` |
-| Italiano   | `it-IT` |
-| Français   | `fr-FR` |
-| Deutsch    | `de-DE` |
-| 简体中文   | `zh-CN` |
-| 日本語     | `ja-JP` |
-| العربية    | `ar-SA` |
-| Українська | `uk-UA` |
-| Русский    | `ru-RU` |
-| हिन्दी     | `hi-IN` |
-| 한국어     | `ko-KR` |
-| Türkçe     | `tr-TR` |
+| Language       | Locale  |
+| -------------- | ------- |
+| System default | `null`  |
+| English        | `en-US` |
+| Español        | `es-ES` |
+| Português      | `pt-PT` |
+| Italiano       | `it-IT` |
+| Français       | `fr-FR` |
+| Deutsch        | `de-DE` |
+| 简体中文       | `zh-CN` |
+| 日本語         | `ja-JP` |
+| العربية        | `ar-SA` |
+| Українська     | `uk-UA` |
+| Русский        | `ru-RU` |
+| हिन्दी         | `hi-IN` |
+| 한국어         | `ko-KR` |
+| Türkçe         | `tr-TR` |
 
 > [!NOTE]
 > Translations live in [`src/TunnelAgent.Avalonia/Resources/Strings*.resx`](src/TunnelAgent.Avalonia/Resources), one file per locale (e.g. `Strings.es-ES.resx`), with `Strings.resx` as the English base. To fix or improve a translation, edit the `<value>` text for the matching key in that locale's file (keep the `name` keys and any `{0}` placeholders unchanged) and open a PR. To add a new language, copy `Strings.resx` to `Strings.<locale>.resx`, translate the values, and register the locale in `LocalizationService.cs`.

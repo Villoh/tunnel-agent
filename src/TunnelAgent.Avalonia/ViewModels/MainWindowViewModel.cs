@@ -290,8 +290,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         // Resolve language: saved preference → system language → English fallback.
         var languageCode = _settings.Current.Language ?? GetSystemLanguageOrEnglish();
         _localization.SetCulture(languageCode);
-        _selectedLanguage = LocalizationService.SupportedLanguages.FirstOrDefault(l => l.Code == languageCode)
-            ?? LocalizationService.SupportedLanguages[0];
+        _selectedLanguage = GetSelectedLanguageOption();
         _selectedThemeMode = ThemeModes.First(mode => mode.Value == NormalizeThemeMode(_settings.Current.ThemeMode));
         _selectedRoutingStrategy = RoutingStrategyOptions.First(strategy => strategy.Value == _settings.Current.RoutingStrategy);
         _engineRegistry = engineRegistry ?? new EngineRegistryService(settings);
@@ -598,8 +597,11 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         {
             if (value != null && SetProperty(ref _selectedLanguage, value))
             {
-                _localization.SetCulture(value.Code);
-                _settings.Current.Language = value.Code;
+                var languageCode = value.Code == LocalizationService.SystemLanguageCode
+                    ? GetSystemLanguageOrEnglish()
+                    : value.Code;
+                _localization.SetCulture(languageCode);
+                _settings.Current.Language = value.Code == LocalizationService.SystemLanguageCode ? null : value.Code;
                 _settings.Save();
                 OnPropertyChanged(nameof(ActiveEngineDescription));
                 OnPropertyChanged(nameof(AgentConfigApplyLabel));
@@ -830,6 +832,15 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         _ => "system"
     };
 
+    private LanguageOption GetSelectedLanguageOption()
+    {
+        if (_settings.Current.Language is null)
+            return LocalizationService.SupportedLanguages[0];
+
+        return LocalizationService.SupportedLanguages.FirstOrDefault(l => l.Code == _settings.Current.Language)
+            ?? LocalizationService.SupportedLanguages[0];
+    }
+
     /// <summary>
     /// Resolves the system language to a supported culture, falling back to English.
     /// Tries an exact match first (e.g. es-ES), then a two-letter prefix match (es-* → es-ES).
@@ -846,7 +857,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
 
         var languagePrefix = systemCulture.TwoLetterISOLanguageName;
         var prefixMatch = supported.FirstOrDefault(l =>
-            l.Code.StartsWith(languagePrefix + "-", StringComparison.OrdinalIgnoreCase));
+            !string.IsNullOrEmpty(l.Code) && l.Code.StartsWith(languagePrefix + "-", StringComparison.OrdinalIgnoreCase));
         if (prefixMatch != null)
             return prefixMatch.Code;
 
@@ -860,14 +871,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         {
             await Task.Run(_settings.LoadAsync);
             var languageCode = _settings.Current.Language ?? GetSystemLanguageOrEnglish();
-            if (_settings.Current.Language is null)
-            {
-                _settings.Current.Language = languageCode;
-                await _settings.SaveImmediateAsync();
-            }
             _localization.SetCulture(languageCode);
-            _selectedLanguage = LocalizationService.SupportedLanguages.FirstOrDefault(l => l.Code == languageCode)
-                ?? LocalizationService.SupportedLanguages[0];
+            _selectedLanguage = GetSelectedLanguageOption();
             OnPropertyChanged(nameof(SelectedLanguage));
 
             _ = ObserveStartupTaskAsync(Task.Run(ReconcileLaunchAtLoginAsync));

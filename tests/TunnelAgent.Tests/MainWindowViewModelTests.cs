@@ -66,7 +66,7 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
-    public async Task InitializeAsync_PersistsDetectedLanguage_WhenSettingIsNull()
+    public async Task InitializeAsync_UsesSystemLanguage_WhenSettingIsNull()
     {
         var previousCulture = CultureInfo.CurrentUICulture;
         try
@@ -83,11 +83,61 @@ public sealed class MainWindowViewModelTests
             var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
             await vm.InitializeAsync();
 
-            Assert.Equal("es-ES", settings.Current.Language);
-            Assert.Equal("es-ES", vm.SelectedLanguage.Code);
+            Assert.Null(settings.Current.Language);
+            Assert.Equal(LocalizationService.SystemLanguageCode, vm.SelectedLanguage.Code);
+            Assert.Equal("es-ES", LocalizationService.Instance.CurrentCulture.Name);
 
             using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(settingsPath));
-            Assert.Equal("es-ES", doc.RootElement.GetProperty("Language").GetString());
+            Assert.Equal(JsonValueKind.Null, doc.RootElement.GetProperty("Language").ValueKind);
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previousCulture;
+        }
+    }
+
+    [Fact]
+    public async Task SelectedLanguage_SystemDefault_SavesNullLanguage()
+    {
+        using var temp = new TestTempDirectory();
+        var settings = new SettingsService(temp.File("settings.json"));
+        await settings.LoadAsync();
+        settings.Current.Language = "es-ES";
+        var registry = new EngineRegistryService(settings);
+        var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
+
+        vm.SelectedLanguage = LocalizationService.SupportedLanguages[0];
+
+        Assert.Null(settings.Current.Language);
+        Assert.Equal(LocalizationService.SystemLanguageCode, vm.SelectedLanguage.Code);
+    }
+
+    [Fact]
+    public async Task InitializeAsync_KeepsSavedLanguage_WhenSystemLanguageChanges()
+    {
+        var previousCulture = CultureInfo.CurrentUICulture;
+        try
+        {
+            using var temp = new TestTempDirectory();
+            var settingsPath = temp.File("settings.json");
+            var seededSettings = new SettingsService(settingsPath);
+            await seededSettings.LoadAsync();
+            seededSettings.Current.Language = "en-US";
+            await seededSettings.SaveImmediateAsync();
+
+            CultureInfo.CurrentUICulture = new CultureInfo("es-MX");
+
+            var settings = new SettingsService(settingsPath);
+            settings.LoadSync();
+            var registry = new EngineRegistryService(settings);
+            var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
+            await vm.InitializeAsync();
+
+            Assert.Equal("en-US", settings.Current.Language);
+            Assert.Equal("en-US", vm.SelectedLanguage.Code);
+
+            using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(settingsPath));
+            Assert.Equal("en-US", doc.RootElement.GetProperty("Language").GetString());
         }
         finally
         {

@@ -28,9 +28,12 @@ public sealed class LocalizationService : INotifyPropertyChanged
     /// <summary>Indexer used by XAML bindings: <c>{l:Loc App_Title}</c> binds to <c>this["App_Title"]</c>.</summary>
     public string this[string key] => GetString(key);
 
+    public const string SystemLanguageCode = "";
+
     /// <summary>Languages that ship with a translation. Code is a culture name, Display is shown in the UI.</summary>
     public static IReadOnlyList<LanguageOption> SupportedLanguages { get; } =
     [
+        new LanguageOption(SystemLanguageCode, "System default"),
         new LanguageOption("en-US", "English"),
         new LanguageOption("es-ES", "Español"),
         new LanguageOption("pt-PT", "Português"),

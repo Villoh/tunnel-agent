@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **System language mode** (`LocalizationService`, `MainWindowViewModel`): the **Language** combo now includes **System default**; `Language: null` remains the explicit setting for following the current OS language, while selecting a specific locale stores that locale as a manual override.
+
 ## [0.7.1] - 2026-06-18
 
 ### Fixed
