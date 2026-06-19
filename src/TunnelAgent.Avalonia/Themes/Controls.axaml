@@ -32,10 +32,6 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="10" />
     </Style>
-    <Style Selector="Border.card.error">
-        <Setter Property="Background" Value="#1AE96B57" />
-        <Setter Property="BorderBrush" Value="#66E96B57" />
-    </Style>
 
     <!-- Row separator -->
     <Style Selector="Border.row-divider">
@@ -110,23 +106,40 @@
         <Setter Property="Foreground" Value="{DynamicResource ErrBrush}" />
     </Style>
 
+    <!-- Cohesive alerts: info / warning / error, solid surfaces -->
     <Style Selector="Border.alert">
-        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="CornerRadius" Value="10" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Padding" Value="10" />
+        <Setter Property="Padding" Value="14,12" />
+        <Setter Property="Background" Value="{DynamicResource AlertInfoBgBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AlertInfoBorderBrush}" />
+    </Style>
+    <Style Selector="Border.alert.info">
+        <Setter Property="Background" Value="{DynamicResource AlertInfoBgBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AlertInfoBorderBrush}" />
+    </Style>
+    <Style Selector="Border.alert.warning">
+        <Setter Property="Background" Value="{DynamicResource AlertWarnBgBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AlertWarnBorderBrush}" />
     </Style>
     <Style Selector="Border.alert.error">
-        <Setter Property="Background" Value="#1AE96B57" />
-        <Setter Property="BorderBrush" Value="#66E96B57" />
+        <Setter Property="Background" Value="{DynamicResource AlertErrBgBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AlertErrBorderBrush}" />
     </Style>
     <Style Selector="TextBlock.alert-title">
-        <Setter Property="Foreground" Value="{DynamicResource ErrBrush}" />
-        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontSize" Value="13" />
         <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+    </Style>
+    <Style Selector="Border.alert.warning TextBlock.alert-title">
+        <Setter Property="Foreground" Value="{DynamicResource WarnBrush}" />
+    </Style>
+    <Style Selector="Border.alert.error TextBlock.alert-title">
+        <Setter Property="Foreground" Value="{DynamicResource ErrBrush}" />
     </Style>
     <Style Selector="TextBlock.alert-body">
-        <Setter Property="Foreground" Value="{DynamicResource FgMutedBrush}" />
-        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
+        <Setter Property="FontSize" Value="12.5" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
 

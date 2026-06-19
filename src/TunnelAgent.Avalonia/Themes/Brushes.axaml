@@ -45,6 +45,14 @@
                     <SolidColorBrush x:Key="OkBrush"          Color="{StaticResource OkColor}" />
                     <SolidColorBrush x:Key="WarnBrush"        Color="{StaticResource WarnColor}" />
                     <SolidColorBrush x:Key="ErrBrush"         Color="{StaticResource ErrColor}" />
+
+                    <!-- Alert surfaces (solid, no transparency) -->
+                    <SolidColorBrush x:Key="AlertInfoBgBrush"     Color="#EAF2FE" />
+                    <SolidColorBrush x:Key="AlertInfoBorderBrush" Color="#BAD4FB" />
+                    <SolidColorBrush x:Key="AlertWarnBgBrush"     Color="#FBF2D8" />
+                    <SolidColorBrush x:Key="AlertWarnBorderBrush" Color="#EFD58F" />
+                    <SolidColorBrush x:Key="AlertErrBgBrush"      Color="#FBE9E5" />
+                    <SolidColorBrush x:Key="AlertErrBorderBrush"  Color="#F1C0B5" />
                 </ResourceDictionary>
 
                 <!-- DARK -->
@@ -88,6 +96,14 @@
                     <SolidColorBrush x:Key="OkBrush"          Color="{StaticResource OkColor}" />
                     <SolidColorBrush x:Key="WarnBrush"        Color="{StaticResource WarnColor}" />
                     <SolidColorBrush x:Key="ErrBrush"         Color="{StaticResource ErrColor}" />
+
+                    <!-- Alert surfaces (solid, no transparency) -->
+                    <SolidColorBrush x:Key="AlertInfoBgBrush"     Color="#122538" />
+                    <SolidColorBrush x:Key="AlertInfoBorderBrush" Color="#214465" />
+                    <SolidColorBrush x:Key="AlertWarnBgBrush"     Color="#2C2410" />
+                    <SolidColorBrush x:Key="AlertWarnBorderBrush" Color="#4E4015" />
+                    <SolidColorBrush x:Key="AlertErrBgBrush"      Color="#2E1714" />
+                    <SolidColorBrush x:Key="AlertErrBorderBrush"  Color="#50241C" />
                 </ResourceDictionary>
 
             </ResourceDictionary.ThemeDictionaries>
