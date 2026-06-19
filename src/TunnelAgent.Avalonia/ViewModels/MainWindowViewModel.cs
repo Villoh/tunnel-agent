@@ -50,6 +50,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     private readonly ILaunchAtLoginService _launchAtLogin;
     private readonly IFolderOpenService _folderOpen;
     private readonly TunnelAgent.Services.ModelFetchService _modelFetch;
+    private readonly TunnelAgent.Services.UpstreamModelFetchService _upstreamModelFetch = new();
+    private CancellationTokenSource? _customProviderModelFetchCts;
     private ConfigService _configService = null!;
     private readonly TokenGeneratorService _perplexityTokenGenerator = new();
     private readonly Dictionary<string, bool> _engineUpdateToastShown = new(StringComparer.OrdinalIgnoreCase);
@@ -171,6 +173,10 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     [ObservableProperty] private string _customProviderApiKeyDraft = "";
     [ObservableProperty] private string _customProviderApiKeyLabelDraft = "";
     [ObservableProperty] private bool _showCustomProviderApiKey;
+    [ObservableProperty] private bool _isFetchingCustomProviderModels;
+    [ObservableProperty] private bool _showCustomProviderModelsDialog;
+    [ObservableProperty] private string _customProviderModelSearch = "";
+    partial void OnCustomProviderModelSearchChanged(string value) => ApplyCustomProviderModelFilter();
     [ObservableProperty] private bool _showPerplexityAccountDialog;
     [ObservableProperty] private string _perplexitySessionTokenDraft = "";
     [ObservableProperty] private bool _isPerplexityTokenGenerationMode;
@@ -269,6 +275,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     public ObservableCollection<EngineOptionViewModel> EngineOptions { get; } = new();
     public ObservableCollection<CliProxyApiKeyViewModel> CliProxyApiKeys { get; } = new();
     public ObservableCollection<SelectableModelViewModel> SelectableModels { get; } = new();
+    public ObservableCollection<SelectableModelViewModel> CustomProviderModels { get; } = new();
 
     public MainWindowViewModel() : this(new SettingsService(), null!, null!, null!, null!, null!) { }
 
@@ -1661,20 +1668,144 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     [RelayCommand]
     private async Task ConfirmAddCustomProvider()
     {
+        if (IsFetchingCustomProviderModels) return;
+
+        var name = CustomProviderNameDraft.Trim();
+        var baseUrl = CustomProviderBaseUrlDraft.Trim();
+        var apiKey = CustomProviderApiKeyDraft.Trim();
+        if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(baseUrl) || string.IsNullOrEmpty(apiKey)) return;
+
+        // Probe the upstream /models endpoint. A non-200 (or unreachable) URL aborts the add
+        // and surfaces an error toast — the /v1/models listing is an OpenAI-compatible standard.
+        _customProviderModelFetchCts?.Cancel();
+        _customProviderModelFetchCts = new CancellationTokenSource();
+        IsFetchingCustomProviderModels = true;
+        ShowOAuthStatus = false;
+        var result = await _upstreamModelFetch.FetchAsync(baseUrl, apiKey, _customProviderModelFetchCts.Token);
+        IsFetchingCustomProviderModels = false;
+
+        if (!result.Success)
+        {
+            // Close the modal so the top-right status toast (rendered under the overlay) is visible.
+            ShowAddCustomProviderDialog = false;
+            OAuthStatusIsError = true;
+            OAuthStatusMessage = result.Error ?? _localization.GetString("Dialog_CustomProviderModels_FetchError");
+            ShowOAuthStatus = true;
+            return;
+        }
+
+        ClearCustomProviderModels();
+        foreach (var model in result.Models)
+        {
+            var vm = new SelectableModelViewModel(model, name) { IsSelected = false };
+            vm.PropertyChanged += OnCustomProviderModelPropertyChanged;
+            CustomProviderModels.Add(vm);
+        }
+        CustomProviderModelSearch = "";
+        ApplyCustomProviderModelFilter();
+
+        ShowAddCustomProviderDialog = false;
+        ShowCustomProviderModelsDialog = true;
+        RaiseCustomProviderModelState();
+    }
+
+    [RelayCommand]
+    private async Task ConfirmCustomProviderModels()
+    {
+        var selected = CustomProviderModels.Where(m => m.IsSelected).Select(m => m.Name).ToList();
+        if (selected.Count == 0) return;
+
         var name = CustomProviderNameDraft.Trim();
         var baseUrl = CustomProviderBaseUrlDraft.Trim();
         var apiKey = CustomProviderApiKeyDraft.Trim();
         var label = CustomProviderApiKeyLabelDraft.Trim();
         if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(baseUrl) || string.IsNullOrEmpty(apiKey)) return;
 
-        ShowAddCustomProviderDialog = false;
-        await _catalog.AddCustomProviderAsync(name, baseUrl, apiKey, string.IsNullOrEmpty(label) ? null : label);
+        ShowCustomProviderModelsDialog = false;
+        await _catalog.AddCustomProviderAsync(name, baseUrl, apiKey, string.IsNullOrEmpty(label) ? null : label, selected);
+        ResetCustomProviderDrafts();
+        OnPropertyChanged(nameof(ConnectedProviderCount));
+    }
+
+    [RelayCommand]
+    private void DismissCustomProviderModels()
+    {
+        ShowCustomProviderModelsDialog = false;
+        ClearCustomProviderModels();
+        ResetCustomProviderDrafts();
+    }
+
+    public IEnumerable<SelectableModelViewModel> VisibleCustomProviderModels =>
+        CustomProviderModels.Where(m => m.IsVisible);
+    public int CustomProviderModelCount => CustomProviderModels.Count;
+    public int SelectedCustomProviderModelCount => CustomProviderModels.Count(m => m.IsSelected);
+    public bool HasCustomProviderModels => CustomProviderModels.Count > 0;
+    public bool HasVisibleCustomProviderModels => CustomProviderModels.Any(m => m.IsVisible);
+    public bool ShowNoCustomProviderModelResults => HasCustomProviderModels && !HasVisibleCustomProviderModels;
+    public bool CanConfirmCustomProviderModels => SelectedCustomProviderModelCount > 0;
+    public string CustomProviderModelsSelectedLabel => _localization.GetString(
+        "Dialog_CustomProviderModels_SelectedLabel", SelectedCustomProviderModelCount, CustomProviderModelCount);
+    public bool? AllVisibleCustomProviderModelsSelected
+    {
+        get
+        {
+            var visible = CustomProviderModels.Where(m => m.IsVisible).ToList();
+            if (visible.Count == 0) return false;
+            var selected = visible.Count(m => m.IsSelected);
+            if (selected == 0) return false;
+            return selected == visible.Count ? true : null;
+        }
+        set
+        {
+            var select = value != false;
+            foreach (var model in CustomProviderModels.Where(m => m.IsVisible))
+                model.IsSelected = select;
+            RaiseCustomProviderModelState();
+        }
+    }
+
+    private void ApplyCustomProviderModelFilter()
+    {
+        foreach (var model in CustomProviderModels)
+            model.IsVisible = model.Matches(CustomProviderModelSearch);
+        RaiseCustomProviderModelState();
+    }
+
+    private void RaiseCustomProviderModelState()
+    {
+        OnPropertyChanged(nameof(VisibleCustomProviderModels));
+        OnPropertyChanged(nameof(CustomProviderModelCount));
+        OnPropertyChanged(nameof(SelectedCustomProviderModelCount));
+        OnPropertyChanged(nameof(HasCustomProviderModels));
+        OnPropertyChanged(nameof(HasVisibleCustomProviderModels));
+        OnPropertyChanged(nameof(ShowNoCustomProviderModelResults));
+        OnPropertyChanged(nameof(CanConfirmCustomProviderModels));
+        OnPropertyChanged(nameof(CustomProviderModelsSelectedLabel));
+        OnPropertyChanged(nameof(AllVisibleCustomProviderModelsSelected));
+    }
+
+    private void OnCustomProviderModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(SelectableModelViewModel.IsSelected)) return;
+        RaiseCustomProviderModelState();
+    }
+
+    private void ClearCustomProviderModels()
+    {
+        foreach (var vm in CustomProviderModels)
+            vm.PropertyChanged -= OnCustomProviderModelPropertyChanged;
+        CustomProviderModels.Clear();
+        RaiseCustomProviderModelState();
+    }
+
+    private void ResetCustomProviderDrafts()
+    {
         CustomProviderNameDraft = "";
         CustomProviderBaseUrlDraft = "";
         CustomProviderApiKeyDraft = "";
         CustomProviderApiKeyLabelDraft = "";
+        CustomProviderModelSearch = "";
         ShowCustomProviderApiKey = false;
-        OnPropertyChanged(nameof(ConnectedProviderCount));
     }
 
     [RelayCommand]
@@ -2698,6 +2829,10 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         _cliProxyModelFetchCts?.Cancel();
         _cliProxyModelFetchCts?.Dispose();
         _cliProxyModelFetchCts = null;
+
+        _customProviderModelFetchCts?.Cancel();
+        _customProviderModelFetchCts?.Dispose();
+        _customProviderModelFetchCts = null;
 
         _perplexityModelFetchCts?.Cancel();
         _perplexityModelFetchCts?.Dispose();

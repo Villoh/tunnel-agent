@@ -163,7 +163,7 @@ public sealed class ProviderCatalogService : IDisposable
     /// Add a custom OpenAI-compatible provider (name + base-url + api key) to
     /// proxy-config.yaml under <c>openai-compatibility</c>, then rebuild the list.
     /// </summary>
-    public async Task AddCustomProviderAsync(string name, string baseUrl, string apiKey, string? label)
+    public async Task AddCustomProviderAsync(string name, string baseUrl, string apiKey, string? label, IReadOnlyList<string>? models = null)
     {
         var id = UniqueProviderId(name);
         var ps = new ProviderSettings
@@ -172,7 +172,8 @@ public sealed class ProviderCatalogService : IDisposable
             Enabled = true,
             Kind = ProviderKind.OpenAICompatibility,
             BaseUrl = baseUrl,
-            Accounts = [new ProviderAccountSettings { ApiKey = apiKey, Label = label ?? "" }]
+            Accounts = [new ProviderAccountSettings { ApiKey = apiKey, Label = label ?? "" }],
+            Models = models?.ToList() ?? []
         };
         _settings.Current.Providers.Add(ps);
         _settings.Save();

@@ -220,6 +220,24 @@
   <data name="Dialog_AddCustomProvider_Add" xml:space="preserve">
     <value>Adicionar fornecedor</value>
   </data>
+  <data name="Dialog_CustomProviderModels_Title" xml:space="preserve">
+    <value>Selecionar modelos</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_Description" xml:space="preserve">
+    <value>Escolha que modelos expor através do proxy.</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_SelectedLabel" xml:space="preserve">
+    <value>{0} de {1} modelos selecionados</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_FetchError" xml:space="preserve">
+    <value>Não foi possível obter os modelos do URL do fornecedor.</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_SearchWatermark" xml:space="preserve">
+    <value>Procurar modelos…</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_SelectAll" xml:space="preserve">
+    <value>Selecionar tudo</value>
+  </data>
 
   <data name="Dialog_AddPerplexity_Title" xml:space="preserve">
     <value>Adicionar conta Perplexity</value>

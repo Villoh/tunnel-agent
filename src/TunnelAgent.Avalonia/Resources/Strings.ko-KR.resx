@@ -220,6 +220,24 @@
   <data name="Dialog_AddCustomProvider_Add" xml:space="preserve">
     <value>공급자 추가</value>
   </data>
+  <data name="Dialog_CustomProviderModels_Title" xml:space="preserve">
+    <value>모델 선택</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_Description" xml:space="preserve">
+    <value>프록시를 통해 노출할 모델을 선택하세요.</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_SelectedLabel" xml:space="preserve">
+    <value>{1}개 중 {0}개 모델 선택됨</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_FetchError" xml:space="preserve">
+    <value>공급자 URL에서 모델을 가져올 수 없습니다.</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_SearchWatermark" xml:space="preserve">
+    <value>모델 검색…</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_SelectAll" xml:space="preserve">
+    <value>모두 선택</value>
+  </data>
 
   <data name="Dialog_AddPerplexity_Title" xml:space="preserve">
     <value>Perplexity 계정 추가</value>

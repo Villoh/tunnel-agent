@@ -39,6 +39,9 @@ public sealed class ProviderSettings
 
     /// <summary>API-key accounts for custom providers. Empty for OAuth providers.</summary>
     public List<ProviderAccountSettings> Accounts { get; set; } = [];
+
+    /// <summary>Upstream model names exposed for OpenAI-compatible providers (written under <c>models:</c>).</summary>
+    public List<string> Models { get; set; } = [];
 }
 
 public sealed class EngineRuntimeSettings

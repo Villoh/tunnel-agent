@@ -220,6 +220,24 @@
   <data name="Dialog_AddCustomProvider_Add" xml:space="preserve">
     <value>Sağlayıcı ekle</value>
   </data>
+  <data name="Dialog_CustomProviderModels_Title" xml:space="preserve">
+    <value>Modelleri seç</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_Description" xml:space="preserve">
+    <value>Proxy üzerinden sunulacak modelleri seçin.</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_SelectedLabel" xml:space="preserve">
+    <value>{1} modelden {0} tanesi seçildi</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_FetchError" xml:space="preserve">
+    <value>Sağlayıcı URL'sinden modeller alınamadı.</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_SearchWatermark" xml:space="preserve">
+    <value>Model ara…</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_SelectAll" xml:space="preserve">
+    <value>Tümünü seç</value>
+  </data>
 
   <data name="Dialog_AddPerplexity_Title" xml:space="preserve">
     <value>Perplexity hesabı ekle</value>

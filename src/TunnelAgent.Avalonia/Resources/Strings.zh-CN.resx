@@ -220,6 +220,24 @@
   <data name="Dialog_AddCustomProvider_Add" xml:space="preserve">
     <value>添加提供商</value>
   </data>
+  <data name="Dialog_CustomProviderModels_Title" xml:space="preserve">
+    <value>选择模型</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_Description" xml:space="preserve">
+    <value>选择通过代理公开的模型。</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_SelectedLabel" xml:space="preserve">
+    <value>已选择 {0} / {1} 个模型</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_FetchError" xml:space="preserve">
+    <value>无法从提供商 URL 获取模型。</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_SearchWatermark" xml:space="preserve">
+    <value>搜索模型…</value>
+  </data>
+  <data name="Dialog_CustomProviderModels_SelectAll" xml:space="preserve">
+    <value>全选</value>
+  </data>
 
   <data name="Dialog_AddPerplexity_Title" xml:space="preserve">
     <value>添加 Perplexity 账户</value>

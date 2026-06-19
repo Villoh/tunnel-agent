@@ -70,14 +70,34 @@ public sealed class ConfigService
             {
                 ProviderSettings? current = null;
                 ProviderAccountSettings? currentAccount = null;
+                var inModels = false;
                 for (i++; i < lines.Length && (lines[i].StartsWith("  ") || string.IsNullOrWhiteSpace(lines[i])); i++)
                 {
                     var t = lines[i].Trim();
-                    if (t.StartsWith("- name:", System.StringComparison.Ordinal))
+                    // Provider boundary (2-space indent) — distinct from a model entry (6-space indent).
+                    if (lines[i].StartsWith("  - name:", System.StringComparison.Ordinal))
                     {
                         if (current is not null && !string.IsNullOrWhiteSpace(current.Id)) result.Add(current);
                         current = new ProviderSettings { Id = Unyaml(t[7..].Trim()), Enabled = true, Kind = ProviderKind.OpenAICompatibility };
                         currentAccount = null;
+                        inModels = false;
+                    }
+                    else if (t == "models:")
+                    {
+                        inModels = true;
+                    }
+                    else if (t == "api-key-entries:")
+                    {
+                        inModels = false;
+                    }
+                    else if (current is not null && inModels && t.StartsWith("- name:", System.StringComparison.Ordinal))
+                    {
+                        var model = Unyaml(t[7..].Trim());
+                        if (!string.IsNullOrWhiteSpace(model)) current.Models.Add(model);
+                    }
+                    else if (current is not null && inModels)
+                    {
+                        // ignore alias/image/thinking lines within a model entry
                     }
                     else if (current is not null && t.StartsWith("display-name:", System.StringComparison.Ordinal))
                     {
@@ -322,6 +342,17 @@ public sealed class ConfigService
                     sb.AppendLine($"      - api-key: {YamlQuote(key.ApiKey)}");
                     if (!string.IsNullOrWhiteSpace(key.Label))
                         sb.AppendLine($"        label: {YamlQuote(key.Label)}");
+                }
+            }
+
+            var models = ps.Models.Where(m => !string.IsNullOrWhiteSpace(m)).Distinct().ToList();
+            if (models.Count > 0)
+            {
+                sb.AppendLine($"    models:");
+                foreach (var model in models)
+                {
+                    sb.AppendLine($"      - name: {YamlQuote(model)}");
+                    sb.AppendLine($"        alias: {YamlQuote(model)}");
                 }
             }
 

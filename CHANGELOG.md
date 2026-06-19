@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Custom provider model selection** (`UpstreamModelFetchService`, `MainWindowViewModel`, `ConfigService`, `ProviderSettings`, `MainWindow.axaml`): adding a custom OpenAI-compatible provider now probes `{base-url}/models`; on HTTP 200 a model-selection popup lists the upstream models (search + select-all, all unchecked, at least one required) and the chosen models are persisted under the provider's `models:` block in `proxy-config.yaml`. A non-200 or unreachable URL aborts the add and shows a top-right error toast without creating the provider.
 - **Upstream API key providers** (`ProviderCatalogService`, `ConfigService`, `ProvidersView`, `MainWindow`): added native API-key flows for Claude, OpenAI, and Gemini plus custom OpenAI-compatible providers stored in `proxy-config.yaml`, with add/edit dialogs, duplicate-key toast feedback, custom-provider add/remove actions, and localized UI strings.
 
 ### Changed

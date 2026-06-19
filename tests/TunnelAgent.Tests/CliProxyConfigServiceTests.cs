@@ -127,6 +127,37 @@ public sealed class ConfigServiceTests
     }
 
     [Fact]
+    public async Task WriteAndRead_CustomProviderModels_RoundTrip()
+    {
+        using var temp = new TestTempDirectory();
+        var settings = new SettingsService(temp.File("settings.json"));
+        await settings.LoadAsync();
+        settings.Current.Providers.Add(new ProviderSettings
+        {
+            Id = "openrouter",
+            Enabled = true,
+            Kind = ProviderKind.OpenAICompatibility,
+            BaseUrl = "https://openrouter.ai/api/v1",
+            Accounts = [new ProviderAccountSettings { ApiKey = "sk-or-test" }],
+            Models = ["openai/gpt-5", "anthropic/claude-opus-4.6"]
+        });
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
+
+        await config.WriteConfigAsync();
+
+        var yaml = await File.ReadAllTextAsync(config.ConfigPath);
+        Assert.Contains("    models:", yaml);
+        Assert.Contains("      - name: \"openai/gpt-5\"", yaml);
+        Assert.Contains("        alias: \"openai/gpt-5\"", yaml);
+        Assert.Contains("      - name: \"anthropic/claude-opus-4.6\"", yaml);
+
+        var parsed = await config.ReadProviderSettingsFromConfigAsync();
+        var provider = Assert.Single(parsed, p => p.Id == "openrouter");
+        Assert.Equal(new[] { "openai/gpt-5", "anthropic/claude-opus-4.6" }, provider.Models);
+        Assert.Single(provider.Accounts, a => a.ApiKey == "sk-or-test");
+    }
+
+    [Fact]
     public async Task WriteConfigAsync_CustomProvider_WithNoKeys_KeepsProviderWithoutKeyEntries()
     {
         using var temp = new TestTempDirectory();

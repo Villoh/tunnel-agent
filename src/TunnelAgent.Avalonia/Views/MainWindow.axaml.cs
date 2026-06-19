@@ -374,6 +374,20 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OnCustomProviderModelsOverlayPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm) vm.DismissCustomProviderModelsCommand.Execute(null);
+    }
+
+    private void OnCustomProviderModelsDialogKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape && DataContext is MainWindowViewModel vm)
+        {
+            e.Handled = true;
+            vm.DismissCustomProviderModelsCommand.Execute(null);
+        }
+    }
+
     private void OnPerplexityAccountOverlayPressed(object? sender, PointerPressedEventArgs e)
     {
         if (DataContext is MainWindowViewModel vm) vm.DismissPerplexityAccountDialogCommand.Execute(null);
