@@ -1752,9 +1752,18 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         _customProviderModelFetchCts?.Cancel();
         _customProviderModelFetchCts = new CancellationTokenSource();
         IsFetchingCustomProviderModels = true;
+        provider.IsFetchingModels = true;
         ShowOAuthStatus = false;
-        var result = await _upstreamModelFetch.FetchAsync(baseUrl, apiKey, _customProviderModelFetchCts.Token);
-        IsFetchingCustomProviderModels = false;
+        UpstreamModelsResult result;
+        try
+        {
+            result = await _upstreamModelFetch.FetchAsync(baseUrl, apiKey, _customProviderModelFetchCts.Token);
+        }
+        finally
+        {
+            IsFetchingCustomProviderModels = false;
+            provider.IsFetchingModels = false;
+        }
 
         if (!result.Success)
         {

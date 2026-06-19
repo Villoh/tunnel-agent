@@ -241,9 +241,15 @@
                                                     </Button>
                                                     <Button Classes="icon-btn" ToolTip.Tip="{l:Loc ProvidersView_Provider_EditModelsTooltip}"
                                                             IsVisible="{Binding IsCustomProvider}"
+                                                            IsEnabled="{Binding !IsFetchingModels}"
                                                             Command="{Binding #Root.DataContext.EditProviderModelsCommand}"
                                                             CommandParameter="{Binding}">
-                                                        <lucide:PackIconLucide Kind="SlidersHorizontal" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                                                        <Panel>
+                                                            <lucide:PackIconLucide Kind="SlidersHorizontal" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}"
+                                                                                   IsVisible="{Binding !IsFetchingModels}" />
+                                                            <lucide:PackIconLucide Classes="spin" Kind="LoaderCircle" Width="14" Height="14" Foreground="{DynamicResource AccentBrush}"
+                                                                                   IsVisible="{Binding IsFetchingModels}" />
+                                                        </Panel>
                                                     </Button>
                                                     <Button Classes="icon-btn" ToolTip.Tip="{l:Loc ProvidersView_Provider_RemoveProviderTooltip}"
                                                             IsVisible="{Binding IsCustomProvider}"

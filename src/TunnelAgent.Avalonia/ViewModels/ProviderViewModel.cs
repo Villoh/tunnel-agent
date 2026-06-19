@@ -271,6 +271,9 @@ public partial class ProviderViewModel : ViewModelBase
     /// <summary>Upstream models exposed for custom OpenAI-compatible providers (mirrors proxy-config.yaml).</summary>
     public IReadOnlyList<string> Models { get; set; } = [];
 
+    /// <summary>True while this custom provider's models are being fetched from its upstream <c>/models</c> endpoint.</summary>
+    [ObservableProperty] private bool _isFetchingModels;
+
     public int ActiveAccountCount => Accounts.Count(a => !a.IsDisabled);
 
     // ── Derived display helpers ───────────────────────────────────────────────
