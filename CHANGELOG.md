@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Provider row count localization** (`ProviderViewModel`, `Resources/Strings*.resx`): the provider sub-line (`N connected account(s)`, `N API key(s)`, and the mixed `… / …` form) now resolves through localized resources and refreshes on language change instead of showing hardcoded English.
 - **Custom provider key deletion** (`ConfigService`, `ProviderCatalogService`): deleting the last API key from a custom OpenAI-compatible provider now keeps the provider entry but removes the entire `api-key-entries` block, instead of deleting the provider or writing an empty `api-key`/`label` placeholder.
 - **Custom provider API-key editing** (`ProviderCatalogService`, `MainWindowViewModel`, `ProviderViewModel`, `MainWindow.axaml.cs`): editing an existing API key no longer shows the duplicate-key alert, label-only edits refresh the UI immediately, and clearing a label persists the empty label state back to `proxy-config.yaml`.
 - **Quota account filtering** (`MainWindowViewModel`, `QuotaFetchService`): API-key accounts are excluded from OAuth quota views and refresh loops so they no longer collide with OAuth token lookup or appear as quota-capable accounts.

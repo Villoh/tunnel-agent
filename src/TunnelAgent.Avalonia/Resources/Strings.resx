@@ -1043,6 +1043,12 @@
 <data name="ProvidersView_Provider_ApiKeyAddedPlural" xml:space="preserve">
   <value>{0} API Keys added</value>
 </data>
+  <data name="ProvidersView_Provider_ApiKeySingular" xml:space="preserve">
+    <value>{0} API key</value>
+  </data>
+  <data name="ProvidersView_Provider_ApiKeyPlural" xml:space="preserve">
+    <value>{0} API keys</value>
+  </data>
 <data name="Dialog_AddAccount_DuplicateApiKey" xml:space="preserve">
   <value>API key already exists.</value>
 </data>

@@ -1043,6 +1043,12 @@
 <data name="ProvidersView_Provider_ApiKeyAddedPlural" xml:space="preserve">
   <value>تمت إضافة {0} مفاتيح API</value>
 </data>
+  <data name="ProvidersView_Provider_ApiKeySingular" xml:space="preserve">
+    <value>{0} مفتاح API</value>
+  </data>
+  <data name="ProvidersView_Provider_ApiKeyPlural" xml:space="preserve">
+    <value>{0} مفاتيح API</value>
+  </data>
 <data name="Dialog_AddAccount_DuplicateApiKey" xml:space="preserve">
   <value>مفتاح API موجود بالفعل.</value>
 </data>

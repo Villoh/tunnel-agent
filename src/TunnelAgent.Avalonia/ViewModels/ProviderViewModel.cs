@@ -286,15 +286,22 @@ public partial class ProviderViewModel : ViewModelBase
             }
 
             if (accountCount > 0 && keyCount > 0)
-                return $"{FormatCount(accountCount, "connected account")} / {FormatCount(keyCount, "API key")}";
+                return $"{AccountCountText(accountCount)} / {ApiKeyCountText(keyCount)}";
             if (keyCount > 0)
-                return FormatCount(keyCount, "API key");
-            return FormatCount(accountCount, "connected account");
+                return ApiKeyCountText(keyCount);
+            return AccountCountText(accountCount);
         }
     }
 
-    private static string FormatCount(int count, string singular) =>
-        $"{count} {singular}{(count == 1 ? "" : "s")}";
+    private static string AccountCountText(int count) =>
+        LocalizationService.Instance.GetString(
+            count == 1 ? "ProvidersView_Provider_ConnectedAccountSingular" : "ProvidersView_Provider_ConnectedAccountPlural",
+            count);
+
+    private static string ApiKeyCountText(int count) =>
+        LocalizationService.Instance.GetString(
+            count == 1 ? "ProvidersView_Provider_ApiKeySingular" : "ProvidersView_Provider_ApiKeyPlural",
+            count);
 
     public string ProviderDetailText => IsCustomProvider ? ApiKeyBaseUrl : "";
 

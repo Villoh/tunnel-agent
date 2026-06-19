@@ -1043,6 +1043,12 @@
 <data name="ProvidersView_Provider_ApiKeyAddedPlural" xml:space="preserve">
   <value>API 키 {0}개 추가됨</value>
 </data>
+  <data name="ProvidersView_Provider_ApiKeySingular" xml:space="preserve">
+    <value>{0}개 API 키</value>
+  </data>
+  <data name="ProvidersView_Provider_ApiKeyPlural" xml:space="preserve">
+    <value>{0}개 API 키</value>
+  </data>
 <data name="Dialog_AddAccount_DuplicateApiKey" xml:space="preserve">
   <value>API 키가 이미 있습니다.</value>
 </data>

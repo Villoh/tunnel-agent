@@ -1043,6 +1043,12 @@
 <data name="ProvidersView_Provider_ApiKeyAddedPlural" xml:space="preserve">
   <value>Добавлено {0} API-ключа</value>
 </data>
+  <data name="ProvidersView_Provider_ApiKeySingular" xml:space="preserve">
+    <value>{0} ключ API</value>
+  </data>
+  <data name="ProvidersView_Provider_ApiKeyPlural" xml:space="preserve">
+    <value>{0} ключей API</value>
+  </data>
 <data name="Dialog_AddAccount_DuplicateApiKey" xml:space="preserve">
   <value>API-ключ уже существует.</value>
 </data>

@@ -1043,6 +1043,12 @@
 <data name="ProvidersView_Provider_ApiKeyAddedPlural" xml:space="preserve">
   <value>{0} API कुंजियाँ जोड़ी गईं</value>
 </data>
+  <data name="ProvidersView_Provider_ApiKeySingular" xml:space="preserve">
+    <value>{0} API कुंजी</value>
+  </data>
+  <data name="ProvidersView_Provider_ApiKeyPlural" xml:space="preserve">
+    <value>{0} API कुंजियाँ</value>
+  </data>
 <data name="Dialog_AddAccount_DuplicateApiKey" xml:space="preserve">
   <value>API कुंजी पहले से मौजूद है।</value>
 </data>
