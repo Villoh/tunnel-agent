@@ -43,6 +43,9 @@ public sealed class RoutingStrategyOption(RoutingStrategy value, string displayK
 public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
 {
     private readonly LocalizationService _localization;
+    // OS UI culture captured at construction, before any SetCulture override mutates
+    // CultureInfo.CurrentUICulture. Used to resolve "System default" reliably.
+    private readonly System.Globalization.CultureInfo _systemCulture = System.Globalization.CultureInfo.CurrentUICulture;
     private readonly SettingsService _settings;
     private readonly EngineRegistryService _engineRegistry;
     private readonly ProviderCatalogService _catalog;
@@ -883,9 +886,9 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     /// Resolves the system language to a supported culture, falling back to English.
     /// Tries an exact match first (e.g. es-ES), then a two-letter prefix match (es-* → es-ES).
     /// </summary>
-    private static string GetSystemLanguageOrEnglish()
+    private string GetSystemLanguageOrEnglish()
     {
-        var systemCulture = LocalizationService.SystemCulture;
+        var systemCulture = _systemCulture;
         var supported = LocalizationService.SupportedLanguages;
 
         var exactMatch = supported.FirstOrDefault(l =>
