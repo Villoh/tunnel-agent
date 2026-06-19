@@ -1,6 +1,5 @@
 using IconPacks.Avalonia.SimpleIcons;
 using TunnelAgent.Services;
-using Xunit;
 
 namespace TunnelAgent.Tests;
 

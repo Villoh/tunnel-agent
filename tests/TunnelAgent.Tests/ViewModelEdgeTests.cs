@@ -56,7 +56,7 @@ public sealed class ViewModelEdgeTests
         vm.RefreshAccountCount();
 
         Assert.Equal(2, vm.ActiveAccountCount);
-        Assert.Equal("2 connected accounts", vm.ConnectedSubText);
+        Assert.Equal("2 API keys", vm.ConnectedSubText);
     }
 
     [Fact]

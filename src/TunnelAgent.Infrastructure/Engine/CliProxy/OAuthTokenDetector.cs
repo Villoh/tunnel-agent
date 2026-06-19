@@ -32,7 +32,6 @@ public sealed class OAuthTokenDetector
         {
             ["claude"]          = "claude",
             ["codex"]           = "codex",
-            ["gemini-cli"]      = "gemini",
             ["kimi"]            = "kimi",
             ["antigravity"]     = "antigravity",
             ["xai"]             = "xai",

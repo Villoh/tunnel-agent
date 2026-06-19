@@ -122,8 +122,8 @@ public sealed class ConfigService
                 var id = kind switch
                 {
                     ProviderKind.ClaudeApiKey => "claude",
-                    ProviderKind.CodexApiKey  => "codex",
-                    _ => "gemini-cli"
+                    ProviderKind.GeminiApiKey => "gemini-cli",
+                    _ => "codex"
                 };
                 var current = new ProviderSettings { Id = id, Enabled = true, Kind = kind };
                 ProviderAccountSettings? currentAccount = null;
@@ -309,18 +309,20 @@ public sealed class ConfigService
         foreach (var ps in s.Providers.Where(p => p.Kind == ProviderKind.OpenAICompatibility && !string.IsNullOrEmpty(p.BaseUrl)))
         {
             var dedupKeys = GetActiveProviderKeyEntries(ps);
-            if (dedupKeys.Count == 0) continue;
 
             var sb = new StringBuilder();
             sb.AppendLine($"  - name: {YamlKey(ps.Id)}");
             sb.AppendLine($"    disabled: {(!ps.Enabled).ToString().ToLowerInvariant()}");
             sb.AppendLine($"    base-url: {YamlQuote(ps.BaseUrl)}");
-            sb.AppendLine($"    api-key-entries:");
-            foreach (var key in dedupKeys)
+            if (dedupKeys.Count > 0)
             {
-                sb.AppendLine($"      - api-key: {YamlQuote(key.ApiKey)}");
-                if (!string.IsNullOrWhiteSpace(key.Label))
-                    sb.AppendLine($"        label: {YamlQuote(key.Label)}");
+                sb.AppendLine($"    api-key-entries:");
+                foreach (var key in dedupKeys)
+                {
+                    sb.AppendLine($"      - api-key: {YamlQuote(key.ApiKey)}");
+                    if (!string.IsNullOrWhiteSpace(key.Label))
+                        sb.AppendLine($"        label: {YamlQuote(key.Label)}");
+                }
             }
 
             entries.Add(sb.ToString());

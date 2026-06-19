@@ -61,6 +61,12 @@ public partial class ProviderAccountViewModel : ViewModelBase
     public string ApiKey     { get; }
 
     [ObservableProperty] private string _label;
+    partial void OnLabelChanged(string value)
+    {
+        OnPropertyChanged(nameof(DisplayName));
+        OnPropertyChanged(nameof(DetailText));
+    }
+
     [ObservableProperty] private bool   _isDisabled;
     [ObservableProperty] private string _providerBaseUrl = "";
 
@@ -101,7 +107,9 @@ public partial class ProviderAccountViewModel : ViewModelBase
     }
 
     public string MaskedKey => string.IsNullOrEmpty(ApiKey) ? "" :
-        ApiKey.Length > 12 ? $"{ApiKey[..8]}...{ApiKey[^4..]}" : ApiKey;
+        ApiKey.Length > 8 ? $"{ApiKey[..4]}...{ApiKey[^4..]}" : ApiKey;
+
+    public string DetailText => IsCustomKey && !string.IsNullOrWhiteSpace(Label) ? MaskedKey : "";
 
     /// <summary>True when this is a custom API-key account (no email, shows masked key).</summary>
     public bool IsCustomKey => !string.IsNullOrEmpty(ApiKey);
@@ -263,18 +271,32 @@ public partial class ProviderViewModel : ViewModelBase
 
     // ── Derived display helpers ───────────────────────────────────────────────
 
-    /// <summary>Bottom sub-line when connected: "N connected account(s)".</summary>
+    /// <summary>Bottom sub-line when connected: "N connected account(s)" or "N API Key(s) added".</summary>
     public string ConnectedSubText
     {
         get
         {
-            var n = ActiveAccountCount > 0 ? ActiveAccountCount : (Connected ? 1 : 0);
-            if (n == 0) return Description;
-            return LocalizationService.Instance.GetString(
-                n == 1 ? "ProvidersView_Provider_ConnectedAccountSingular" : "ProvidersView_Provider_ConnectedAccountPlural",
-                n);
+            var accountCount = Accounts.Count(a => !a.IsCustomKey && !a.IsDisabled);
+            var keyCount = Accounts.Count(a => a.IsCustomKey && !a.IsDisabled);
+
+            if (accountCount == 0 && keyCount == 0)
+            {
+                if (!Connected) return Description;
+                accountCount = 1;
+            }
+
+            if (accountCount > 0 && keyCount > 0)
+                return $"{FormatCount(accountCount, "connected account")} / {FormatCount(keyCount, "API key")}";
+            if (keyCount > 0)
+                return FormatCount(keyCount, "API key");
+            return FormatCount(accountCount, "connected account");
         }
     }
+
+    private static string FormatCount(int count, string singular) =>
+        $"{count} {singular}{(count == 1 ? "" : "s")}";
+
+    public string ProviderDetailText => IsCustomProvider ? ApiKeyBaseUrl : "";
 
     /// <summary>Color of the sub-line status text: green when connected/active, muted otherwise.</summary>
     public string StatusColor =>

@@ -291,30 +291,6 @@
     <value>Repor contas</value>
   </data>
 
-  <data name="Dialog_GeminiLogin_Title" xml:space="preserve">
-    <value>Adicionar conta Gemini</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode_Text" xml:space="preserve">
-    <value>Escolha como Gemini deve autenticar.</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode1_Title" xml:space="preserve">
-    <value>Code Assist</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode1_Desc" xml:space="preserve">
-    <value>Projeto GCP, seleção manual</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode2_Title" xml:space="preserve">
-    <value>Google One</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode2_Desc" xml:space="preserve">
-    <value>Conta pessoal, deteção automática do projeto</value>
-  </data>
-  <data name="Dialog_GeminiLogin_Cancel" xml:space="preserve">
-    <value>Cancelar</value>
-  </data>
-  <data name="Dialog_GeminiLogin_Connect" xml:space="preserve">
-    <value>Ligar</value>
-  </data>
 
   <!-- ═══════════════════════════════════════════════════════════════════════════
        TOAST NOTIFICATIONS
@@ -1028,9 +1004,6 @@
   <data name="Agent_codex_Description" xml:space="preserve">
     <value>Interface de linha de comandos OpenAI Codex.</value>
   </data>
-  <data name="Agent_gemini-cli_Description" xml:space="preserve">
-    <value>Agente de codificação CLI Google Gemini.</value>
-  </data>
   <data name="Agent_amp_Description" xml:space="preserve">
     <value>Assistente de codificação Amp da Sourcegraph.</value>
   </data>
@@ -1064,7 +1037,16 @@
   <data name="ProvidersView_Provider_ConnectedAccountPlural" xml:space="preserve">
     <value>{0} contas ligadas</value>
   </data>
-  <data name="AgentConfigOverlay_BulkTitle" xml:space="preserve">
+  <data name="ProvidersView_Provider_ApiKeyAddedSingular" xml:space="preserve">
+  <value>{0} chave API adicionada</value>
+</data>
+<data name="ProvidersView_Provider_ApiKeyAddedPlural" xml:space="preserve">
+  <value>{0} chaves API adicionadas</value>
+</data>
+<data name="Dialog_AddAccount_DuplicateApiKey" xml:space="preserve">
+  <value>A chave API já existe.</value>
+</data>
+<data name="AgentConfigOverlay_BulkTitle" xml:space="preserve">
     <value>Configurar agentes</value>
   </data>
   <data name="AgentConfigOverlay_SingleTitle" xml:space="preserve">
@@ -1123,5 +1105,8 @@
   </data>
   <data name="ConfigView_ListenPort_Apply" xml:space="preserve">
     <value>Aplicar</value>
+  </data>
+  <data name="Agent_gemini-cli_Description" xml:space="preserve">
+    <value>Google Gemini API-key provider.</value>
   </data>
 </root>

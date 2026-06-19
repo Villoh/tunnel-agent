@@ -1,7 +1,6 @@
 using IconPacks.Avalonia.SimpleIcons;
 using TunnelAgent.Services;
 using TunnelAgent.ViewModels;
-using Xunit;
 
 namespace TunnelAgent.Tests;
 
@@ -74,31 +73,16 @@ public sealed class QuotaFetchServiceEdgeTests
         var vm = new MainWindowViewModel();
         var claude   = new ProviderViewModel("claude",         "Claude",         PackIconSimpleIconsKind.Claude,  "#000000", "");
         var codex    = new ProviderViewModel("codex",          "Codex",          PackIconSimpleIconsKind.OpenAi,  "#000000", "");
-        var gemini   = new ProviderViewModel("gemini-cli",     "Gemini CLI",     PackIconSimpleIconsKind.OpenAi,  "#000000", "");
         var anti     = new ProviderViewModel("antigravity",    "Antigravity",    PackIconSimpleIconsKind.OpenAi,  "#000000", "");
         var local    = new ProviderViewModel("local-ai",       "Local",          PackIconSimpleIconsKind.OpenAi,  "#000000", "");
         // QuotaProviderCount counts providers that have at least one active account.
-        foreach (var p in new[] { claude, codex, gemini, anti })
+        foreach (var p in new[] { claude, codex, anti })
             p.Accounts.Add(new ProviderAccountViewModel(p.Id, "", "Account", isDisabled: false));
 
-        foreach (var p in new[] { claude, codex, gemini, anti, local })
+        foreach (var p in new[] { claude, codex, anti, local })
             vm.Providers.Add(p);
 
-        Assert.Equal(4, vm.QuotaProviderCount);
-    }
-
-    [Fact]
-    public async Task FetchAndApplyAsync_GeminiCli_WithoutTokenFile_CompletesWithoutError()
-    {
-        using var temp = new TestTempDirectory();
-        var service = new QuotaFetchService(temp.Path);
-        var provider = new ProviderViewModel("gemini-cli", "Gemini CLI", PackIconSimpleIconsKind.OpenAi, "#000000", "");
-        var account = new ProviderAccountViewModel("gemini-cli", "", "test@example.com", isDisabled: false);
-        provider.Accounts.Add(account);
-
-        await service.FetchAndApplyAsync(provider);
-
-        Assert.Empty(account.QuotaBars);
+        Assert.Equal(3, vm.QuotaProviderCount);
     }
 
     [Fact]

@@ -291,30 +291,6 @@
     <value>계정 초기화</value>
   </data>
 
-  <data name="Dialog_GeminiLogin_Title" xml:space="preserve">
-    <value>Gemini 계정 추가</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode_Text" xml:space="preserve">
-    <value>Gemini의 인증 방식을 선택하세요.</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode1_Title" xml:space="preserve">
-    <value>Code Assist</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode1_Desc" xml:space="preserve">
-    <value>GCP 프로젝트, 수동 선택</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode2_Title" xml:space="preserve">
-    <value>Google One</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode2_Desc" xml:space="preserve">
-    <value>개인 계정, 프로젝트 자동 검색</value>
-  </data>
-  <data name="Dialog_GeminiLogin_Cancel" xml:space="preserve">
-    <value>취소</value>
-  </data>
-  <data name="Dialog_GeminiLogin_Connect" xml:space="preserve">
-    <value>연결</value>
-  </data>
 
   <!-- ═══════════════════════════════════════════════════════════════════════════
        TOAST NOTIFICATIONS
@@ -1028,9 +1004,6 @@
   <data name="Agent_codex_Description" xml:space="preserve">
     <value>OpenAI Codex 명령줄 인터페이스입니다.</value>
   </data>
-  <data name="Agent_gemini-cli_Description" xml:space="preserve">
-    <value>Google Gemini CLI 코딩 에이전트입니다.</value>
-  </data>
   <data name="Agent_amp_Description" xml:space="preserve">
     <value>Sourcegraph의 Amp 코딩 어시스턴트입니다.</value>
   </data>
@@ -1064,7 +1037,16 @@
   <data name="ProvidersView_Provider_ConnectedAccountPlural" xml:space="preserve">
     <value>연결된 계정 {0}개</value>
   </data>
-  <data name="AgentConfigOverlay_BulkTitle" xml:space="preserve">
+  <data name="ProvidersView_Provider_ApiKeyAddedSingular" xml:space="preserve">
+  <value>API 키 {0}개 추가됨</value>
+</data>
+<data name="ProvidersView_Provider_ApiKeyAddedPlural" xml:space="preserve">
+  <value>API 키 {0}개 추가됨</value>
+</data>
+<data name="Dialog_AddAccount_DuplicateApiKey" xml:space="preserve">
+  <value>API 키가 이미 있습니다.</value>
+</data>
+<data name="AgentConfigOverlay_BulkTitle" xml:space="preserve">
     <value>에이전트 구성</value>
   </data>
   <data name="AgentConfigOverlay_SingleTitle" xml:space="preserve">
@@ -1123,5 +1105,8 @@
   </data>
   <data name="ConfigView_ListenPort_Apply" xml:space="preserve">
     <value>적용</value>
+  </data>
+  <data name="Agent_gemini-cli_Description" xml:space="preserve">
+    <value>Google Gemini API-key provider.</value>
   </data>
 </root>

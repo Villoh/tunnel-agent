@@ -108,7 +108,6 @@ public sealed class AgentConfigurationService
         {
             "claude-code"    => new[] { ClaudeCodeRaw(proxyBaseUrl, apiKey) },
             "codex"          => CodexRaw(proxyBaseUrl, apiKey),
-            "gemini-cli"     => new[] { EnvExportRaw("gemini-cli", GeminiEnv(proxyBaseUrl, apiKey)) },
             "amp"            => AmpRaw(proxyBaseUrl, apiKey),
             "opencode"       => new[] { OpenCodeRaw(proxyBaseUrl, apiKey, models) },
             "pi"             => new[] { PiRaw(proxyBaseUrl, apiKey, models) },
@@ -128,7 +127,6 @@ public sealed class AgentConfigurationService
             {
                 "claude-code"  => ApplyClaudeCode(proxyBaseUrl, apiKey, remove),
                 "codex"        => ApplyCodex(proxyBaseUrl, apiKey, remove),
-                "gemini-cli"   => ApplyGeminiCli(proxyBaseUrl, apiKey, remove),
                 "amp"          => ApplyAmp(proxyBaseUrl, apiKey, remove),
                 "opencode"     => AgentConfigApplyResult.Failure("OpenCode requires async apply."),
                 "factory-droid"=> ApplyFactoryDroid(proxyBaseUrl, apiKey, remove, modelEntries),
@@ -293,30 +291,6 @@ public sealed class AgentConfigurationService
         };
         return string.Join(Environment.NewLine, lines.Where(l => l is not null));
     }
-
-    // ── Gemini CLI ────────────────────────────────────────────────────────────
-
-    private static AgentConfigApplyResult ApplyGeminiCli(string proxyBaseUrl, string apiKey, bool remove)
-    {
-        if (remove)
-        {
-            TunnelAgent.Infrastructure.Services.UserEnvironmentService.Remove("GOOGLE_GEMINI_BASE_URL");
-            TunnelAgent.Infrastructure.Services.UserEnvironmentService.Remove("GEMINI_API_KEY");
-            return AgentConfigApplyResult.Ok(
-                "Removed Gemini CLI proxy configuration. Restart your terminal for changes to take effect.");
-        }
-
-        var baseUrl = proxyBaseUrl;
-        var key     = HasApiKey(apiKey) ? apiKey : "no-key";
-        TunnelAgent.Infrastructure.Services.UserEnvironmentService.Set("GOOGLE_GEMINI_BASE_URL", baseUrl);
-        TunnelAgent.Infrastructure.Services.UserEnvironmentService.Set("GEMINI_API_KEY", key);
-        return AgentConfigApplyResult.Ok(
-            "Saved to user environment",
-            configPath: "Saved to user environment");
-    }
-
-    private static string[] GeminiEnv(string proxyBaseUrl, string apiKey) =>
-        ["GOOGLE_GEMINI_BASE_URL=" + proxyBaseUrl, "GEMINI_API_KEY=" + (HasApiKey(apiKey) ? apiKey : "no-key")];
 
     // ── Amp CLI ───────────────────────────────────────────────────────────────
 

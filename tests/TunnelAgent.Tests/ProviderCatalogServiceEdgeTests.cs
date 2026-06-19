@@ -1,5 +1,4 @@
 using TunnelAgent.Services;
-using Xunit;
 
 using TunnelAgent.Infrastructure.Engine.CliProxy;
 namespace TunnelAgent.Tests;
@@ -49,6 +48,38 @@ public sealed class ProviderCatalogServiceEdgeTests
         Assert.False(File.Exists(oauthFile));
         Assert.False(File.Exists(customFile));
         Assert.True(Directory.Exists(Path.Combine(authDir, ".tunnelagent-backup")));
+    }
+
+    [Fact]
+    public async Task RemoveAccountAsync_LastCustomProviderKey_RemovesEntriesAndKeepsProvider()
+    {
+        using var temp = new TestTempDirectory();
+        var authDir = temp.File("auth");
+        var settings = new SettingsService(temp.File("settings.json"));
+        await settings.LoadAsync();
+        settings.Current.Providers.Add(new ProviderSettings
+        {
+            Id = "opencode",
+            Enabled = true,
+            Kind = ProviderKind.OpenAICompatibility,
+            BaseUrl = "https://opencode.ai/zen/go/v1",
+            Accounts = [new ProviderAccountSettings { ApiKey = "1234", Label = "mikel" }]
+        });
+
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir);
+        using var catalog = new ProviderCatalogService(settings, config, authDir);
+        await catalog.InitializeAsync();
+
+        await catalog.RemoveAccountAsync("opencode", "1234");
+
+        var provider = Assert.Single(settings.Current.Providers, p => p.Id == "opencode");
+        Assert.Empty(provider.Accounts);
+
+        var yaml = await File.ReadAllTextAsync(config.ConfigPath);
+        Assert.Contains("  - name: opencode", yaml);
+        Assert.Contains("    base-url: \"https://opencode.ai/zen/go/v1\"", yaml);
+        Assert.DoesNotContain("api-key-entries:", yaml);
+        Assert.DoesNotContain("label: \"mikel\"", yaml);
     }
 
     [Fact]

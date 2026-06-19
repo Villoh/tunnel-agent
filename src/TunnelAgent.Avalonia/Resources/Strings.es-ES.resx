@@ -287,30 +287,6 @@
     <value>Restablecer cuentas</value>
   </data>
 
-  <data name="Dialog_GeminiLogin_Title" xml:space="preserve">
-    <value>Agregar cuenta de Gemini</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode_Text" xml:space="preserve">
-    <value>Elige cómo Gemini debe autenticarse.</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode1_Title" xml:space="preserve">
-    <value>Code Assist</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode1_Desc" xml:space="preserve">
-    <value>Proyecto GCP, selección manual</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode2_Title" xml:space="preserve">
-    <value>Google One</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode2_Desc" xml:space="preserve">
-    <value>Cuenta personal, descubrimiento automático</value>
-  </data>
-  <data name="Dialog_GeminiLogin_Cancel" xml:space="preserve">
-    <value>Cancelar</value>
-  </data>
-  <data name="Dialog_GeminiLogin_Connect" xml:space="preserve">
-    <value>Conectar</value>
-  </data>
 
   
   <data name="Toast_AppUpdateAvailable_Title" xml:space="preserve">
@@ -1004,9 +980,6 @@
   <data name="Agent_codex_Description" xml:space="preserve">
     <value>Interfaz de línea de comandos de OpenAI Codex.</value>
   </data>
-  <data name="Agent_gemini-cli_Description" xml:space="preserve">
-    <value>Agente de programación CLI de Google Gemini.</value>
-  </data>
   <data name="Agent_amp_Description" xml:space="preserve">
     <value>Asistente de programación Amp de Sourcegraph.</value>
   </data>
@@ -1040,7 +1013,16 @@
   <data name="ProvidersView_Provider_ConnectedAccountPlural" xml:space="preserve">
     <value>{0} cuentas conectadas</value>
   </data>
-  <data name="AgentConfigOverlay_BulkTitle" xml:space="preserve">
+  <data name="ProvidersView_Provider_ApiKeyAddedSingular" xml:space="preserve">
+  <value>{0} clave de API añadida</value>
+</data>
+<data name="ProvidersView_Provider_ApiKeyAddedPlural" xml:space="preserve">
+  <value>{0} claves de API añadidas</value>
+</data>
+<data name="Dialog_AddAccount_DuplicateApiKey" xml:space="preserve">
+  <value>La clave de API ya existe.</value>
+</data>
+<data name="AgentConfigOverlay_BulkTitle" xml:space="preserve">
     <value>Configurar agentes</value>
   </data>
   <data name="AgentConfigOverlay_SingleTitle" xml:space="preserve">
@@ -1099,5 +1081,8 @@
   </data>
   <data name="ConfigView_ListenPort_Apply" xml:space="preserve">
     <value>Aplicar</value>
+  </data>
+  <data name="Agent_gemini-cli_Description" xml:space="preserve">
+    <value>Google Gemini API-key provider.</value>
   </data>
 </root>

@@ -1,5 +1,4 @@
 using TunnelAgent.Services;
-using Xunit;
 
 using TunnelAgent.Infrastructure.Engine.CliProxy;
 namespace TunnelAgent.Tests;
@@ -9,7 +8,6 @@ public sealed class OAuthServiceTests
     [Theory]
     [InlineData("claude", true)]
     [InlineData("codex", true)]
-    [InlineData("gemini-cli", true)]
     [InlineData("kimi", true)]
     [InlineData("antigravity", true)]
     [InlineData("local-ai", false)]

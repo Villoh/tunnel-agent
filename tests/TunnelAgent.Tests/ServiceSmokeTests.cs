@@ -27,7 +27,7 @@ public sealed class ServiceSmokeTests
     public void OAuthService_IsOAuthProvider_RecognizesSupportedProviders()
     {
         Assert.True(OAuthService.IsOAuthProvider("claude"));
-        Assert.True(OAuthService.IsOAuthProvider("gemini-cli"));
+        Assert.True(OAuthService.IsOAuthProvider("codex"));
         Assert.False(OAuthService.IsOAuthProvider("local-ai"));
     }
 

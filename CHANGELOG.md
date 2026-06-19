@@ -14,10 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Provider credentials source of truth** (`ConfigService`, `ProviderCatalogService`): upstream provider API keys, labels, base URLs, disabled custom providers, and OpenAI-compatible provider entries now round-trip through `proxy-config.yaml`; legacy `openai-compat-*.json` files are migrated and removed.
-- **Provider/account display** (`ProviderViewModel`, `ProvidersView`): built-in providers now display as Claude, OpenAI, and Gemini, API-key rows show label plus provider base URL instead of exposing the raw/masked key, and per-key enable toggles are hidden for API-key credentials that CLIProxyAPI cannot disable individually.
+- **Provider/account display** (`ProviderViewModel`, `ProvidersView`): built-in providers now display as Claude, OpenAI, and Gemini; custom providers show their base URL on the provider row; API-key rows show the label with a masked `xxxx...yyyy` key underneath (or only the masked key when unlabeled); API-key credentials display as `N API key(s)`, OAuth credentials as `N connected account(s)`, and mixed providers as `N connected account(s) / N API key(s)`; per-key enable toggles are hidden for API-key credentials that CLIProxyAPI cannot disable individually.
+- **Gemini provider scope** (`ProviderCatalogService`, `ConfigService`, `OAuthService`, `QuotaView`): Gemini support is now API-key-only via `gemini-api-key`; removed Gemini CLI OAuth/login, agent configuration, and quota UI paths after CLIProxyAPI dropped Gemini CLI support.
 
 ### Fixed
 
+- **Custom provider key deletion** (`ConfigService`, `ProviderCatalogService`): deleting the last API key from a custom OpenAI-compatible provider now keeps the provider entry but removes the entire `api-key-entries` block, instead of deleting the provider or writing an empty `api-key`/`label` placeholder.
+- **Custom provider API-key editing** (`ProviderCatalogService`, `MainWindowViewModel`, `ProviderViewModel`, `MainWindow.axaml.cs`): editing an existing API key no longer shows the duplicate-key alert, label-only edits refresh the UI immediately, and clearing a label persists the empty label state back to `proxy-config.yaml`.
 - **Quota account filtering** (`MainWindowViewModel`, `QuotaFetchService`): API-key accounts are excluded from OAuth quota views and refresh loops so they no longer collide with OAuth token lookup or appear as quota-capable accounts.
 - **Debug diagnostics startup** (`MainWindow.axaml.cs`): debug builds now initialize Avalonia diagnostics conditionally so release deployments do not require the diagnostics assembly.
 

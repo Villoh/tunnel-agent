@@ -291,30 +291,6 @@
     <value>Сбросить аккаунты</value>
   </data>
 
-  <data name="Dialog_GeminiLogin_Title" xml:space="preserve">
-    <value>Добавить аккаунт Gemini</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode_Text" xml:space="preserve">
-    <value>Выберите способ аутентификации Gemini.</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode1_Title" xml:space="preserve">
-    <value>Code Assist</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode1_Desc" xml:space="preserve">
-    <value>Проект GCP, выбор вручную</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode2_Title" xml:space="preserve">
-    <value>Google One</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode2_Desc" xml:space="preserve">
-    <value>Личный аккаунт, автоопределение проекта</value>
-  </data>
-  <data name="Dialog_GeminiLogin_Cancel" xml:space="preserve">
-    <value>Отмена</value>
-  </data>
-  <data name="Dialog_GeminiLogin_Connect" xml:space="preserve">
-    <value>Подключить</value>
-  </data>
 
   <!-- ═══════════════════════════════════════════════════════════════════════════
        TOAST NOTIFICATIONS
@@ -1028,9 +1004,6 @@
   <data name="Agent_codex_Description" xml:space="preserve">
     <value>Интерфейс командной строки OpenAI Codex.</value>
   </data>
-  <data name="Agent_gemini-cli_Description" xml:space="preserve">
-    <value>CLI-агент Google Gemini для написания кода.</value>
-  </data>
   <data name="Agent_amp_Description" xml:space="preserve">
     <value>Помощник по написанию кода Amp от Sourcegraph.</value>
   </data>
@@ -1064,7 +1037,16 @@
   <data name="ProvidersView_Provider_ConnectedAccountPlural" xml:space="preserve">
     <value>{0} подключённых аккаунтов</value>
   </data>
-  <data name="AgentConfigOverlay_BulkTitle" xml:space="preserve">
+  <data name="ProvidersView_Provider_ApiKeyAddedSingular" xml:space="preserve">
+  <value>Добавлен {0} API-ключ</value>
+</data>
+<data name="ProvidersView_Provider_ApiKeyAddedPlural" xml:space="preserve">
+  <value>Добавлено {0} API-ключа</value>
+</data>
+<data name="Dialog_AddAccount_DuplicateApiKey" xml:space="preserve">
+  <value>API-ключ уже существует.</value>
+</data>
+<data name="AgentConfigOverlay_BulkTitle" xml:space="preserve">
     <value>Настроить агентов</value>
   </data>
   <data name="AgentConfigOverlay_SingleTitle" xml:space="preserve">
@@ -1123,5 +1105,8 @@
   </data>
   <data name="ConfigView_ListenPort_Apply" xml:space="preserve">
     <value>Применить</value>
+  </data>
+  <data name="Agent_gemini-cli_Description" xml:space="preserve">
+    <value>Google Gemini API-key provider.</value>
   </data>
 </root>

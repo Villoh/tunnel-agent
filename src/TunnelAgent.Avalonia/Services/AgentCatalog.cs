@@ -40,16 +40,6 @@ public static class AgentCatalog
             AssetsBase + "codex.svg"),
 
         new AgentDefinition(
-            "gemini-cli", "Gemini CLI",
-            "Google Gemini CLI coding agent.",
-            new[] { "gemini", "gemini.cmd", "gemini.exe" },
-            Array.Empty<string>(),
-            "https://github.com/google-gemini/gemini-cli",
-            "#4285F4",
-            AssetsBase + "gemini-cli.svg",
-            ConfiguredEnvVar: "GOOGLE_GEMINI_BASE_URL"),
-
-        new AgentDefinition(
             "amp", "Amp CLI",
             "Sourcegraph's Amp coding assistant.",
             new[] { "amp", "amp.cmd", "amp.exe" },

@@ -1,8 +1,6 @@
-using System.ComponentModel;
 using IconPacks.Avalonia.SimpleIcons;
 using TunnelAgent.Services;
 using TunnelAgent.ViewModels;
-using Xunit;
 
 using TunnelAgent.Core.Engine;
 namespace TunnelAgent.Tests;
@@ -109,7 +107,7 @@ public sealed class ViewModelTests
     [Theory]
     [InlineData("", "", "", false, "")]
     [InlineData("short", "", "Label", true, "Label")]
-    [InlineData("1234567890abcdef", "", "", true, "12345678...cdef")]
+    [InlineData("1234567890abcdef", "", "", true, "1234...cdef")]
     [InlineData("1234567890abcdef", "mail@example.com", "Label", true, "mail@example.com")]
     public void ProviderAccountViewModel_DisplayAndMask_UseExpectedFallbacks(
         string apiKey, string email, string label, bool isCustomKey, string displayName)
@@ -121,8 +119,8 @@ public sealed class ViewModelTests
 
         Assert.Equal(isCustomKey, vm.IsCustomKey);
         Assert.Equal(displayName, vm.DisplayName);
-        if (apiKey.Length > 12)
-            Assert.Equal("12345678...cdef", vm.MaskedKey);
+        if (apiKey.Length > 8)
+            Assert.Equal("1234...cdef", vm.MaskedKey);
     }
 
     [Fact]
@@ -164,7 +162,7 @@ public sealed class ViewModelTests
     [Fact]
     public void ProviderViewModel_AccountCountAndEnableState_TrackAccounts()
     {
-        var vm = new ProviderViewModel("local", "Local", PackIconSimpleIconsKind.OpenAi, "#000000", "Description");
+        var vm = new ProviderViewModel("local", "Local", PackIconSimpleIconsKind.OpenAi, "#000000", "Description", supportsApiKey: true);
         var active = new ProviderAccountViewModel("local", "key1", "Active", isDisabled: false);
         var disabled = new ProviderAccountViewModel("local", "key2", "Disabled", isDisabled: true);
         vm.Accounts.Add(active);
@@ -174,10 +172,55 @@ public sealed class ViewModelTests
         vm.IsEnabled = false;
 
         Assert.Equal(1, vm.ActiveAccountCount);
-        Assert.Equal("1 connected account", vm.ConnectedSubText);
+        Assert.Equal("1 API key", vm.ConnectedSubText);
         Assert.True(vm.HasAccounts);
         Assert.False(active.IsProviderEnabled);
         Assert.False(disabled.IsProviderEnabled);
+    }
+
+    [Fact]
+    public void ProviderAccountViewModel_CustomKeyDisplay_UsesLabelThenMaskedKey()
+    {
+        var labeled = new ProviderAccountViewModel("local", "1234567890abcdef", "Test", false);
+        var unlabeled = new ProviderAccountViewModel("local", "1234567890abcdef", "", false);
+
+        Assert.Equal("Test", labeled.DisplayName);
+        Assert.Equal("1234...cdef", labeled.DetailText);
+        Assert.Equal("1234...cdef", unlabeled.DisplayName);
+        Assert.Equal("", unlabeled.DetailText);
+
+        unlabeled.Label = "Later";
+
+        Assert.Equal("Later", unlabeled.DisplayName);
+        Assert.Equal("1234...cdef", unlabeled.DetailText);
+    }
+
+    [Fact]
+    public void ProviderAccountViewModel_LabelChange_NotifiesDisplayProperties()
+    {
+        var vm = new ProviderAccountViewModel("local", "1234567890abcdef", "", false);
+        var changed = new List<string?>();
+        vm.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        vm.Label = "Later";
+
+        Assert.Contains(nameof(ProviderAccountViewModel.DisplayName), changed);
+        Assert.Contains(nameof(ProviderAccountViewModel.DetailText), changed);
+    }
+
+    [Fact]
+    public void ProviderViewModel_CustomProviderDetailText_ShowsBaseUrl()
+    {
+        var vm = new ProviderViewModel("local", "Local", PackIconSimpleIconsKind.OpenAi, "#000000", "Description", supportsApiKey: true)
+        {
+            ApiKeyBaseUrl = "https://local.example/v1"
+        };
+
+        vm.Accounts.Add(new ProviderAccountViewModel("local", "key1", "Active", isDisabled: false));
+        vm.RefreshAccountCount();
+
+        Assert.Equal("1 API key", vm.ConnectedSubText);
+        Assert.Equal("https://local.example/v1", vm.ProviderDetailText);
     }
 
     [Fact]

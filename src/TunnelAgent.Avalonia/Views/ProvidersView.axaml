@@ -212,6 +212,8 @@
                                                     <TextBlock Text="{Binding ConnectedSubText}" FontSize="11.5"
                                                                IsVisible="{Binding IsEnabled}"
                                                                Foreground="{Binding StatusColor, Converter={StaticResource HexBrush}}" />
+                                                    <TextBlock Text="{Binding ProviderDetailText}" Classes="row-desc"
+                                                               IsVisible="{Binding ProviderDetailText, Converter={StaticResource StringNotEmpty}}" />
                                                 </StackPanel>
                                                 <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center" Margin="8,0">
                                                     <Border Classes="chip" Background="#22AAAAFF" IsVisible="{Binding IsConnecting}" VerticalAlignment="Center" Margin="0,0,4,0">
@@ -269,8 +271,8 @@
                                                                             <TextBlock Text="{Binding PlanBadge}" Foreground="{DynamicResource AccentBrush}" FontWeight="Bold" />
                                                                         </Border>
                                                                     </StackPanel>
-                                                                    <TextBlock Text="{Binding ProviderBaseUrl}" Classes="row-desc"
-                                                                               IsVisible="{Binding ProviderBaseUrl, Converter={StaticResource StringNotEmpty}}" />
+                                                                    <TextBlock Text="{Binding DetailText}" Classes="row-desc"
+                                                                               IsVisible="{Binding DetailText, Converter={StaticResource StringNotEmpty}}" />
                                                                 </StackPanel>
                                                                 <Button Grid.Column="1" Classes="icon-btn" ToolTip.Tip="{l:Loc ProvidersView_Provider_EditAccountTooltip}"
                                                                         IsVisible="{Binding IsCustomKey}"

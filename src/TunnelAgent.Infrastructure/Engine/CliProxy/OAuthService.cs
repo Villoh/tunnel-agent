@@ -21,7 +21,6 @@ public sealed class OAuthService : IDisposable
         {
             ["claude"]          = "claude-login",
             ["codex"]           = "codex-login",
-            ["gemini-cli"]      = "login",            // gemini uses just -login
             ["kimi"]            = "kimi-login",
             ["antigravity"]     = "antigravity-login",
             ["xai"]             = "xai-login",
@@ -147,7 +146,6 @@ public sealed class OAuthService : IDisposable
     {
         "claude"         => "Claude Code",
         "codex"          => "OpenAI Codex",
-        "gemini-cli"     => "Gemini CLI",
         "kimi"           => "Kimi",
         "antigravity"    => "Antigravity",
         "xai"            => "xAI",

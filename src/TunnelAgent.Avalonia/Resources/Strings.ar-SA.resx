@@ -291,30 +291,6 @@
     <value>إعادة تعيين الحسابات</value>
   </data>
 
-  <data name="Dialog_GeminiLogin_Title" xml:space="preserve">
-    <value>إضافة حساب Gemini</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode_Text" xml:space="preserve">
-    <value>اختر طريقة مصادقة Gemini.</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode1_Title" xml:space="preserve">
-    <value>Code Assist</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode1_Desc" xml:space="preserve">
-    <value>مشروع GCP، اختيار يدوي</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode2_Title" xml:space="preserve">
-    <value>Google One</value>
-  </data>
-  <data name="Dialog_GeminiLogin_SelectMode2_Desc" xml:space="preserve">
-    <value>حساب شخصي، اكتشاف تلقائي للمشروع</value>
-  </data>
-  <data name="Dialog_GeminiLogin_Cancel" xml:space="preserve">
-    <value>إلغاء</value>
-  </data>
-  <data name="Dialog_GeminiLogin_Connect" xml:space="preserve">
-    <value>اتصال</value>
-  </data>
 
   <!-- ═══════════════════════════════════════════════════════════════════════════
        TOAST NOTIFICATIONS
@@ -1028,9 +1004,6 @@
   <data name="Agent_codex_Description" xml:space="preserve">
     <value>واجهة سطر أوامر OpenAI Codex.</value>
   </data>
-  <data name="Agent_gemini-cli_Description" xml:space="preserve">
-    <value>وكيل ترميز Google Gemini CLI.</value>
-  </data>
   <data name="Agent_amp_Description" xml:space="preserve">
     <value>مساعد ترميز Amp من Sourcegraph.</value>
   </data>
@@ -1064,7 +1037,16 @@
   <data name="ProvidersView_Provider_ConnectedAccountPlural" xml:space="preserve">
     <value>{0} حسابات متصلة</value>
   </data>
-  <data name="AgentConfigOverlay_BulkTitle" xml:space="preserve">
+  <data name="ProvidersView_Provider_ApiKeyAddedSingular" xml:space="preserve">
+  <value>تمت إضافة {0} مفتاح API</value>
+</data>
+<data name="ProvidersView_Provider_ApiKeyAddedPlural" xml:space="preserve">
+  <value>تمت إضافة {0} مفاتيح API</value>
+</data>
+<data name="Dialog_AddAccount_DuplicateApiKey" xml:space="preserve">
+  <value>مفتاح API موجود بالفعل.</value>
+</data>
+<data name="AgentConfigOverlay_BulkTitle" xml:space="preserve">
     <value>تكوين الوكلاء</value>
   </data>
   <data name="AgentConfigOverlay_SingleTitle" xml:space="preserve">
@@ -1123,5 +1105,8 @@
   </data>
   <data name="ConfigView_ListenPort_Apply" xml:space="preserve">
     <value>تطبيق</value>
+  </data>
+  <data name="Agent_gemini-cli_Description" xml:space="preserve">
+    <value>Google Gemini API-key provider.</value>
   </data>
 </root>

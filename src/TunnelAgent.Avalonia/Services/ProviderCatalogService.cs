@@ -23,10 +23,14 @@ public sealed class ProviderCatalogService : IDisposable
     [
         new("claude",         "Claude",         "Anthropic models via OAuth or API key."),
         new("codex",          "OpenAI",         "OpenAI models via OAuth or API key."),
-        new("gemini-cli",     "Gemini",         "Google Gemini via OAuth or API key."),
         new("kimi",           "Kimi",           "Moonshot AI via OAuth."),
         new("antigravity",    "Antigravity",    "Antigravity AI via OAuth."),
         new("xai",            "xAI",            "Grok models via xAI OAuth."),
+    ];
+
+    private static readonly ProviderMeta[] BuiltinApiKeyProviders =
+    [
+        new("gemini-cli", "Gemini", "Google Gemini via API key."),
     ];
 
     private readonly record struct ProviderMeta(string Id, string Name, string Description);
@@ -127,7 +131,7 @@ public sealed class ProviderCatalogService : IDisposable
         {
             created = false;
             existing.Disabled = false;
-            if (!string.IsNullOrWhiteSpace(label)) existing.Label = label!;
+            if (label is not null) existing.Label = label;
         }
         else
         {
@@ -136,6 +140,8 @@ public sealed class ProviderCatalogService : IDisposable
         _settings.Save();
 
         await _config.WriteConfigAsync();
+        BuildProviderList();
+        ProvidersRebuilt?.Invoke(this, EventArgs.Empty);
         _watcher.NotifyNow();
 
         return created;
@@ -148,6 +154,8 @@ public sealed class ProviderCatalogService : IDisposable
             ps.Accounts.RemoveAll(a => a.ApiKey == apiKey);
         _settings.Save();
         await _config.WriteConfigAsync();
+        BuildProviderList();
+        ProvidersRebuilt?.Invoke(this, EventArgs.Empty);
         _watcher.NotifyNow();
     }
 
@@ -377,7 +385,26 @@ public sealed class ProviderCatalogService : IDisposable
             Providers.Add(vm);
         }
 
-        // 2. Custom OpenAI-compatible providers from settings
+        // 2. Built-in API-key-only providers
+        foreach (var meta in BuiltinApiKeyProviders)
+        {
+            var kind = GetDefaultKind(meta.Id);
+            var ps = _settings.Current.Providers.FirstOrDefault(p => p.Id == meta.Id && p.Kind == kind);
+            var keyRecords = ApiKeyAccountsFor(meta.Id, kind);
+            var hasActiveAccts = keyRecords.Any(a => !a.Disabled);
+            var icon = ProviderIconRegistry.Get(meta.Id);
+            var vm = new ProviderViewModel(meta.Id, meta.Name, icon.IconKind, icon.LogoColor, meta.Description, customIconData: icon.CustomIconData, supportsApiKey: true)
+            {
+                IsEnabled = hasActiveAccts && (ps?.Enabled ?? true),
+                ApiKeyBaseUrl = ps?.BaseUrl ?? "",
+            };
+
+            SyncCustomAccounts(vm, keyRecords);
+            WireEvents(vm);
+            Providers.Add(vm);
+        }
+
+        // 3. Custom OpenAI-compatible providers from settings
         foreach (var ps in _settings.Current.Providers.Where(p => p.Kind == ProviderKind.OpenAICompatibility && !string.IsNullOrEmpty(p.BaseUrl)))
         {
             if (Providers.Any(p => p.Id == ps.Id)) continue; // skip if already added
@@ -440,9 +467,9 @@ public sealed class ProviderCatalogService : IDisposable
             foreach (var id in newlyConnected)
                 ProviderFirstConnected?.Invoke(this, id);
 
-            // Update custom provider account lists
+            // Update API-key-only provider account lists
             foreach (var vm in Providers.Where(p => !p.SupportsOAuth))
-                SyncCustomAccounts(vm, ApiKeyAccountsFor(vm.Id, ProviderKind.OpenAICompatibility));
+                SyncCustomAccounts(vm, ApiKeyAccountsFor(vm.Id, GetDefaultKind(vm.Id)));
 
             ProvidersRefreshed?.Invoke(this, EventArgs.Empty);
         });

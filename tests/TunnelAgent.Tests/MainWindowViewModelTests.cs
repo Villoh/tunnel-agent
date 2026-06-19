@@ -241,15 +241,14 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
-    public void QuotaProviderCount_SevenProviders_CountsAll()
+    public void QuotaProviderCount_SixProviders_CountsAll()
     {
         var vm = new MainWindowViewModel();
-        // 4 standard providers, each with one active account
+        // 3 standard providers, each with one active account
         foreach (var (id, name, icon) in new[]
         {
             ("claude",         "Claude",         PackIconSimpleIconsKind.Claude),
             ("codex",          "Codex",          PackIconSimpleIconsKind.OpenAi),
-            ("gemini-cli",     "Gemini CLI",     PackIconSimpleIconsKind.OpenAi),
             ("antigravity",    "Antigravity",    PackIconSimpleIconsKind.OpenAi),
         })
         {
@@ -265,7 +264,7 @@ public sealed class MainWindowViewModelTests
             vm.StandaloneQuotaProviders.Add(p);
         }
 
-        Assert.Equal(6, vm.QuotaProviderCount);
+        Assert.Equal(5, vm.QuotaProviderCount);
     }
 
     [Fact]

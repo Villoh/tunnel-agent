@@ -1,5 +1,4 @@
 using TunnelAgent.Services;
-using Xunit;
 
 using TunnelAgent.Infrastructure.Engine.CliProxy;
 namespace TunnelAgent.Tests;
@@ -128,7 +127,31 @@ public sealed class ConfigServiceTests
     }
 
     [Fact]
-    public async Task WriteConfigAsync_NativeApiKeyProviders_WriteClaudeAndGeminiBlocks()
+    public async Task WriteConfigAsync_CustomProvider_WithNoKeys_KeepsProviderWithoutKeyEntries()
+    {
+        using var temp = new TestTempDirectory();
+        var settings = new SettingsService(temp.File("settings.json"));
+        await settings.LoadAsync();
+        settings.Current.Providers.Add(new ProviderSettings
+        {
+            Id = "opencode",
+            Enabled = true,
+            Kind = ProviderKind.OpenAICompatibility,
+            BaseUrl = "https://opencode.ai/zen/go/v1"
+        });
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
+
+        await config.WriteConfigAsync();
+
+        var yaml = await File.ReadAllTextAsync(config.ConfigPath);
+        Assert.Contains("openai-compatibility:", yaml);
+        Assert.Contains("  - name: opencode", yaml);
+        Assert.Contains("    base-url: \"https://opencode.ai/zen/go/v1\"", yaml);
+        Assert.DoesNotContain("api-key-entries:", yaml);
+    }
+
+    [Fact]
+    public async Task WriteConfigAsync_NativeApiKeyProviders_WriteClaudeGeminiAndCodexBlocks()
     {
         using var temp = new TestTempDirectory();
         var authDir = temp.File("auth");
@@ -147,10 +170,7 @@ public sealed class ConfigServiceTests
             Enabled = true,
             Kind = ProviderKind.GeminiApiKey,
             BaseUrl = "https://generativelanguage.googleapis.com",
-            Accounts =
-            [
-                new ProviderAccountSettings { ApiKey = "AIza-test" }
-            ]
+            Accounts = [new ProviderAccountSettings { ApiKey = "AIza-test" }]
         });
         settings.Current.Providers.Add(new ProviderSettings
         {
