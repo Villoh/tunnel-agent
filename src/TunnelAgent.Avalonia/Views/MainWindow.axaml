@@ -3,6 +3,7 @@
         xmlns:vm="using:TunnelAgent.ViewModels"
         xmlns:v="using:TunnelAgent.Views"
         xmlns:cv="using:TunnelAgent.Converters"
+        xmlns:ctrl="using:TunnelAgent.Controls"
         xmlns:lucide="using:IconPacks.Avalonia.Lucide"
         xmlns:svc="using:TunnelAgent.Services"
         xmlns:l="using:TunnelAgent.Services"
@@ -754,43 +755,37 @@
                     Margin="0,0,0,20"
                     Spacing="8"
                     ZIndex="50">
-            <Border IsVisible="{Binding AppUpdateAvailable}"
-                    Background="{DynamicResource CardBgBrush}"
-                    BorderBrush="{DynamicResource CardBorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="10"
-                    Padding="14,10"
-                    Width="400">
-                <Grid ColumnDefinitions="*,Auto">
-                    <StackPanel Grid.Column="0" Spacing="2">
-                        <TextBlock Classes="row-label" Text="{l:Loc Toast_AppUpdateAvailable_Title}"/>
-                        <TextBlock Classes="row-desc"
+            <Border ctrl:Toast.IsOpen="{Binding AppUpdateAvailable}" IsVisible="False" Opacity="0"
+                    Classes="alert" Width="420">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <lucide:PackIconLucide Grid.Column="0" Kind="Info" Width="19" Height="19"
+                                           Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Top" Margin="0,1,10,0" />
+                    <StackPanel Grid.Column="1" Spacing="2">
+                        <TextBlock Classes="alert-title" Text="{l:Loc Toast_AppUpdateAvailable_Title}"/>
+                        <TextBlock Classes="alert-body"
                                    Text="{l:LocFormat Key=Toast_AppUpdateAvailable_Version, Path=AppUpdateNewVersion}" />
                     </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="12,0,0,0" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" Margin="12,0,0,0" VerticalAlignment="Center">
                         <Button Classes="app primary" Content="{l:Loc Toast_AppUpdateAvailable_Download}" Command="{Binding DownloadAppUpdateCommand}" />
                         <Button Classes="app" Content="{l:Loc Toast_AppUpdateAvailable_Dismiss}" Command="{Binding DismissAppUpdateCommand}" />
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <Border IsVisible="{Binding ShowUpdateToast}"
-                    Background="{DynamicResource CardBgBrush}"
-                    BorderBrush="{DynamicResource CardBorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="10"
-                    Padding="14,10"
-                    Width="400">
-                <Grid ColumnDefinitions="*,Auto">
-                    <StackPanel Grid.Column="0" Spacing="2">
-                        <TextBlock Classes="row-label"
+            <Border ctrl:Toast.IsOpen="{Binding ShowUpdateToast}" IsVisible="False" Opacity="0"
+                    Classes="alert" Width="420">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <lucide:PackIconLucide Grid.Column="0" Kind="Info" Width="19" Height="19"
+                                           Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Top" Margin="0,1,10,0" />
+                    <StackPanel Grid.Column="1" Spacing="2">
+                        <TextBlock Classes="alert-title"
                                    Text="{l:Loc Toast_EngineUpdateAvailable_Title}"
                                    TextWrapping="Wrap"
                                    MaxLines="2" />
-                        <TextBlock Classes="row-desc"
+                        <TextBlock Classes="alert-body"
                                    Text="{Binding UpdateToastText}" />
                     </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="12,0,0,0" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" Margin="12,0,0,0" VerticalAlignment="Center">
                         <Button Classes="app primary" Content="{l:Loc Toast_EngineUpdateAvailable_Update}" Command="{Binding UpdateToastEngineCommand}" />
                         <Button Classes="app" Content="{l:Loc Toast_EngineUpdateAvailable_Dismiss}" Command="{Binding DismissToastCommand}" />
                     </StackPanel>
@@ -802,7 +797,7 @@
         <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,50,20,0" Spacing="8" ZIndex="60">
 
             <!-- Provider status toast (info / error) -->
-            <Border IsVisible="{Binding ShowOAuthStatus}" Classes="alert" Classes.error="{Binding OAuthStatusIsError}" MaxWidth="460">
+            <Border ctrl:Toast.IsOpen="{Binding ShowOAuthStatus}" IsVisible="False" Opacity="0" Classes="alert" Classes.error="{Binding OAuthStatusIsError}" MaxWidth="460">
                 <Grid ColumnDefinitions="Auto,*,Auto">
                     <lucide:PackIconLucide Grid.Column="0" Kind="TriangleAlert" Width="19" Height="19"
                                            Foreground="{DynamicResource ErrBrush}" VerticalAlignment="Top" Margin="0,1,10,0"
@@ -820,7 +815,7 @@
             </Border>
 
             <!-- Management key repaired toast -->
-            <Border IsVisible="{Binding ShowManagementKeyRepairedToast}" Classes="alert" MaxWidth="460">
+            <Border ctrl:Toast.IsOpen="{Binding ShowManagementKeyRepairedToast}" IsVisible="False" Opacity="0" Classes="alert" MaxWidth="460">
                 <Grid ColumnDefinitions="Auto,*,Auto">
                     <lucide:PackIconLucide Grid.Column="0" Kind="Info" Width="19" Height="19"
                                            Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Top" Margin="0,1,10,0" />
@@ -834,7 +829,7 @@
             </Border>
 
             <!-- Engine 'no update available' toast -->
-            <Border IsVisible="{Binding ShowNoUpdateToast}" Classes="alert" MaxWidth="460">
+            <Border ctrl:Toast.IsOpen="{Binding ShowNoUpdateToast}" IsVisible="False" Opacity="0" Classes="alert" MaxWidth="460">
                 <Grid ColumnDefinitions="Auto,*,Auto">
                     <lucide:PackIconLucide Grid.Column="0" Kind="Info" Width="19" Height="19"
                                            Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Top" Margin="0,1,10,0" />
@@ -848,7 +843,7 @@
             </Border>
 
             <!-- App 'no update available' toast -->
-            <Border IsVisible="{Binding ShowAppNoUpdateToast}" Classes="alert" MaxWidth="460">
+            <Border ctrl:Toast.IsOpen="{Binding ShowAppNoUpdateToast}" IsVisible="False" Opacity="0" Classes="alert" MaxWidth="460">
                 <Grid ColumnDefinitions="Auto,*,Auto">
                     <lucide:PackIconLucide Grid.Column="0" Kind="Info" Width="19" Height="19"
                                            Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Top" Margin="0,1,10,0" />
