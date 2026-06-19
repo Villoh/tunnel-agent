@@ -885,7 +885,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     /// </summary>
     private static string GetSystemLanguageOrEnglish()
     {
-        var systemCulture = System.Globalization.CultureInfo.CurrentUICulture;
+        var systemCulture = LocalizationService.SystemCulture;
         var supported = LocalizationService.SupportedLanguages;
 
         var exactMatch = supported.FirstOrDefault(l =>

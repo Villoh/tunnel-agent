@@ -19,6 +19,13 @@ public sealed class LocalizationService : INotifyPropertyChanged
     private static readonly ResourceManager ResourceManager =
         new("TunnelAgent.Resources.Strings", typeof(LocalizationService).Assembly);
 
+    /// <summary>
+    /// The OS UI culture captured at process start, before any manual override.
+    /// Used to resolve "System default" without being affected by a prior
+    /// <see cref="SetCulture"/> mutating <see cref="CultureInfo.CurrentUICulture"/>.
+    /// </summary>
+    public static CultureInfo SystemCulture { get; } = CultureInfo.CurrentUICulture;
+
     private CultureInfo _currentCulture = CultureInfo.CurrentUICulture;
 
     public event PropertyChangedEventHandler? PropertyChanged;
