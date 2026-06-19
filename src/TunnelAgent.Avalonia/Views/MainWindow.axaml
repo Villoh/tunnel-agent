@@ -798,39 +798,70 @@
             </Border>
         </StackPanel>
 
-        <!-- Provider status toast (info / error) -->
-        <Border IsVisible="{Binding ShowOAuthStatus}" Classes="alert" Classes.error="{Binding OAuthStatusIsError}" MaxWidth="460"
-                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,50,20,0" ZIndex="60">
-            <Grid ColumnDefinitions="Auto,*,Auto">
-                <lucide:PackIconLucide Grid.Column="0" Kind="TriangleAlert" Width="19" Height="19"
-                                       Foreground="{DynamicResource ErrBrush}" VerticalAlignment="Top" Margin="0,1,10,0"
-                                       IsVisible="{Binding OAuthStatusIsError}" />
-                <lucide:PackIconLucide Grid.Column="0" Kind="Info" Width="19" Height="19"
-                                       Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Top" Margin="0,1,10,0"
-                                       IsVisible="{Binding !OAuthStatusIsError}" />
-                <TextBlock Grid.Column="1" Classes="alert-body" Text="{Binding OAuthStatusMessage}"
-                           VerticalAlignment="Center" MaxWidth="370" />
-                <Button Grid.Column="2" Classes="icon-btn" Margin="10,0,0,0" VerticalAlignment="Top"
-                        Command="{Binding DismissOAuthStatusCommand}">
-                    <lucide:PackIconLucide Kind="X" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
-                </Button>
-            </Grid>
-        </Border>
+        <!-- Window-pinned status toasts (info / error), stacked top-right -->
+        <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,50,20,0" Spacing="8" ZIndex="60">
 
-        <!-- Management key repaired toast -->
-        <Border IsVisible="{Binding ShowManagementKeyRepairedToast}" Classes="alert" MaxWidth="420"
-                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,50,20,0" ZIndex="50">
-            <Grid ColumnDefinitions="Auto,*,Auto">
-                <lucide:PackIconLucide Grid.Column="0" Kind="Info" Width="17" Height="17"
-                                       Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Top" Margin="0,1,9,0" />
-                <TextBlock Grid.Column="1" Classes="alert-body" Text="{l:Loc Toast_ManagementKeyRepaired}"
-                           VerticalAlignment="Center" MaxWidth="340" />
-                <Button Grid.Column="2" Classes="icon-btn" Margin="9,0,0,0" VerticalAlignment="Top"
-                        Command="{Binding DismissManagementKeyRepairedToastCommand}">
-                    <lucide:PackIconLucide Kind="X" Width="13" Height="13" Foreground="{DynamicResource FgMutedBrush}" />
-                </Button>
-            </Grid>
-        </Border>
+            <!-- Provider status toast (info / error) -->
+            <Border IsVisible="{Binding ShowOAuthStatus}" Classes="alert" Classes.error="{Binding OAuthStatusIsError}" MaxWidth="460">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <lucide:PackIconLucide Grid.Column="0" Kind="TriangleAlert" Width="19" Height="19"
+                                           Foreground="{DynamicResource ErrBrush}" VerticalAlignment="Top" Margin="0,1,10,0"
+                                           IsVisible="{Binding OAuthStatusIsError}" />
+                    <lucide:PackIconLucide Grid.Column="0" Kind="Info" Width="19" Height="19"
+                                           Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Top" Margin="0,1,10,0"
+                                           IsVisible="{Binding !OAuthStatusIsError}" />
+                    <TextBlock Grid.Column="1" Classes="alert-body" Text="{Binding OAuthStatusMessage}"
+                               VerticalAlignment="Center" MaxWidth="370" />
+                    <Button Grid.Column="2" Classes="icon-btn" Margin="10,0,0,0" VerticalAlignment="Top"
+                            Command="{Binding DismissOAuthStatusCommand}">
+                        <lucide:PackIconLucide Kind="X" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Management key repaired toast -->
+            <Border IsVisible="{Binding ShowManagementKeyRepairedToast}" Classes="alert" MaxWidth="460">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <lucide:PackIconLucide Grid.Column="0" Kind="Info" Width="19" Height="19"
+                                           Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Top" Margin="0,1,10,0" />
+                    <TextBlock Grid.Column="1" Classes="alert-body" Text="{l:Loc Toast_ManagementKeyRepaired}"
+                               VerticalAlignment="Center" MaxWidth="370" />
+                    <Button Grid.Column="2" Classes="icon-btn" Margin="10,0,0,0" VerticalAlignment="Top"
+                            Command="{Binding DismissManagementKeyRepairedToastCommand}">
+                        <lucide:PackIconLucide Kind="X" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Engine 'no update available' toast -->
+            <Border IsVisible="{Binding ShowNoUpdateToast}" Classes="alert" MaxWidth="460">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <lucide:PackIconLucide Grid.Column="0" Kind="Info" Width="19" Height="19"
+                                           Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Top" Margin="0,1,10,0" />
+                    <TextBlock Grid.Column="1" Classes="alert-body" Text="{l:Loc Toast_NoUpdateAvailable}"
+                               VerticalAlignment="Center" MaxWidth="370" />
+                    <Button Grid.Column="2" Classes="icon-btn" Margin="10,0,0,0" VerticalAlignment="Top"
+                            Command="{Binding DismissNoUpdateToastCommand}">
+                        <lucide:PackIconLucide Kind="X" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- App 'no update available' toast -->
+            <Border IsVisible="{Binding ShowAppNoUpdateToast}" Classes="alert" MaxWidth="460">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <lucide:PackIconLucide Grid.Column="0" Kind="Info" Width="19" Height="19"
+                                           Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Top" Margin="0,1,10,0" />
+                    <TextBlock Grid.Column="1" Classes="alert-body" Text="{l:Loc Toast_AppNoUpdateAvailable}"
+                               VerticalAlignment="Center" MaxWidth="370" />
+                    <Button Grid.Column="2" Classes="icon-btn" Margin="10,0,0,0" VerticalAlignment="Top"
+                            Command="{Binding DismissAppNoUpdateToastCommand}">
+                        <lucide:PackIconLucide Kind="X" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                    </Button>
+                </Grid>
+            </Border>
+
+        </StackPanel>
 
         </Panel>
     </Border>

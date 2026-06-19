@@ -2899,6 +2899,12 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     [RelayCommand]
     private void DismissManagementKeyRepairedToast() => ShowManagementKeyRepairedToast = false;
 
+    [RelayCommand]
+    private void DismissNoUpdateToast() => ShowNoUpdateToast = false;
+
+    [RelayCommand]
+    private void DismissAppNoUpdateToast() => ShowAppNoUpdateToast = false;
+
     public async ValueTask DisposeAsync()
     {
         if (_disposed) return;
