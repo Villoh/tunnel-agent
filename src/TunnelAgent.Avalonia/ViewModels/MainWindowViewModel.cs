@@ -199,6 +199,29 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     [ObservableProperty] private bool _showOAuthStatus;
     [ObservableProperty] private bool _oAuthStatusIsError;
     [ObservableProperty] private string _oAuthStatusMessage = "";
+    private CancellationTokenSource? _oauthStatusDismissCts;
+
+    partial void OnShowOAuthStatusChanged(bool value)
+    {
+        _oauthStatusDismissCts?.Cancel();
+        _oauthStatusDismissCts?.Dispose();
+        _oauthStatusDismissCts = null;
+        if (!value) return;
+
+        var cts = new CancellationTokenSource();
+        _oauthStatusDismissCts = cts;
+        _ = Task.Delay(6000, cts.Token).ContinueWith(t =>
+        {
+            if (t.IsCanceled) return;
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (_oauthStatusDismissCts == cts) ShowOAuthStatus = false;
+            });
+        }, TaskScheduler.Default);
+    }
+
+    [RelayCommand]
+    private void DismissOAuthStatus() => ShowOAuthStatus = false;
 
     [ObservableProperty] private bool _showConfigurationStatus;
     [ObservableProperty] private bool _configurationStatusIsError;
@@ -1389,7 +1412,6 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
             OAuthStatusIsError = true;
             OAuthStatusMessage = Localization.GetString("Dialog_AddAccount_DuplicateApiKey");
             ShowOAuthStatus = true;
-            _ = Task.Delay(4000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowOAuthStatus = false));
         }
         OnPropertyChanged(nameof(ConnectedProviderCount));
         PropagateEmailMasking(MaskEmails);
@@ -2889,6 +2911,10 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         _customProviderModelFetchCts?.Cancel();
         _customProviderModelFetchCts?.Dispose();
         _customProviderModelFetchCts = null;
+
+        _oauthStatusDismissCts?.Cancel();
+        _oauthStatusDismissCts?.Dispose();
+        _oauthStatusDismissCts = null;
 
         _perplexityModelFetchCts?.Cancel();
         _perplexityModelFetchCts?.Dispose();

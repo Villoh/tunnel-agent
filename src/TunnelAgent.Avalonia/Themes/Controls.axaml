@@ -110,7 +110,7 @@
     <Style Selector="Border.alert">
         <Setter Property="CornerRadius" Value="10" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Padding" Value="14,12" />
+        <Setter Property="Padding" Value="16,14" />
         <Setter Property="Background" Value="{DynamicResource AlertInfoBgBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource AlertInfoBorderBrush}" />
     </Style>
@@ -139,7 +139,7 @@
     </Style>
     <Style Selector="TextBlock.alert-body">
         <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
-        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="FontSize" Value="13" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
 

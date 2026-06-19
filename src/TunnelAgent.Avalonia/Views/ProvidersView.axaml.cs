@@ -45,13 +45,6 @@ public partial class ProvidersView : UserControl
         vm.OAuthStatusIsError = !success;
         vm.OAuthStatusMessage = message;
         vm.ShowOAuthStatus = true;
-
-        if (success)
-        {
-            await Task.Delay(8000);
-            if (vm.OAuthStatusMessage == message)
-                vm.ShowOAuthStatus = false;
-        }
     }
 
     private void OnOAuthDisconnect(object? sender, RoutedEventArgs e)
@@ -60,12 +53,6 @@ public partial class ProvidersView : UserControl
         if (sender is not Button { Tag: ProviderViewModel provider }) return;
         vm.DisconnectOAuth(provider.Id);
         vm.ShowOAuthStatus = false;
-    }
-
-    private void OnDismissOAuthStatus(object? sender, RoutedEventArgs e)
-    {
-        if (DataContext is MainWindowViewModel vm)
-            vm.ShowOAuthStatus = false;
     }
 
     private void OnToggleAccount(object? sender, RoutedEventArgs e)
