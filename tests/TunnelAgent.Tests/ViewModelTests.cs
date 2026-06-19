@@ -213,7 +213,8 @@ public sealed class ViewModelTests
     {
         var vm = new ProviderViewModel("local", "Local", PackIconSimpleIconsKind.OpenAi, "#000000", "Description", supportsApiKey: true)
         {
-            ApiKeyBaseUrl = "https://local.example/v1"
+            ApiKeyBaseUrl = "https://local.example/v1",
+            IsCustomProvider = true
         };
 
         vm.Accounts.Add(new ProviderAccountViewModel("local", "key1", "Active", isDisabled: false));

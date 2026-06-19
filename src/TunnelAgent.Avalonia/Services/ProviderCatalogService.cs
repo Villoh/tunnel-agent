@@ -443,7 +443,8 @@ public sealed class ProviderCatalogService : IDisposable
         {
             IsEnabled = ps.Enabled,
             ApiKeyBaseUrl = ps.BaseUrl,
-            Models = ps.Models.ToList()
+            Models = ps.Models.ToList(),
+            IsCustomProvider = true
         };
 
         SyncCustomAccounts(vm, ApiKeyAccountsFor(ps.Id, ProviderKind.OpenAICompatibility));

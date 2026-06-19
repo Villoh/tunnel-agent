@@ -240,8 +240,8 @@ public partial class ProviderViewModel : ViewModelBase
     public bool HasOnlyOAuth => SupportsOAuth && !SupportsApiKey;
     public bool HasSingleAddMode => SupportsOAuth != SupportsApiKey;
     public bool HasMultipleAddModes => SupportsOAuth && SupportsApiKey;
-    /// <summary>Custom OpenAI-compatible provider added by the user (not a built-in).</summary>
-    public bool IsCustomProvider => SupportsApiKey && !SupportsOAuth;
+    /// <summary>Custom OpenAI-compatible provider added by the user (not a built-in API-key provider).</summary>
+    public bool IsCustomProvider { get; init; }
 
     /// <summary>Provider is included in config.yaml (not excluded).</summary>
     [ObservableProperty] private bool _isEnabled = true;
