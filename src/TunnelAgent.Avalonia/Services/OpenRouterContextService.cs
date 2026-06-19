@@ -17,7 +17,7 @@ public sealed class OpenRouterContextService
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(10) };
     private const string Url = "https://openrouter.ai/api/v1/models";
 
-    public sealed record ModelInfo(int ContextLength, bool SupportsImage, string? Name = null);
+    public sealed record ModelInfo(int ContextLength, bool SupportsImage, bool SupportsReasoning, string? Name = null);
 
     private Dictionary<string, ModelInfo>? _cache;
     private readonly SemaphoreSlim _lock = new(1, 1);
@@ -94,8 +94,13 @@ public sealed class OpenRouterContextService
                 if (id is null) continue;
                 var modalities  = item?["architecture"]?["input_modalities"]?.AsArray();
                 var supportsImg = modalities?.Any(m => m?.GetValue<string>() == "image") ?? false;
+                // Reasoning support: OpenRouter exposes a `reasoning` object only for models
+                // that support it, and lists "reasoning" in `supported_parameters`.
+                var supportedParams = item?["supported_parameters"]?.AsArray();
+                var supportsReasoning = item?["reasoning"] is not null
+                    || (supportedParams?.Any(p => p?.GetValue<string>() == "reasoning") ?? false);
                 var name = item?["name"]?.GetValue<string>();
-                map[id] = new ModelInfo(ctx, supportsImg, name);
+                map[id] = new ModelInfo(ctx, supportsImg, supportsReasoning, name);
             }
 
             _cache = map;

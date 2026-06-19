@@ -554,6 +554,8 @@ public sealed class AgentConfigurationService
                     entry["input"] = new JsonArray(info.SupportsImage
                         ? new JsonNode[] { "text", "image" }
                         : new JsonNode[] { "text" });
+                    if (info.SupportsReasoning)
+                        entry["reasoning"] = true;
                 }
                 return (JsonNode?)entry;
             }).ToArray());
