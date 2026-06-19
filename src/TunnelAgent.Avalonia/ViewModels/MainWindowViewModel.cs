@@ -226,17 +226,25 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     [ObservableProperty] private bool _showConfigurationStatus;
     [ObservableProperty] private bool _configurationStatusIsError;
     [ObservableProperty] private string _configurationStatusMessage = "";
-    public bool ShowConfigurationInfoStatus => ShowConfigurationStatus && !ConfigurationStatusIsError;
-    public bool ShowConfigurationErrorStatus => ShowConfigurationStatus && ConfigurationStatusIsError;
+    private CancellationTokenSource? _configurationStatusDismissCts;
+
     partial void OnShowConfigurationStatusChanged(bool value)
     {
-        OnPropertyChanged(nameof(ShowConfigurationInfoStatus));
-        OnPropertyChanged(nameof(ShowConfigurationErrorStatus));
-    }
-    partial void OnConfigurationStatusIsErrorChanged(bool value)
-    {
-        OnPropertyChanged(nameof(ShowConfigurationInfoStatus));
-        OnPropertyChanged(nameof(ShowConfigurationErrorStatus));
+        _configurationStatusDismissCts?.Cancel();
+        _configurationStatusDismissCts?.Dispose();
+        _configurationStatusDismissCts = null;
+        if (!value) return;
+
+        var cts = new CancellationTokenSource();
+        _configurationStatusDismissCts = cts;
+        _ = Task.Delay(6000, cts.Token).ContinueWith(t =>
+        {
+            if (t.IsCanceled) return;
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (_configurationStatusDismissCts == cts) ShowConfigurationStatus = false;
+            });
+        }, TaskScheduler.Default);
     }
     [ObservableProperty] private bool _showResetCredentialsDialog;
     [ObservableProperty] private bool _showApiKeysDialog;
@@ -2921,6 +2929,10 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         _oauthStatusDismissCts?.Cancel();
         _oauthStatusDismissCts?.Dispose();
         _oauthStatusDismissCts = null;
+
+        _configurationStatusDismissCts?.Cancel();
+        _configurationStatusDismissCts?.Dispose();
+        _configurationStatusDismissCts = null;
 
         _perplexityModelFetchCts?.Cancel();
         _perplexityModelFetchCts?.Dispose();

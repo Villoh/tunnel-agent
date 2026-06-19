@@ -814,6 +814,24 @@
                 </Grid>
             </Border>
 
+            <!-- Configuration status toast (info / error) -->
+            <Border ctrl:Toast.IsOpen="{Binding ShowConfigurationStatus}" IsVisible="False" Opacity="0" Classes="alert" Classes.error="{Binding ConfigurationStatusIsError}" MaxWidth="460">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <lucide:PackIconLucide Grid.Column="0" Kind="TriangleAlert" Width="19" Height="19"
+                                           Foreground="{DynamicResource ErrBrush}" VerticalAlignment="Top" Margin="0,1,10,0"
+                                           IsVisible="{Binding ConfigurationStatusIsError}" />
+                    <lucide:PackIconLucide Grid.Column="0" Kind="Info" Width="19" Height="19"
+                                           Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Top" Margin="0,1,10,0"
+                                           IsVisible="{Binding !ConfigurationStatusIsError}" />
+                    <TextBlock Grid.Column="1" Classes="alert-body" Text="{Binding ConfigurationStatusMessage}"
+                               VerticalAlignment="Center" MaxWidth="370" />
+                    <Button Grid.Column="2" Classes="icon-btn" Margin="10,0,0,0" VerticalAlignment="Top"
+                            Command="{Binding DismissConfigurationStatusCommand}">
+                        <lucide:PackIconLucide Kind="X" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                    </Button>
+                </Grid>
+            </Border>
+
             <!-- Management key repaired toast -->
             <Border ctrl:Toast.IsOpen="{Binding ShowManagementKeyRepairedToast}" IsVisible="False" Opacity="0" Classes="alert" MaxWidth="460">
                 <Grid ColumnDefinitions="Auto,*,Auto">

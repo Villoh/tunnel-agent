@@ -26,18 +26,6 @@
                     </ctrl:SlidingTabBar.Tabs>
                 </ctrl:SlidingTabBar>
 
-                <!-- ── Status banner ──────────────────────────────────── -->
-                <Border IsVisible="{Binding ShowConfigurationInfoStatus}" Classes="card" Padding="14,10" Margin="0,0,0,12">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <TextBlock Grid.Column="0" Text="{Binding ConfigurationStatusMessage}"
-                                   TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource FgBrush}" />
-                        <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0" VerticalAlignment="Top"
-                                Command="{Binding DismissConfigurationStatusCommand}">
-                            <lucide:PackIconLucide Kind="X" Width="12" Height="12" Foreground="{DynamicResource FgMutedBrush}" />
-                        </Button>
-                    </Grid>
-                </Border>
-
                 <!-- ══ GENERAL ══════════════════════════════════════════ -->
                 <StackPanel IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=ConfigGeneral}">
                     <StackPanel Margin="0,0,0,14">
@@ -534,21 +522,6 @@
 
             </StackPanel>
         </ScrollViewer>
-
-        <!-- Configuration error toast -->
-        <Border IsVisible="{Binding ShowConfigurationErrorStatus}" Classes="card" MaxWidth="430"
-                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,12,12,0" Padding="14,10" ZIndex="11"
-                BorderBrush="{DynamicResource ErrBrush}" BorderThickness="1">
-            <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Grid.Column="0" Text="{Binding ConfigurationStatusMessage}"
-                           TextWrapping="Wrap" FontSize="12" VerticalAlignment="Center"
-                           Foreground="{DynamicResource ErrBrush}" MaxWidth="360" />
-                <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0" VerticalAlignment="Top"
-                        Command="{Binding DismissConfigurationStatusCommand}">
-                    <lucide:PackIconLucide Kind="X" Width="12" Height="12" Foreground="{DynamicResource FgMutedBrush}" />
-                </Button>
-            </Grid>
-        </Border>
 
     </Panel>
 </UserControl>
