@@ -205,6 +205,9 @@
   <data name="ProvidersView_Provider_RemoveProviderTooltip" xml:space="preserve">
     <value>공급자 제거</value>
   </data>
+  <data name="ProvidersView_Provider_EditModelsTooltip" xml:space="preserve">
+    <value>모델 편집</value>
+  </data>
   <data name="Dialog_AddCustomProvider_Title" xml:space="preserve">
     <value>사용자 지정 공급자 추가</value>
   </data>

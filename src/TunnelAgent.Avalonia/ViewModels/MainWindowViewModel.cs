@@ -176,6 +176,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     [ObservableProperty] private bool _isFetchingCustomProviderModels;
     [ObservableProperty] private bool _showCustomProviderModelsDialog;
     [ObservableProperty] private string _customProviderModelSearch = "";
+    // Non-null when the model dialog is editing an existing custom provider; null when adding a new one.
+    private string? _editingProviderModelsId;
     partial void OnCustomProviderModelSearchChanged(string value) => ApplyCustomProviderModelFilter();
     [ObservableProperty] private bool _showPerplexityAccountDialog;
     [ObservableProperty] private string _perplexitySessionTokenDraft = "";
@@ -1694,15 +1696,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
             return;
         }
 
-        ClearCustomProviderModels();
-        foreach (var model in result.Models)
-        {
-            var vm = new SelectableModelViewModel(model, name) { IsSelected = false };
-            vm.PropertyChanged += OnCustomProviderModelPropertyChanged;
-            CustomProviderModels.Add(vm);
-        }
-        CustomProviderModelSearch = "";
-        ApplyCustomProviderModelFilter();
+        _editingProviderModelsId = null;
+        PopulateCustomProviderModels(result.Models, name, []);
 
         ShowAddCustomProviderDialog = false;
         ShowCustomProviderModelsDialog = true;
@@ -1710,10 +1705,70 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     }
 
     [RelayCommand]
+    private async Task EditProviderModels(ProviderViewModel provider)
+    {
+        if (provider is null || IsFetchingCustomProviderModels) return;
+
+        var baseUrl = provider.ApiKeyBaseUrl;
+        var apiKey = provider.Accounts.FirstOrDefault(a => a.IsCustomKey)?.ApiKey ?? "";
+        if (string.IsNullOrWhiteSpace(baseUrl) || string.IsNullOrWhiteSpace(apiKey))
+        {
+            OAuthStatusIsError = true;
+            OAuthStatusMessage = _localization.GetString("Dialog_CustomProviderModels_FetchError");
+            ShowOAuthStatus = true;
+            return;
+        }
+
+        _customProviderModelFetchCts?.Cancel();
+        _customProviderModelFetchCts = new CancellationTokenSource();
+        IsFetchingCustomProviderModels = true;
+        ShowOAuthStatus = false;
+        var result = await _upstreamModelFetch.FetchAsync(baseUrl, apiKey, _customProviderModelFetchCts.Token);
+        IsFetchingCustomProviderModels = false;
+
+        if (!result.Success)
+        {
+            OAuthStatusIsError = true;
+            OAuthStatusMessage = result.Error ?? _localization.GetString("Dialog_CustomProviderModels_FetchError");
+            ShowOAuthStatus = true;
+            return;
+        }
+
+        _editingProviderModelsId = provider.Id;
+        PopulateCustomProviderModels(result.Models, provider.Name, provider.Models);
+
+        ShowCustomProviderModelsDialog = true;
+        RaiseCustomProviderModelState();
+    }
+
+    private void PopulateCustomProviderModels(IReadOnlyList<string> models, string providerName, IReadOnlyList<string> preselected)
+    {
+        var selectedSet = new HashSet<string>(preselected, StringComparer.Ordinal);
+        ClearCustomProviderModels();
+        foreach (var model in models)
+        {
+            var vm = new SelectableModelViewModel(model, providerName) { IsSelected = selectedSet.Contains(model) };
+            vm.PropertyChanged += OnCustomProviderModelPropertyChanged;
+            CustomProviderModels.Add(vm);
+        }
+        CustomProviderModelSearch = "";
+        ApplyCustomProviderModelFilter();
+    }
+
+    [RelayCommand]
     private async Task ConfirmCustomProviderModels()
     {
         var selected = CustomProviderModels.Where(m => m.IsSelected).Select(m => m.Name).ToList();
         if (selected.Count == 0) return;
+
+        if (_editingProviderModelsId is { } editId)
+        {
+            ShowCustomProviderModelsDialog = false;
+            await _catalog.UpdateCustomProviderModelsAsync(editId, selected);
+            _editingProviderModelsId = null;
+            ClearCustomProviderModels();
+            return;
+        }
 
         var name = CustomProviderNameDraft.Trim();
         var baseUrl = CustomProviderBaseUrlDraft.Trim();
@@ -1732,7 +1787,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     {
         ShowCustomProviderModelsDialog = false;
         ClearCustomProviderModels();
-        ResetCustomProviderDrafts();
+        if (_editingProviderModelsId is null) ResetCustomProviderDrafts();
+        _editingProviderModelsId = null;
     }
 
     public IEnumerable<SelectableModelViewModel> VisibleCustomProviderModels =>

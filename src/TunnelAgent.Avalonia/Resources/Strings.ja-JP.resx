@@ -205,6 +205,9 @@
   <data name="ProvidersView_Provider_RemoveProviderTooltip" xml:space="preserve">
     <value>プロバイダーを削除</value>
   </data>
+  <data name="ProvidersView_Provider_EditModelsTooltip" xml:space="preserve">
+    <value>モデルを編集</value>
+  </data>
   <data name="Dialog_AddCustomProvider_Title" xml:space="preserve">
     <value>カスタムプロバイダーを追加</value>
   </data>

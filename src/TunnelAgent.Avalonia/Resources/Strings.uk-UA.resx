@@ -205,6 +205,9 @@
   <data name="ProvidersView_Provider_RemoveProviderTooltip" xml:space="preserve">
     <value>Видалити постачальника</value>
   </data>
+  <data name="ProvidersView_Provider_EditModelsTooltip" xml:space="preserve">
+    <value>Редагувати моделі</value>
+  </data>
   <data name="Dialog_AddCustomProvider_Title" xml:space="preserve">
     <value>Додати власного постачальника</value>
   </data>

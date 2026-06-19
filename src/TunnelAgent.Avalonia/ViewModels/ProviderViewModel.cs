@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -266,6 +267,9 @@ public partial class ProviderViewModel : ViewModelBase
     /// <summary>Per-account slots — populated for custom (non-OAuth) providers
     /// and for OAuth providers with detected accounts.</summary>
     public ObservableCollection<ProviderAccountViewModel> Accounts { get; } = new();
+
+    /// <summary>Upstream models exposed for custom OpenAI-compatible providers (mirrors proxy-config.yaml).</summary>
+    public IReadOnlyList<string> Models { get; set; } = [];
 
     public int ActiveAccountCount => Accounts.Count(a => !a.IsDisabled);
 

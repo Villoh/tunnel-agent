@@ -182,6 +182,19 @@ public sealed class ProviderCatalogService : IDisposable
         ProvidersRebuilt?.Invoke(this, EventArgs.Empty);
     }
 
+    /// <summary>Replace the exposed model list for a custom provider and rewrite config.yaml.</summary>
+    public async Task UpdateCustomProviderModelsAsync(string providerId, IReadOnlyList<string> models)
+    {
+        var ps = _settings.Current.Providers.FirstOrDefault(p => p.Id == providerId && p.Kind == ProviderKind.OpenAICompatibility);
+        if (ps is null) return;
+
+        ps.Models = models.ToList();
+        _settings.Save();
+        await _config.WriteConfigAsync();
+        BuildProviderList();
+        ProvidersRebuilt?.Invoke(this, EventArgs.Empty);
+    }
+
     /// <summary>Remove an entire custom provider (settings + config.yaml) and rebuild the list.</summary>
     public async Task RemoveCustomProviderAsync(string providerId)
     {
@@ -429,7 +442,8 @@ public sealed class ProviderCatalogService : IDisposable
             $"Custom provider — {ps.BaseUrl}", isOAuth: false, supportsApiKey: true)
         {
             IsEnabled = ps.Enabled,
-            ApiKeyBaseUrl = ps.BaseUrl
+            ApiKeyBaseUrl = ps.BaseUrl,
+            Models = ps.Models.ToList()
         };
 
         SyncCustomAccounts(vm, ApiKeyAccountsFor(ps.Id, ProviderKind.OpenAICompatibility));

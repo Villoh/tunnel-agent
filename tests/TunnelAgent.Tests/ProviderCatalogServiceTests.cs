@@ -72,6 +72,30 @@ public sealed class ProviderCatalogServiceTests
     }
 
     [Fact]
+    public async Task UpdateCustomProviderModelsAsync_PersistsModelsAndRefreshesProvider()
+    {
+        using var temp = new TestTempDirectory();
+        var authDir = temp.File("auth");
+        var settings = new SettingsService(temp.File("settings.json"));
+        await settings.LoadAsync();
+        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir);
+        using var catalog = new ProviderCatalogService(settings, config, authDir);
+        await catalog.InitializeAsync();
+
+        await catalog.AddCustomProviderAsync("OpenRouter", "https://openrouter.ai/api/v1", "sk-or", null, ["a", "b"]);
+        var providerId = Assert.Single(catalog.Providers, p => p.Id == "openrouter").Id;
+
+        await catalog.UpdateCustomProviderModelsAsync(providerId, ["b", "c", "d"]);
+
+        var provider = Assert.Single(catalog.Providers, p => p.Id == providerId);
+        Assert.Equal(new[] { "b", "c", "d" }, provider.Models);
+
+        var yaml = await File.ReadAllTextAsync(config.ConfigPath);
+        Assert.Contains("      - name: \"c\"", yaml);
+        Assert.DoesNotContain("      - name: \"a\"", yaml);
+    }
+
+    [Fact]
     public async Task AddAccountAsync_ExistingKey_WithBlankLabel_ClearsLabelInConfig()
     {
         using var temp = new TestTempDirectory();

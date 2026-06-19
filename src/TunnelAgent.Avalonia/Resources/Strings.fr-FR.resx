@@ -205,6 +205,9 @@
   <data name="ProvidersView_Provider_RemoveProviderTooltip" xml:space="preserve">
     <value>Supprimer le fournisseur</value>
   </data>
+  <data name="ProvidersView_Provider_EditModelsTooltip" xml:space="preserve">
+    <value>Modifier les modèles</value>
+  </data>
   <data name="Dialog_AddCustomProvider_Title" xml:space="preserve">
     <value>Ajouter un fournisseur personnalisé</value>
   </data>
