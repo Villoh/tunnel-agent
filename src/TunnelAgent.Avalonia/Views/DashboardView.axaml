@@ -16,6 +16,14 @@
         </LinearGradientBrush>
     </UserControl.Resources>
 
+    <UserControl.Styles>
+        <!-- Stat-card labels: cancel section-label's 4px horizontal inset so the label
+             aligns with its value/number (which sit at the card padding edge). -->
+        <Style Selector="Border.card &gt; StackPanel &gt; TextBlock.section-label">
+            <Setter Property="Margin" Value="0,18,0,8" />
+        </Style>
+    </UserControl.Styles>
+
     <StackPanel Spacing="16" Margin="0,0,0,8">
 
         <!-- Page header -->
