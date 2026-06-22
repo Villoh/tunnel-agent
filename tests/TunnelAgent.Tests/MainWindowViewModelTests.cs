@@ -17,7 +17,7 @@ public sealed class MainWindowViewModelTests
     {
         var vm = new MainWindowViewModel();
 
-        Assert.Equal(SectionKey.Providers, vm.SelectedSection);
+        Assert.Equal(SectionKey.Home, vm.SelectedSection);
         Assert.False(vm.IsSidebarCollapsed);
         Assert.False(vm.IsDark);
         Assert.Equal(EngineState.Stopped, vm.EngineState);

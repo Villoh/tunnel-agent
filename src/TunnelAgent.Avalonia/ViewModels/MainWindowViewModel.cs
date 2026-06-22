@@ -1198,7 +1198,7 @@ SelectedSection is SectionKey.Logs;
                         {
                             UpdateToastEngineId = engine.Definition.Id;
                             UpdateToastText = _localization.GetString(
-                                "Toast_EngineUpdateAvailable_Body", engine.Definition.DisplayName, engine.LatestVersion);
+                                "Toast_EngineUpdateAvailable_Body", engine.Definition.DisplayName, engine.LatestVersion ?? string.Empty);
                             ShowUpdateToast = true;
                             _ = Task.Delay(8000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowUpdateToast = false));
                         }
