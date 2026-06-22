@@ -5,14 +5,30 @@ using TunnelAgent.ViewModels;
 
 namespace TunnelAgent.Services;
 
-/// <summary>USD price per 1M tokens for a model.</summary>
-public readonly record struct ModelPrice(double PromptPer1M, double CompletionPer1M, double CachePer1M);
+/// <summary>
+/// USD price per 1M tokens for a model. <see cref="CachePer1M"/> is the cache-read
+/// rate; <see cref="CacheWritePer1M"/> is the (more expensive) cache-creation rate,
+/// which defaults to 0 — callers treat 0 as "unknown" and fall back to 1.25× prompt.
+/// </summary>
+public readonly record struct ModelPrice(
+    double PromptPer1M,
+    double CompletionPer1M,
+    double CachePer1M,
+    double CacheWritePer1M = 0);
 
 /// <summary>
-/// Estimates request cost from token usage, mirroring quotio-desktop's formula:
-/// <c>max(input-cached,0)*prompt/1e6 + output*completion/1e6 + cached*cache/1e6</c>.
-/// Prices are matched by longest model-id prefix; unknown models cost 0 (like the
-/// proxy's LEFT JOIN with COALESCE), so the cost figure is a best-effort estimate.
+/// Estimates request cost from token usage. Two billing shapes are supported:
+/// <list type="bullet">
+/// <item>Anthropic-style (events carry cache creation/read token splits):
+/// <c>input*prompt + creation*cacheWrite + read*cacheRead + output*completion</c>,
+/// where <c>input</c> is already cache-free.</item>
+/// <item>OpenAI-style (only an aggregate cached count, input includes it):
+/// <c>max(input-cached,0)*prompt + cached*cacheRead + output*completion</c>.</item>
+/// </list>
+/// Prices come from OpenRouter's live list (cached on disk via
+/// <see cref="OpenRouterContextService"/>) when available, falling back to the
+/// built-in table below; unknown models cost 0 (like the proxy's LEFT JOIN with
+/// COALESCE), so the cost figure is a best-effort estimate.
 /// </summary>
 public static class ModelPricing
 {
@@ -48,16 +64,37 @@ public static class ModelPricing
 
     public static double CostFor(UsageEvent e)
     {
-        if (!TryGetPrice(e.Model, out var p)) return 0;
-        var billedInput = Math.Max(e.InputTokens - e.CachedTokens, 0);
-        return billedInput * p.PromptPer1M / 1_000_000.0
-             + e.OutputTokens * p.CompletionPer1M / 1_000_000.0
-             + e.CachedTokens * p.CachePer1M / 1_000_000.0;
+        if (!TryResolvePrice(e.Model, out var p)) return 0;
+
+        var cost = e.OutputTokens * p.CompletionPer1M / 1_000_000.0;
+
+        if (e.CacheCreationTokens > 0 || e.CacheReadTokens > 0)
+        {
+            // Anthropic-style: input_tokens is already cache-free; creation and read
+            // tokens are billed separately (creation is the pricey write rate).
+            var writeRate = p.CacheWritePer1M > 0 ? p.CacheWritePer1M : p.PromptPer1M * 1.25;
+            cost += e.InputTokens * p.PromptPer1M / 1_000_000.0
+                  + e.CacheCreationTokens * writeRate / 1_000_000.0
+                  + e.CacheReadTokens * p.CachePer1M / 1_000_000.0;
+        }
+        else
+        {
+            // OpenAI-style: input_tokens includes the cached (read) portion.
+            var billedInput = Math.Max(e.InputTokens - e.CachedTokens, 0);
+            cost += billedInput * p.PromptPer1M / 1_000_000.0
+                  + e.CachedTokens * p.CachePer1M / 1_000_000.0;
+        }
+
+        return cost;
     }
 
     /// <summary>True when at least one event maps to a known price (drives whether cost is shown).</summary>
     public static bool HasKnownPrice(IEnumerable<UsageEvent> events) =>
-        events.Any(e => TryGetPrice(e.Model, out _));
+        events.Any(e => TryResolvePrice(e.Model, out _));
+
+    /// <summary>OpenRouter live/cached pricing first, then the built-in table.</summary>
+    private static bool TryResolvePrice(string model, out ModelPrice price) =>
+        OpenRouterContextService.Instance.TryGetPrice(model, out price) || TryGetPrice(model, out price);
 
     private static bool TryGetPrice(string model, out ModelPrice price)
     {

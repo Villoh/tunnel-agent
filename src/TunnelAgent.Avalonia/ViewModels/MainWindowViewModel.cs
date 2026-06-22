@@ -958,6 +958,7 @@ SelectedSection is SectionKey.Logs;
             // This keeps first navigation to Quota/Agents responsive while startup UI stays lazy.
             _ = ObserveStartupTaskAsync(ScanAndRefreshQuotaOnceAsync());
             _ = ObserveStartupTaskAsync(DetectAgentsAsync());
+            _ = ObserveStartupTaskAsync(WarmModelPricingAsync());
 
             var engineInitTasks = _engineRegistry.Engines
                 .Select(engine => ObserveStartupTaskAsync(Task.Run(engine.InitializeAsync)))
@@ -2059,6 +2060,14 @@ SelectedSection is SectionKey.Logs;
     {
         await ScanQuotaProvidersAsync();
         await RefreshAllQuotaProvidersAsync();
+    }
+
+    // Warm model pricing from disk (instant, offline) then refresh from OpenRouter when
+    // stale, refreshing dashboard cost figures after each step.
+    private async Task WarmModelPricingAsync()
+    {
+        void Refresh() => Dispatcher.UIThread.Post(Dashboard.OnPricingUpdated);
+        await TunnelAgent.Services.OpenRouterContextService.Instance.WarmAsync(Refresh);
     }
 
     private async Task ScanAndRefreshQuotaOnceAsync()

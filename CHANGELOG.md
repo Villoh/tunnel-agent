@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Dynamic model pricing with on-disk cache** (`OpenRouterContextService`, `ModelPricing`, `DashboardViewModel`, `MainWindowViewModel`): dashboard cost estimates now resolve per-model prices from OpenRouter's live `/v1/models` list (input, output, cache-read and cache-write rates) instead of relying solely on the built-in table, which mispriced models newer than the table by falling back to an older prefix match. The fetched model map is persisted to `openrouter-models.json` under the local data directory and seeded into memory on startup (instant, offline-capable), refreshing from the network only when the cache is missing or older than 24h. The built-in price table remains the fallback for models OpenRouter does not list. Agents configuration reuses the same cached map for context window, reasoning and image-modality metadata.
+
+### Changed
+
+- **Per-provider cost accounting** (`ModelPricing`): cost estimation now distinguishes cache-creation (write) from cache-read tokens and applies the correct token model per provider — Anthropic-style events bill `input` as cache-free with separate write/read rates, while OpenAI-style events keep the aggregate-cached subtraction. Cache-write tokens were previously billed at the cheaper read rate, undercounting Anthropic usage.
+
 ### Fixed
 
 - **Dashboard/Home and clear-usage localization** (`Resources/Strings*.resx`, `MainWindow.axaml`): the Home/Dashboard view and the clear-usage-history dialog only had English and Spanish strings, so the remaining twelve languages fell back to English. Added the full set of `DashboardView_*`, `Sidebar_Home`, and `Dialog_ClearUsageHistory_*` translations to all locale resources, and the clear-usage confirmation dialog now uses its own `Dialog_ClearUsageHistory_Cancel` key instead of borrowing the delete-log dialog's cancel string.

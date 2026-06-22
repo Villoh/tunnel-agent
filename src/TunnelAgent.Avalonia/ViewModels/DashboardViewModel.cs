@@ -122,6 +122,9 @@ public partial class DashboardViewModel : ViewModelBase
         Recompute();
     }
 
+    /// <summary>Re-run aggregation after model pricing is (re)loaded so cost figures refresh.</summary>
+    public void OnPricingUpdated() => Recompute();
+
     [RelayCommand]
     private void Refresh()
     {
