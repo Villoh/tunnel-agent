@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Engine update toast localization** (`MainWindowViewModel`, `Resources/Strings*.resx`): the "&lt;engine&gt; &lt;version&gt; is ready to install." body of the CLIProxyAPI/Perplexity update toast was hardcoded in English while its title was translated. It now resolves through the new `Toast_EngineUpdateAvailable_Body` format string, translated for all fourteen supported languages.
+
 ### Added
 
 - **Dashboard/Home usage view and usage-backed requests** (`DashboardView`, `DashboardViewModel`, `LogsViewModel`, `UsageChart`, `UsageService`, `UsageStore`, `UsageEvent`, `ModelPricing`, `MainWindow`): added Home as the default sidebar section with usage range tabs, headline metrics, provider summary, an interactive hoverable usage chart, and CLIProxyAPI usage telemetry backed by SQLite persistence. Tunnel Agent enables CLIProxyAPI usage statistics, continuously drains the destructive `/v0/management/usage-queue`, deduplicates events by hash, estimates model token costs, parses cache/reasoning token details, and keeps persisted history across restarts. Dashboard and the Logs → Requests tab now use this telemetry store as their source of truth, while Logs → Proxy logs remains a raw log-file view with separate clear/delete actions and its own renamed auto-refresh setting; clearing usage history is available from Dashboard and Requests and deletes only stored usage events.

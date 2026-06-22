@@ -345,6 +345,9 @@
   <data name="Toast_EngineUpdateAvailable_Title" xml:space="preserve">
     <value>Доступне оновлення рушія</value>
   </data>
+  <data name="Toast_EngineUpdateAvailable_Body" xml:space="preserve">
+    <value>{0} {1} готовий до встановлення.</value>
+  </data>
   <data name="Toast_EngineUpdateAvailable_Update" xml:space="preserve">
     <value>Оновити</value>
   </data>

@@ -345,6 +345,9 @@
   <data name="Toast_EngineUpdateAvailable_Title" xml:space="preserve">
     <value>Aggiornamento del motore disponibile</value>
   </data>
+  <data name="Toast_EngineUpdateAvailable_Body" xml:space="preserve">
+    <value>{0} {1} è pronto per l&#x27;installazione.</value>
+  </data>
   <data name="Toast_EngineUpdateAvailable_Update" xml:space="preserve">
     <value>Aggiorna</value>
   </data>

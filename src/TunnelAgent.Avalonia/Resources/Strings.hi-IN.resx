@@ -345,6 +345,9 @@
   <data name="Toast_EngineUpdateAvailable_Title" xml:space="preserve">
     <value>इंजन अपडेट उपलब्ध है</value>
   </data>
+  <data name="Toast_EngineUpdateAvailable_Body" xml:space="preserve">
+    <value>{0} {1} इंस्टॉल करने के लिए तैयार है।</value>
+  </data>
   <data name="Toast_EngineUpdateAvailable_Update" xml:space="preserve">
     <value>अपडेट करें</value>
   </data>

@@ -345,6 +345,9 @@
   <data name="Toast_EngineUpdateAvailable_Title" xml:space="preserve">
     <value>Motor güncellemesi mevcut</value>
   </data>
+  <data name="Toast_EngineUpdateAvailable_Body" xml:space="preserve">
+    <value>{0} {1} yüklemeye hazır.</value>
+  </data>
   <data name="Toast_EngineUpdateAvailable_Update" xml:space="preserve">
     <value>Güncelle</value>
   </data>

@@ -1197,7 +1197,8 @@ SelectedSection is SectionKey.Logs;
                         else
                         {
                             UpdateToastEngineId = engine.Definition.Id;
-                            UpdateToastText = $"{engine.Definition.DisplayName} {engine.LatestVersion} is ready to install.";
+                            UpdateToastText = _localization.GetString(
+                                "Toast_EngineUpdateAvailable_Body", engine.Definition.DisplayName, engine.LatestVersion);
                             ShowUpdateToast = true;
                             _ = Task.Delay(8000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowUpdateToast = false));
                         }

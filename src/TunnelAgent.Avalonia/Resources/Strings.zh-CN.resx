@@ -345,6 +345,9 @@
   <data name="Toast_EngineUpdateAvailable_Title" xml:space="preserve">
     <value>引擎有可用更新</value>
   </data>
+  <data name="Toast_EngineUpdateAvailable_Body" xml:space="preserve">
+    <value>{0} {1} 已准备好安装。</value>
+  </data>
   <data name="Toast_EngineUpdateAvailable_Update" xml:space="preserve">
     <value>更新</value>
   </data>
