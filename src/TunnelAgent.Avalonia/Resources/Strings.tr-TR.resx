@@ -1258,6 +1258,15 @@
   <data name="DashboardView_Summary_Provider" xml:space="preserve">
     <value>SAĞLAYICI</value>
   </data>
+  <data name="DashboardView_Summary_ByProvider" xml:space="preserve">
+    <value>Sağlayıcıya göre</value>
+  </data>
+  <data name="DashboardView_Summary_ByModel" xml:space="preserve">
+    <value>Modele göre</value>
+  </data>
+  <data name="DashboardView_Summary_Model" xml:space="preserve">
+    <value>MODEL</value>
+  </data>
   <data name="DashboardView_Summary_Calls" xml:space="preserve">
     <value>ÇAĞRILAR</value>
   </data>

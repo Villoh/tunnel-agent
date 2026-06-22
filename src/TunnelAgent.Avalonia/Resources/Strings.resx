@@ -1256,6 +1256,15 @@
   <data name="DashboardView_Summary_Provider" xml:space="preserve">
     <value>PROVIDER</value>
   </data>
+  <data name="DashboardView_Summary_ByProvider" xml:space="preserve">
+    <value>By provider</value>
+  </data>
+  <data name="DashboardView_Summary_ByModel" xml:space="preserve">
+    <value>By model</value>
+  </data>
+  <data name="DashboardView_Summary_Model" xml:space="preserve">
+    <value>MODEL</value>
+  </data>
   <data name="DashboardView_Summary_Calls" xml:space="preserve">
     <value>CALLS</value>
   </data>

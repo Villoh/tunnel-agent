@@ -1258,6 +1258,15 @@
   <data name="DashboardView_Summary_Provider" xml:space="preserve">
     <value>제공자</value>
   </data>
+  <data name="DashboardView_Summary_ByProvider" xml:space="preserve">
+    <value>제공자별</value>
+  </data>
+  <data name="DashboardView_Summary_ByModel" xml:space="preserve">
+    <value>모델별</value>
+  </data>
+  <data name="DashboardView_Summary_Model" xml:space="preserve">
+    <value>모델</value>
+  </data>
   <data name="DashboardView_Summary_Calls" xml:space="preserve">
     <value>호출</value>
   </data>

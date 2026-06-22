@@ -1232,6 +1232,15 @@
   <data name="DashboardView_Summary_Provider" xml:space="preserve">
     <value>PROVEEDOR</value>
   </data>
+  <data name="DashboardView_Summary_ByProvider" xml:space="preserve">
+    <value>Por proveedor</value>
+  </data>
+  <data name="DashboardView_Summary_ByModel" xml:space="preserve">
+    <value>Por modelo</value>
+  </data>
+  <data name="DashboardView_Summary_Model" xml:space="preserve">
+    <value>MODELO</value>
+  </data>
   <data name="DashboardView_Summary_Calls" xml:space="preserve">
     <value>LLAMADAS</value>
   </data>

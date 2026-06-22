@@ -15,6 +15,9 @@ public enum DashboardRange { Today, Last7Days, Last14Days, Last30Days, All }
 /// <summary>Which series the usage chart shows.</summary>
 public enum DashboardChartMetric { Calls, Tokens, Cost }
 
+/// <summary>How the usage summary table is grouped.</summary>
+public enum DashboardSummaryMode { Provider, Model }
+
 /// <summary>
 /// Aggregates per-request usage drained from the proxy's <c>/usage-queue</c> and
 /// persisted in the usage store into the metrics shown on the Home/Dashboard:
@@ -59,6 +62,23 @@ public partial class DashboardViewModel : ViewModelBase
         if (Enum.TryParse<DashboardChartMetric>(metric, out var m)) ChartMetric = m;
     }
 
+    // ── Summary grouping tabs ───────────────────────────────────────────
+    [ObservableProperty] private DashboardSummaryMode _summaryMode = DashboardSummaryMode.Provider;
+    public int SummaryModeIndex => (int)SummaryMode;
+    public bool IsModelSummary => SummaryMode == DashboardSummaryMode.Model;
+
+    partial void OnSummaryModeChanged(DashboardSummaryMode value)
+    {
+        OnPropertyChanged(nameof(SummaryModeIndex));
+        OnPropertyChanged(nameof(IsModelSummary));
+        RebuildSummary(EventsInRange());
+    }
+
+    [RelayCommand] private void SelectSummaryMode(string mode)
+    {
+        if (Enum.TryParse<DashboardSummaryMode>(mode, out var m)) SummaryMode = m;
+    }
+
     // ── Headline cards ──────────────────────────────────────────────────
     [ObservableProperty] private int _totalCalls;
     [ObservableProperty] private string _successRate = "–";
@@ -88,8 +108,9 @@ public partial class DashboardViewModel : ViewModelBase
     [ObservableProperty] private string _chartAxisMax = "";
     [ObservableProperty] private bool _hasData;
 
-    // ── Provider summary table ──────────────────────────────────────────
-    public ObservableCollection<ProviderUsageRow> ProviderRows { get; } = new();
+    // ── Summary table (grouped by provider or model) ────────────────────
+    public ObservableCollection<UsageSummaryRow> SummaryRows { get; } = new();
+    [ObservableProperty] private string _summaryRowCount = "0";
 
     // ── Feeds ───────────────────────────────────────────────────────────
 
@@ -196,7 +217,14 @@ public partial class DashboardViewModel : ViewModelBase
         var cost = source.Sum(ModelPricing.CostFor);
         EstimatedCost = "$" + cost.ToString("N2", CultureInfo.InvariantCulture);
 
-        RebuildProviderRowsFromEvents(source);
+        // Distinct-provider count drives the TOTAL CALLS card regardless of the summary tab.
+        ProviderSummaryCount = source
+            .Select(e => string.IsNullOrWhiteSpace(e.Provider) ? "—" : e.Provider!)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Count()
+            .ToString(CultureInfo.InvariantCulture);
+
+        RebuildSummary(source);
         RebuildChart(source);
     }
 
@@ -214,19 +242,23 @@ public partial class DashboardViewModel : ViewModelBase
         }
     }
 
-    private void RebuildProviderRowsFromEvents(List<UsageEvent> source)
+    private void RebuildSummary(List<UsageEvent> source)
     {
-        var groups = source
-            .GroupBy(e => string.IsNullOrWhiteSpace(e.Provider) ? "—" : e.Provider!, StringComparer.OrdinalIgnoreCase)
+        Func<UsageEvent, string> keySelector = SummaryMode == DashboardSummaryMode.Model
+            ? e => string.IsNullOrWhiteSpace(e.Model) ? "—" : e.Model
+            : e => string.IsNullOrWhiteSpace(e.Provider) ? "—" : e.Provider!;
+
+        var rows = source
+            .GroupBy(keySelector, StringComparer.OrdinalIgnoreCase)
             .Select(g =>
             {
                 var total = g.Count();
                 var ok = g.Count(e => e.IsSuccess);
                 var fail = total - ok;
                 var cost = g.Sum(ModelPricing.CostFor);
-                return new ProviderUsageRow
+                return new UsageSummaryRow
                 {
-                    Provider = g.Key,
+                    Label = g.Key,
                     TotalCalls = total,
                     SuccessCount = ok,
                     FailureCount = fail,
@@ -239,14 +271,9 @@ public partial class DashboardViewModel : ViewModelBase
             .OrderByDescending(r => r.TotalCalls)
             .ToList();
 
-        ApplyProviderRows(groups);
-    }
-
-    private void ApplyProviderRows(List<ProviderUsageRow> rows)
-    {
-        ProviderRows.Clear();
-        foreach (var row in rows) ProviderRows.Add(row);
-        ProviderSummaryCount = rows.Count.ToString(CultureInfo.InvariantCulture);
+        SummaryRows.Clear();
+        foreach (var row in rows) SummaryRows.Add(row);
+        SummaryRowCount = rows.Count.ToString(CultureInfo.InvariantCulture);
     }
 
     private void RebuildChart() => Recompute();
@@ -336,10 +363,10 @@ public partial class DashboardViewModel : ViewModelBase
         whole <= 0 ? "" : (part * 100.0 / whole).ToString("0.0", CultureInfo.InvariantCulture) + "%";
 }
 
-/// <summary>A single row in the dashboard's per-provider usage summary.</summary>
-public sealed class ProviderUsageRow
+/// <summary>A single row in the dashboard's usage summary (grouped by provider or model).</summary>
+public sealed class UsageSummaryRow
 {
-    public string Provider { get; init; } = "";
+    public string Label { get; init; } = "";
     public int TotalCalls { get; init; }
     public int SuccessCount { get; init; }
     public int FailureCount { get; init; }

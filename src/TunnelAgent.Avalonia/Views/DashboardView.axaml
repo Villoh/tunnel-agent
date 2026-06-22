@@ -195,16 +195,25 @@ Foreground="{DynamicResource AccentBrush}" />
             </StackPanel>
         </Border>
 
-        <!-- Provider summary -->
+        <!-- Usage summary (by provider / by model) -->
         <Border Classes="card">
             <StackPanel>
-                <Grid Margin="16,14,16,10" ColumnDefinitions="Auto,Auto">
+                <Grid Margin="16,14,16,10" ColumnDefinitions="Auto,Auto,*">
                     <TextBlock Grid.Column="0" Text="{l:Loc DashboardView_Summary_Title}"
                                FontWeight="SemiBold" Foreground="{DynamicResource FgBrush}" VerticalAlignment="Center" />
                     <Border Grid.Column="1" Classes="chip" Background="{DynamicResource AccentSoftBrush}" Margin="8,0,0,0">
-                        <TextBlock Text="{Binding Dashboard.ProviderSummaryCount}"
+                        <TextBlock Text="{Binding Dashboard.SummaryRowCount}"
                                    Foreground="{DynamicResource AccentBrush}" FontSize="11" />
                     </Border>
+                    <ctrl:SlidingTabBar Grid.Column="2" HorizontalAlignment="Right" MinWidth="240"
+                                        SelectedIndex="{Binding Dashboard.SummaryModeIndex}">
+                        <ctrl:SlidingTabBar.Tabs>
+                            <ctrl:SlidingTab Header="{l:Loc DashboardView_Summary_ByProvider}"
+                                             Command="{Binding Dashboard.SelectSummaryModeCommand}" CommandParameter="Provider" />
+                            <ctrl:SlidingTab Header="{l:Loc DashboardView_Summary_ByModel}"
+                                             Command="{Binding Dashboard.SelectSummaryModeCommand}" CommandParameter="Model" />
+                        </ctrl:SlidingTabBar.Tabs>
+                    </ctrl:SlidingTabBar>
                 </Grid>
 
                 <Border Classes="row-divider" />
@@ -212,7 +221,12 @@ Foreground="{DynamicResource AccentBrush}" />
                 <!-- Column headers -->
                 <Grid Margin="16,10,16,8"
                       ColumnDefinitions="2*,1.2*,1*,1*,1*,1.2*,1.2*,1.6*">
-                    <TextBlock Grid.Column="0" Classes="section-label" Text="{l:Loc DashboardView_Summary_Provider}" />
+                    <Panel Grid.Column="0">
+                        <TextBlock Classes="section-label" Text="{l:Loc DashboardView_Summary_Provider}"
+                                   IsVisible="{Binding !Dashboard.IsModelSummary}" />
+                        <TextBlock Classes="section-label" Text="{l:Loc DashboardView_Summary_Model}"
+                                   IsVisible="{Binding Dashboard.IsModelSummary}" />
+                    </Panel>
                     <TextBlock Grid.Column="1" Classes="section-label" Text="{l:Loc DashboardView_Summary_Calls}" HorizontalAlignment="Right" />
                     <TextBlock Grid.Column="2" Classes="section-label" Text="{l:Loc DashboardView_Summary_Success}" HorizontalAlignment="Right" />
                     <TextBlock Grid.Column="3" Classes="section-label" Text="{l:Loc DashboardView_Summary_Fail}" HorizontalAlignment="Right" />
@@ -224,12 +238,12 @@ Foreground="{DynamicResource AccentBrush}" />
 
                 <Border Classes="row-divider" />
 
-                <ItemsControl ItemsSource="{Binding Dashboard.ProviderRows}">
+                <ItemsControl ItemsSource="{Binding Dashboard.SummaryRows}">
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="vm:ProviderUsageRow">
+                        <DataTemplate x:DataType="vm:UsageSummaryRow">
                             <StackPanel>
                                 <Grid Margin="16,11" ColumnDefinitions="2*,1.2*,1*,1*,1*,1.2*,1.2*,1.6*">
-                                    <TextBlock Grid.Column="0" Text="{Binding Provider}" FontWeight="SemiBold"
+                                    <TextBlock Grid.Column="0" Text="{Binding Label}" FontWeight="SemiBold"
                                                Foreground="{DynamicResource FgBrush}" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="1" Text="{Binding TotalCalls}" HorizontalAlignment="Right"
                                                Foreground="{DynamicResource FgBrush}" VerticalAlignment="Center" />

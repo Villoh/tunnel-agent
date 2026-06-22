@@ -1258,6 +1258,15 @@
   <data name="DashboardView_Summary_Provider" xml:space="preserve">
     <value>प्रदाता</value>
   </data>
+  <data name="DashboardView_Summary_ByProvider" xml:space="preserve">
+    <value>प्रदाता अनुसार</value>
+  </data>
+  <data name="DashboardView_Summary_ByModel" xml:space="preserve">
+    <value>मॉडल अनुसार</value>
+  </data>
+  <data name="DashboardView_Summary_Model" xml:space="preserve">
+    <value>मॉडल</value>
+  </data>
   <data name="DashboardView_Summary_Calls" xml:space="preserve">
     <value>कॉल</value>
   </data>
