@@ -113,6 +113,15 @@
   <data name="Dialog_DeleteLogFile_Delete" xml:space="preserve">
     <value>Delete log file</value>
   </data>
+  <data name="Dialog_ClearUsageHistory_Title" xml:space="preserve">
+    <value>Clear usage history?</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Description" xml:space="preserve">
+    <value>This permanently deletes stored usage events used by Dashboard and Requests. Proxy log files are not affected.</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Delete" xml:space="preserve">
+    <value>Clear usage history</value>
+  </data>
 
   <data name="Dialog_ResetCredentials_Title" xml:space="preserve">
     <value>Reset all credentials?</value>
@@ -492,6 +501,9 @@
   <data name="LogsView_ClearViewTooltip" xml:space="preserve">
     <value>Clear view</value>
   </data>
+  <data name="LogsView_ClearUsageHistoryTooltip" xml:space="preserve">
+    <value>Clear usage history</value>
+  </data>
   <data name="LogsView_DeleteLogFileTooltip" xml:space="preserve">
     <value>Delete log file</value>
   </data>
@@ -765,16 +777,16 @@
   </data>
 
   <data name="ConfigView_CLIProxy_LogsAutoRefresh_Label" xml:space="preserve">
-    <value>Auto-refresh</value>
+    <value>Auto-refresh proxy logs</value>
   </data>
   <data name="ConfigView_CLIProxy_LogsAutoRefresh_Description" xml:space="preserve">
-    <value>Automatically poll for new log entries in the Logs screen.</value>
+    <value>Automatically poll for new raw proxy log entries. Usage metrics are collected continuously while CLIProxyAPI is running.</value>
   </data>
   <data name="ConfigView_CLIProxy_LogsRefreshInterval_Label" xml:space="preserve">
-    <value>Refresh interval</value>
+    <value>Proxy log refresh interval</value>
   </data>
   <data name="ConfigView_CLIProxy_LogsRefreshInterval_Description" xml:space="preserve">
-    <value>How often to check for new entries.</value>
+    <value>How often to poll the raw proxy log view when auto-refresh is enabled.</value>
   </data>
   <data name="ConfigView_CLIProxy_LogsRefreshInterval_Seconds" xml:space="preserve">
     <value>{0} seconds</value>
@@ -1135,5 +1147,131 @@
   </data>
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
+  </data>
+  <data name="Sidebar_Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="DashboardView_Title" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="DashboardView_Subtitle" xml:space="preserve">
+    <value>Live overview of requests handled by the local proxy.</value>
+  </data>
+  <data name="DashboardView_Range_Today" xml:space="preserve">
+    <value>Today</value>
+  </data>
+  <data name="DashboardView_Range_7d" xml:space="preserve">
+    <value>7 days</value>
+  </data>
+  <data name="DashboardView_Range_14d" xml:space="preserve">
+    <value>14 days</value>
+  </data>
+  <data name="DashboardView_Range_30d" xml:space="preserve">
+    <value>30 days</value>
+  </data>
+  <data name="DashboardView_Range_All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="DashboardView_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls" xml:space="preserve">
+    <value>TOTAL CALLS</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls_Sub" xml:space="preserve">
+    <value>{0} providers</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate" xml:space="preserve">
+    <value>SUCCESS RATE</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate_Sub" xml:space="preserve">
+    <value>{0} successful</value>
+  </data>
+  <data name="DashboardView_Card_Failures" xml:space="preserve">
+    <value>FAILURES</value>
+  </data>
+  <data name="DashboardView_Card_Failures_Sub" xml:space="preserve">
+    <value>Failure rate {0}</value>
+  </data>
+  <data name="DashboardView_Card_EstCost" xml:space="preserve">
+    <value>EST. COST</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_Sub" xml:space="preserve">
+    <value>Estimated from model unit prices</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_NoData" xml:space="preserve">
+    <value>No pricing for these models</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens_Sub" xml:space="preserve">
+    <value>Reasoning {0}</value>
+  </data>
+  <data name="DashboardView_Card_Ratio_Sub" xml:space="preserve">
+    <value>Share {0}</value>
+  </data>
+  <data name="DashboardView_Card_CacheHit_Sub" xml:space="preserve">
+    <value>Hit rate {0}</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens" xml:space="preserve">
+    <value>TOTAL TOKENS</value>
+  </data>
+  <data name="DashboardView_Card_InputTokens" xml:space="preserve">
+    <value>INPUT TOKENS</value>
+  </data>
+  <data name="DashboardView_Card_OutputTokens" xml:space="preserve">
+    <value>OUTPUT TOKENS</value>
+  </data>
+  <data name="DashboardView_Card_CacheTokens" xml:space="preserve">
+    <value>CACHE TOKENS</value>
+  </data>
+  <data name="DashboardView_Card_Tokens_Sub" xml:space="preserve">
+    <value>Enable the proxy to collect usage</value>
+  </data>
+  <data name="DashboardView_Chart_Title" xml:space="preserve">
+    <value>Usage chart</value>
+  </data>
+  <data name="DashboardView_Chart_Subtitle" xml:space="preserve">
+    <value>Trend over the selected time range.</value>
+  </data>
+  <data name="DashboardView_Chart_Calls" xml:space="preserve">
+    <value>Calls</value>
+  </data>
+  <data name="DashboardView_Chart_Tokens" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="DashboardView_Chart_Cost" xml:space="preserve">
+    <value>Cost</value>
+  </data>
+  <data name="DashboardView_Chart_Empty" xml:space="preserve">
+    <value>No requests in the selected range.</value>
+  </data>
+  <data name="DashboardView_Summary_Title" xml:space="preserve">
+    <value>Provider summary</value>
+  </data>
+  <data name="DashboardView_Summary_Provider" xml:space="preserve">
+    <value>PROVIDER</value>
+  </data>
+  <data name="DashboardView_Summary_Calls" xml:space="preserve">
+    <value>CALLS</value>
+  </data>
+  <data name="DashboardView_Summary_Success" xml:space="preserve">
+    <value>SUCCESS</value>
+  </data>
+  <data name="DashboardView_Summary_Fail" xml:space="preserve">
+    <value>FAIL</value>
+  </data>
+  <data name="DashboardView_Summary_Rate" xml:space="preserve">
+    <value>RATE</value>
+  </data>
+  <data name="DashboardView_Summary_Tokens" xml:space="preserve">
+    <value>TOKENS</value>
+  </data>
+  <data name="DashboardView_Summary_Cost" xml:space="preserve">
+    <value>EST. COST</value>
+  </data>
+  <data name="DashboardView_Summary_Last" xml:space="preserve">
+    <value>LAST REQUEST</value>
+  </data>
+  <data name="DashboardView_Summary_Empty" xml:space="preserve">
+    <value>No requests yet. Point an agent at the local proxy to see activity here.</value>
   </data>
 </root>

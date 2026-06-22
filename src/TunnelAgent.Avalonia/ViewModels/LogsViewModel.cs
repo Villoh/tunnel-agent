@@ -15,12 +15,13 @@ public enum LogsTab { Requests, ProxyLogs }
 
 public partial class LogsViewModel : ViewModelBase
 {
-    private const int PageSize     = 25;
-    private const int MaxRequestLogs = 5000;
-    private const int ProxyLogsCap = 100;
+    private const int PageSize       = 25;
+    private const int MaxRequestLogs = 50_000;
+    private const int ProxyLogsCap   = 100;
 
-    // Full backing store — newest first, capped to avoid unbounded memory growth.
+    // Usage-backed requests — newest first, capped to avoid unbounded memory growth.
     private readonly List<RequestLogEntry> _allEntries = new();
+    private readonly HashSet<string> _usageEventKeys = new(StringComparer.OrdinalIgnoreCase);
     // Filtered results (search + provider) before pagination
     private List<RequestLogEntry> _filteredAll = new();
 
@@ -41,6 +42,7 @@ public partial class LogsViewModel : ViewModelBase
 
     [ObservableProperty] private bool _isRefreshing;
     [ObservableProperty] private bool _showClearConfirm;
+    [ObservableProperty] private bool _showClearUsageConfirm;
 
     public async Task RefreshWithSpinAsync(Action action)
     {
@@ -104,21 +106,39 @@ public partial class LogsViewModel : ViewModelBase
 
     public void OnEntriesLoaded(IReadOnlyList<RequestLogEntry> entries, bool isInitialLoad)
     {
-        if (isInitialLoad)
+        // Requests tab is usage-backed now. Parsed file entries are intentionally
+        // ignored; raw file lines still feed the Proxy logs tab.
+    }
+
+    public void OnUsageEventsLoaded(IReadOnlyList<UsageEvent> events)
+    {
+        foreach (var e in events.OrderBy(e => e.Timestamp))
         {
-            _allEntries.Clear();
-            _allEntries.AddRange(entries);
-        }
-        else
-        {
-            foreach (var e in entries.Reverse())
-                _allEntries.Insert(0, e);
+            var key = string.IsNullOrWhiteSpace(e.EventHash)
+                ? string.Join('|', e.RequestId, e.Timestamp.Ticks, e.Model)
+                : e.EventHash;
+            if (!_usageEventKeys.Add(key)) continue;
+            _allEntries.Insert(0, RequestLogEntry.FromUsageEvent(e));
         }
 
         TrimRequestEntries();
         RebuildProviderOptions();
         CurrentPage = 1;
         ApplyFilter();
+    }
+
+    public void OnUsageCleared()
+    {
+        _allEntries.Clear();
+        _usageEventKeys.Clear();
+        _filteredAll.Clear();
+        ProviderOptions.Clear();
+        ProviderOptions.Add(_allProvidersLabel);
+        SelectedProvider = _allProvidersLabel;
+        FilteredEntries.Clear();
+        CurrentPage = 1;
+        TotalPages = 1;
+        UpdateStats([]);
     }
 
     public void OnRawLinesLoaded(IReadOnlyList<string> lines, bool isInitialLoad)
@@ -143,17 +163,8 @@ public partial class LogsViewModel : ViewModelBase
 
     public void OnCleared()
     {
-        _allEntries.Clear();
         _allProxyLines.Clear();
-        _filteredAll.Clear();
-        ProviderOptions.Clear();
-        ProviderOptions.Add(_allProvidersLabel);
-        SelectedProvider = _allProvidersLabel;
-        FilteredEntries.Clear();
         ProxyLogLines.Clear();
-        CurrentPage = 1;
-        TotalPages  = 1;
-        UpdateStats([]);
     }
 
     // ── Provider filter ──────────────────────────────────────────────────

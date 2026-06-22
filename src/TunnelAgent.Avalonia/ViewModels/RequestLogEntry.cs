@@ -25,9 +25,9 @@ public sealed partial class RequestLogEntry
     public string   Path       { get; }
     public bool     IsSuccess  => StatusCode >= 200 && StatusCode < 300;
     public bool     IsError    => StatusCode >= 400;
-    public string   Provider   { get; }
+    public string   Provider   { get; private set; }
 
-    private RequestLogEntry(DateTime ts, string reqId, int status, string latRaw, TimeSpan latency, string method, string path)
+    private RequestLogEntry(DateTime ts, string reqId, int status, string latRaw, TimeSpan latency, string method, string path, string? provider = null)
     {
         Timestamp  = ts;
         RequestId  = reqId;
@@ -36,7 +36,27 @@ public sealed partial class RequestLogEntry
         Latency    = latency;
         Method     = method;
         Path       = path;
-        Provider   = InferProvider(path);
+        Provider   = string.IsNullOrWhiteSpace(provider) ? InferProvider(path) : Titlecase(provider.Trim());
+    }
+
+    public static RequestLogEntry FromUsageEvent(UsageEvent e)
+    {
+        var status = e.StatusCode ?? (e.Failed ? 500 : 200);
+        var latency = TimeSpan.FromMilliseconds(Math.Max(0, e.LatencyMs));
+        return new RequestLogEntry(
+            e.Timestamp,
+            e.RequestId,
+            status,
+            FormatLatency(latency),
+            latency,
+            string.IsNullOrWhiteSpace(e.Path) ? "" : "POST",
+            string.IsNullOrWhiteSpace(e.Path) ? "—" : e.Path!,
+            e.Provider);
+    }
+
+    public void ApplyProviderOverride(string provider)
+    {
+        if (!string.IsNullOrWhiteSpace(provider)) Provider = Titlecase(provider.Trim());
     }
 
     public static RequestLogEntry? TryParse(string line)
@@ -115,6 +135,14 @@ public sealed partial class RequestLogEntry
         }
 
         return TimeSpan.Zero;
+    }
+
+    private static string FormatLatency(TimeSpan latency)
+    {
+        if (latency <= TimeSpan.Zero) return "–";
+        return latency.TotalMilliseconds >= 1000
+            ? latency.TotalSeconds.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) + "s"
+            : latency.TotalMilliseconds.ToString("0", System.Globalization.CultureInfo.InvariantCulture) + "ms";
     }
 
     private static string Titlecase(string s) =>

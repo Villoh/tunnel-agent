@@ -147,6 +147,7 @@ public partial class MainWindow : Window
 
     private static Control CreateSectionView(SectionKey section) => section switch
     {
+        SectionKey.Home => new DashboardView(),
         SectionKey.Providers => new ProvidersView(),
         SectionKey.Quota => new QuotaView(),
         SectionKey.Agents => new AgentsView(),
@@ -234,6 +235,7 @@ public partial class MainWindow : Window
         if (DataContext is not MainWindowViewModel vm || sender is not ListBoxItem item) return;
         vm.SelectedSection = item.Tag switch
         {
+            "Home"          => SectionKey.Home,
             "Providers"     => SectionKey.Providers,
             "Quota"         => SectionKey.Quota,
             "Agents"        => SectionKey.Agents,

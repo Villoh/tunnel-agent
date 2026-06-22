@@ -109,6 +109,15 @@
   <data name="Dialog_DeleteLogFile_Delete" xml:space="preserve">
     <value>Eliminar archivo de registro</value>
   </data>
+  <data name="Dialog_ClearUsageHistory_Title" xml:space="preserve">
+    <value>¿Borrar historial de uso?</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Description" xml:space="preserve">
+    <value>Esto elimina permanentemente los eventos de uso almacenados que usan Dashboard y Requests. Los archivos de log del proxy no se modifican.</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Delete" xml:space="preserve">
+    <value>Borrar historial de uso</value>
+  </data>
 
   <data name="Dialog_ResetCredentials_Title" xml:space="preserve">
     <value>¿Restablecer todas las credenciales?</value>
@@ -480,6 +489,9 @@
   <data name="LogsView_ClearViewTooltip" xml:space="preserve">
     <value>Limpiar vista</value>
   </data>
+  <data name="LogsView_ClearUsageHistoryTooltip" xml:space="preserve">
+    <value>Borrar historial de uso</value>
+  </data>
   <data name="LogsView_DeleteLogFileTooltip" xml:space="preserve">
     <value>Eliminar archivo de registro</value>
   </data>
@@ -745,16 +757,16 @@
   </data>
 
   <data name="ConfigView_CLIProxy_LogsAutoRefresh_Label" xml:space="preserve">
-    <value>Actualización automática</value>
+    <value>Actualización automática de logs del proxy</value>
   </data>
   <data name="ConfigView_CLIProxy_LogsAutoRefresh_Description" xml:space="preserve">
-    <value>Consulta automáticamente nuevas entradas de registro en la pantalla de Registros.</value>
+    <value>Consulta automáticamente nuevas entradas del log bruto del proxy. Las métricas de uso se recopilan continuamente mientras CLIProxyAPI está en ejecución.</value>
   </data>
   <data name="ConfigView_CLIProxy_LogsRefreshInterval_Label" xml:space="preserve">
-    <value>Intervalo de actualización</value>
+    <value>Intervalo de actualización de logs del proxy</value>
   </data>
   <data name="ConfigView_CLIProxy_LogsRefreshInterval_Description" xml:space="preserve">
-    <value>Con qué frecuencia verificar nuevas entradas.</value>
+    <value>Cada cuánto consultar la vista de logs brutos del proxy cuando la actualización automática está activada.</value>
   </data>
   <data name="ConfigView_CLIProxy_LogsRefreshInterval_Seconds" xml:space="preserve">
     <value>{0} segundos</value>
@@ -1111,5 +1123,131 @@
   </data>
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
+  </data>
+  <data name="Sidebar_Home" xml:space="preserve">
+    <value>Inicio</value>
+  </data>
+  <data name="DashboardView_Title" xml:space="preserve">
+    <value>Panel</value>
+  </data>
+  <data name="DashboardView_Subtitle" xml:space="preserve">
+    <value>Resumen en vivo de las solicitudes gestionadas por el proxy local.</value>
+  </data>
+  <data name="DashboardView_Range_Today" xml:space="preserve">
+    <value>Hoy</value>
+  </data>
+  <data name="DashboardView_Range_7d" xml:space="preserve">
+    <value>7 días</value>
+  </data>
+  <data name="DashboardView_Range_14d" xml:space="preserve">
+    <value>14 días</value>
+  </data>
+  <data name="DashboardView_Range_30d" xml:space="preserve">
+    <value>30 días</value>
+  </data>
+  <data name="DashboardView_Range_All" xml:space="preserve">
+    <value>Todo</value>
+  </data>
+  <data name="DashboardView_Refresh" xml:space="preserve">
+    <value>Actualizar</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls" xml:space="preserve">
+    <value>LLAMADAS TOTALES</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls_Sub" xml:space="preserve">
+    <value>{0} proveedores</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate" xml:space="preserve">
+    <value>TASA DE ÉXITO</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate_Sub" xml:space="preserve">
+    <value>{0} correctas</value>
+  </data>
+  <data name="DashboardView_Card_Failures" xml:space="preserve">
+    <value>FALLOS</value>
+  </data>
+  <data name="DashboardView_Card_Failures_Sub" xml:space="preserve">
+    <value>Tasa de fallos {0}</value>
+  </data>
+  <data name="DashboardView_Card_EstCost" xml:space="preserve">
+    <value>COSTE EST.</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_Sub" xml:space="preserve">
+    <value>Estimado por precio unitario del modelo</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_NoData" xml:space="preserve">
+    <value>Sin precios para estos modelos</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens_Sub" xml:space="preserve">
+    <value>Razonamiento {0}</value>
+  </data>
+  <data name="DashboardView_Card_Ratio_Sub" xml:space="preserve">
+    <value>Proporción {0}</value>
+  </data>
+  <data name="DashboardView_Card_CacheHit_Sub" xml:space="preserve">
+    <value>Tasa de aciertos {0}</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens" xml:space="preserve">
+    <value>TOKENS TOTALES</value>
+  </data>
+  <data name="DashboardView_Card_InputTokens" xml:space="preserve">
+    <value>TOKENS DE ENTRADA</value>
+  </data>
+  <data name="DashboardView_Card_OutputTokens" xml:space="preserve">
+    <value>TOKENS DE SALIDA</value>
+  </data>
+  <data name="DashboardView_Card_CacheTokens" xml:space="preserve">
+    <value>TOKENS EN CACHÉ</value>
+  </data>
+  <data name="DashboardView_Card_Tokens_Sub" xml:space="preserve">
+    <value>Activa el proxy para recopilar uso</value>
+  </data>
+  <data name="DashboardView_Chart_Title" xml:space="preserve">
+    <value>Gráfico de uso</value>
+  </data>
+  <data name="DashboardView_Chart_Subtitle" xml:space="preserve">
+    <value>Tendencia en el rango de tiempo seleccionado.</value>
+  </data>
+  <data name="DashboardView_Chart_Calls" xml:space="preserve">
+    <value>Llamadas</value>
+  </data>
+  <data name="DashboardView_Chart_Tokens" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="DashboardView_Chart_Cost" xml:space="preserve">
+    <value>Coste</value>
+  </data>
+  <data name="DashboardView_Chart_Empty" xml:space="preserve">
+    <value>No hay solicitudes en el rango seleccionado.</value>
+  </data>
+  <data name="DashboardView_Summary_Title" xml:space="preserve">
+    <value>Resumen por proveedor</value>
+  </data>
+  <data name="DashboardView_Summary_Provider" xml:space="preserve">
+    <value>PROVEEDOR</value>
+  </data>
+  <data name="DashboardView_Summary_Calls" xml:space="preserve">
+    <value>LLAMADAS</value>
+  </data>
+  <data name="DashboardView_Summary_Success" xml:space="preserve">
+    <value>ÉXITO</value>
+  </data>
+  <data name="DashboardView_Summary_Fail" xml:space="preserve">
+    <value>FALLOS</value>
+  </data>
+  <data name="DashboardView_Summary_Rate" xml:space="preserve">
+    <value>TASA</value>
+  </data>
+  <data name="DashboardView_Summary_Tokens" xml:space="preserve">
+    <value>TOKENS</value>
+  </data>
+  <data name="DashboardView_Summary_Cost" xml:space="preserve">
+    <value>COSTE EST.</value>
+  </data>
+  <data name="DashboardView_Summary_Last" xml:space="preserve">
+    <value>ÚLTIMA SOLICITUD</value>
+  </data>
+  <data name="DashboardView_Summary_Empty" xml:space="preserve">
+    <value>Aún no hay solicitudes. Apunta un agente al proxy local para ver la actividad aquí.</value>
   </data>
 </root>

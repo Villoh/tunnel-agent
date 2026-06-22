@@ -76,10 +76,10 @@ public sealed class AppSettings
     /// <summary>Auto-generated key for the CLIProxyAPI management API (enables /v0/management/* and logging).</summary>
     public string ManagementKey { get; set; } = "";
 
-    /// <summary>Whether the Logs screen polls automatically for new entries.</summary>
+    /// <summary>Whether the raw proxy logs view polls automatically for new entries.</summary>
     public bool LogsAutoRefresh { get; set; } = false;
 
-    /// <summary>Polling interval in seconds for the Logs screen (2, 5, 10, 30).</summary>
+    /// <summary>Polling interval in seconds for the raw proxy logs view (2, 5, 10, 30).</summary>
     public int LogsRefreshIntervalSeconds { get; set; } = 5;
     public List<EngineRuntimeSettings> Engines { get; set; } = [];
     public List<PerplexityAccountSettings> PerplexityAccounts { get; set; } = [];

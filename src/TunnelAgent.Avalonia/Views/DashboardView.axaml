@@ -1,0 +1,263 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TunnelAgent.ViewModels"
+             xmlns:ctrl="using:TunnelAgent.Controls"
+             xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+             xmlns:l="using:TunnelAgent.Services"
+             x:Class="TunnelAgent.Views.DashboardView"
+             x:DataType="vm:MainWindowViewModel">
+
+    <UserControl.Resources>
+               <Color x:Key="ChartLineColor">#F2A33C</Color>
+        <SolidColorBrush x:Key="ChartLineBrush" Color="#F2A33C" />
+        <LinearGradientBrush x:Key="ChartAreaBrush" StartPoint="0%,0%" EndPoint="0%,100%">
+            <GradientStop Offset="0" Color="#59F2A33C" />
+            <GradientStop Offset="1" Color="#00F2A33C" />
+        </LinearGradientBrush>
+    </UserControl.Resources>
+
+    <StackPanel Spacing="16" Margin="0,0,0,8">
+
+        <!-- Page header -->
+        <StackPanel>
+            <TextBlock Classes="page-title" Text="{l:Loc DashboardView_Title}" />
+            <TextBlock Classes="page-sub" Text="{l:Loc DashboardView_Subtitle}" />
+        </StackPanel>
+
+        <!-- Toolbar: range tabs + refresh -->
+        <Border Classes="card" Padding="14">
+            <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                <ctrl:SlidingTabBar Grid.Column="0" HorizontalAlignment="Left"
+                                    MinWidth="360"
+                                    SelectedIndex="{Binding Dashboard.RangeIndex}">
+                    <ctrl:SlidingTabBar.Tabs>
+                        <ctrl:SlidingTab Header="{l:Loc DashboardView_Range_Today}"
+                                         Command="{Binding Dashboard.SelectRangeCommand}" CommandParameter="Today" />
+                        <ctrl:SlidingTab Header="{l:Loc DashboardView_Range_7d}"
+                                         Command="{Binding Dashboard.SelectRangeCommand}" CommandParameter="Last7Days" />
+                        <ctrl:SlidingTab Header="{l:Loc DashboardView_Range_14d}"
+                                         Command="{Binding Dashboard.SelectRangeCommand}" CommandParameter="Last14Days" />
+                        <ctrl:SlidingTab Header="{l:Loc DashboardView_Range_30d}"
+                                         Command="{Binding Dashboard.SelectRangeCommand}" CommandParameter="Last30Days" />
+                        <ctrl:SlidingTab Header="{l:Loc DashboardView_Range_All}"
+                                         Command="{Binding Dashboard.SelectRangeCommand}" CommandParameter="All" />
+                    </ctrl:SlidingTabBar.Tabs>
+                </ctrl:SlidingTabBar>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                    <Button Classes="icon"
+                            ToolTip.Tip="{l:Loc DashboardView_Refresh}"
+                            Command="{Binding Dashboard.RefreshCommand}">
+                        <lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14"
+                                               Classes.spin="{Binding Dashboard.IsRefreshing}" />
+                    </Button>
+                    <Button Classes="icon"
+                            ToolTip.Tip="{l:Loc LogsView_ClearUsageHistoryTooltip}"
+                            Command="{Binding ShowClearUsageConfirmCommand}">
+                        <lucide:PackIconLucide Kind="Trash2" Width="14" Height="14" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Stat cards row 1 -->
+        <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
+            <Border Grid.Column="0" Classes="card" Padding="18,16">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="section-label" Text="{l:Loc DashboardView_Card_TotalCalls}" />
+                    <TextBlock Text="{Binding Dashboard.TotalCalls}" FontSize="26" FontWeight="Bold"
+                               Foreground="{DynamicResource AccentBrush}" />
+                    <TextBlock Classes="row-desc" Text="{l:LocFormat Key=DashboardView_Card_TotalCalls_Sub, Path=Dashboard.ProviderSummaryCount}" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="1" Classes="card" Padding="18,16">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="section-label" Text="{l:Loc DashboardView_Card_SuccessRate}" />
+                    <TextBlock Text="{Binding Dashboard.SuccessRate}" FontSize="26" FontWeight="Bold"
+                               Foreground="{DynamicResource OkBrush}" />
+                    <TextBlock Classes="row-desc" Text="{l:LocFormat Key=DashboardView_Card_SuccessRate_Sub, Path=Dashboard.SuccessCount}" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="2" Classes="card" Padding="18,16">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="section-label" Text="{l:Loc DashboardView_Card_Failures}" />
+                    <TextBlock Text="{Binding Dashboard.FailureCount}" FontSize="26" FontWeight="Bold"
+                               Foreground="{DynamicResource ErrBrush}" />
+                    <TextBlock Classes="row-desc" Text="{l:LocFormat Key=DashboardView_Card_Failures_Sub, Path=Dashboard.FailureRate}" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="3" Classes="card" Padding="18,16">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="section-label" Text="{l:Loc DashboardView_Card_EstCost}" />
+                    <TextBlock Text="{Binding Dashboard.EstimatedCost}" FontSize="26" FontWeight="Bold"
+                               Foreground="{DynamicResource WarnBrush}" />
+                    <TextBlock Classes="row-desc" Text="{l:Loc DashboardView_Card_EstCost_Sub}"
+                               IsVisible="{Binding Dashboard.HasCost}" />
+                    <TextBlock Classes="row-desc" Text="{l:Loc DashboardView_Card_EstCost_NoData}"
+                               IsVisible="{Binding !Dashboard.HasCost}" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Stat cards row 2 (tokens — placeholder) -->
+        <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
+            <Border Grid.Column="0" Classes="card" Padding="18,16">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="section-label" Text="{l:Loc DashboardView_Card_TotalTokens}" />
+                    <TextBlock Text="{Binding Dashboard.TotalTokens}" FontSize="26" FontWeight="Bold"
+                               Foreground="{DynamicResource AccentBrush}" />
+                    <TextBlock Classes="row-desc" Text="{l:LocFormat Key=DashboardView_Card_TotalTokens_Sub, Path=Dashboard.ReasoningTokens}"
+                               IsVisible="{Binding Dashboard.HasTokenData}" />
+                    <TextBlock Classes="row-desc" Text="{l:Loc DashboardView_Card_Tokens_Sub}"
+                               IsVisible="{Binding !Dashboard.HasTokenData}" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="1" Classes="card" Padding="18,16">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="section-label" Text="{l:Loc DashboardView_Card_InputTokens}" />
+                    <TextBlock Text="{Binding Dashboard.InputTokens}" FontSize="26" FontWeight="Bold"
+                               Foreground="{DynamicResource AccentBrush}" />
+                    <TextBlock Classes="row-desc" Text="{l:LocFormat Key=DashboardView_Card_Ratio_Sub, Path=Dashboard.InputTokenRatio}"
+                               IsVisible="{Binding Dashboard.HasTokenData}" />
+                    <TextBlock Classes="row-desc" Text="{l:Loc DashboardView_Card_Tokens_Sub}"
+                               IsVisible="{Binding !Dashboard.HasTokenData}" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="2" Classes="card" Padding="18,16">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="section-label" Text="{l:Loc DashboardView_Card_OutputTokens}" />
+                    <TextBlock Text="{Binding Dashboard.OutputTokens}" FontSize="26" FontWeight="Bold"
+Foreground="{DynamicResource AccentBrush}" />
+<TextBlock Classes="row-desc" Text="{l:LocFormat Key=DashboardView_Card_Ratio_Sub, Path=Dashboard.OutputTokenRatio}"
+                               IsVisible="{Binding Dashboard.HasTokenData}" />
+                    <TextBlock Classes="row-desc" Text="{l:Loc DashboardView_Card_Tokens_Sub}"
+                               IsVisible="{Binding !Dashboard.HasTokenData}" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="3" Classes="card" Padding="18,16">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="section-label" Text="{l:Loc DashboardView_Card_CacheTokens}" />
+                    <TextBlock Text="{Binding Dashboard.CacheTokens}" FontSize="26" FontWeight="Bold"
+                               Foreground="{DynamicResource AccentBrush}" />
+                    <TextBlock Classes="row-desc" Text="{l:LocFormat Key=DashboardView_Card_CacheHit_Sub, Path=Dashboard.CacheHitRate}"
+                               IsVisible="{Binding Dashboard.HasTokenData}" />
+                    <TextBlock Classes="row-desc" Text="{l:Loc DashboardView_Card_Tokens_Sub}"
+                               IsVisible="{Binding !Dashboard.HasTokenData}" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Usage chart -->
+        <Border Classes="card" Padding="18">
+            <StackPanel Spacing="14">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="{l:Loc DashboardView_Chart_Title}" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AccentBrush}" FontSize="13" />
+                        <TextBlock Classes="row-desc" Text="{l:Loc DashboardView_Chart_Subtitle}" />
+                    </StackPanel>
+                    <ctrl:SlidingTabBar Grid.Column="1" MinWidth="280"
+                                        SelectedIndex="{Binding Dashboard.ChartMetricIndex}">
+                        <ctrl:SlidingTabBar.Tabs>
+                            <ctrl:SlidingTab Header="{l:Loc DashboardView_Chart_Calls}"
+                                             Command="{Binding Dashboard.SelectChartMetricCommand}" CommandParameter="Calls" />
+                            <ctrl:SlidingTab Header="{l:Loc DashboardView_Chart_Tokens}"
+                                             Command="{Binding Dashboard.SelectChartMetricCommand}" CommandParameter="Tokens" />
+                            <ctrl:SlidingTab Header="{l:Loc DashboardView_Chart_Cost}"
+                                             Command="{Binding Dashboard.SelectChartMetricCommand}" CommandParameter="Cost" />
+                        </ctrl:SlidingTabBar.Tabs>
+                    </ctrl:SlidingTabBar>
+                </Grid>
+
+                <Panel Height="240">
+                    <ctrl:UsageChart Values="{Binding Dashboard.ChartValues}"
+                                     Labels="{Binding Dashboard.ChartLabels}"
+                                     LineBrush="{StaticResource ChartLineBrush}"
+                                     AreaBrush="{StaticResource ChartAreaBrush}"
+                                     GridBrush="{DynamicResource RowDividerBrush}"
+                                     GridLines="4"
+                                     IsVisible="{Binding Dashboard.HasData}" />
+                    <TextBlock Text="{l:Loc DashboardView_Chart_Empty}"
+                               Foreground="{DynamicResource FgFaintBrush}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               IsVisible="{Binding !Dashboard.HasData}" />
+                    <TextBlock Text="{Binding Dashboard.ChartAxisMax}" FontSize="11"
+                               Foreground="{DynamicResource FgFaintBrush}"
+                               HorizontalAlignment="Left" VerticalAlignment="Top" />
+                </Panel>
+
+                <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Dashboard.HasData}">
+                    <TextBlock Grid.Column="0" Text="{Binding Dashboard.ChartAxisStart}" FontSize="11"
+                               Foreground="{DynamicResource FgFaintBrush}" />
+                    <TextBlock Grid.Column="1" Text="{Binding Dashboard.ChartAxisEnd}" FontSize="11"
+                               Foreground="{DynamicResource FgFaintBrush}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Provider summary -->
+        <Border Classes="card">
+            <StackPanel>
+                <Grid Margin="16,14,16,10" ColumnDefinitions="Auto,Auto">
+                    <TextBlock Grid.Column="0" Text="{l:Loc DashboardView_Summary_Title}"
+                               FontWeight="SemiBold" Foreground="{DynamicResource FgBrush}" VerticalAlignment="Center" />
+                    <Border Grid.Column="1" Classes="chip" Background="{DynamicResource AccentSoftBrush}" Margin="8,0,0,0">
+                        <TextBlock Text="{Binding Dashboard.ProviderSummaryCount}"
+                                   Foreground="{DynamicResource AccentBrush}" FontSize="11" />
+                    </Border>
+                </Grid>
+
+                <Border Classes="row-divider" />
+
+                <!-- Column headers -->
+                <Grid Margin="16,10,16,8"
+                      ColumnDefinitions="2*,1.2*,1*,1*,1*,1.2*,1.2*,1.6*">
+                    <TextBlock Grid.Column="0" Classes="section-label" Text="{l:Loc DashboardView_Summary_Provider}" />
+                    <TextBlock Grid.Column="1" Classes="section-label" Text="{l:Loc DashboardView_Summary_Calls}" HorizontalAlignment="Right" />
+                    <TextBlock Grid.Column="2" Classes="section-label" Text="{l:Loc DashboardView_Summary_Success}" HorizontalAlignment="Right" />
+                    <TextBlock Grid.Column="3" Classes="section-label" Text="{l:Loc DashboardView_Summary_Fail}" HorizontalAlignment="Right" />
+                    <TextBlock Grid.Column="4" Classes="section-label" Text="{l:Loc DashboardView_Summary_Rate}" HorizontalAlignment="Right" />
+                    <TextBlock Grid.Column="5" Classes="section-label" Text="{l:Loc DashboardView_Summary_Tokens}" HorizontalAlignment="Right" />
+                    <TextBlock Grid.Column="6" Classes="section-label" Text="{l:Loc DashboardView_Summary_Cost}" HorizontalAlignment="Right" />
+                    <TextBlock Grid.Column="7" Classes="section-label" Text="{l:Loc DashboardView_Summary_Last}" HorizontalAlignment="Right" />
+                </Grid>
+
+                <Border Classes="row-divider" />
+
+                <ItemsControl ItemsSource="{Binding Dashboard.ProviderRows}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ProviderUsageRow">
+                            <StackPanel>
+                                <Grid Margin="16,11" ColumnDefinitions="2*,1.2*,1*,1*,1*,1.2*,1.2*,1.6*">
+                                    <TextBlock Grid.Column="0" Text="{Binding Provider}" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource FgBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="{Binding TotalCalls}" HorizontalAlignment="Right"
+                                               Foreground="{DynamicResource FgBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{Binding SuccessCount}" HorizontalAlignment="Right"
+                                               Foreground="{DynamicResource OkBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="3" Text="{Binding FailureCount}" HorizontalAlignment="Right"
+                                               Foreground="{DynamicResource ErrBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="4" Text="{Binding SuccessRate}" HorizontalAlignment="Right"
+                                               Foreground="{DynamicResource FgMutedBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="5" Text="{Binding TotalTokens}" HorizontalAlignment="Right"
+                                               Foreground="{DynamicResource FgMutedBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="6" Text="{Binding EstimatedCost}" HorizontalAlignment="Right"
+                                               Foreground="{DynamicResource FgMutedBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="7" Text="{Binding LastRequest}" HorizontalAlignment="Right"
+                                               Foreground="{DynamicResource FgFaintBrush}" FontSize="11" VerticalAlignment="Center" />
+                                </Grid>
+                                <Border Classes="row-divider" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock Text="{l:Loc DashboardView_Summary_Empty}"
+                           Foreground="{DynamicResource FgFaintBrush}"
+                           Margin="16,18" HorizontalAlignment="Center"
+                           IsVisible="{Binding !Dashboard.HasData}" />
+            </StackPanel>
+        </Border>
+
+    </StackPanel>
+</UserControl>

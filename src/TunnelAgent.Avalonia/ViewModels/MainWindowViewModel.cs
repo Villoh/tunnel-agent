@@ -79,7 +79,10 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     private string? _suppressAutoUpdateForEngineId;
     private readonly AppUpdateService _appUpdate = new();
     private readonly LogsService _logs = new(IPlatformInfo.Current.AuthDirectory);
+    private readonly UsageStore _usageStore = new(System.IO.Path.Combine(IPlatformInfo.Current.LocalDataDirectory, "usage.db"));
+    private readonly UsageService _usage;
     public LogsViewModel Logs { get; } = new();
+    public DashboardViewModel Dashboard { get; } = new();
     private bool _logsInitialLoadPending;
     private bool _isWindowVisibleForLogs = true;
     private bool _managementKeyRepairAttempted;
@@ -91,6 +94,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     {
         var runtime = _settings.Current.GetOrAddEngine(EngineCatalog.CliProxyApi.Id, EngineCatalog.CliProxyApi.DefaultPort);
         _logs.Configure(portOverride ?? runtime.Port, _settings.Current.ManagementKey);
+        _usage.Configure(portOverride ?? runtime.Port, _settings.Current.ManagementKey);
     }
 
     public void SetWindowVisibleForLogs(bool visible)
@@ -100,7 +104,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         UpdateLogsPollingState();
     }
 
-    private bool AreLogsActive => _isWindowVisibleForLogs && SelectedSection == SectionKey.Logs;
+private bool AreLogsActive => _isWindowVisibleForLogs &&
+SelectedSection is SectionKey.Logs;
 
     private void UpdateLogsPollingState()
     {
@@ -109,6 +114,11 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     }
 
     private void OnLogEntriesLoaded(IReadOnlyList<RequestLogEntry> entries, bool isInitial) => Logs.OnEntriesLoaded(entries, isInitial);
+    private void OnUsageEventsLoaded(IReadOnlyList<UsageEvent> events)
+    {
+        Dashboard.OnUsageEventsLoaded(events);
+        Logs.OnUsageEventsLoaded(events);
+    }
     private void OnRawLogLinesLoaded(IReadOnlyList<string> lines, bool isInitial) => Logs.OnRawLinesLoaded(lines, isInitial);
     private void OnLogsCleared() => Logs.OnCleared();
 
@@ -136,7 +146,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         }
     }
 
-    [ObservableProperty] private SectionKey _selectedSection = SectionKey.Providers;
+    [ObservableProperty] private SectionKey _selectedSection = SectionKey.Home;
     [ObservableProperty] private bool _isSidebarCollapsed;
     [ObservableProperty] private bool _isDark;
     [ObservableProperty] private string _focusedConfigEngineId = EngineCatalog.CliProxyApi.Id;
@@ -363,6 +373,12 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
                 PopulateSelectableModels();
         };
         _modelFetch = new TunnelAgent.Services.ModelFetchService(settings);
+        _usage = new UsageService(_usageStore);
+        // Seed telemetry-backed views before logs load, so request_id → provider
+        // overrides are available when log entries are parsed.
+        var persistedUsage = _usageStore.LoadRecent(50_000);
+        Dashboard.OnUsageEventsLoaded(persistedUsage);
+        Logs.OnUsageEventsLoaded(persistedUsage);
         _logs.ManagementKeyRejected += OnManagementKeyRejected;
         ConfigureLogsService();
 
@@ -393,6 +409,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         _logs.EntriesLoaded  += OnLogEntriesLoaded;
         _logs.RawLinesLoaded += OnRawLogLinesLoaded;
         _logs.Cleared        += OnLogsCleared;
+        _usage.EventsLoaded  += OnUsageEventsLoaded;
         UpdateLogsPollingState();
         _logsInitialLoadPending = true;
     }
@@ -970,10 +987,12 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
                     // Engine already running at startup — configure management API and start log polling if needed.
                     ConfigureLogsService(engine.Port);
                     _logs.SetManagementApiAvailable(true);
+                    _usage.SetManagementApiAvailable(true);
                     if (_logsInitialLoadPending && AreLogsActive)
                     {
                         _logsInitialLoadPending = false;
                         _logs.Start();
+                        _usage.Start();
                     }
                     else
                     {
@@ -991,12 +1010,27 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
             RefreshFocusedEngineState();
             PropagateEmailMasking(MaskEmails);
 
+            // Kick the initial log/usage load for the section we land on at startup
+            // (Home by default). OnSelectedSectionChanged does not fire for the
+            // initial value, so without this the dashboard stays empty until the
+            // user navigates away and back.
+            EnsureInitialLogsLoad();
+
             _ = ObserveStartupTaskAsync(LoadEngineReleasesAsync());
         }
         catch (Exception ex)
         {
             TraceStartupWarning("Startup initialization failed", ex);
         }
+    }
+
+    private void EnsureInitialLogsLoad()
+    {
+        if (!_logsInitialLoadPending || !AreLogsActive) return;
+        _logsInitialLoadPending = false;
+        ConfigureLogsService(CliProxyEngine.Port);
+        _logs.Start();
+        _usage.Start();
     }
 
     private static async Task ObserveStartupTaskAsync(Task task)
@@ -1115,10 +1149,12 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
                     {
                         ConfigureLogsService(engine.Port);
                         _logs.SetManagementApiAvailable(true);
+                        _usage.SetManagementApiAvailable(true);
                         if (_logsInitialLoadPending && AreLogsActive)
                         {
                             _logsInitialLoadPending = false;
                             _logs.Start();
+                            _usage.Start();
                         }
                         else
                         {
@@ -1135,6 +1171,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
                     {
                         _logs.SetManagementApiAvailable(false);
                         _logs.Stop();
+                        _usage.SetManagementApiAvailable(false);
+                        _usage.Stop();
                         _logsInitialLoadPending = true;
                     }
                 }
@@ -2161,6 +2199,24 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     }
 
     [RelayCommand] private void DismissConfigurationStatus() => ShowConfigurationStatus = false;
+
+    [RelayCommand]
+    private void SelectHome()
+    {
+        SelectedSection = SectionKey.Home;
+        if (_logsInitialLoadPending && AreLogsActive)
+        {
+            _logsInitialLoadPending = false;
+            ConfigureLogsService(CliProxyEngine.Port);
+            _logs.Start();
+            _usage.Start();
+        }
+        else
+        {
+            UpdateLogsPollingState();
+        }
+    }
+
     [RelayCommand]
     private void SelectProviders()
     {
@@ -2216,6 +2272,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
             _logsInitialLoadPending = false;
             ConfigureLogsService(CliProxyEngine.Port);
             _logs.Start();
+            _usage.Start();
         }
         else
         {
@@ -2227,6 +2284,16 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     [RelayCommand] private Task RefreshLogsAsync() => Logs.RefreshWithSpinAsync(() => _logs.TriggerManualRefresh());
     [RelayCommand] private void ShowDeleteLogsConfirm()    => Logs.ShowClearConfirm = true;
     [RelayCommand] private void DismissDeleteLogsConfirm() => Logs.ShowClearConfirm = false;
+    [RelayCommand] private void ShowClearUsageConfirm()    => Logs.ShowClearUsageConfirm = true;
+    [RelayCommand] private void DismissClearUsageConfirm() => Logs.ShowClearUsageConfirm = false;
+    [RelayCommand]
+    private void ConfirmClearUsage()
+    {
+        Logs.ShowClearUsageConfirm = false;
+        _usageStore.Clear();
+        Dashboard.OnCleared();
+        Logs.OnUsageCleared();
+    }
     [RelayCommand]
     private async Task ConfirmDeleteLogsAsync()
     {
@@ -2910,6 +2977,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
             await CliProxyEngine.StartAsync();
             ConfigureLogsService(CliProxyEngine.Port);
             _logs.SetManagementApiAvailable(true);
+            _usage.SetManagementApiAvailable(true);
         }
 
         ShowManagementKeyRepairedToast = true;
@@ -2961,8 +3029,11 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
         _logs.RawLinesLoaded -= OnRawLogLinesLoaded;
         _logs.Cleared -= OnLogsCleared;
         _logs.ManagementKeyRejected -= OnManagementKeyRejected;
+        _usage.EventsLoaded -= OnUsageEventsLoaded;
 
         _logs.Dispose();
+        _usage.Dispose();
+        _usageStore.Dispose();
         _catalog.Dispose();
         await _perplexityTokenGenerator.DisposeAsync();
     }

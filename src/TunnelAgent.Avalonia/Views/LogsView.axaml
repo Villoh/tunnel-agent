@@ -51,9 +51,32 @@
                                            Classes.spin="{Binding Logs.IsRefreshing}" />
                 </Button>
 
-                <!-- Eraser: clear view only -->
+                <!-- Requests: clear persisted usage history -->
+                <Button Classes="icon-btn" ToolTip.Tip="{l:Loc LogsView_ClearUsageHistoryTooltip}"
+                        Command="{Binding ShowClearUsageConfirmCommand}"
+                        IsVisible="{Binding Logs.IsRequestsTab}"
+                        RenderTransformOrigin="50%,50%">
+                    <Button.Transitions>
+                        <Transitions>
+                            <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15" Easing="CubicEaseOut" />
+                        </Transitions>
+                    </Button.Transitions>
+                    <Button.Styles>
+                        <Style Selector="Button:pointerover">
+                            <Setter Property="RenderTransform" Value="scale(1.2)" />
+                        </Style>
+                        <Style Selector="Button:pressed">
+                            <Setter Property="RenderTransform" Value="scale(0.9)" />
+                        </Style>
+                    </Button.Styles>
+                    <lucide:PackIconLucide Kind="Trash2" Width="14" Height="14"
+                                           Foreground="{DynamicResource FgMutedBrush}" />
+                </Button>
+
+                <!-- Proxy logs: clear view only -->
                 <Button Classes="icon-btn" ToolTip.Tip="{l:Loc LogsView_ClearViewTooltip}"
                         Command="{Binding ClearLogsCommand}"
+                        IsVisible="{Binding Logs.IsProxyLogsTab}"
                         RenderTransformOrigin="50%,50%">
                     <Button.Transitions>
                         <Transitions>
@@ -72,9 +95,10 @@
                                            Foreground="{DynamicResource FgMutedBrush}" />
                 </Button>
 
-                <!-- Trash: delete log file with confirmation -->
+                <!-- Proxy logs: delete log file with confirmation -->
                 <Button Classes="icon-btn" ToolTip.Tip="{l:Loc LogsView_DeleteLogFileTooltip}"
                         Command="{Binding ShowDeleteLogsConfirmCommand}"
+                        IsVisible="{Binding Logs.IsProxyLogsTab}"
                         RenderTransformOrigin="50%,50%">
                     <Button.Transitions>
                         <Transitions>
