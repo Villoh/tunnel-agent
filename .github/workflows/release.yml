@@ -28,7 +28,7 @@ jobs:
       is_prerelease: ${{ steps.version.outputs.is_prerelease }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -104,7 +104,7 @@ jobs:
 
     steps:
       # Checkout the tagged commit — already has the bumped version in .csproj
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ needs.prepare.outputs.tag }}
 
@@ -201,7 +201,7 @@ jobs:
       TAG: ${{ needs.prepare.outputs.tag }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ needs.prepare.outputs.tag }}
 
