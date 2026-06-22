@@ -37,13 +37,15 @@
 ## Features
 
 - 🖥️ **Native Windows Experience**: clean Avalonia UI that respects your system theme and keeps local engine management in one place
-- 🌍 **Multi-Language UI (i18n)**: fully localized interface with runtime language switching across 8 languages, auto-detecting your system language on first launch
+- 🌍 **Multi-Language UI (i18n)**: fully localized interface with runtime language switching across 14 languages, auto-detecting your system language on first launch
 - 🔀 **Multi-Engine Control**: run and manage both CLIProxyAPI and Perplexity from the same desktop app, with per-engine configuration, endpoint controls, and status
 - 🚀 **One-Click Server Management**: start and stop each local engine directly from the Providers view
 - 🔐 **Credential Storage**: secure handling for OAuth tokens, custom provider API keys, and file-based Perplexity session accounts stored under Tunnel Agent settings
 - 👥 **Provider Management**: connect Claude Code, OpenAI Codex, Gemini CLI, Kimi, Antigravity, xAI (Grok), and custom OpenAI-compatible providers
 - 🧠 **Perplexity WebUI Sessions**: add multiple Perplexity accounts, set a default session, reset accounts safely, and auto-install the Perplexity engine when needed
 - 🎚️ **Model Visibility**: browse available models grouped by connected provider or engine source, including Perplexity-backed model listings
+- 📈 **Usage Dashboard**: Home view with live usage telemetry (calls, tokens, success rate) over selectable time ranges, an interactive usage chart, and a summary table that groups by provider or model — backed by SQLite history that persists across restarts
+- 💰 **Cost Estimation**: per-request cost estimates using live OpenRouter pricing (input/output/cache read & write rates) cached on disk for offline use, with a built-in price table fallback
 - 📊 **Live Status**: see sidebar engine health plus focused engine state, endpoint, and release info
 - ⚙️ **Configuration**: control startup behaviour, per-engine ports, updates, release selection, routing strategy, and credential actions
 
