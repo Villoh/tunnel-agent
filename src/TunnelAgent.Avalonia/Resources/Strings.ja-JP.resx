@@ -505,6 +505,9 @@
   <data name="LogsView_ClearViewTooltip" xml:space="preserve">
     <value>表示をクリア</value>
   </data>
+  <data name="Common_ClearUsageHistoryTooltip" xml:space="preserve">
+    <value>使用履歴を消去</value>
+  </data>
   <data name="LogsView_DeleteLogFileTooltip" xml:space="preserve">
     <value>ログファイルを削除</value>
   </data>

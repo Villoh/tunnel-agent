@@ -504,7 +504,7 @@
   <data name="LogsView_ClearViewTooltip" xml:space="preserve">
     <value>Clear view</value>
   </data>
-  <data name="LogsView_ClearUsageHistoryTooltip" xml:space="preserve">
+  <data name="Common_ClearUsageHistoryTooltip" xml:space="preserve">
     <value>Clear usage history</value>
   </data>
   <data name="LogsView_DeleteLogFileTooltip" xml:space="preserve">

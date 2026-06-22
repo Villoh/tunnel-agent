@@ -505,6 +505,9 @@
   <data name="LogsView_ClearViewTooltip" xml:space="preserve">
     <value>Очистити перегляд</value>
   </data>
+  <data name="Common_ClearUsageHistoryTooltip" xml:space="preserve">
+    <value>Очистити історію використання</value>
+  </data>
   <data name="LogsView_DeleteLogFileTooltip" xml:space="preserve">
     <value>Видалити файл журналу</value>
   </data>

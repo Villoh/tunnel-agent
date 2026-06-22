@@ -52,7 +52,7 @@
                                                Classes.spin="{Binding Dashboard.IsRefreshing}" />
                     </Button>
                     <Button Classes="icon"
-                            ToolTip.Tip="{l:Loc LogsView_ClearUsageHistoryTooltip}"
+                            ToolTip.Tip="{l:Loc Common_ClearUsageHistoryTooltip}"
                             Command="{Binding ShowClearUsageConfirmCommand}">
                         <lucide:PackIconLucide Kind="Trash2" Width="14" Height="14" />
                     </Button>

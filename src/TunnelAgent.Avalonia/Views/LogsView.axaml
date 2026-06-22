@@ -52,7 +52,7 @@
                 </Button>
 
                 <!-- Requests: clear persisted usage history -->
-                <Button Classes="icon-btn" ToolTip.Tip="{l:Loc LogsView_ClearUsageHistoryTooltip}"
+                <Button Classes="icon-btn" ToolTip.Tip="{l:Loc Common_ClearUsageHistoryTooltip}"
                         Command="{Binding ShowClearUsageConfirmCommand}"
                         IsVisible="{Binding Logs.IsRequestsTab}"
                         RenderTransformOrigin="50%,50%">

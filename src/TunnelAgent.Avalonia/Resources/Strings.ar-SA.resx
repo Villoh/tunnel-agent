@@ -505,6 +505,9 @@
   <data name="LogsView_ClearViewTooltip" xml:space="preserve">
     <value>مسح العرض</value>
   </data>
+  <data name="Common_ClearUsageHistoryTooltip" xml:space="preserve">
+    <value>مسح سجل الاستخدام</value>
+  </data>
   <data name="LogsView_DeleteLogFileTooltip" xml:space="preserve">
     <value>حذف ملف السجل</value>
   </data>

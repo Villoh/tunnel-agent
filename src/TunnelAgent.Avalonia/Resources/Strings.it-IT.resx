@@ -505,6 +505,9 @@
   <data name="LogsView_ClearViewTooltip" xml:space="preserve">
     <value>Svuota vista</value>
   </data>
+  <data name="Common_ClearUsageHistoryTooltip" xml:space="preserve">
+    <value>Cancella cronologia di utilizzo</value>
+  </data>
   <data name="LogsView_DeleteLogFileTooltip" xml:space="preserve">
     <value>Elimina file di log</value>
   </data>

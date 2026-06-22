@@ -505,6 +505,9 @@
   <data name="LogsView_ClearViewTooltip" xml:space="preserve">
     <value>Ansicht leeren</value>
   </data>
+  <data name="Common_ClearUsageHistoryTooltip" xml:space="preserve">
+    <value>Nutzungsverlauf löschen</value>
+  </data>
   <data name="LogsView_DeleteLogFileTooltip" xml:space="preserve">
     <value>Protokolldatei löschen</value>
   </data>
