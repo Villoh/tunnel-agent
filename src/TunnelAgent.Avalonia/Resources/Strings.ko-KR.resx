@@ -1253,7 +1253,7 @@
     <value>선택한 범위에 요청이 없습니다.</value>
   </data>
   <data name="DashboardView_Summary_Title" xml:space="preserve">
-    <value>제공자 요약</value>
+    <value>요약</value>
   </data>
   <data name="DashboardView_Summary_Provider" xml:space="preserve">
     <value>제공자</value>

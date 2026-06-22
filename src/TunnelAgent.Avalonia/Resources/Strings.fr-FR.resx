@@ -1253,7 +1253,7 @@
     <value>Aucune requête dans la plage sélectionnée.</value>
   </data>
   <data name="DashboardView_Summary_Title" xml:space="preserve">
-    <value>Résumé par fournisseur</value>
+    <value>Résumé</value>
   </data>
   <data name="DashboardView_Summary_Provider" xml:space="preserve">
     <value>FOURNISSEUR</value>

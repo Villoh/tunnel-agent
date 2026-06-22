@@ -1251,7 +1251,7 @@
     <value>No requests in the selected range.</value>
   </data>
   <data name="DashboardView_Summary_Title" xml:space="preserve">
-    <value>Provider summary</value>
+    <value>Summary</value>
   </data>
   <data name="DashboardView_Summary_Provider" xml:space="preserve">
     <value>PROVIDER</value>

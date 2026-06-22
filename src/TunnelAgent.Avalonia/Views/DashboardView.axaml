@@ -201,7 +201,8 @@ Foreground="{DynamicResource AccentBrush}" />
                 <Grid Margin="16,14,16,10" ColumnDefinitions="Auto,Auto,*">
                     <TextBlock Grid.Column="0" Text="{l:Loc DashboardView_Summary_Title}"
                                FontWeight="SemiBold" Foreground="{DynamicResource FgBrush}" VerticalAlignment="Center" />
-                    <Border Grid.Column="1" Classes="chip" Background="{DynamicResource AccentSoftBrush}" Margin="8,0,0,0">
+                    <Border Grid.Column="1" Classes="chip" Background="{DynamicResource AccentSoftBrush}"
+                            Margin="8,0,0,0" VerticalAlignment="Center">
                         <TextBlock Text="{Binding Dashboard.SummaryRowCount}"
                                    Foreground="{DynamicResource AccentBrush}" FontSize="11" />
                     </Border>

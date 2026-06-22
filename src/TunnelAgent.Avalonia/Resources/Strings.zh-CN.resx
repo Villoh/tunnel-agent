@@ -1253,7 +1253,7 @@
     <value>所选范围内没有请求。</value>
   </data>
   <data name="DashboardView_Summary_Title" xml:space="preserve">
-    <value>按提供商汇总</value>
+    <value>汇总</value>
   </data>
   <data name="DashboardView_Summary_Provider" xml:space="preserve">
     <value>提供商</value>

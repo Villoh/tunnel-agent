@@ -1253,7 +1253,7 @@
     <value>Keine Anfragen im ausgewählten Zeitraum.</value>
   </data>
   <data name="DashboardView_Summary_Title" xml:space="preserve">
-    <value>Anbieterübersicht</value>
+    <value>Übersicht</value>
   </data>
   <data name="DashboardView_Summary_Provider" xml:space="preserve">
     <value>ANBIETER</value>

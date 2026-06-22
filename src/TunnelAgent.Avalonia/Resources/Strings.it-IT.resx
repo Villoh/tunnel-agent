@@ -1253,7 +1253,7 @@
     <value>Nessuna richiesta nell’intervallo selezionato.</value>
   </data>
   <data name="DashboardView_Summary_Title" xml:space="preserve">
-    <value>Riepilogo per provider</value>
+    <value>Riepilogo</value>
   </data>
   <data name="DashboardView_Summary_Provider" xml:space="preserve">
     <value>PROVIDER</value>

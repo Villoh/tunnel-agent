@@ -1253,7 +1253,7 @@
     <value>В выбранном диапазоне нет запросов.</value>
   </data>
   <data name="DashboardView_Summary_Title" xml:space="preserve">
-    <value>Сводка по провайдерам</value>
+    <value>Сводка</value>
   </data>
   <data name="DashboardView_Summary_Provider" xml:space="preserve">
     <value>ПРОВАЙДЕР</value>

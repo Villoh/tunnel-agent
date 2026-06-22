@@ -1253,7 +1253,7 @@
     <value>لا توجد طلبات في النطاق المحدد.</value>
   </data>
   <data name="DashboardView_Summary_Title" xml:space="preserve">
-    <value>ملخص حسب المزود</value>
+    <value>ملخص</value>
   </data>
   <data name="DashboardView_Summary_Provider" xml:space="preserve">
     <value>المزود</value>

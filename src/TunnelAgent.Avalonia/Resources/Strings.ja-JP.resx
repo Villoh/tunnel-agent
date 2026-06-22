@@ -1253,7 +1253,7 @@
     <value>選択した範囲にリクエストはありません。</value>
   </data>
   <data name="DashboardView_Summary_Title" xml:space="preserve">
-    <value>プロバイダー概要</value>
+    <value>概要</value>
   </data>
   <data name="DashboardView_Summary_Provider" xml:space="preserve">
     <value>プロバイダー</value>

@@ -1253,7 +1253,7 @@
     <value>Немає запитів у вибраному діапазоні.</value>
   </data>
   <data name="DashboardView_Summary_Title" xml:space="preserve">
-    <value>Зведення за провайдерами</value>
+    <value>Зведення</value>
   </data>
   <data name="DashboardView_Summary_Provider" xml:space="preserve">
     <value>ПРОВАЙДЕР</value>

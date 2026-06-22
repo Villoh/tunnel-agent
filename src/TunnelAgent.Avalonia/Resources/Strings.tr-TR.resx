@@ -1253,7 +1253,7 @@
     <value>Seçilen aralıkta istek yok.</value>
   </data>
   <data name="DashboardView_Summary_Title" xml:space="preserve">
-    <value>Sağlayıcı özeti</value>
+    <value>Özet</value>
   </data>
   <data name="DashboardView_Summary_Provider" xml:space="preserve">
     <value>SAĞLAYICI</value>
