@@ -22,7 +22,7 @@ public partial class LogsViewModel : ViewModelBase
     // Usage-backed requests — newest first, capped to avoid unbounded memory growth.
     private readonly List<RequestLogEntry> _allEntries = new();
     private readonly HashSet<string> _usageEventKeys = new(StringComparer.OrdinalIgnoreCase);
-    // Filtered results (search + provider) before pagination
+    // Filtered results (search + provider + model) before pagination
     private List<RequestLogEntry> _filteredAll = new();
 
     // ── Tabs ─────────────────────────────────────────────────────────────
@@ -56,15 +56,20 @@ public partial class LogsViewModel : ViewModelBase
     // ── Requests tab ─────────────────────────────────────────────────────
     public ObservableCollection<RequestLogEntry> FilteredEntries { get; } = new();
     public ObservableCollection<string> ProviderOptions { get; } = new();
+    public ObservableCollection<string> ModelOptions { get; } = new();
     private string _allProvidersLabel = LocalizationService.Instance.GetString("LogsView_Requests_AllProviders");
+    private string _allModelsLabel = LocalizationService.Instance.GetString("LogsView_Requests_AllModels");
 
     [ObservableProperty] private string _searchText       = "";
     [ObservableProperty] private string _selectedProvider = "";
+    [ObservableProperty] private string _selectedModel    = "";
 
     public LogsViewModel()
     {
         ProviderOptions.Add(_allProvidersLabel);
+        ModelOptions.Add(_allModelsLabel);
         _selectedProvider = _allProvidersLabel;
+        _selectedModel = _allModelsLabel;
         LocalizationService.Instance.PropertyChanged += OnLocalizationChanged;
     }
 
@@ -84,6 +89,7 @@ public partial class LogsViewModel : ViewModelBase
 
     partial void OnSearchTextChanged(string value)       { CurrentPage = 1; ApplyFilter(); }
     partial void OnSelectedProviderChanged(string value) { CurrentPage = 1; ApplyFilter(); }
+    partial void OnSelectedModelChanged(string value)    { CurrentPage = 1; ApplyFilter(); }
     partial void OnCurrentPageChanged(int value)
     {
         OnPropertyChanged(nameof(CanGoPrev));
@@ -122,7 +128,7 @@ public partial class LogsViewModel : ViewModelBase
         }
 
         TrimRequestEntries();
-        RebuildProviderOptions();
+        RebuildFilterOptions();
         CurrentPage = 1;
         ApplyFilter();
     }
@@ -134,7 +140,10 @@ public partial class LogsViewModel : ViewModelBase
         _filteredAll.Clear();
         ProviderOptions.Clear();
         ProviderOptions.Add(_allProvidersLabel);
+        ModelOptions.Clear();
+        ModelOptions.Add(_allModelsLabel);
         SelectedProvider = _allProvidersLabel;
+        SelectedModel = _allModelsLabel;
         FilteredEntries.Clear();
         CurrentPage = 1;
         TotalPages = 1;
@@ -178,36 +187,59 @@ public partial class LogsViewModel : ViewModelBase
     [RelayCommand]
     private void SelectProvider(string provider) => SelectedProvider = provider;
 
-    private void RebuildProviderOptions()
+    private void RebuildFilterOptions()
     {
-        var providers = _allEntries
-            .Select(e => e.Provider)
+        RebuildOptions(
+            ProviderOptions,
+            _allProvidersLabel,
+            _allEntries.Select(e => e.Provider),
+            SelectedProvider,
+            value => SelectedProvider = value);
+
+        RebuildOptions(
+            ModelOptions,
+            _allModelsLabel,
+            _allEntries.Select(e => e.Model).Where(m => m != "—"),
+            SelectedModel,
+            value => SelectedModel = value);
+    }
+
+    private static void RebuildOptions(ObservableCollection<string> options, string allLabel, IEnumerable<string> values, string selected, Action<string> setSelected)
+    {
+        var sorted = values
             .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(p => p)
+            .OrderBy(v => v)
             .ToList();
 
-        var existing = ProviderOptions.Skip(1).ToList();
-        foreach (var p in providers.Where(p => !existing.Contains(p, StringComparer.OrdinalIgnoreCase)))
-            ProviderOptions.Add(p);
+        var existing = options.Skip(1).ToList();
+        foreach (var value in sorted.Where(v => !existing.Contains(v, StringComparer.OrdinalIgnoreCase)))
+            options.Add(value);
 
-        var toRemove = existing.Where(p => !providers.Contains(p, StringComparer.OrdinalIgnoreCase)).ToList();
-        foreach (var p in toRemove) ProviderOptions.Remove(p);
+        var toRemove = existing.Where(v => !sorted.Contains(v, StringComparer.OrdinalIgnoreCase)).ToList();
+        foreach (var value in toRemove) options.Remove(value);
 
-        if (SelectedProvider != _allProvidersLabel &&
-            !providers.Contains(SelectedProvider, StringComparer.OrdinalIgnoreCase))
-            SelectedProvider = _allProvidersLabel;
+        if (selected != allLabel && !sorted.Contains(selected, StringComparer.OrdinalIgnoreCase))
+            setSelected(allLabel);
     }
 
     private void OnLocalizationChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         var wasAllProvidersSelected = SelectedProvider == _allProvidersLabel;
+        var wasAllModelsSelected = SelectedModel == _allModelsLabel;
         _allProvidersLabel = LocalizationService.Instance.GetString("LogsView_Requests_AllProviders");
+        _allModelsLabel = LocalizationService.Instance.GetString("LogsView_Requests_AllModels");
         if (ProviderOptions.Count == 0)
             ProviderOptions.Add(_allProvidersLabel);
         else
             ProviderOptions[0] = _allProvidersLabel;
+        if (ModelOptions.Count == 0)
+            ModelOptions.Add(_allModelsLabel);
+        else
+            ModelOptions[0] = _allModelsLabel;
         if (wasAllProvidersSelected)
             SelectedProvider = _allProvidersLabel;
+        if (wasAllModelsSelected)
+            SelectedModel = _allModelsLabel;
     }
 
     // ── Filtering + pagination ────────────────────────────────────────────
@@ -216,17 +248,21 @@ public partial class LogsViewModel : ViewModelBase
     {
         var q          = SearchText.Trim();
         var byProvider = SelectedProvider != _allProvidersLabel;
+        var byModel    = SelectedModel != _allModelsLabel;
 
         var filtered = _allEntries.AsEnumerable();
 
         if (byProvider)
             filtered = filtered.Where(e => string.Equals(e.Provider, SelectedProvider, StringComparison.OrdinalIgnoreCase));
+        if (byModel)
+            filtered = filtered.Where(e => string.Equals(e.Model, SelectedModel, StringComparison.OrdinalIgnoreCase));
 
         if (!string.IsNullOrEmpty(q))
             filtered = filtered.Where(e =>
                 e.Path.Contains(q,     StringComparison.OrdinalIgnoreCase) ||
                 e.Method.Contains(q,   StringComparison.OrdinalIgnoreCase) ||
                 e.Provider.Contains(q, StringComparison.OrdinalIgnoreCase) ||
+                e.Model.Contains(q,    StringComparison.OrdinalIgnoreCase) ||
                 e.StatusCode.ToString().Contains(q) ||
                 e.LatencyRaw.Contains(q, StringComparison.OrdinalIgnoreCase));
 
@@ -287,11 +323,12 @@ public partial class LogsViewModel : ViewModelBase
     public string BuildRequestsCsv()
     {
         var sb = new StringBuilder();
-        sb.AppendLine("Timestamp,Provider,Path,Method,Status,Latency,RequestId");
+        sb.AppendLine("Timestamp,Provider,Model,Path,Method,Status,Latency,RequestId");
         foreach (var e in _allEntries)
         {
             sb.Append(CsvField(e.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")));
             sb.Append(','); sb.Append(CsvField(e.Provider));
+            sb.Append(','); sb.Append(CsvField(e.Model));
             sb.Append(','); sb.Append(CsvField(e.Path));
             sb.Append(','); sb.Append(CsvField(e.Method));
             sb.Append(','); sb.Append(e.StatusCode);

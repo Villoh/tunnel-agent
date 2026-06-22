@@ -532,6 +532,9 @@
   <data name="LogsView_Requests_ProviderLabel" xml:space="preserve">
     <value>प्रोवाइडर</value>
   </data>
+  <data name="LogsView_Requests_ModelLabel" xml:space="preserve">
+    <value>मॉडल</value>
+  </data>
   <data name="LogsView_Requests_SearchPlaceholder" xml:space="preserve">
     <value>रिक्वेस्ट खोजें...</value>
   </data>
@@ -1127,6 +1130,9 @@
   </data>
   <data name="LogsView_Requests_AllProviders" xml:space="preserve">
     <value>सभी प्रोवाइडर</value>
+  </data>
+  <data name="LogsView_Requests_AllModels" xml:space="preserve">
+    <value>सभी मॉडल</value>
   </data>
   <data name="ConfigView_General_Theme_System" xml:space="preserve">
     <value>सिस्टम</value>

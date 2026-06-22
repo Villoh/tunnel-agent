@@ -532,6 +532,9 @@
   <data name="LogsView_Requests_ProviderLabel" xml:space="preserve">
     <value>المزوّد</value>
   </data>
+  <data name="LogsView_Requests_ModelLabel" xml:space="preserve">
+    <value>النموذج</value>
+  </data>
   <data name="LogsView_Requests_SearchPlaceholder" xml:space="preserve">
     <value>البحث في الطلبات...</value>
   </data>
@@ -1127,6 +1130,9 @@
   </data>
   <data name="LogsView_Requests_AllProviders" xml:space="preserve">
     <value>كل المزوّدين</value>
+  </data>
+  <data name="LogsView_Requests_AllModels" xml:space="preserve">
+    <value>كل النماذج</value>
   </data>
   <data name="ConfigView_General_Theme_System" xml:space="preserve">
     <value>النظام</value>

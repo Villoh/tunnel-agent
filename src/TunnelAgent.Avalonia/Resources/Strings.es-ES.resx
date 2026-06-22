@@ -519,6 +519,9 @@
   <data name="LogsView_Requests_ProviderLabel" xml:space="preserve">
     <value>Proveedor</value>
   </data>
+  <data name="LogsView_Requests_ModelLabel" xml:space="preserve">
+    <value>Modelo</value>
+  </data>
   <data name="LogsView_Requests_SearchPlaceholder" xml:space="preserve">
     <value>Buscar solicitudes...</value>
   </data>
@@ -1102,6 +1105,9 @@
   </data>
   <data name="LogsView_Requests_AllProviders" xml:space="preserve">
     <value>Todos los proveedores</value>
+  </data>
+  <data name="LogsView_Requests_AllModels" xml:space="preserve">
+    <value>Todos los modelos</value>
   </data>
   <data name="ConfigView_General_Theme_System" xml:space="preserve">
     <value>Sistema</value>

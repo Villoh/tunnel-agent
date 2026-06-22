@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Logs request model filter** (`LogsViewModel`, `RequestLogEntry`, `LogsView.axaml`, `Resources/Strings*.resx`): the Logs → Requests tab now exposes a model filter alongside the provider filter and shows each request as `Provider · model` above the path. Request search and CSV export also include the model.
+
 ## [0.9.0] - 2026-06-22
 
 ### Fixed

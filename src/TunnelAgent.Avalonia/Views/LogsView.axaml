@@ -135,7 +135,7 @@
                     IsVisible="{Binding Logs.IsRequestsTab}">
 
             <!-- Stats bar + Provider dropdown -->
-            <Grid Margin="0,0,0,10" ColumnDefinitions="Auto,Auto,Auto,*,Auto">
+            <Grid Margin="0,0,0,10" ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto">
                 <StackPanel Grid.Column="0" Margin="0,0,24,0">
                     <TextBlock Classes="row-desc" Text="{l:Loc LogsView_Requests_Total}" />
                     <TextBlock Classes="row-label" FontSize="15" FontWeight="SemiBold"
@@ -152,12 +152,19 @@
                                Text="{Binding Logs.AvgTime}" />
                 </StackPanel>
 
-                <!-- Provider filter — ComboBox on the right -->
-                <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="6" VerticalAlignment="Bottom">
+                <!-- Provider/model filters — ComboBoxes on the right -->
+                <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="6" VerticalAlignment="Bottom" Margin="0,0,10,0">
                     <TextBlock Classes="row-desc" VerticalAlignment="Center" Text="{l:Loc LogsView_Requests_ProviderLabel}" />
                     <ComboBox ItemsSource="{Binding Logs.ProviderOptions}"
                               SelectedItem="{Binding Logs.SelectedProvider, Mode=TwoWay}"
                               MinWidth="120"
+                              FontSize="12" />
+                </StackPanel>
+                <StackPanel Grid.Column="5" Orientation="Horizontal" Spacing="6" VerticalAlignment="Bottom">
+                    <TextBlock Classes="row-desc" VerticalAlignment="Center" Text="{l:Loc LogsView_Requests_ModelLabel}" />
+                    <ComboBox ItemsSource="{Binding Logs.ModelOptions}"
+                              SelectedItem="{Binding Logs.SelectedModel, Mode=TwoWay}"
+                              MinWidth="140"
                               FontSize="12" />
                 </StackPanel>
             </Grid>
@@ -218,7 +225,18 @@
                                         </Border>
                                         <!-- Provider + path -->
                                         <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
-                                            <TextBlock Classes="row-label" FontSize="12" Text="{Binding Provider}" />
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Classes="row-label" FontSize="12" Text="{Binding Provider}" />
+                                                <Ellipse Width="3" Height="3"
+                                                         Fill="{DynamicResource FgFaintBrush}"
+                                                         VerticalAlignment="Center" />
+                                                <TextBlock Classes="row-desc"
+                                                           FontFamily="Cascadia Mono,Consolas,monospace"
+                                                           FontSize="11"
+                                                           MaxWidth="220"
+                                                           Text="{Binding Model}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
                                             <TextBlock FontFamily="Cascadia Mono,Consolas,monospace"
                                                        FontSize="11"
                                                        Foreground="{DynamicResource FgMutedBrush}"

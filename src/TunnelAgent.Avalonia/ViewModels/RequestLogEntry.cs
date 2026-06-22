@@ -26,8 +26,9 @@ public sealed partial class RequestLogEntry
     public bool     IsSuccess  => StatusCode >= 200 && StatusCode < 300;
     public bool     IsError    => StatusCode >= 400;
     public string   Provider   { get; private set; }
+    public string   Model      { get; }
 
-    private RequestLogEntry(DateTime ts, string reqId, int status, string latRaw, TimeSpan latency, string method, string path, string? provider = null)
+    private RequestLogEntry(DateTime ts, string reqId, int status, string latRaw, TimeSpan latency, string method, string path, string? provider = null, string? model = null)
     {
         Timestamp  = ts;
         RequestId  = reqId;
@@ -37,6 +38,7 @@ public sealed partial class RequestLogEntry
         Method     = method;
         Path       = path;
         Provider   = string.IsNullOrWhiteSpace(provider) ? InferProvider(path) : Titlecase(provider.Trim());
+        Model      = string.IsNullOrWhiteSpace(model) ? "—" : model.Trim();
     }
 
     public static RequestLogEntry FromUsageEvent(UsageEvent e)
@@ -51,7 +53,8 @@ public sealed partial class RequestLogEntry
             latency,
             string.IsNullOrWhiteSpace(e.Path) ? "" : "POST",
             string.IsNullOrWhiteSpace(e.Path) ? "—" : e.Path!,
-            e.Provider);
+            e.Provider,
+            e.Model);
     }
 
     public void ApplyProviderOverride(string provider)

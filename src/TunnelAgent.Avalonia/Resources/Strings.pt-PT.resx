@@ -532,6 +532,9 @@
   <data name="LogsView_Requests_ProviderLabel" xml:space="preserve">
     <value>Fornecedor</value>
   </data>
+  <data name="LogsView_Requests_ModelLabel" xml:space="preserve">
+    <value>Modelo</value>
+  </data>
   <data name="LogsView_Requests_SearchPlaceholder" xml:space="preserve">
     <value>Pesquisar pedidos...</value>
   </data>
@@ -1127,6 +1130,9 @@
   </data>
   <data name="LogsView_Requests_AllProviders" xml:space="preserve">
     <value>Todos os fornecedores</value>
+  </data>
+  <data name="LogsView_Requests_AllModels" xml:space="preserve">
+    <value>Todos os modelos</value>
   </data>
   <data name="ConfigView_General_Theme_System" xml:space="preserve">
     <value>Sistema</value>

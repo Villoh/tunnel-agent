@@ -531,6 +531,9 @@
   <data name="LogsView_Requests_ProviderLabel" xml:space="preserve">
     <value>Provider</value>
   </data>
+  <data name="LogsView_Requests_ModelLabel" xml:space="preserve">
+    <value>Model</value>
+  </data>
   <data name="LogsView_Requests_SearchPlaceholder" xml:space="preserve">
     <value>Search requests...</value>
   </data>
@@ -1126,6 +1129,9 @@
   </data>
   <data name="LogsView_Requests_AllProviders" xml:space="preserve">
     <value>All Providers</value>
+  </data>
+  <data name="LogsView_Requests_AllModels" xml:space="preserve">
+    <value>All Models</value>
   </data>
   <data name="ConfigView_General_Theme_System" xml:space="preserve">
     <value>System</value>
