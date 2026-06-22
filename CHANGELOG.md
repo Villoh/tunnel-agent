@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-06-22
+
 ### Fixed
 
 - **Engine update toast localization** (`MainWindowViewModel`, `Resources/Strings*.resx`): the "&lt;engine&gt; &lt;version&gt; is ready to install." body of the CLIProxyAPI/Perplexity update toast was hardcoded in English while its title was translated. It now resolves through the new `Toast_EngineUpdateAvailable_Body` format string, translated for all fourteen supported languages.
@@ -853,7 +855,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/Villoh/tunnel-agent/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Villoh/tunnel-agent/compare/v0.7.2...v0.8.0
 [0.7.2]: https://github.com/Villoh/tunnel-agent/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/Villoh/tunnel-agent/compare/v0.7.0...v0.7.1
