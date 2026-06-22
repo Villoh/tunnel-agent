@@ -114,6 +114,19 @@
     <value>로그 파일 삭제</value>
   </data>
 
+  <data name="Dialog_ClearUsageHistory_Title" xml:space="preserve">
+    <value>사용 기록을 지우시겠습니까?</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Description" xml:space="preserve">
+    <value>대시보드 및 요청에서 사용하는 저장된 사용 이벤트를 영구적으로 삭제합니다. 프록시 로그 파일은 영향을 받지 않습니다.</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Delete" xml:space="preserve">
+    <value>사용 기록 지우기</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Cancel" xml:space="preserve">
+    <value>취소</value>
+  </data>
+
   <data name="Dialog_ResetCredentials_Title" xml:space="preserve">
     <value>모든 자격 증명을 초기화할까요?</value>
   </data>
@@ -1135,6 +1148,133 @@
   </data>
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
+  </data>
+
+  <data name="Sidebar_Home" xml:space="preserve">
+    <value>홈</value>
+  </data>
+  <data name="DashboardView_Title" xml:space="preserve">
+    <value>대시보드</value>
+  </data>
+  <data name="DashboardView_Subtitle" xml:space="preserve">
+    <value>로컬 프록시가 처리한 요청의 실시간 개요입니다.</value>
+  </data>
+  <data name="DashboardView_Range_Today" xml:space="preserve">
+    <value>오늘</value>
+  </data>
+  <data name="DashboardView_Range_7d" xml:space="preserve">
+    <value>7일</value>
+  </data>
+  <data name="DashboardView_Range_14d" xml:space="preserve">
+    <value>14일</value>
+  </data>
+  <data name="DashboardView_Range_30d" xml:space="preserve">
+    <value>30일</value>
+  </data>
+  <data name="DashboardView_Range_All" xml:space="preserve">
+    <value>전체</value>
+  </data>
+  <data name="DashboardView_Refresh" xml:space="preserve">
+    <value>새로 고침</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls" xml:space="preserve">
+    <value>총 호출</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls_Sub" xml:space="preserve">
+    <value>{0}개 제공자</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate" xml:space="preserve">
+    <value>성공률</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate_Sub" xml:space="preserve">
+    <value>{0}개 성공</value>
+  </data>
+  <data name="DashboardView_Card_Failures" xml:space="preserve">
+    <value>실패</value>
+  </data>
+  <data name="DashboardView_Card_Failures_Sub" xml:space="preserve">
+    <value>실패율 {0}</value>
+  </data>
+  <data name="DashboardView_Card_EstCost" xml:space="preserve">
+    <value>예상 비용</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_Sub" xml:space="preserve">
+    <value>모델 단가로 추정</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_NoData" xml:space="preserve">
+    <value>이 모델의 가격 정보 없음</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens_Sub" xml:space="preserve">
+    <value>추론 {0}</value>
+  </data>
+  <data name="DashboardView_Card_Ratio_Sub" xml:space="preserve">
+    <value>비율 {0}</value>
+  </data>
+  <data name="DashboardView_Card_CacheHit_Sub" xml:space="preserve">
+    <value>히트율 {0}</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens" xml:space="preserve">
+    <value>총 토큰</value>
+  </data>
+  <data name="DashboardView_Card_InputTokens" xml:space="preserve">
+    <value>입력 토큰</value>
+  </data>
+  <data name="DashboardView_Card_OutputTokens" xml:space="preserve">
+    <value>출력 토큰</value>
+  </data>
+  <data name="DashboardView_Card_CacheTokens" xml:space="preserve">
+    <value>캐시 토큰</value>
+  </data>
+  <data name="DashboardView_Card_Tokens_Sub" xml:space="preserve">
+    <value>사용량을 수집하려면 프록시를 활성화하세요</value>
+  </data>
+  <data name="DashboardView_Chart_Title" xml:space="preserve">
+    <value>사용량 차트</value>
+  </data>
+  <data name="DashboardView_Chart_Subtitle" xml:space="preserve">
+    <value>선택한 기간의 추세입니다.</value>
+  </data>
+  <data name="DashboardView_Chart_Calls" xml:space="preserve">
+    <value>호출</value>
+  </data>
+  <data name="DashboardView_Chart_Tokens" xml:space="preserve">
+    <value>토큰</value>
+  </data>
+  <data name="DashboardView_Chart_Cost" xml:space="preserve">
+    <value>비용</value>
+  </data>
+  <data name="DashboardView_Chart_Empty" xml:space="preserve">
+    <value>선택한 범위에 요청이 없습니다.</value>
+  </data>
+  <data name="DashboardView_Summary_Title" xml:space="preserve">
+    <value>제공자 요약</value>
+  </data>
+  <data name="DashboardView_Summary_Provider" xml:space="preserve">
+    <value>제공자</value>
+  </data>
+  <data name="DashboardView_Summary_Calls" xml:space="preserve">
+    <value>호출</value>
+  </data>
+  <data name="DashboardView_Summary_Success" xml:space="preserve">
+    <value>성공</value>
+  </data>
+  <data name="DashboardView_Summary_Fail" xml:space="preserve">
+    <value>실패</value>
+  </data>
+  <data name="DashboardView_Summary_Rate" xml:space="preserve">
+    <value>비율</value>
+  </data>
+  <data name="DashboardView_Summary_Tokens" xml:space="preserve">
+    <value>토큰</value>
+  </data>
+  <data name="DashboardView_Summary_Cost" xml:space="preserve">
+    <value>예상 비용</value>
+  </data>
+  <data name="DashboardView_Summary_Last" xml:space="preserve">
+    <value>마지막 요청</value>
+  </data>
+  <data name="DashboardView_Summary_Empty" xml:space="preserve">
+    <value>아직 요청이 없습니다. 활동을 보려면 에이전트를 로컬 프록시로 지정하세요.</value>
   </data>
 
   <data name="Quota_Error_Title" xml:space="preserve">

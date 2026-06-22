@@ -114,6 +114,19 @@
     <value>حذف ملف السجل</value>
   </data>
 
+  <data name="Dialog_ClearUsageHistory_Title" xml:space="preserve">
+    <value>هل تريد مسح سجل الاستخدام؟</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Description" xml:space="preserve">
+    <value>يؤدي هذا إلى حذف أحداث الاستخدام المخزنة التي تستخدمها لوحة المعلومات والطلبات نهائيًا. لا تتأثر ملفات سجل الوكيل.</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Delete" xml:space="preserve">
+    <value>مسح سجل الاستخدام</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Cancel" xml:space="preserve">
+    <value>إلغاء</value>
+  </data>
+
   <data name="Dialog_ResetCredentials_Title" xml:space="preserve">
     <value>إعادة تعيين كل بيانات الاعتماد؟</value>
   </data>
@@ -1135,6 +1148,133 @@
   </data>
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
+  </data>
+
+  <data name="Sidebar_Home" xml:space="preserve">
+    <value>الرئيسية</value>
+  </data>
+  <data name="DashboardView_Title" xml:space="preserve">
+    <value>لوحة المعلومات</value>
+  </data>
+  <data name="DashboardView_Subtitle" xml:space="preserve">
+    <value>نظرة عامة مباشرة على الطلبات التي يعالجها الوكيل المحلي.</value>
+  </data>
+  <data name="DashboardView_Range_Today" xml:space="preserve">
+    <value>اليوم</value>
+  </data>
+  <data name="DashboardView_Range_7d" xml:space="preserve">
+    <value>7 أيام</value>
+  </data>
+  <data name="DashboardView_Range_14d" xml:space="preserve">
+    <value>14 يومًا</value>
+  </data>
+  <data name="DashboardView_Range_30d" xml:space="preserve">
+    <value>30 يومًا</value>
+  </data>
+  <data name="DashboardView_Range_All" xml:space="preserve">
+    <value>الكل</value>
+  </data>
+  <data name="DashboardView_Refresh" xml:space="preserve">
+    <value>تحديث</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls" xml:space="preserve">
+    <value>إجمالي الاستدعاءات</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls_Sub" xml:space="preserve">
+    <value>{0} مزودين</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate" xml:space="preserve">
+    <value>معدل النجاح</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate_Sub" xml:space="preserve">
+    <value>{0} ناجحة</value>
+  </data>
+  <data name="DashboardView_Card_Failures" xml:space="preserve">
+    <value>الإخفاقات</value>
+  </data>
+  <data name="DashboardView_Card_Failures_Sub" xml:space="preserve">
+    <value>معدل الإخفاق {0}</value>
+  </data>
+  <data name="DashboardView_Card_EstCost" xml:space="preserve">
+    <value>التكلفة المقدرة</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_Sub" xml:space="preserve">
+    <value>مقدّرة من أسعار وحدة النموذج</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_NoData" xml:space="preserve">
+    <value>لا توجد أسعار لهذه النماذج</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens_Sub" xml:space="preserve">
+    <value>الاستدلال {0}</value>
+  </data>
+  <data name="DashboardView_Card_Ratio_Sub" xml:space="preserve">
+    <value>النسبة {0}</value>
+  </data>
+  <data name="DashboardView_Card_CacheHit_Sub" xml:space="preserve">
+    <value>معدل الإصابة {0}</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens" xml:space="preserve">
+    <value>إجمالي الرموز</value>
+  </data>
+  <data name="DashboardView_Card_InputTokens" xml:space="preserve">
+    <value>رموز الإدخال</value>
+  </data>
+  <data name="DashboardView_Card_OutputTokens" xml:space="preserve">
+    <value>رموز الإخراج</value>
+  </data>
+  <data name="DashboardView_Card_CacheTokens" xml:space="preserve">
+    <value>رموز الذاكرة المؤقتة</value>
+  </data>
+  <data name="DashboardView_Card_Tokens_Sub" xml:space="preserve">
+    <value>فعّل الوكيل لجمع الاستخدام</value>
+  </data>
+  <data name="DashboardView_Chart_Title" xml:space="preserve">
+    <value>مخطط الاستخدام</value>
+  </data>
+  <data name="DashboardView_Chart_Subtitle" xml:space="preserve">
+    <value>الاتجاه خلال النطاق الزمني المحدد.</value>
+  </data>
+  <data name="DashboardView_Chart_Calls" xml:space="preserve">
+    <value>استدعاءات</value>
+  </data>
+  <data name="DashboardView_Chart_Tokens" xml:space="preserve">
+    <value>رموز</value>
+  </data>
+  <data name="DashboardView_Chart_Cost" xml:space="preserve">
+    <value>التكلفة</value>
+  </data>
+  <data name="DashboardView_Chart_Empty" xml:space="preserve">
+    <value>لا توجد طلبات في النطاق المحدد.</value>
+  </data>
+  <data name="DashboardView_Summary_Title" xml:space="preserve">
+    <value>ملخص حسب المزود</value>
+  </data>
+  <data name="DashboardView_Summary_Provider" xml:space="preserve">
+    <value>المزود</value>
+  </data>
+  <data name="DashboardView_Summary_Calls" xml:space="preserve">
+    <value>الاستدعاءات</value>
+  </data>
+  <data name="DashboardView_Summary_Success" xml:space="preserve">
+    <value>نجاح</value>
+  </data>
+  <data name="DashboardView_Summary_Fail" xml:space="preserve">
+    <value>فشل</value>
+  </data>
+  <data name="DashboardView_Summary_Rate" xml:space="preserve">
+    <value>المعدل</value>
+  </data>
+  <data name="DashboardView_Summary_Tokens" xml:space="preserve">
+    <value>الرموز</value>
+  </data>
+  <data name="DashboardView_Summary_Cost" xml:space="preserve">
+    <value>التكلفة المقدرة</value>
+  </data>
+  <data name="DashboardView_Summary_Last" xml:space="preserve">
+    <value>آخر طلب</value>
+  </data>
+  <data name="DashboardView_Summary_Empty" xml:space="preserve">
+    <value>لا توجد طلبات بعد. وجّه وكيلًا إلى الوكيل المحلي لرؤية النشاط هنا.</value>
   </data>
 
   <data name="Quota_Error_Title" xml:space="preserve">

@@ -114,6 +114,19 @@
     <value>删除日志文件</value>
   </data>
 
+  <data name="Dialog_ClearUsageHistory_Title" xml:space="preserve">
+    <value>清除使用历史记录？</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Description" xml:space="preserve">
+    <value>这会永久删除仪表板和请求使用的已存储使用事件。代理日志文件不受影响。</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Delete" xml:space="preserve">
+    <value>清除使用历史记录</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+
   <data name="Dialog_ResetCredentials_Title" xml:space="preserve">
     <value>重置所有凭据？</value>
   </data>
@@ -1135,6 +1148,133 @@
   </data>
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
+  </data>
+
+  <data name="Sidebar_Home" xml:space="preserve">
+    <value>主页</value>
+  </data>
+  <data name="DashboardView_Title" xml:space="preserve">
+    <value>仪表板</value>
+  </data>
+  <data name="DashboardView_Subtitle" xml:space="preserve">
+    <value>本地代理处理请求的实时概览。</value>
+  </data>
+  <data name="DashboardView_Range_Today" xml:space="preserve">
+    <value>今天</value>
+  </data>
+  <data name="DashboardView_Range_7d" xml:space="preserve">
+    <value>7 天</value>
+  </data>
+  <data name="DashboardView_Range_14d" xml:space="preserve">
+    <value>14 天</value>
+  </data>
+  <data name="DashboardView_Range_30d" xml:space="preserve">
+    <value>30 天</value>
+  </data>
+  <data name="DashboardView_Range_All" xml:space="preserve">
+    <value>全部</value>
+  </data>
+  <data name="DashboardView_Refresh" xml:space="preserve">
+    <value>刷新</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls" xml:space="preserve">
+    <value>总调用数</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls_Sub" xml:space="preserve">
+    <value>{0} 个提供商</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate" xml:space="preserve">
+    <value>成功率</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate_Sub" xml:space="preserve">
+    <value>{0} 次成功</value>
+  </data>
+  <data name="DashboardView_Card_Failures" xml:space="preserve">
+    <value>失败</value>
+  </data>
+  <data name="DashboardView_Card_Failures_Sub" xml:space="preserve">
+    <value>失败率 {0}</value>
+  </data>
+  <data name="DashboardView_Card_EstCost" xml:space="preserve">
+    <value>预估成本</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_Sub" xml:space="preserve">
+    <value>按模型单价估算</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_NoData" xml:space="preserve">
+    <value>这些模型没有价格</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens_Sub" xml:space="preserve">
+    <value>推理 {0}</value>
+  </data>
+  <data name="DashboardView_Card_Ratio_Sub" xml:space="preserve">
+    <value>占比 {0}</value>
+  </data>
+  <data name="DashboardView_Card_CacheHit_Sub" xml:space="preserve">
+    <value>命中率 {0}</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens" xml:space="preserve">
+    <value>总令牌</value>
+  </data>
+  <data name="DashboardView_Card_InputTokens" xml:space="preserve">
+    <value>输入令牌</value>
+  </data>
+  <data name="DashboardView_Card_OutputTokens" xml:space="preserve">
+    <value>输出令牌</value>
+  </data>
+  <data name="DashboardView_Card_CacheTokens" xml:space="preserve">
+    <value>缓存令牌</value>
+  </data>
+  <data name="DashboardView_Card_Tokens_Sub" xml:space="preserve">
+    <value>启用代理以收集使用情况</value>
+  </data>
+  <data name="DashboardView_Chart_Title" xml:space="preserve">
+    <value>使用情况图表</value>
+  </data>
+  <data name="DashboardView_Chart_Subtitle" xml:space="preserve">
+    <value>所选时间范围内的趋势。</value>
+  </data>
+  <data name="DashboardView_Chart_Calls" xml:space="preserve">
+    <value>调用</value>
+  </data>
+  <data name="DashboardView_Chart_Tokens" xml:space="preserve">
+    <value>令牌</value>
+  </data>
+  <data name="DashboardView_Chart_Cost" xml:space="preserve">
+    <value>成本</value>
+  </data>
+  <data name="DashboardView_Chart_Empty" xml:space="preserve">
+    <value>所选范围内没有请求。</value>
+  </data>
+  <data name="DashboardView_Summary_Title" xml:space="preserve">
+    <value>按提供商汇总</value>
+  </data>
+  <data name="DashboardView_Summary_Provider" xml:space="preserve">
+    <value>提供商</value>
+  </data>
+  <data name="DashboardView_Summary_Calls" xml:space="preserve">
+    <value>调用</value>
+  </data>
+  <data name="DashboardView_Summary_Success" xml:space="preserve">
+    <value>成功</value>
+  </data>
+  <data name="DashboardView_Summary_Fail" xml:space="preserve">
+    <value>失败</value>
+  </data>
+  <data name="DashboardView_Summary_Rate" xml:space="preserve">
+    <value>比率</value>
+  </data>
+  <data name="DashboardView_Summary_Tokens" xml:space="preserve">
+    <value>令牌</value>
+  </data>
+  <data name="DashboardView_Summary_Cost" xml:space="preserve">
+    <value>预估成本</value>
+  </data>
+  <data name="DashboardView_Summary_Last" xml:space="preserve">
+    <value>最后请求</value>
+  </data>
+  <data name="DashboardView_Summary_Empty" xml:space="preserve">
+    <value>还没有请求。将代理指向本地代理即可在此查看活动。</value>
   </data>
 
   <data name="Quota_Error_Title" xml:space="preserve">

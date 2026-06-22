@@ -114,6 +114,19 @@
     <value>Supprimer fichier journal</value>
   </data>
 
+  <data name="Dialog_ClearUsageHistory_Title" xml:space="preserve">
+    <value>Effacer l’historique d’utilisation ?</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Description" xml:space="preserve">
+    <value>Cela supprime définitivement les événements d’utilisation stockés utilisés par le tableau de bord et les requêtes. Les fichiers journaux du proxy ne sont pas affectés.</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Delete" xml:space="preserve">
+    <value>Effacer l’historique d’utilisation</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Cancel" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+
   <data name="Dialog_ResetCredentials_Title" xml:space="preserve">
     <value>Réinitialiser tous les identifiants ?</value>
   </data>
@@ -1135,6 +1148,133 @@
   </data>
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
+  </data>
+
+  <data name="Sidebar_Home" xml:space="preserve">
+    <value>Accueil</value>
+  </data>
+  <data name="DashboardView_Title" xml:space="preserve">
+    <value>Tableau de bord</value>
+  </data>
+  <data name="DashboardView_Subtitle" xml:space="preserve">
+    <value>Vue d’ensemble en direct des requêtes traitées par le proxy local.</value>
+  </data>
+  <data name="DashboardView_Range_Today" xml:space="preserve">
+    <value>Aujourd’hui</value>
+  </data>
+  <data name="DashboardView_Range_7d" xml:space="preserve">
+    <value>7 jours</value>
+  </data>
+  <data name="DashboardView_Range_14d" xml:space="preserve">
+    <value>14 jours</value>
+  </data>
+  <data name="DashboardView_Range_30d" xml:space="preserve">
+    <value>30 jours</value>
+  </data>
+  <data name="DashboardView_Range_All" xml:space="preserve">
+    <value>Tout</value>
+  </data>
+  <data name="DashboardView_Refresh" xml:space="preserve">
+    <value>Actualiser</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls" xml:space="preserve">
+    <value>APPELS TOTAUX</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls_Sub" xml:space="preserve">
+    <value>{0} fournisseurs</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate" xml:space="preserve">
+    <value>TAUX DE RÉUSSITE</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate_Sub" xml:space="preserve">
+    <value>{0} réussis</value>
+  </data>
+  <data name="DashboardView_Card_Failures" xml:space="preserve">
+    <value>ÉCHECS</value>
+  </data>
+  <data name="DashboardView_Card_Failures_Sub" xml:space="preserve">
+    <value>Taux d’échec {0}</value>
+  </data>
+  <data name="DashboardView_Card_EstCost" xml:space="preserve">
+    <value>COÛT EST.</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_Sub" xml:space="preserve">
+    <value>Estimé à partir des prix unitaires du modèle</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_NoData" xml:space="preserve">
+    <value>Aucun prix pour ces modèles</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens_Sub" xml:space="preserve">
+    <value>Raisonnement {0}</value>
+  </data>
+  <data name="DashboardView_Card_Ratio_Sub" xml:space="preserve">
+    <value>Part {0}</value>
+  </data>
+  <data name="DashboardView_Card_CacheHit_Sub" xml:space="preserve">
+    <value>Taux de succès {0}</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens" xml:space="preserve">
+    <value>JETONS TOTAUX</value>
+  </data>
+  <data name="DashboardView_Card_InputTokens" xml:space="preserve">
+    <value>JETONS D’ENTRÉE</value>
+  </data>
+  <data name="DashboardView_Card_OutputTokens" xml:space="preserve">
+    <value>JETONS DE SORTIE</value>
+  </data>
+  <data name="DashboardView_Card_CacheTokens" xml:space="preserve">
+    <value>JETONS EN CACHE</value>
+  </data>
+  <data name="DashboardView_Card_Tokens_Sub" xml:space="preserve">
+    <value>Activez le proxy pour collecter l’utilisation</value>
+  </data>
+  <data name="DashboardView_Chart_Title" xml:space="preserve">
+    <value>Graphique d’utilisation</value>
+  </data>
+  <data name="DashboardView_Chart_Subtitle" xml:space="preserve">
+    <value>Tendance sur la plage sélectionnée.</value>
+  </data>
+  <data name="DashboardView_Chart_Calls" xml:space="preserve">
+    <value>Appels</value>
+  </data>
+  <data name="DashboardView_Chart_Tokens" xml:space="preserve">
+    <value>Jetons</value>
+  </data>
+  <data name="DashboardView_Chart_Cost" xml:space="preserve">
+    <value>Coût</value>
+  </data>
+  <data name="DashboardView_Chart_Empty" xml:space="preserve">
+    <value>Aucune requête dans la plage sélectionnée.</value>
+  </data>
+  <data name="DashboardView_Summary_Title" xml:space="preserve">
+    <value>Résumé par fournisseur</value>
+  </data>
+  <data name="DashboardView_Summary_Provider" xml:space="preserve">
+    <value>FOURNISSEUR</value>
+  </data>
+  <data name="DashboardView_Summary_Calls" xml:space="preserve">
+    <value>APPELS</value>
+  </data>
+  <data name="DashboardView_Summary_Success" xml:space="preserve">
+    <value>SUCCÈS</value>
+  </data>
+  <data name="DashboardView_Summary_Fail" xml:space="preserve">
+    <value>ÉCHEC</value>
+  </data>
+  <data name="DashboardView_Summary_Rate" xml:space="preserve">
+    <value>TAUX</value>
+  </data>
+  <data name="DashboardView_Summary_Tokens" xml:space="preserve">
+    <value>JETONS</value>
+  </data>
+  <data name="DashboardView_Summary_Cost" xml:space="preserve">
+    <value>COÛT EST.</value>
+  </data>
+  <data name="DashboardView_Summary_Last" xml:space="preserve">
+    <value>DERNIÈRE REQUÊTE</value>
+  </data>
+  <data name="DashboardView_Summary_Empty" xml:space="preserve">
+    <value>Aucune requête pour l’instant. Pointez un agent vers le proxy local pour voir l’activité ici.</value>
   </data>
 
   <data name="Quota_Error_Title" xml:space="preserve">

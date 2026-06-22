@@ -114,6 +114,19 @@
     <value>ログファイルを削除</value>
   </data>
 
+  <data name="Dialog_ClearUsageHistory_Title" xml:space="preserve">
+    <value>使用履歴を消去しますか？</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Description" xml:space="preserve">
+    <value>ダッシュボードとリクエストで使用される保存済みの使用イベントを完全に削除します。プロキシのログファイルには影響しません。</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Delete" xml:space="preserve">
+    <value>使用履歴を消去</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Cancel" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+
   <data name="Dialog_ResetCredentials_Title" xml:space="preserve">
     <value>すべての認証情報をリセットしますか？</value>
   </data>
@@ -1135,6 +1148,133 @@
   </data>
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
+  </data>
+
+  <data name="Sidebar_Home" xml:space="preserve">
+    <value>ホーム</value>
+  </data>
+  <data name="DashboardView_Title" xml:space="preserve">
+    <value>ダッシュボード</value>
+  </data>
+  <data name="DashboardView_Subtitle" xml:space="preserve">
+    <value>ローカルプロキシが処理したリクエストのライブ概要。</value>
+  </data>
+  <data name="DashboardView_Range_Today" xml:space="preserve">
+    <value>今日</value>
+  </data>
+  <data name="DashboardView_Range_7d" xml:space="preserve">
+    <value>7日</value>
+  </data>
+  <data name="DashboardView_Range_14d" xml:space="preserve">
+    <value>14日</value>
+  </data>
+  <data name="DashboardView_Range_30d" xml:space="preserve">
+    <value>30日</value>
+  </data>
+  <data name="DashboardView_Range_All" xml:space="preserve">
+    <value>すべて</value>
+  </data>
+  <data name="DashboardView_Refresh" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls" xml:space="preserve">
+    <value>合計呼び出し</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls_Sub" xml:space="preserve">
+    <value>{0} プロバイダー</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate" xml:space="preserve">
+    <value>成功率</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate_Sub" xml:space="preserve">
+    <value>{0} 件成功</value>
+  </data>
+  <data name="DashboardView_Card_Failures" xml:space="preserve">
+    <value>失敗</value>
+  </data>
+  <data name="DashboardView_Card_Failures_Sub" xml:space="preserve">
+    <value>失敗率 {0}</value>
+  </data>
+  <data name="DashboardView_Card_EstCost" xml:space="preserve">
+    <value>推定コスト</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_Sub" xml:space="preserve">
+    <value>モデル単価から推定</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_NoData" xml:space="preserve">
+    <value>これらのモデルの価格情報はありません</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens_Sub" xml:space="preserve">
+    <value>推論 {0}</value>
+  </data>
+  <data name="DashboardView_Card_Ratio_Sub" xml:space="preserve">
+    <value>割合 {0}</value>
+  </data>
+  <data name="DashboardView_Card_CacheHit_Sub" xml:space="preserve">
+    <value>ヒット率 {0}</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens" xml:space="preserve">
+    <value>合計トークン</value>
+  </data>
+  <data name="DashboardView_Card_InputTokens" xml:space="preserve">
+    <value>入力トークン</value>
+  </data>
+  <data name="DashboardView_Card_OutputTokens" xml:space="preserve">
+    <value>出力トークン</value>
+  </data>
+  <data name="DashboardView_Card_CacheTokens" xml:space="preserve">
+    <value>キャッシュトークン</value>
+  </data>
+  <data name="DashboardView_Card_Tokens_Sub" xml:space="preserve">
+    <value>使用量を収集するにはプロキシを有効にしてください</value>
+  </data>
+  <data name="DashboardView_Chart_Title" xml:space="preserve">
+    <value>使用量グラフ</value>
+  </data>
+  <data name="DashboardView_Chart_Subtitle" xml:space="preserve">
+    <value>選択した期間の推移。</value>
+  </data>
+  <data name="DashboardView_Chart_Calls" xml:space="preserve">
+    <value>呼び出し</value>
+  </data>
+  <data name="DashboardView_Chart_Tokens" xml:space="preserve">
+    <value>トークン</value>
+  </data>
+  <data name="DashboardView_Chart_Cost" xml:space="preserve">
+    <value>コスト</value>
+  </data>
+  <data name="DashboardView_Chart_Empty" xml:space="preserve">
+    <value>選択した範囲にリクエストはありません。</value>
+  </data>
+  <data name="DashboardView_Summary_Title" xml:space="preserve">
+    <value>プロバイダー概要</value>
+  </data>
+  <data name="DashboardView_Summary_Provider" xml:space="preserve">
+    <value>プロバイダー</value>
+  </data>
+  <data name="DashboardView_Summary_Calls" xml:space="preserve">
+    <value>呼び出し</value>
+  </data>
+  <data name="DashboardView_Summary_Success" xml:space="preserve">
+    <value>成功</value>
+  </data>
+  <data name="DashboardView_Summary_Fail" xml:space="preserve">
+    <value>失敗</value>
+  </data>
+  <data name="DashboardView_Summary_Rate" xml:space="preserve">
+    <value>率</value>
+  </data>
+  <data name="DashboardView_Summary_Tokens" xml:space="preserve">
+    <value>トークン</value>
+  </data>
+  <data name="DashboardView_Summary_Cost" xml:space="preserve">
+    <value>推定コスト</value>
+  </data>
+  <data name="DashboardView_Summary_Last" xml:space="preserve">
+    <value>最終リクエスト</value>
+  </data>
+  <data name="DashboardView_Summary_Empty" xml:space="preserve">
+    <value>まだリクエストはありません。アクティビティを表示するには、エージェントをローカルプロキシに向けてください。</value>
   </data>
 
   <data name="Quota_Error_Title" xml:space="preserve">

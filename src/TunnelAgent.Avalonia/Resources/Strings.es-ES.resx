@@ -113,10 +113,13 @@
     <value>¿Borrar historial de uso?</value>
   </data>
   <data name="Dialog_ClearUsageHistory_Description" xml:space="preserve">
-    <value>Esto elimina permanentemente los eventos de uso almacenados que usan Dashboard y Requests. Los archivos de log del proxy no se modifican.</value>
+    <value>Esto elimina permanentemente los eventos de uso almacenados que usan el Panel y Solicitudes. Los archivos de log del proxy no se modifican.</value>
   </data>
   <data name="Dialog_ClearUsageHistory_Delete" xml:space="preserve">
     <value>Borrar historial de uso</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Cancel" xml:space="preserve">
+    <value>Cancelar</value>
   </data>
 
   <data name="Dialog_ResetCredentials_Title" xml:space="preserve">

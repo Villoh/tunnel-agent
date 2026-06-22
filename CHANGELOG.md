@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Dashboard/Home and clear-usage localization** (`Resources/Strings*.resx`, `MainWindow.axaml`): the Home/Dashboard view and the clear-usage-history dialog only had English and Spanish strings, so the remaining twelve languages fell back to English. Added the full set of `DashboardView_*`, `Sidebar_Home`, and `Dialog_ClearUsageHistory_*` translations to all locale resources, and the clear-usage confirmation dialog now uses its own `Dialog_ClearUsageHistory_Cancel` key instead of borrowing the delete-log dialog's cancel string.
+
 ### Added
 
 - **Dashboard/Home usage view and usage-backed requests** (`DashboardView`, `DashboardViewModel`, `LogsViewModel`, `UsageChart`, `UsageService`, `UsageStore`, `UsageEvent`, `ModelPricing`, `MainWindow`): added Home as the default sidebar section with usage range tabs, headline metrics, provider summary, an interactive hoverable usage chart, and CLIProxyAPI usage telemetry backed by SQLite persistence. Tunnel Agent enables CLIProxyAPI usage statistics, continuously drains the destructive `/v0/management/usage-queue`, deduplicates events by hash, estimates model token costs, parses cache/reasoning token details, and keeps persisted history across restarts. Dashboard and the Logs → Requests tab now use this telemetry store as their source of truth, while Logs → Proxy logs remains a raw log-file view with separate clear/delete actions and its own renamed auto-refresh setting; clearing usage history is available from Dashboard and Requests and deletes only stored usage events.

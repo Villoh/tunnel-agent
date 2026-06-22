@@ -114,6 +114,19 @@
     <value>Günlük dosyasını sil</value>
   </data>
 
+  <data name="Dialog_ClearUsageHistory_Title" xml:space="preserve">
+    <value>Kullanım geçmişi temizlensin mi?</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Description" xml:space="preserve">
+    <value>Bu işlem Pano ve İstekler tarafından kullanılan saklanan kullanım olaylarını kalıcı olarak siler. Proxy günlük dosyaları etkilenmez.</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Delete" xml:space="preserve">
+    <value>Kullanım geçmişini temizle</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Cancel" xml:space="preserve">
+    <value>İptal</value>
+  </data>
+
   <data name="Dialog_ResetCredentials_Title" xml:space="preserve">
     <value>Tüm kimlik bilgileri sıfırlansın mı?</value>
   </data>
@@ -1135,6 +1148,133 @@
   </data>
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
+  </data>
+
+  <data name="Sidebar_Home" xml:space="preserve">
+    <value>Ana sayfa</value>
+  </data>
+  <data name="DashboardView_Title" xml:space="preserve">
+    <value>Pano</value>
+  </data>
+  <data name="DashboardView_Subtitle" xml:space="preserve">
+    <value>Yerel proxy tarafından işlenen isteklerin canlı özeti.</value>
+  </data>
+  <data name="DashboardView_Range_Today" xml:space="preserve">
+    <value>Bugün</value>
+  </data>
+  <data name="DashboardView_Range_7d" xml:space="preserve">
+    <value>7 gün</value>
+  </data>
+  <data name="DashboardView_Range_14d" xml:space="preserve">
+    <value>14 gün</value>
+  </data>
+  <data name="DashboardView_Range_30d" xml:space="preserve">
+    <value>30 gün</value>
+  </data>
+  <data name="DashboardView_Range_All" xml:space="preserve">
+    <value>Tümü</value>
+  </data>
+  <data name="DashboardView_Refresh" xml:space="preserve">
+    <value>Yenile</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls" xml:space="preserve">
+    <value>TOPLAM ÇAĞRI</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls_Sub" xml:space="preserve">
+    <value>{0} sağlayıcı</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate" xml:space="preserve">
+    <value>BAŞARI ORANI</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate_Sub" xml:space="preserve">
+    <value>{0} başarılı</value>
+  </data>
+  <data name="DashboardView_Card_Failures" xml:space="preserve">
+    <value>HATALAR</value>
+  </data>
+  <data name="DashboardView_Card_Failures_Sub" xml:space="preserve">
+    <value>Hata oranı {0}</value>
+  </data>
+  <data name="DashboardView_Card_EstCost" xml:space="preserve">
+    <value>TAHM. MALİYET</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_Sub" xml:space="preserve">
+    <value>Model birim fiyatlarından tahmin edildi</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_NoData" xml:space="preserve">
+    <value>Bu modeller için fiyat yok</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens_Sub" xml:space="preserve">
+    <value>Akıl yürütme {0}</value>
+  </data>
+  <data name="DashboardView_Card_Ratio_Sub" xml:space="preserve">
+    <value>Pay {0}</value>
+  </data>
+  <data name="DashboardView_Card_CacheHit_Sub" xml:space="preserve">
+    <value>İsabet oranı {0}</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens" xml:space="preserve">
+    <value>TOPLAM TOKEN</value>
+  </data>
+  <data name="DashboardView_Card_InputTokens" xml:space="preserve">
+    <value>GİRİŞ TOKENLARI</value>
+  </data>
+  <data name="DashboardView_Card_OutputTokens" xml:space="preserve">
+    <value>ÇIKIŞ TOKENLARI</value>
+  </data>
+  <data name="DashboardView_Card_CacheTokens" xml:space="preserve">
+    <value>ÖNBELLEK TOKENLARI</value>
+  </data>
+  <data name="DashboardView_Card_Tokens_Sub" xml:space="preserve">
+    <value>Kullanımı toplamak için proxy’yi etkinleştirin</value>
+  </data>
+  <data name="DashboardView_Chart_Title" xml:space="preserve">
+    <value>Kullanım grafiği</value>
+  </data>
+  <data name="DashboardView_Chart_Subtitle" xml:space="preserve">
+    <value>Seçilen zaman aralığındaki eğilim.</value>
+  </data>
+  <data name="DashboardView_Chart_Calls" xml:space="preserve">
+    <value>Çağrılar</value>
+  </data>
+  <data name="DashboardView_Chart_Tokens" xml:space="preserve">
+    <value>Tokenlar</value>
+  </data>
+  <data name="DashboardView_Chart_Cost" xml:space="preserve">
+    <value>Maliyet</value>
+  </data>
+  <data name="DashboardView_Chart_Empty" xml:space="preserve">
+    <value>Seçilen aralıkta istek yok.</value>
+  </data>
+  <data name="DashboardView_Summary_Title" xml:space="preserve">
+    <value>Sağlayıcı özeti</value>
+  </data>
+  <data name="DashboardView_Summary_Provider" xml:space="preserve">
+    <value>SAĞLAYICI</value>
+  </data>
+  <data name="DashboardView_Summary_Calls" xml:space="preserve">
+    <value>ÇAĞRILAR</value>
+  </data>
+  <data name="DashboardView_Summary_Success" xml:space="preserve">
+    <value>BAŞARI</value>
+  </data>
+  <data name="DashboardView_Summary_Fail" xml:space="preserve">
+    <value>HATA</value>
+  </data>
+  <data name="DashboardView_Summary_Rate" xml:space="preserve">
+    <value>ORAN</value>
+  </data>
+  <data name="DashboardView_Summary_Tokens" xml:space="preserve">
+    <value>TOKENLAR</value>
+  </data>
+  <data name="DashboardView_Summary_Cost" xml:space="preserve">
+    <value>TAHM. MALİYET</value>
+  </data>
+  <data name="DashboardView_Summary_Last" xml:space="preserve">
+    <value>SON İSTEK</value>
+  </data>
+  <data name="DashboardView_Summary_Empty" xml:space="preserve">
+    <value>Henüz istek yok. Burada etkinliği görmek için bir ajanı yerel proxy’ye yönlendirin.</value>
   </data>
 
   <data name="Quota_Error_Title" xml:space="preserve">

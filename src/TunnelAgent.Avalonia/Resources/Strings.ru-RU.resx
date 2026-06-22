@@ -114,6 +114,19 @@
     <value>Удалить файл журнала</value>
   </data>
 
+  <data name="Dialog_ClearUsageHistory_Title" xml:space="preserve">
+    <value>Очистить историю использования?</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Description" xml:space="preserve">
+    <value>Это навсегда удалит сохранённые события использования, которые применяются в Панели и Запросах. Файлы журналов прокси не затрагиваются.</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Delete" xml:space="preserve">
+    <value>Очистить историю использования</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Cancel" xml:space="preserve">
+    <value>Отмена</value>
+  </data>
+
   <data name="Dialog_ResetCredentials_Title" xml:space="preserve">
     <value>Сбросить все учётные данные?</value>
   </data>
@@ -1135,6 +1148,133 @@
   </data>
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
+  </data>
+
+  <data name="Sidebar_Home" xml:space="preserve">
+    <value>Главная</value>
+  </data>
+  <data name="DashboardView_Title" xml:space="preserve">
+    <value>Панель</value>
+  </data>
+  <data name="DashboardView_Subtitle" xml:space="preserve">
+    <value>Обзор в реальном времени запросов, обработанных локальным прокси.</value>
+  </data>
+  <data name="DashboardView_Range_Today" xml:space="preserve">
+    <value>Сегодня</value>
+  </data>
+  <data name="DashboardView_Range_7d" xml:space="preserve">
+    <value>7 дней</value>
+  </data>
+  <data name="DashboardView_Range_14d" xml:space="preserve">
+    <value>14 дней</value>
+  </data>
+  <data name="DashboardView_Range_30d" xml:space="preserve">
+    <value>30 дней</value>
+  </data>
+  <data name="DashboardView_Range_All" xml:space="preserve">
+    <value>Все</value>
+  </data>
+  <data name="DashboardView_Refresh" xml:space="preserve">
+    <value>Обновить</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls" xml:space="preserve">
+    <value>ВСЕГО ВЫЗОВОВ</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls_Sub" xml:space="preserve">
+    <value>{0} провайдеров</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate" xml:space="preserve">
+    <value>УСПЕШНОСТЬ</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate_Sub" xml:space="preserve">
+    <value>{0} успешно</value>
+  </data>
+  <data name="DashboardView_Card_Failures" xml:space="preserve">
+    <value>ОШИБКИ</value>
+  </data>
+  <data name="DashboardView_Card_Failures_Sub" xml:space="preserve">
+    <value>Доля ошибок {0}</value>
+  </data>
+  <data name="DashboardView_Card_EstCost" xml:space="preserve">
+    <value>ОЦЕН. СТОИМОСТЬ</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_Sub" xml:space="preserve">
+    <value>Оценено по ценам моделей за единицу</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_NoData" xml:space="preserve">
+    <value>Нет цен для этих моделей</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens_Sub" xml:space="preserve">
+    <value>Рассуждение {0}</value>
+  </data>
+  <data name="DashboardView_Card_Ratio_Sub" xml:space="preserve">
+    <value>Доля {0}</value>
+  </data>
+  <data name="DashboardView_Card_CacheHit_Sub" xml:space="preserve">
+    <value>Доля попаданий {0}</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens" xml:space="preserve">
+    <value>ВСЕГО ТОКЕНОВ</value>
+  </data>
+  <data name="DashboardView_Card_InputTokens" xml:space="preserve">
+    <value>ВХОДНЫЕ ТОКЕНЫ</value>
+  </data>
+  <data name="DashboardView_Card_OutputTokens" xml:space="preserve">
+    <value>ВЫХОДНЫЕ ТОКЕНЫ</value>
+  </data>
+  <data name="DashboardView_Card_CacheTokens" xml:space="preserve">
+    <value>КЭШ-ТОКЕНЫ</value>
+  </data>
+  <data name="DashboardView_Card_Tokens_Sub" xml:space="preserve">
+    <value>Включите прокси, чтобы собирать использование</value>
+  </data>
+  <data name="DashboardView_Chart_Title" xml:space="preserve">
+    <value>График использования</value>
+  </data>
+  <data name="DashboardView_Chart_Subtitle" xml:space="preserve">
+    <value>Тренд за выбранный период.</value>
+  </data>
+  <data name="DashboardView_Chart_Calls" xml:space="preserve">
+    <value>Вызовы</value>
+  </data>
+  <data name="DashboardView_Chart_Tokens" xml:space="preserve">
+    <value>Токены</value>
+  </data>
+  <data name="DashboardView_Chart_Cost" xml:space="preserve">
+    <value>Стоимость</value>
+  </data>
+  <data name="DashboardView_Chart_Empty" xml:space="preserve">
+    <value>В выбранном диапазоне нет запросов.</value>
+  </data>
+  <data name="DashboardView_Summary_Title" xml:space="preserve">
+    <value>Сводка по провайдерам</value>
+  </data>
+  <data name="DashboardView_Summary_Provider" xml:space="preserve">
+    <value>ПРОВАЙДЕР</value>
+  </data>
+  <data name="DashboardView_Summary_Calls" xml:space="preserve">
+    <value>ВЫЗОВЫ</value>
+  </data>
+  <data name="DashboardView_Summary_Success" xml:space="preserve">
+    <value>УСПЕХ</value>
+  </data>
+  <data name="DashboardView_Summary_Fail" xml:space="preserve">
+    <value>ОШИБКА</value>
+  </data>
+  <data name="DashboardView_Summary_Rate" xml:space="preserve">
+    <value>ДОЛЯ</value>
+  </data>
+  <data name="DashboardView_Summary_Tokens" xml:space="preserve">
+    <value>ТОКЕНЫ</value>
+  </data>
+  <data name="DashboardView_Summary_Cost" xml:space="preserve">
+    <value>ОЦЕН. СТОИМОСТЬ</value>
+  </data>
+  <data name="DashboardView_Summary_Last" xml:space="preserve">
+    <value>ПОСЛЕДНИЙ ЗАПРОС</value>
+  </data>
+  <data name="DashboardView_Summary_Empty" xml:space="preserve">
+    <value>Запросов пока нет. Направьте агент на локальный прокси, чтобы увидеть активность здесь.</value>
   </data>
 
   <data name="Quota_Error_Title" xml:space="preserve">

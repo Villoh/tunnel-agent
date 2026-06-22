@@ -114,6 +114,19 @@
     <value>लॉग फ़ाइल हटाएँ</value>
   </data>
 
+  <data name="Dialog_ClearUsageHistory_Title" xml:space="preserve">
+    <value>उपयोग इतिहास साफ़ करें?</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Description" xml:space="preserve">
+    <value>यह डैशबोर्ड और अनुरोधों द्वारा उपयोग किए जाने वाले संग्रहीत उपयोग इवेंट स्थायी रूप से हटा देता है। प्रॉक्सी लॉग फ़ाइलों पर असर नहीं पड़ेगा।</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Delete" xml:space="preserve">
+    <value>उपयोग इतिहास साफ़ करें</value>
+  </data>
+  <data name="Dialog_ClearUsageHistory_Cancel" xml:space="preserve">
+    <value>रद्द करें</value>
+  </data>
+
   <data name="Dialog_ResetCredentials_Title" xml:space="preserve">
     <value>सभी क्रेडेंशियल रीसेट करें?</value>
   </data>
@@ -1135,6 +1148,133 @@
   </data>
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
+  </data>
+
+  <data name="Sidebar_Home" xml:space="preserve">
+    <value>होम</value>
+  </data>
+  <data name="DashboardView_Title" xml:space="preserve">
+    <value>डैशबोर्ड</value>
+  </data>
+  <data name="DashboardView_Subtitle" xml:space="preserve">
+    <value>स्थानीय प्रॉक्सी द्वारा संभाले गए अनुरोधों का लाइव अवलोकन।</value>
+  </data>
+  <data name="DashboardView_Range_Today" xml:space="preserve">
+    <value>आज</value>
+  </data>
+  <data name="DashboardView_Range_7d" xml:space="preserve">
+    <value>7 दिन</value>
+  </data>
+  <data name="DashboardView_Range_14d" xml:space="preserve">
+    <value>14 दिन</value>
+  </data>
+  <data name="DashboardView_Range_30d" xml:space="preserve">
+    <value>30 दिन</value>
+  </data>
+  <data name="DashboardView_Range_All" xml:space="preserve">
+    <value>सभी</value>
+  </data>
+  <data name="DashboardView_Refresh" xml:space="preserve">
+    <value>रीफ़्रेश</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls" xml:space="preserve">
+    <value>कुल कॉल</value>
+  </data>
+  <data name="DashboardView_Card_TotalCalls_Sub" xml:space="preserve">
+    <value>{0} प्रदाता</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate" xml:space="preserve">
+    <value>सफलता दर</value>
+  </data>
+  <data name="DashboardView_Card_SuccessRate_Sub" xml:space="preserve">
+    <value>{0} सफल</value>
+  </data>
+  <data name="DashboardView_Card_Failures" xml:space="preserve">
+    <value>विफलताएँ</value>
+  </data>
+  <data name="DashboardView_Card_Failures_Sub" xml:space="preserve">
+    <value>विफलता दर {0}</value>
+  </data>
+  <data name="DashboardView_Card_EstCost" xml:space="preserve">
+    <value>अनुमानित लागत</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_Sub" xml:space="preserve">
+    <value>मॉडल इकाई कीमतों से अनुमानित</value>
+  </data>
+  <data name="DashboardView_Card_EstCost_NoData" xml:space="preserve">
+    <value>इन मॉडलों के लिए मूल्य नहीं</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens_Sub" xml:space="preserve">
+    <value>रीज़निंग {0}</value>
+  </data>
+  <data name="DashboardView_Card_Ratio_Sub" xml:space="preserve">
+    <value>हिस्सा {0}</value>
+  </data>
+  <data name="DashboardView_Card_CacheHit_Sub" xml:space="preserve">
+    <value>हिट दर {0}</value>
+  </data>
+  <data name="DashboardView_Card_TotalTokens" xml:space="preserve">
+    <value>कुल टोकन</value>
+  </data>
+  <data name="DashboardView_Card_InputTokens" xml:space="preserve">
+    <value>इनपुट टोकन</value>
+  </data>
+  <data name="DashboardView_Card_OutputTokens" xml:space="preserve">
+    <value>आउटपुट टोकन</value>
+  </data>
+  <data name="DashboardView_Card_CacheTokens" xml:space="preserve">
+    <value>कैश टोकन</value>
+  </data>
+  <data name="DashboardView_Card_Tokens_Sub" xml:space="preserve">
+    <value>उपयोग एकत्र करने के लिए प्रॉक्सी सक्षम करें</value>
+  </data>
+  <data name="DashboardView_Chart_Title" xml:space="preserve">
+    <value>उपयोग चार्ट</value>
+  </data>
+  <data name="DashboardView_Chart_Subtitle" xml:space="preserve">
+    <value>चुनी गई समय सीमा में रुझान।</value>
+  </data>
+  <data name="DashboardView_Chart_Calls" xml:space="preserve">
+    <value>कॉल</value>
+  </data>
+  <data name="DashboardView_Chart_Tokens" xml:space="preserve">
+    <value>टोकन</value>
+  </data>
+  <data name="DashboardView_Chart_Cost" xml:space="preserve">
+    <value>लागत</value>
+  </data>
+  <data name="DashboardView_Chart_Empty" xml:space="preserve">
+    <value>चुनी गई सीमा में कोई अनुरोध नहीं।</value>
+  </data>
+  <data name="DashboardView_Summary_Title" xml:space="preserve">
+    <value>प्रदाता सारांश</value>
+  </data>
+  <data name="DashboardView_Summary_Provider" xml:space="preserve">
+    <value>प्रदाता</value>
+  </data>
+  <data name="DashboardView_Summary_Calls" xml:space="preserve">
+    <value>कॉल</value>
+  </data>
+  <data name="DashboardView_Summary_Success" xml:space="preserve">
+    <value>सफल</value>
+  </data>
+  <data name="DashboardView_Summary_Fail" xml:space="preserve">
+    <value>विफल</value>
+  </data>
+  <data name="DashboardView_Summary_Rate" xml:space="preserve">
+    <value>दर</value>
+  </data>
+  <data name="DashboardView_Summary_Tokens" xml:space="preserve">
+    <value>टोकन</value>
+  </data>
+  <data name="DashboardView_Summary_Cost" xml:space="preserve">
+    <value>अनुमानित लागत</value>
+  </data>
+  <data name="DashboardView_Summary_Last" xml:space="preserve">
+    <value>अंतिम अनुरोध</value>
+  </data>
+  <data name="DashboardView_Summary_Empty" xml:space="preserve">
+    <value>अभी कोई अनुरोध नहीं। गतिविधि देखने के लिए किसी एजेंट को स्थानीय प्रॉक्सी पर इंगित करें।</value>
   </data>
 
   <data name="Quota_Error_Title" xml:space="preserve">
