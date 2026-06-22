@@ -1136,4 +1136,50 @@
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
   </data>
+
+  <data name="Quota_Error_Title" xml:space="preserve">
+    <value>Квота недоступна</value>
+  </data>
+  <data name="Quota_Empty_NoDataTitle" xml:space="preserve">
+    <value>Немає доступних даних квоти</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedTitle" xml:space="preserve">
+    <value>Квоту не завантажено</value>
+  </data>
+  <data name="Quota_Empty_NoDataDescription" xml:space="preserve">
+    <value>Немає активного плану або провайдер не повернув дані використання.</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedDescription" xml:space="preserve">
+    <value>Оновіть цей обліковий запис, щоб отримати доступні вікна квоти.</value>
+  </data>
+  <data name="Quota_Error_TokenUnavailable" xml:space="preserve">
+    <value>Токен автентифікації {0} недоступний. Увійдіть знову й оновіть квоту.</value>
+  </data>
+  <data name="Quota_Error_AuthExpired" xml:space="preserve">
+    <value>Автентифікація {0} минула. Увійдіть знову й оновіть квоту.</value>
+  </data>
+  <data name="Quota_Error_RequestFailed" xml:space="preserve">
+    <value>Запит квоти {0} не вдався. Спробуйте пізніше.</value>
+  </data>
+  <data name="Quota_Error_RequestFailedWithStatus" xml:space="preserve">
+    <value>Запит квоти {0} не вдався ({1}). Спробуйте пізніше.</value>
+  </data>
+  <data name="Quota_Error_NoData" xml:space="preserve">
+    <value>{0} не повернув дані квоти.</value>
+  </data>
+  <data name="Quota_Error_LocalAuthMissing" xml:space="preserve">
+    <value>Локальні дані автентифікації {0} не знайдено. Відкрийте {0}, увійдіть і оновіть квоту.</value>
+  </data>
+  <data name="Quota_Error_AuthDataUnreadable" xml:space="preserve">
+    <value>Не вдалося прочитати дані автентифікації {0}. Увійдіть знову й оновіть квоту.</value>
+  </data>
+  <data name="Quota_Error_RefreshUnavailable" xml:space="preserve">
+    <value>Токен оновлення {0} недоступний. Увійдіть знову й оновіть квоту.</value>
+  </data>
+  <data name="Quota_Error_RateLimited" xml:space="preserve">
+    <value>API квоти {0} обмежено за частотою. Спробуйте пізніше.</value>
+  </data>
+  <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
+    <value>API квоти {0} недоступний ({1}). Спробуйте пізніше.</value>
+  </data>
 </root>

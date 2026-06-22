@@ -1136,4 +1136,50 @@
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
   </data>
+
+  <data name="Quota_Error_Title" xml:space="preserve">
+    <value>クォータを利用できません</value>
+  </data>
+  <data name="Quota_Empty_NoDataTitle" xml:space="preserve">
+    <value>利用可能なクォータデータがありません</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedTitle" xml:space="preserve">
+    <value>クォータ未読み込み</value>
+  </data>
+  <data name="Quota_Empty_NoDataDescription" xml:space="preserve">
+    <value>有効なプランがないか、プロバイダーから使用状況データが返されませんでした。</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedDescription" xml:space="preserve">
+    <value>このアカウントを更新して、利用可能なクォータ枠を取得してください。</value>
+  </data>
+  <data name="Quota_Error_TokenUnavailable" xml:space="preserve">
+    <value>{0} の認証トークンを利用できません。再度サインインしてからクォータを更新してください。</value>
+  </data>
+  <data name="Quota_Error_AuthExpired" xml:space="preserve">
+    <value>{0} の認証期限が切れました。再度サインインしてからクォータを更新してください。</value>
+  </data>
+  <data name="Quota_Error_RequestFailed" xml:space="preserve">
+    <value>{0} のクォータ要求に失敗しました。後でもう一度お試しください。</value>
+  </data>
+  <data name="Quota_Error_RequestFailedWithStatus" xml:space="preserve">
+    <value>{0} のクォータ要求に失敗しました（{1}）。後でもう一度お試しください。</value>
+  </data>
+  <data name="Quota_Error_NoData" xml:space="preserve">
+    <value>{0} はクォータデータを返しませんでした。</value>
+  </data>
+  <data name="Quota_Error_LocalAuthMissing" xml:space="preserve">
+    <value>{0} のローカル認証データが見つかりません。{0} を開いてサインインし、クォータを更新してください。</value>
+  </data>
+  <data name="Quota_Error_AuthDataUnreadable" xml:space="preserve">
+    <value>{0} の認証データを読み取れませんでした。再度サインインしてからクォータを更新してください。</value>
+  </data>
+  <data name="Quota_Error_RefreshUnavailable" xml:space="preserve">
+    <value>{0} の更新トークンを利用できません。再度サインインしてからクォータを更新してください。</value>
+  </data>
+  <data name="Quota_Error_RateLimited" xml:space="preserve">
+    <value>{0} のクォータ API はレート制限中です。後でもう一度お試しください。</value>
+  </data>
+  <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
+    <value>{0} のクォータ API を利用できません（{1}）。後でもう一度お試しください。</value>
+  </data>
 </root>

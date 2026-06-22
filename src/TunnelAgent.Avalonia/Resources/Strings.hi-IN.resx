@@ -1136,4 +1136,50 @@
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
   </data>
+
+  <data name="Quota_Error_Title" xml:space="preserve">
+    <value>कोटा उपलब्ध नहीं</value>
+  </data>
+  <data name="Quota_Empty_NoDataTitle" xml:space="preserve">
+    <value>कोई कोटा डेटा उपलब्ध नहीं</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedTitle" xml:space="preserve">
+    <value>कोटा लोड नहीं हुआ</value>
+  </data>
+  <data name="Quota_Empty_NoDataDescription" xml:space="preserve">
+    <value>कोई सक्रिय प्लान नहीं है या प्रदाता ने उपयोग डेटा नहीं लौटाया।</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedDescription" xml:space="preserve">
+    <value>उपलब्ध कोटा विंडो लाने के लिए इस खाते को रीफ़्रेश करें।</value>
+  </data>
+  <data name="Quota_Error_TokenUnavailable" xml:space="preserve">
+    <value>{0} प्रमाणीकरण टोकन उपलब्ध नहीं है। फिर से साइन इन करें और कोटा रीफ़्रेश करें।</value>
+  </data>
+  <data name="Quota_Error_AuthExpired" xml:space="preserve">
+    <value>{0} प्रमाणीकरण समाप्त हो गया है। फिर से साइन इन करें और कोटा रीफ़्रेश करें।</value>
+  </data>
+  <data name="Quota_Error_RequestFailed" xml:space="preserve">
+    <value>{0} कोटा अनुरोध विफल हुआ। बाद में फिर प्रयास करें।</value>
+  </data>
+  <data name="Quota_Error_RequestFailedWithStatus" xml:space="preserve">
+    <value>{0} कोटा अनुरोध विफल हुआ ({1})। बाद में फिर प्रयास करें।</value>
+  </data>
+  <data name="Quota_Error_NoData" xml:space="preserve">
+    <value>{0} ने कोई कोटा डेटा नहीं लौटाया।</value>
+  </data>
+  <data name="Quota_Error_LocalAuthMissing" xml:space="preserve">
+    <value>{0} का स्थानीय प्रमाणीकरण डेटा नहीं मिला। {0} खोलें, साइन इन करें और कोटा रीफ़्रेश करें।</value>
+  </data>
+  <data name="Quota_Error_AuthDataUnreadable" xml:space="preserve">
+    <value>{0} प्रमाणीकरण डेटा पढ़ा नहीं जा सका। फिर से साइन इन करें और कोटा रीफ़्रेश करें।</value>
+  </data>
+  <data name="Quota_Error_RefreshUnavailable" xml:space="preserve">
+    <value>{0} रीफ़्रेश टोकन उपलब्ध नहीं है। फिर से साइन इन करें और कोटा रीफ़्रेश करें।</value>
+  </data>
+  <data name="Quota_Error_RateLimited" xml:space="preserve">
+    <value>{0} कोटा API दर-सीमित है। बाद में फिर प्रयास करें।</value>
+  </data>
+  <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
+    <value>{0} कोटा API उपलब्ध नहीं है ({1})। बाद में फिर प्रयास करें।</value>
+  </data>
 </root>

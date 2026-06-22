@@ -70,7 +70,11 @@ public sealed class QuotaFetchService
     private async Task FetchClaudeAsync(ProviderAccountViewModel account, CancellationToken ct)
     {
         var token = ReadAccessToken("claude", account.Email);
-        if (token is null) return;
+        if (token is null)
+        {
+            SetQuotaError(account, QuotaErrorTokenUnavailable("Claude"));
+            return;
+        }
 
         try
         {
@@ -90,7 +94,11 @@ public sealed class QuotaFetchService
                                 or System.Net.HttpStatusCode.Forbidden)
             {
                 var refreshed = await RefreshClaudeTokenIfNeededAsync(account.Email, token, ct, force: true);
-                if (refreshed is null) return;
+                if (refreshed is null)
+                {
+                    SetQuotaError(account, QuotaErrorAuthExpired("Claude"));
+                    return;
+                }
                 token = refreshed;
                 // Retry once with new token
                 using var req2 = new HttpRequestMessage(HttpMethod.Get,
@@ -100,12 +108,20 @@ public sealed class QuotaFetchService
                 req2.Headers.Add("anthropic-beta", "oauth-2025-04-20");
                 req2.Headers.Add("User-Agent", "TunnelAgent/1.0");
                 using var resp2 = await Http.SendAsync(req2, ct);
-                if (!resp2.IsSuccessStatusCode) return;
+                if (!resp2.IsSuccessStatusCode)
+                {
+                    SetQuotaError(account, ToQuotaErrorMessage("Claude", resp2.StatusCode));
+                    return;
+                }
                 await ParseClaudeUsageAsync(account, resp2, ct);
                 return;
             }
 
-            if (!resp.IsSuccessStatusCode) return;
+            if (!resp.IsSuccessStatusCode)
+            {
+                SetQuotaError(account, ToQuotaErrorMessage("Claude", resp.StatusCode));
+                return;
+            }
             await ParseClaudeUsageAsync(account, resp, ct);
         }
         catch (OperationCanceledException) { throw; }
@@ -251,7 +267,11 @@ public sealed class QuotaFetchService
     private async Task FetchCodexAsync(ProviderAccountViewModel account, CancellationToken ct)
     {
         var (token, accountId, lastRefresh) = ReadCodexToken(account.Email);
-        if (token is null) return;
+        if (token is null)
+        {
+            SetQuotaError(account, QuotaErrorTokenUnavailable("Codex"));
+            return;
+        }
 
         try
         {
@@ -272,7 +292,11 @@ public sealed class QuotaFetchService
                                 or System.Net.HttpStatusCode.Forbidden)
             {
                 var refreshed = await RefreshCodexTokenIfNeededAsync(account.Email, token, DateTimeOffset.MinValue, ct);
-                if (refreshed is null) return;
+                if (refreshed is null)
+                {
+                    SetQuotaError(account, QuotaErrorAuthExpired("Codex"));
+                    return;
+                }
                 token = refreshed;
                 using var req2 = new HttpRequestMessage(HttpMethod.Get,
                     "https://chatgpt.com/backend-api/wham/usage");
@@ -282,12 +306,20 @@ public sealed class QuotaFetchService
                 if (!string.IsNullOrEmpty(accountId))
                     req2.Headers.Add("ChatGPT-Account-Id", accountId);
                 using var resp2 = await Http.SendAsync(req2, ct);
-                if (!resp2.IsSuccessStatusCode) return;
+                if (!resp2.IsSuccessStatusCode)
+                {
+                    SetQuotaError(account, ToQuotaErrorMessage("Codex", resp2.StatusCode));
+                    return;
+                }
                 await ParseCodexUsageAsync(account, resp2, ct);
                 return;
             }
 
-            if (!resp.IsSuccessStatusCode) return;
+            if (!resp.IsSuccessStatusCode)
+            {
+                SetQuotaError(account, ToQuotaErrorMessage("Codex", resp.StatusCode));
+                return;
+            }
             await ParseCodexUsageAsync(account, resp, ct);
         }
         catch (OperationCanceledException) { throw; }
@@ -437,7 +469,11 @@ public sealed class QuotaFetchService
     private async Task FetchAntigravityAsync(ProviderAccountViewModel account, CancellationToken ct)
     {
         var token = await ReadAntigravityTokenAsync(account.Email, ct);
-        if (token is null) return;
+        if (token is null)
+        {
+            SetQuotaError(account, QuotaErrorTokenUnavailable("Antigravity"));
+            return;
+        }
 
         try
         {
@@ -492,10 +528,18 @@ public sealed class QuotaFetchService
                 body = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
                 if (body is not null) break;
             }
-            if (body is null) return;
+            if (body is null)
+            {
+                SetQuotaError(account, QuotaErrorRequestFailed("Antigravity"));
+                return;
+            }
 
             var models = body["models"]?.AsObject();
-            if (models is null) return;
+            if (models is null)
+            {
+                SetQuotaError(account, QuotaErrorNoData("Antigravity"));
+                return;
+            }
 
             // Deduplicate by displayName: keep the entry with the lowest remainingFraction
             var seen = new Dictionary<string, (double remaining, string? resetTime)>(StringComparer.OrdinalIgnoreCase);
@@ -584,7 +628,11 @@ public sealed class QuotaFetchService
     private async Task FetchXaiAsync(ProviderAccountViewModel account, CancellationToken ct)
     {
         var token = await ReadXaiTokenAsync(account.Email, ct);
-        if (token is null) return;
+        if (token is null)
+        {
+            SetQuotaError(account, QuotaErrorTokenUnavailable("xAI"));
+            return;
+        }
 
         try
         {
@@ -612,11 +660,19 @@ public sealed class QuotaFetchService
             req.Headers.Add("X-XAI-Token-Auth", "xai-grok-cli");
             req.Headers.Add("Accept", "application/json");
             using var resp = await Http.SendAsync(req, ct);
-            if (!resp.IsSuccessStatusCode) return;
+            if (!resp.IsSuccessStatusCode)
+            {
+                SetQuotaError(account, ToQuotaErrorMessage("xAI", resp.StatusCode));
+                return;
+            }
 
             var doc    = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
             var config = doc?["config"];
-            if (config is null) return;
+            if (config is null)
+            {
+                SetQuotaError(account, QuotaErrorNoData("xAI"));
+                return;
+            }
 
             var used         = config["used"]?["val"]?.GetValue<double>() ?? 0;
             var monthlyLimit = config["monthlyLimit"]?["val"]?.GetValue<double>() ?? 0;
@@ -734,7 +790,11 @@ public sealed class QuotaFetchService
         {
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             var dbPath  = Path.Combine(appData, "Cursor", "User", "globalStorage", "state.vscdb");
-            if (!File.Exists(dbPath)) return;
+            if (!File.Exists(dbPath))
+            {
+                SetQuotaError(account, QuotaErrorLocalAuthMissing("Cursor"));
+                return;
+            }
 
             string? accessToken = null, refreshToken = null;
             using (var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={dbPath};Mode=ReadOnly"))
@@ -750,7 +810,11 @@ public sealed class QuotaFetchService
                 }
             }
 
-            if (string.IsNullOrEmpty(accessToken)) return;
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                SetQuotaError(account, QuotaErrorTokenUnavailable("Cursor"));
+                return;
+            }
 
             // Try fetch; if unauthorized, refresh token and retry once
             var planBody = await CallCursorApiAsync("GetPlanInfo", accessToken, ct);
@@ -765,10 +829,18 @@ public sealed class QuotaFetchService
             if (body is null && !string.IsNullOrEmpty(refreshToken))
             {
                 accessToken = await RefreshCursorTokenAsync(refreshToken, ct);
-                if (string.IsNullOrEmpty(accessToken)) return;
+                if (string.IsNullOrEmpty(accessToken))
+                {
+                    SetQuotaError(account, QuotaErrorAuthExpired("Cursor"));
+                    return;
+                }
                 body = await CallCursorPeriodUsageAsync(accessToken, ct);
             }
-            if (body is null) return;
+            if (body is null)
+            {
+                SetQuotaError(account, QuotaErrorRequestFailed("Cursor"));
+                return;
+            }
 
             var doc  = JsonNode.Parse(body);
             var bars = new List<(string title, double fraction, string resetIn)>();
@@ -842,10 +914,18 @@ public sealed class QuotaFetchService
         {
             var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             var tokenPath = Path.Combine(userProfile, ".aws", "sso", "cache", "kiro-auth-token.json");
-            if (!File.Exists(tokenPath)) return;
+            if (!File.Exists(tokenPath))
+            {
+                SetQuotaError(account, QuotaErrorLocalAuthMissing("Kiro"));
+                return;
+            }
 
             var doc = JsonNode.Parse(File.ReadAllText(tokenPath))?.AsObject();
-            if (doc is null) return;
+            if (doc is null)
+            {
+                SetQuotaError(account, QuotaErrorAuthDataUnreadable("Kiro"));
+                return;
+            }
 
             var refreshToken = doc["refreshToken"]?.GetValue<string>();
             var expiresAt    = doc["expiresAt"]?.GetValue<string>();
@@ -889,7 +969,11 @@ public sealed class QuotaFetchService
                 }
             }
 
-            if (refreshToken is null) return;
+            if (refreshToken is null)
+            {
+                SetQuotaError(account, QuotaErrorRefreshUnavailable("Kiro"));
+                return;
+            }
 
             // ── 1. Try local SQLite cache ────────────────────────────────────
             var (localBars, localPlanTitle, localOverage, localTimestamp) =
@@ -1261,7 +1345,11 @@ public sealed class QuotaFetchService
                 !string.Equals(account.Email, email, StringComparison.OrdinalIgnoreCase))
                 return;
 
-            if (token is null) return;
+            if (token is null)
+            {
+                SetQuotaError(account, QuotaErrorTokenUnavailable("Trae"));
+                return;
+            }
 
             using var req = new HttpRequestMessage(HttpMethod.Post,
                 $"{host.TrimEnd('/')}/trae/api/v1/pay/user_current_entitlement_list");
@@ -1273,7 +1361,13 @@ public sealed class QuotaFetchService
             req.Content = new StringContent("{\"require_usage\":true}", Encoding.UTF8, "application/json");
 
             using var resp = await Http.SendAsync(req, ct);
-            if (!resp.IsSuccessStatusCode) return;
+            if (!resp.IsSuccessStatusCode)
+            {
+                SetQuotaError(account, resp.StatusCode is System.Net.HttpStatusCode.Unauthorized or System.Net.HttpStatusCode.Forbidden
+                    ? QuotaErrorAuthExpired("Trae")
+                    : ToQuotaErrorMessage("Trae", resp.StatusCode));
+                return;
+            }
 
             var body = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
             if (body is null) return;
@@ -1341,6 +1435,7 @@ public sealed class QuotaFetchService
 
             Avalonia.Threading.Dispatcher.UIThread.Post(() =>
             {
+                account.QuotaError = "";
                 account.QuotaBars.Clear();
                 foreach (var (title, used, total) in bars)
                 {
@@ -1355,6 +1450,35 @@ public sealed class QuotaFetchService
         }
         catch (OperationCanceledException) { throw; }
         catch { }
+    }
+
+    private static string QuotaErrorTokenUnavailable(string provider) => $"loc:Quota_Error_TokenUnavailable|{provider}";
+    private static string QuotaErrorAuthExpired(string provider) => $"loc:Quota_Error_AuthExpired|{provider}";
+    private static string QuotaErrorRequestFailed(string provider) => $"loc:Quota_Error_RequestFailed|{provider}";
+    private static string QuotaErrorNoData(string provider) => $"loc:Quota_Error_NoData|{provider}";
+    private static string QuotaErrorLocalAuthMissing(string provider) => $"loc:Quota_Error_LocalAuthMissing|{provider}";
+    private static string QuotaErrorAuthDataUnreadable(string provider) => $"loc:Quota_Error_AuthDataUnreadable|{provider}";
+    private static string QuotaErrorRefreshUnavailable(string provider) => $"loc:Quota_Error_RefreshUnavailable|{provider}";
+
+    private static string ToQuotaErrorMessage(string provider, System.Net.HttpStatusCode status) => status switch
+    {
+        System.Net.HttpStatusCode.Unauthorized or System.Net.HttpStatusCode.Forbidden =>
+            $"loc:Quota_Error_AuthExpired|{provider}",
+        (System.Net.HttpStatusCode)429 =>
+            $"loc:Quota_Error_RateLimited|{provider}",
+        >= System.Net.HttpStatusCode.InternalServerError =>
+            $"loc:Quota_Error_ApiUnavailable|{provider}|{(int)status}",
+        _ => $"loc:Quota_Error_RequestFailedWithStatus|{provider}|{(int)status}",
+    };
+
+    private static void SetQuotaError(ProviderAccountViewModel account, string message)
+    {
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            account.QuotaBars.Clear();
+            account.QuotaFetchedEmpty = false;
+            account.QuotaError = message;
+        });
     }
 
     // ── Google OAuth2 token refresh ──────────────────────────────────────────

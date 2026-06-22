@@ -40,7 +40,9 @@ public partial class QuotaBarViewModel : ViewModelBase
 
     partial void OnUsedChanged(double value) => OnPropertyChanged(nameof(UsedLabel));
 
-    private static string LocalizeResetIn(string value)
+    private static string LocalizeResetIn(string value) => LocalizeValue(value);
+
+    internal static string LocalizeValue(string value)
     {
         if (!value.StartsWith("loc:", StringComparison.Ordinal))
             return value;
@@ -89,10 +91,20 @@ public partial class ProviderAccountViewModel : ViewModelBase
     [ObservableProperty] private bool _quotaFetchedEmpty;
     partial void OnQuotaFetchedEmptyChanged(bool value) { OnPropertyChanged(nameof(QuotaEmptyLabel)); OnPropertyChanged(nameof(QuotaEmptyDescription)); }
 
-    public string QuotaEmptyLabel => QuotaFetchedEmpty ? "No quota data available" : "Quota not loaded";
-    public string QuotaEmptyDescription => QuotaFetchedEmpty
-        ? "No active plan or no usage data returned by the provider."
-        : "Refresh this account to fetch available quota windows.";
+    /// <summary>Quota fetch failure shown instead of the generic not-loaded state.</summary>
+    [ObservableProperty] private string _quotaError = "";
+    partial void OnQuotaErrorChanged(string value) { OnPropertyChanged(nameof(QuotaEmptyLabel)); OnPropertyChanged(nameof(QuotaEmptyDescription)); }
+
+    public string QuotaEmptyLabel => !string.IsNullOrEmpty(QuotaError)
+        ? LocalizationService.Instance.GetString("Quota_Error_Title")
+        : QuotaFetchedEmpty
+            ? LocalizationService.Instance.GetString("Quota_Empty_NoDataTitle")
+            : LocalizationService.Instance.GetString("Quota_Empty_NotLoadedTitle");
+    public string QuotaEmptyDescription => !string.IsNullOrEmpty(QuotaError)
+        ? QuotaBarViewModel.LocalizeValue(QuotaError)
+        : QuotaFetchedEmpty
+            ? LocalizationService.Instance.GetString("Quota_Empty_NoDataDescription")
+            : LocalizationService.Instance.GetString("Quota_Empty_NotLoadedDescription");
 
     [ObservableProperty] private bool _isRefreshing;
     [ObservableProperty] private bool _isProviderEnabled = true;
@@ -105,6 +117,11 @@ public partial class ProviderAccountViewModel : ViewModelBase
         _isDisabled = isDisabled;
         QuotaBars   = new ObservableCollection<QuotaBarViewModel>();
         QuotaBars.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasQuota));
+        LocalizationService.Instance.PropertyChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(QuotaEmptyLabel));
+            OnPropertyChanged(nameof(QuotaEmptyDescription));
+        };
     }
 
     public string MaskedKey => string.IsNullOrEmpty(ApiKey) ? "" :

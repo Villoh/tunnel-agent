@@ -1274,4 +1274,50 @@
   <data name="DashboardView_Summary_Empty" xml:space="preserve">
     <value>No requests yet. Point an agent at the local proxy to see activity here.</value>
   </data>
+
+  <data name="Quota_Error_Title" xml:space="preserve">
+    <value>Quota unavailable</value>
+  </data>
+  <data name="Quota_Empty_NoDataTitle" xml:space="preserve">
+    <value>No quota data available</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedTitle" xml:space="preserve">
+    <value>Quota not loaded</value>
+  </data>
+  <data name="Quota_Empty_NoDataDescription" xml:space="preserve">
+    <value>No active plan or no usage data returned by the provider.</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedDescription" xml:space="preserve">
+    <value>Refresh this account to fetch available quota windows.</value>
+  </data>
+  <data name="Quota_Error_TokenUnavailable" xml:space="preserve">
+    <value>{0} authentication token is unavailable. Sign in again, then refresh quota.</value>
+  </data>
+  <data name="Quota_Error_AuthExpired" xml:space="preserve">
+    <value>{0} authentication expired. Sign in again, then refresh quota.</value>
+  </data>
+  <data name="Quota_Error_RequestFailed" xml:space="preserve">
+    <value>{0} quota request failed. Try again later.</value>
+  </data>
+  <data name="Quota_Error_RequestFailedWithStatus" xml:space="preserve">
+    <value>{0} quota request failed ({1}). Try again later.</value>
+  </data>
+  <data name="Quota_Error_NoData" xml:space="preserve">
+    <value>{0} returned no quota data.</value>
+  </data>
+  <data name="Quota_Error_LocalAuthMissing" xml:space="preserve">
+    <value>{0} local authentication data was not found. Open {0}, sign in, then refresh quota.</value>
+  </data>
+  <data name="Quota_Error_AuthDataUnreadable" xml:space="preserve">
+    <value>{0} authentication data could not be read. Sign in again, then refresh quota.</value>
+  </data>
+  <data name="Quota_Error_RefreshUnavailable" xml:space="preserve">
+    <value>{0} refresh token is unavailable. Sign in again, then refresh quota.</value>
+  </data>
+  <data name="Quota_Error_RateLimited" xml:space="preserve">
+    <value>{0} quota API is rate limited. Try again later.</value>
+  </data>
+  <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
+    <value>{0} quota API is unavailable ({1}). Try again later.</value>
+  </data>
 </root>

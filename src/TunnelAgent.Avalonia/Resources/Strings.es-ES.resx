@@ -1250,4 +1250,50 @@
   <data name="DashboardView_Summary_Empty" xml:space="preserve">
     <value>Aún no hay solicitudes. Apunta un agente al proxy local para ver la actividad aquí.</value>
   </data>
+
+  <data name="Quota_Error_Title" xml:space="preserve">
+    <value>Cuota no disponible</value>
+  </data>
+  <data name="Quota_Empty_NoDataTitle" xml:space="preserve">
+    <value>No hay datos de cuota disponibles</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedTitle" xml:space="preserve">
+    <value>Cuota no cargada</value>
+  </data>
+  <data name="Quota_Empty_NoDataDescription" xml:space="preserve">
+    <value>No hay plan activo o el proveedor no devolvió datos de uso.</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedDescription" xml:space="preserve">
+    <value>Actualiza esta cuenta para obtener las ventanas de cuota disponibles.</value>
+  </data>
+  <data name="Quota_Error_TokenUnavailable" xml:space="preserve">
+    <value>El token de autenticación de {0} no está disponible. Inicia sesión de nuevo y actualiza la cuota.</value>
+  </data>
+  <data name="Quota_Error_AuthExpired" xml:space="preserve">
+    <value>La autenticación de {0} ha caducado. Inicia sesión de nuevo y actualiza la cuota.</value>
+  </data>
+  <data name="Quota_Error_RequestFailed" xml:space="preserve">
+    <value>La solicitud de cuota de {0} falló. Inténtalo más tarde.</value>
+  </data>
+  <data name="Quota_Error_RequestFailedWithStatus" xml:space="preserve">
+    <value>La solicitud de cuota de {0} falló ({1}). Inténtalo más tarde.</value>
+  </data>
+  <data name="Quota_Error_NoData" xml:space="preserve">
+    <value>{0} no devolvió datos de cuota.</value>
+  </data>
+  <data name="Quota_Error_LocalAuthMissing" xml:space="preserve">
+    <value>No se encontraron datos locales de autenticación de {0}. Abre {0}, inicia sesión y actualiza la cuota.</value>
+  </data>
+  <data name="Quota_Error_AuthDataUnreadable" xml:space="preserve">
+    <value>No se pudieron leer los datos de autenticación de {0}. Inicia sesión de nuevo y actualiza la cuota.</value>
+  </data>
+  <data name="Quota_Error_RefreshUnavailable" xml:space="preserve">
+    <value>El token de refresco de {0} no está disponible. Inicia sesión de nuevo y actualiza la cuota.</value>
+  </data>
+  <data name="Quota_Error_RateLimited" xml:space="preserve">
+    <value>La API de cuota de {0} está limitada por frecuencia. Inténtalo más tarde.</value>
+  </data>
+  <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
+    <value>La API de cuota de {0} no está disponible ({1}). Inténtalo más tarde.</value>
+  </data>
 </root>

@@ -1136,4 +1136,50 @@
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
   </data>
+
+  <data name="Quota_Error_Title" xml:space="preserve">
+    <value>Quota indisponible</value>
+  </data>
+  <data name="Quota_Empty_NoDataTitle" xml:space="preserve">
+    <value>Aucune donnée de quota disponible</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedTitle" xml:space="preserve">
+    <value>Quota non chargé</value>
+  </data>
+  <data name="Quota_Empty_NoDataDescription" xml:space="preserve">
+    <value>Aucun forfait actif ou aucune donnée d’utilisation renvoyée par le fournisseur.</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedDescription" xml:space="preserve">
+    <value>Actualisez ce compte pour récupérer les fenêtres de quota disponibles.</value>
+  </data>
+  <data name="Quota_Error_TokenUnavailable" xml:space="preserve">
+    <value>Le jeton d’authentification de {0} est indisponible. Reconnectez-vous, puis actualisez le quota.</value>
+  </data>
+  <data name="Quota_Error_AuthExpired" xml:space="preserve">
+    <value>L’authentification de {0} a expiré. Reconnectez-vous, puis actualisez le quota.</value>
+  </data>
+  <data name="Quota_Error_RequestFailed" xml:space="preserve">
+    <value>La requête de quota de {0} a échoué. Réessayez plus tard.</value>
+  </data>
+  <data name="Quota_Error_RequestFailedWithStatus" xml:space="preserve">
+    <value>La requête de quota de {0} a échoué ({1}). Réessayez plus tard.</value>
+  </data>
+  <data name="Quota_Error_NoData" xml:space="preserve">
+    <value>{0} n’a renvoyé aucune donnée de quota.</value>
+  </data>
+  <data name="Quota_Error_LocalAuthMissing" xml:space="preserve">
+    <value>Les données d’authentification locales de {0} sont introuvables. Ouvrez {0}, connectez-vous, puis actualisez le quota.</value>
+  </data>
+  <data name="Quota_Error_AuthDataUnreadable" xml:space="preserve">
+    <value>Impossible de lire les données d’authentification de {0}. Reconnectez-vous, puis actualisez le quota.</value>
+  </data>
+  <data name="Quota_Error_RefreshUnavailable" xml:space="preserve">
+    <value>Le jeton d’actualisation de {0} est indisponible. Reconnectez-vous, puis actualisez le quota.</value>
+  </data>
+  <data name="Quota_Error_RateLimited" xml:space="preserve">
+    <value>L’API de quota de {0} est limitée. Réessayez plus tard.</value>
+  </data>
+  <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
+    <value>L’API de quota de {0} est indisponible ({1}). Réessayez plus tard.</value>
+  </data>
 </root>

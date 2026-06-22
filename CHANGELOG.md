@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Quota fetch error states** (`QuotaFetchService`, `ProviderViewModel`, `Resources/Strings*.resx`): quota providers now surface localized, actionable errors for missing tokens, expired authentication, rate limits, provider outages, and failed quota requests instead of silently leaving accounts in the generic "Quota not loaded" state.
 - **System default language switch** (`LocalizationService`, `MainWindowViewModel`): switching from a manually-selected language back to **System default** now correctly follows the OS language. `SetCulture` mutates `CultureInfo.CurrentUICulture`, so resolving the system language from it returned the previously-selected override instead of the real OS culture. The OS UI culture is now captured once at process start (`LocalizationService.SystemCulture`) and used to resolve **System default**.
 - **Provider row count localization** (`ProviderViewModel`, `Resources/Strings*.resx`): the provider sub-line (`N connected account(s)`, `N API key(s)`, and the mixed `… / …` form) now resolves through localized resources and refreshes on language change instead of showing hardcoded English.
 - **Built-in Gemini provider actions** (`ProviderViewModel`, `ProviderCatalogService`): the edit-models and remove-provider buttons no longer appear on the built-in Gemini API-key provider — `IsCustomProvider` is now an explicit flag set only for user-added OpenAI-compatible providers instead of being inferred from API-key support.

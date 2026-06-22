@@ -1136,4 +1136,50 @@
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
   </data>
+
+  <data name="Quota_Error_Title" xml:space="preserve">
+    <value>额度不可用</value>
+  </data>
+  <data name="Quota_Empty_NoDataTitle" xml:space="preserve">
+    <value>没有可用额度数据</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedTitle" xml:space="preserve">
+    <value>额度未加载</value>
+  </data>
+  <data name="Quota_Empty_NoDataDescription" xml:space="preserve">
+    <value>没有有效套餐，或提供商未返回使用数据。</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedDescription" xml:space="preserve">
+    <value>刷新此账号以获取可用额度窗口。</value>
+  </data>
+  <data name="Quota_Error_TokenUnavailable" xml:space="preserve">
+    <value>{0} 认证令牌不可用。请重新登录，然后刷新额度。</value>
+  </data>
+  <data name="Quota_Error_AuthExpired" xml:space="preserve">
+    <value>{0} 认证已过期。请重新登录，然后刷新额度。</value>
+  </data>
+  <data name="Quota_Error_RequestFailed" xml:space="preserve">
+    <value>{0} 额度请求失败。请稍后重试。</value>
+  </data>
+  <data name="Quota_Error_RequestFailedWithStatus" xml:space="preserve">
+    <value>{0} 额度请求失败（{1}）。请稍后重试。</value>
+  </data>
+  <data name="Quota_Error_NoData" xml:space="preserve">
+    <value>{0} 未返回额度数据。</value>
+  </data>
+  <data name="Quota_Error_LocalAuthMissing" xml:space="preserve">
+    <value>未找到 {0} 本地认证数据。请打开 {0}，登录后刷新额度。</value>
+  </data>
+  <data name="Quota_Error_AuthDataUnreadable" xml:space="preserve">
+    <value>无法读取 {0} 认证数据。请重新登录，然后刷新额度。</value>
+  </data>
+  <data name="Quota_Error_RefreshUnavailable" xml:space="preserve">
+    <value>{0} 刷新令牌不可用。请重新登录，然后刷新额度。</value>
+  </data>
+  <data name="Quota_Error_RateLimited" xml:space="preserve">
+    <value>{0} 额度 API 受到限流。请稍后重试。</value>
+  </data>
+  <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
+    <value>{0} 额度 API 不可用（{1}）。请稍后重试。</value>
+  </data>
 </root>

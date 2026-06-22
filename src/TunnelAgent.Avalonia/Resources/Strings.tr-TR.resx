@@ -1136,4 +1136,50 @@
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
   </data>
+
+  <data name="Quota_Error_Title" xml:space="preserve">
+    <value>Kota kullanılamıyor</value>
+  </data>
+  <data name="Quota_Empty_NoDataTitle" xml:space="preserve">
+    <value>Kota verisi yok</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedTitle" xml:space="preserve">
+    <value>Kota yüklenmedi</value>
+  </data>
+  <data name="Quota_Empty_NoDataDescription" xml:space="preserve">
+    <value>Etkin plan yok veya sağlayıcı kullanım verisi döndürmedi.</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedDescription" xml:space="preserve">
+    <value>Kullanılabilir kota pencerelerini almak için bu hesabı yenileyin.</value>
+  </data>
+  <data name="Quota_Error_TokenUnavailable" xml:space="preserve">
+    <value>{0} kimlik doğrulama belirteci kullanılamıyor. Tekrar oturum açın ve kotayı yenileyin.</value>
+  </data>
+  <data name="Quota_Error_AuthExpired" xml:space="preserve">
+    <value>{0} kimlik doğrulaması süresi doldu. Tekrar oturum açın ve kotayı yenileyin.</value>
+  </data>
+  <data name="Quota_Error_RequestFailed" xml:space="preserve">
+    <value>{0} kota isteği başarısız oldu. Daha sonra tekrar deneyin.</value>
+  </data>
+  <data name="Quota_Error_RequestFailedWithStatus" xml:space="preserve">
+    <value>{0} kota isteği başarısız oldu ({1}). Daha sonra tekrar deneyin.</value>
+  </data>
+  <data name="Quota_Error_NoData" xml:space="preserve">
+    <value>{0} kota verisi döndürmedi.</value>
+  </data>
+  <data name="Quota_Error_LocalAuthMissing" xml:space="preserve">
+    <value>{0} yerel kimlik doğrulama verisi bulunamadı. {0} uygulamasını açın, oturum açın ve kotayı yenileyin.</value>
+  </data>
+  <data name="Quota_Error_AuthDataUnreadable" xml:space="preserve">
+    <value>{0} kimlik doğrulama verisi okunamadı. Tekrar oturum açın ve kotayı yenileyin.</value>
+  </data>
+  <data name="Quota_Error_RefreshUnavailable" xml:space="preserve">
+    <value>{0} yenileme belirteci kullanılamıyor. Tekrar oturum açın ve kotayı yenileyin.</value>
+  </data>
+  <data name="Quota_Error_RateLimited" xml:space="preserve">
+    <value>{0} kota API’si hız sınırına takıldı. Daha sonra tekrar deneyin.</value>
+  </data>
+  <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
+    <value>{0} kota API’si kullanılamıyor ({1}). Daha sonra tekrar deneyin.</value>
+  </data>
 </root>

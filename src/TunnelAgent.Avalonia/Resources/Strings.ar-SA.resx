@@ -1136,4 +1136,50 @@
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
   </data>
+
+  <data name="Quota_Error_Title" xml:space="preserve">
+    <value>الحصة غير متاحة</value>
+  </data>
+  <data name="Quota_Empty_NoDataTitle" xml:space="preserve">
+    <value>لا توجد بيانات حصة متاحة</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedTitle" xml:space="preserve">
+    <value>لم يتم تحميل الحصة</value>
+  </data>
+  <data name="Quota_Empty_NoDataDescription" xml:space="preserve">
+    <value>لا توجد خطة نشطة أو لم يُرجع المزوّد بيانات استخدام.</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedDescription" xml:space="preserve">
+    <value>حدّث هذا الحساب لجلب نوافذ الحصة المتاحة.</value>
+  </data>
+  <data name="Quota_Error_TokenUnavailable" xml:space="preserve">
+    <value>رمز مصادقة {0} غير متاح. سجّل الدخول مرة أخرى ثم حدّث الحصة.</value>
+  </data>
+  <data name="Quota_Error_AuthExpired" xml:space="preserve">
+    <value>انتهت صلاحية مصادقة {0}. سجّل الدخول مرة أخرى ثم حدّث الحصة.</value>
+  </data>
+  <data name="Quota_Error_RequestFailed" xml:space="preserve">
+    <value>فشل طلب حصة {0}. حاول لاحقًا.</value>
+  </data>
+  <data name="Quota_Error_RequestFailedWithStatus" xml:space="preserve">
+    <value>فشل طلب حصة {0} ({1}). حاول لاحقًا.</value>
+  </data>
+  <data name="Quota_Error_NoData" xml:space="preserve">
+    <value>لم يُرجع {0} بيانات حصة.</value>
+  </data>
+  <data name="Quota_Error_LocalAuthMissing" xml:space="preserve">
+    <value>لم يتم العثور على بيانات المصادقة المحلية لـ {0}. افتح {0} وسجّل الدخول ثم حدّث الحصة.</value>
+  </data>
+  <data name="Quota_Error_AuthDataUnreadable" xml:space="preserve">
+    <value>تعذرت قراءة بيانات مصادقة {0}. سجّل الدخول مرة أخرى ثم حدّث الحصة.</value>
+  </data>
+  <data name="Quota_Error_RefreshUnavailable" xml:space="preserve">
+    <value>رمز تحديث {0} غير متاح. سجّل الدخول مرة أخرى ثم حدّث الحصة.</value>
+  </data>
+  <data name="Quota_Error_RateLimited" xml:space="preserve">
+    <value>واجهة برمجة حصة {0} محدودة المعدل. حاول لاحقًا.</value>
+  </data>
+  <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
+    <value>واجهة برمجة حصة {0} غير متاحة ({1}). حاول لاحقًا.</value>
+  </data>
 </root>

@@ -1136,4 +1136,50 @@
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
   </data>
+
+  <data name="Quota_Error_Title" xml:space="preserve">
+    <value>Kontingent nicht verfügbar</value>
+  </data>
+  <data name="Quota_Empty_NoDataTitle" xml:space="preserve">
+    <value>Keine Kontingentdaten verfügbar</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedTitle" xml:space="preserve">
+    <value>Kontingent nicht geladen</value>
+  </data>
+  <data name="Quota_Empty_NoDataDescription" xml:space="preserve">
+    <value>Kein aktiver Plan oder keine Nutzungsdaten vom Anbieter zurückgegeben.</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedDescription" xml:space="preserve">
+    <value>Aktualisieren Sie dieses Konto, um verfügbare Kontingentfenster abzurufen.</value>
+  </data>
+  <data name="Quota_Error_TokenUnavailable" xml:space="preserve">
+    <value>Das Authentifizierungstoken von {0} ist nicht verfügbar. Melden Sie sich erneut an und aktualisieren Sie das Kontingent.</value>
+  </data>
+  <data name="Quota_Error_AuthExpired" xml:space="preserve">
+    <value>Die Authentifizierung von {0} ist abgelaufen. Melden Sie sich erneut an und aktualisieren Sie das Kontingent.</value>
+  </data>
+  <data name="Quota_Error_RequestFailed" xml:space="preserve">
+    <value>Die Kontingentanfrage von {0} ist fehlgeschlagen. Versuchen Sie es später erneut.</value>
+  </data>
+  <data name="Quota_Error_RequestFailedWithStatus" xml:space="preserve">
+    <value>Die Kontingentanfrage von {0} ist fehlgeschlagen ({1}). Versuchen Sie es später erneut.</value>
+  </data>
+  <data name="Quota_Error_NoData" xml:space="preserve">
+    <value>{0} hat keine Kontingentdaten zurückgegeben.</value>
+  </data>
+  <data name="Quota_Error_LocalAuthMissing" xml:space="preserve">
+    <value>Lokale Authentifizierungsdaten von {0} wurden nicht gefunden. Öffnen Sie {0}, melden Sie sich an und aktualisieren Sie das Kontingent.</value>
+  </data>
+  <data name="Quota_Error_AuthDataUnreadable" xml:space="preserve">
+    <value>Authentifizierungsdaten von {0} konnten nicht gelesen werden. Melden Sie sich erneut an und aktualisieren Sie das Kontingent.</value>
+  </data>
+  <data name="Quota_Error_RefreshUnavailable" xml:space="preserve">
+    <value>Das Aktualisierungstoken von {0} ist nicht verfügbar. Melden Sie sich erneut an und aktualisieren Sie das Kontingent.</value>
+  </data>
+  <data name="Quota_Error_RateLimited" xml:space="preserve">
+    <value>Die Kontingent-API von {0} ist ratenbegrenzt. Versuchen Sie es später erneut.</value>
+  </data>
+  <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
+    <value>Die Kontingent-API von {0} ist nicht verfügbar ({1}). Versuchen Sie es später erneut.</value>
+  </data>
 </root>

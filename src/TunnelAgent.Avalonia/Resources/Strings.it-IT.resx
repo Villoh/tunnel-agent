@@ -1136,4 +1136,50 @@
   <data name="Agent_gemini-cli_Description" xml:space="preserve">
     <value>Google Gemini API-key provider.</value>
   </data>
+
+  <data name="Quota_Error_Title" xml:space="preserve">
+    <value>Quota non disponibile</value>
+  </data>
+  <data name="Quota_Empty_NoDataTitle" xml:space="preserve">
+    <value>Nessun dato quota disponibile</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedTitle" xml:space="preserve">
+    <value>Quota non caricata</value>
+  </data>
+  <data name="Quota_Empty_NoDataDescription" xml:space="preserve">
+    <value>Nessun piano attivo o nessun dato di utilizzo restituito dal provider.</value>
+  </data>
+  <data name="Quota_Empty_NotLoadedDescription" xml:space="preserve">
+    <value>Aggiorna questo account per recuperare le finestre di quota disponibili.</value>
+  </data>
+  <data name="Quota_Error_TokenUnavailable" xml:space="preserve">
+    <value>Il token di autenticazione di {0} non è disponibile. Accedi di nuovo e aggiorna la quota.</value>
+  </data>
+  <data name="Quota_Error_AuthExpired" xml:space="preserve">
+    <value>L’autenticazione di {0} è scaduta. Accedi di nuovo e aggiorna la quota.</value>
+  </data>
+  <data name="Quota_Error_RequestFailed" xml:space="preserve">
+    <value>La richiesta quota di {0} non è riuscita. Riprova più tardi.</value>
+  </data>
+  <data name="Quota_Error_RequestFailedWithStatus" xml:space="preserve">
+    <value>La richiesta quota di {0} non è riuscita ({1}). Riprova più tardi.</value>
+  </data>
+  <data name="Quota_Error_NoData" xml:space="preserve">
+    <value>{0} non ha restituito dati quota.</value>
+  </data>
+  <data name="Quota_Error_LocalAuthMissing" xml:space="preserve">
+    <value>Dati di autenticazione locali di {0} non trovati. Apri {0}, accedi e aggiorna la quota.</value>
+  </data>
+  <data name="Quota_Error_AuthDataUnreadable" xml:space="preserve">
+    <value>Impossibile leggere i dati di autenticazione di {0}. Accedi di nuovo e aggiorna la quota.</value>
+  </data>
+  <data name="Quota_Error_RefreshUnavailable" xml:space="preserve">
+    <value>Il token di aggiornamento di {0} non è disponibile. Accedi di nuovo e aggiorna la quota.</value>
+  </data>
+  <data name="Quota_Error_RateLimited" xml:space="preserve">
+    <value>L’API quota di {0} è limitata. Riprova più tardi.</value>
+  </data>
+  <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
+    <value>L’API quota di {0} non è disponibile ({1}). Riprova più tardi.</value>
+  </data>
 </root>
