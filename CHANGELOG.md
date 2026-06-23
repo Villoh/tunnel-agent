@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Updater-free Scoop zip** (`.github/workflows/release.yml`): Windows releases now also publish a plain `TunnelAgent-<version>-win-x64-scoop.zip` (and `win-arm64`) built straight from the publish output, without the Velopack shim, `Update.exe` or `.portable` marker. The Scoop manifest consumes this instead of the Velopack portable zip, so `UpdateManager.IsInstalled` is `false`, the in-app updater stays disabled, and Scoop — not Velopack — owns updates (no more self-updates writing into the Scoop directory). The hash is exposed under `platforms.<rid>.scoop` in `latest.json`.
 - **Linux `.deb` and `.rpm` packages** (`.github/workflows/release.yml`): Linux releases now ship native `.deb` and `.rpm` packages for `linux-x64` and `linux-arm64` alongside the existing `.AppImage`. Velopack only emits AppImages, so the release build now also stages the published app under `/opt/TunnelAgent` with a `/usr/bin/tunnel-agent` symlink, a `.desktop` entry and a hicolor icon, and packages it with `fpm`. The release notes installation table links the new artifacts; auto-update remains AppImage/Velopack-driven (deb/rpm are managed by the system package manager).
 
 ### Fixed

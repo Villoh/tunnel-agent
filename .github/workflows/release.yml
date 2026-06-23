@@ -133,6 +133,18 @@ jobs:
           -p:DebugType=None -p:DebugSymbols=false
           -o artifacts/publish
 
+      # Plain, updater-free zip for package managers (Scoop). Built straight from
+      # the publish output so it has no Velopack shim/Update.exe/.portable marker,
+      # which keeps the in-app updater disabled and lets Scoop own updates.
+      - name: Package plain zip for Scoop (Windows)
+        if: startsWith(matrix.rid, 'win-')
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts/velopack | Out-Null
+          Compress-Archive -Path artifacts/publish/* `
+            -DestinationPath "artifacts/velopack/TunnelAgent-${env:SEMVER}-${{ matrix.channel }}-scoop.zip" `
+            -Force
+
       - name: Package with Velopack (Windows)
         if: startsWith(matrix.rid, 'win-')
         shell: pwsh
@@ -341,10 +353,12 @@ jobs:
 
             installer=$(find "$dir" -maxdepth 1 \( -name "*Setup.exe" -o -name "*.AppImage" -o -name "*.pkg" \) | head -1)
             portable=$(find  "$dir" -maxdepth 1 \( -name "*portable.zip" -o -name "*.AppImage" -o -name "*.zip" \) \
-              ! -name "*Setup*" ! -name "*.nupkg" | head -1)
+              ! -name "*Setup*" ! -name "*.nupkg" ! -name "*-scoop.zip" | head -1)
+            scoop=$(find "$dir" -maxdepth 1 -name "*-scoop.zip" | head -1)
 
             inst_json="null"
             port_json="null"
+            scoop_json="null"
             [[ -n "$installer" ]] && {
               hash=$(sha256sum "$installer" | awk '{print $1}')
               name=$(basename "$installer")
@@ -355,7 +369,12 @@ jobs:
               name=$(basename "$portable")
               port_json="{\"url\":\"$base/$name\",\"sha256\":\"$hash\"}"
             }
-            entries+=("\"$rid\":{\"installer\":$inst_json,\"portable\":$port_json}")
+            [[ -n "$scoop" ]] && {
+              hash=$(sha256sum "$scoop" | awk '{print $1}')
+              name=$(basename "$scoop")
+              scoop_json="{\"url\":\"$base/$name\",\"sha256\":\"$hash\"}"
+            }
+            entries+=("\"$rid\":{\"installer\":$inst_json,\"portable\":$port_json,\"scoop\":$scoop_json}")
           done
 
           joined=$(IFS=,; echo "${entries[*]}")
@@ -382,12 +401,12 @@ jobs:
 
           win_x64_setup=$(find artifacts/velopack/release-win-x64 -maxdepth 1 -name "*Setup.exe" | head -1)
           win_x64_setup_name=$(basename "$win_x64_setup")
-          win_x64_portable=$(find artifacts/velopack/release-win-x64 -maxdepth 1 \( -name "*portable.zip" -o -name "*.zip" \) ! -name "*Setup*" ! -name "*.nupkg" | head -1)
+          win_x64_portable=$(find artifacts/velopack/release-win-x64 -maxdepth 1 \( -name "*portable.zip" -o -name "*.zip" \) ! -name "*Setup*" ! -name "*.nupkg" ! -name "*-scoop.zip" | head -1)
           win_x64_portable_name=$(basename "$win_x64_portable")
 
           win_arm64_setup=$(find artifacts/velopack/release-win-arm64 -maxdepth 1 -name "*Setup.exe" | head -1)
           win_arm64_setup_name=$(basename "$win_arm64_setup")
-          win_arm64_portable=$(find artifacts/velopack/release-win-arm64 -maxdepth 1 \( -name "*portable.zip" -o -name "*.zip" \) ! -name "*Setup*" ! -name "*.nupkg" | head -1)
+          win_arm64_portable=$(find artifacts/velopack/release-win-arm64 -maxdepth 1 \( -name "*portable.zip" -o -name "*.zip" \) ! -name "*Setup*" ! -name "*.nupkg" ! -name "*-scoop.zip" | head -1)
           win_arm64_portable_name=$(basename "$win_arm64_portable")
 
           {
@@ -431,9 +450,9 @@ jobs:
         env:
           SCOOP_TOKEN: ${{ secrets.SCOOP_BUCKET_TOKEN }}
         run: |
-          portable=$(find artifacts/velopack/release-win-x64 -name "*portable.zip" | head -1)
-          hash=$(sha256sum "$portable" | awk '{print $1}')
-          name=$(basename "$portable")
+          scoop=$(find artifacts/velopack/release-win-x64 -name "*-scoop.zip" | head -1)
+          hash=$(sha256sum "$scoop" | awk '{print $1}')
+          name=$(basename "$scoop")
           base="https://github.com/${{ github.repository }}/releases/download/${{ env.TAG }}"
 
           curl -sfL -X POST \
