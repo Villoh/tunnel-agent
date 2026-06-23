@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Dashboard usage chart axis dates** (`DashboardViewModel`): the Home usage chart axis and hover labels only switched from `HH:mm` to a dated format when the data span was `>= 2 days`. With two calendar days of data the actual min→max span fell below that threshold, so both axis ends and the tooltips showed bare times and the days were indistinguishable. The format is now chosen from the real calendar range (`HH:mm` within a day, `MM-dd HH:mm` across days, `yyyy-MM-dd` across months, `yyyy-MM` across years), so days, months and years can be told apart.
+
 ### Added
 
 - **Logs request model filter** (`LogsViewModel`, `RequestLogEntry`, `LogsView.axaml`, `Resources/Strings*.resx`): the Logs → Requests tab now exposes a model filter alongside the provider filter and shows each request as `Provider · model` above the path. Request search and CSV export also include the model.

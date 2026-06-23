@@ -324,7 +324,7 @@ public partial class DashboardViewModel : ViewModelBase
         }
 
         ChartValues = series;
-        var labelFmt = span.TotalDays >= 2 ? "MM-dd HH:mm" : "HH:mm";
+        var (axisFmt, labelFmt) = ChartTimeFormats(start, end);
         ChartLabels = series.Select((v, i) =>
         {
             var t = start.AddTicks(bucketTicks * i);
@@ -340,9 +340,21 @@ public partial class DashboardViewModel : ViewModelBase
                 ? "$" + maxVal.ToString("0.##", CultureInfo.InvariantCulture)
                 : FormatCount((long)Math.Round(maxVal));
 
-        var fmt = span.TotalDays >= 2 ? "MM-dd" : "HH:mm";
-        ChartAxisStart = start.ToString(fmt, CultureInfo.InvariantCulture);
-        ChartAxisEnd = end.ToString(fmt, CultureInfo.InvariantCulture);
+        ChartAxisStart = start.ToString(axisFmt, CultureInfo.InvariantCulture);
+        ChartAxisEnd = end.ToString(axisFmt, CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>Picks axis and hover label date/time formats based on the calendar span covered by the chart,
+    /// so days, months and years can be distinguished instead of collapsing to bare times.</summary>
+    private static (string Axis, string Label) ChartTimeFormats(DateTime start, DateTime end)
+    {
+        if (start.Year != end.Year && (end - start).TotalDays >= 365)
+            return ("yyyy-MM", "yyyy-MM-dd");
+        if (start.Year != end.Year || start.Month != end.Month || (end - start).TotalDays >= 60)
+            return ("yyyy-MM-dd", "yyyy-MM-dd HH:mm");
+        if (start.Date != end.Date)
+            return ("MM-dd HH:mm", "MM-dd HH:mm");
+        return ("HH:mm", "HH:mm");
     }
 
     // ── Formatting ──────────────────────────────────────────────────────
