@@ -162,6 +162,58 @@ jobs:
             --categories  Utility \
             --outputDir   artifacts/velopack
 
+      - name: Package .deb and .rpm (Linux)
+        if: startsWith(matrix.rid, 'linux-')
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ruby ruby-dev build-essential rpm
+          sudo gem install --no-document fpm
+
+          case "${{ matrix.rid }}" in
+            linux-x64)   deb_arch=amd64; rpm_arch=x86_64; pkg_arch=x64 ;;
+            linux-arm64) deb_arch=arm64; rpm_arch=aarch64; pkg_arch=arm64 ;;
+          esac
+
+          stage="$(mktemp -d)"
+          install -d "$stage/opt/TunnelAgent"
+          cp -r artifacts/publish/. "$stage/opt/TunnelAgent/"
+          chmod +x "$stage/opt/TunnelAgent/${{ matrix.exe }}"
+
+          install -d "$stage/usr/bin"
+          ln -s "/opt/TunnelAgent/${{ matrix.exe }}" "$stage/usr/bin/tunnel-agent"
+
+          install -d "$stage/usr/share/applications"
+          cat > "$stage/usr/share/applications/tunnel-agent.desktop" <<EOF
+          [Desktop Entry]
+          Name=Tunnel Agent
+          Comment=Desktop UI for CLIProxyAPI and Perplexity WebUI Scraper
+          Exec=/opt/TunnelAgent/${{ matrix.exe }}
+          Icon=tunnel-agent
+          Terminal=false
+          Type=Application
+          Categories=Utility;Development;
+          EOF
+
+          install -d "$stage/usr/share/icons/hicolor/256x256/apps"
+          cp src/TunnelAgent.Avalonia/Assets/logo-256.png "$stage/usr/share/icons/hicolor/256x256/apps/tunnel-agent.png"
+
+          common=(
+            -s dir -C "$stage"
+            --name tunnel-agent
+            --version "${SEMVER}"
+            --license MIT
+            --vendor Villoh
+            --maintainer Villoh
+            --url "https://github.com/${{ github.repository }}"
+            --description "Desktop UI for CLIProxyAPI and Perplexity WebUI Scraper."
+          )
+
+          fpm "${common[@]}" -t deb -a "$deb_arch" \
+            -p "artifacts/velopack/TunnelAgent-${SEMVER}-linux-${pkg_arch}.deb" opt usr
+          fpm "${common[@]}" -t rpm -a "$rpm_arch" \
+            -p "artifacts/velopack/TunnelAgent-${SEMVER}-linux-${pkg_arch}.rpm" opt usr
+
       - name: Package with Velopack (macOS)
         if: startsWith(matrix.rid, 'osx-')
         run: |
@@ -345,8 +397,8 @@ jobs:
             echo "|----------|-----------|----------|"
             echo "| Windows x64 | [Setup.exe]($base/$win_x64_setup_name) | [.zip]($base/$win_x64_portable_name) |"
             echo "| Windows arm64 | [Setup.exe]($base/$win_arm64_setup_name) | [.zip]($base/$win_arm64_portable_name) |"
-            echo "| Linux x64 | [.AppImage]($base/TunnelAgent-${semver}-linux-x64.AppImage) | — |"
-            echo "| Linux arm64 | [.AppImage]($base/TunnelAgent-${semver}-linux-arm64.AppImage) | — |"
+            echo "| Linux x64 | [.AppImage]($base/TunnelAgent-${semver}-linux-x64.AppImage) · [.deb]($base/TunnelAgent-${semver}-linux-x64.deb) · [.rpm]($base/TunnelAgent-${semver}-linux-x64.rpm) | — |"
+            echo "| Linux arm64 | [.AppImage]($base/TunnelAgent-${semver}-linux-arm64.AppImage) · [.deb]($base/TunnelAgent-${semver}-linux-arm64.deb) · [.rpm]($base/TunnelAgent-${semver}-linux-arm64.rpm) | — |"
             echo "| macOS x64 (Intel) | [.pkg]($base/TunnelAgent-${semver}-osx-x64.pkg) | [.zip]($base/TunnelAgent-${semver}-osx-x64.zip) |"
             echo "| macOS arm64 (Apple Silicon) | [.pkg]($base/TunnelAgent-${semver}-osx-arm64.pkg) | [.zip]($base/TunnelAgent-${semver}-osx-arm64.zip) |"
             echo ""

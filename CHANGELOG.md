@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Linux `.deb` and `.rpm` packages** (`.github/workflows/release.yml`): Linux releases now ship native `.deb` and `.rpm` packages for `linux-x64` and `linux-arm64` alongside the existing `.AppImage`. Velopack only emits AppImages, so the release build now also stages the published app under `/opt/TunnelAgent` with a `/usr/bin/tunnel-agent` symlink, a `.desktop` entry and a hicolor icon, and packages it with `fpm`. The release notes installation table links the new artifacts; auto-update remains AppImage/Velopack-driven (deb/rpm are managed by the system package manager).
+
 ### Fixed
 
 - **Dashboard usage chart axis dates** (`DashboardViewModel`): the Home usage chart axis and hover labels only switched from `HH:mm` to a dated format when the data span was `>= 2 days`. With two calendar days of data the actual min→max span fell below that threshold, so both axis ends and the tooltips showed bare times and the days were indistinguishable. The format is now chosen from the real calendar range (`HH:mm` within a day, `MM-dd HH:mm` across days, `yyyy-MM-dd` across months, `yyyy-MM` across years), so days, months and years can be told apart.
