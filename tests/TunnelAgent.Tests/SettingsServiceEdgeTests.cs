@@ -20,7 +20,7 @@ public sealed class SettingsServiceEdgeTests
             Enabled = true,
             BaseUrl = "https://api.example.com",
             DisplayName = "Custom",
-            Accounts = [new ProviderAccountSettings { ApiKey = "key-1", Label = "Main" }]
+            Accounts = [new ProviderAccountSettings { ApiKey = "key-1" }]
         });
         await service.SaveImmediateAsync();
 

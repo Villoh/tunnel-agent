@@ -31,8 +31,7 @@ public sealed class ConfigService
     public ConfigService(
         SettingsService settings,
         string? configPath,
-        string? authDir,
-        CustomProviderCredentialStore? credentialStore = null)
+        string? authDir)
     {
         _settings        = settings;
         _authDir         = authDir ?? Platform.AuthDirectory;
@@ -120,10 +119,6 @@ public sealed class ConfigService
                             current.Accounts.Add(currentAccount);
                         }
                     }
-                    else if (currentAccount is not null && t.StartsWith("label:", System.StringComparison.Ordinal))
-                    {
-                        currentAccount.Label = Unyaml(t[6..].Trim());
-                    }
                 }
                 if (current is not null && !string.IsNullOrWhiteSpace(current.Id)) result.Add(current);
                 i--;
@@ -158,10 +153,6 @@ public sealed class ConfigService
                             currentAccount = new ProviderAccountSettings { ApiKey = key };
                             current.Accounts.Add(currentAccount);
                         }
-                    }
-                    else if (currentAccount is not null && t.StartsWith("label:", System.StringComparison.Ordinal))
-                    {
-                        currentAccount.Label = Unyaml(t[6..].Trim());
                     }
                     else if (t.StartsWith("base-url:", System.StringComparison.Ordinal))
                         current.BaseUrl = Unyaml(t[9..].Trim());
@@ -338,11 +329,7 @@ public sealed class ConfigService
             {
                 sb.AppendLine($"    api-key-entries:");
                 foreach (var key in dedupKeys)
-                {
                     sb.AppendLine($"      - api-key: {YamlQuote(key.ApiKey)}");
-                    if (!string.IsNullOrWhiteSpace(key.Label))
-                        sb.AppendLine($"        label: {YamlQuote(key.Label)}");
-                }
             }
 
             var models = ps.Models.Where(m => !string.IsNullOrWhiteSpace(m)).Distinct().ToList();
@@ -373,18 +360,16 @@ public sealed class ConfigService
     {
         var providers = s.Providers.Where(p => p.Enabled && p.Kind == kind).ToList();
         var entries = providers
-            .SelectMany(ps => GetActiveProviderKeyEntries(ps).Select(key => (key.ApiKey, key.Label, ps.BaseUrl)))
+            .SelectMany(ps => GetActiveProviderKeyEntries(ps).Select(key => (key.ApiKey, ps.BaseUrl)))
             .GroupBy(x => x.ApiKey)
             .Select(g => g.First())
             .ToList();
         if (entries.Count == 0) return;
 
         sb.AppendLine($"{blockName}:");
-        foreach (var (apiKey, label, baseUrl) in entries)
+        foreach (var (apiKey, baseUrl) in entries)
         {
             sb.AppendLine($"  - api-key: {YamlQuote(apiKey)}");
-            if (!string.IsNullOrWhiteSpace(label))
-                sb.AppendLine($"    label: {YamlQuote(label)}");
             if (!string.IsNullOrWhiteSpace(baseUrl))
                 sb.AppendLine($"    base-url: {YamlQuote(baseUrl)}");
         }

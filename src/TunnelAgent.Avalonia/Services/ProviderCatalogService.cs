@@ -39,7 +39,6 @@ public sealed class ProviderCatalogService : IDisposable
 
     private readonly SettingsService _settings;
     private readonly ConfigService _config;
-    private readonly CustomProviderCredentialStore _store;
     private readonly OAuthTokenDetector _oauthDetector;
     private readonly AuthFileWatcher _watcher;
     private readonly OAuthService _oauth;
@@ -62,7 +61,6 @@ public sealed class ProviderCatalogService : IDisposable
         _settings      = settings;
         _config        = config;
         _authDir       = authDir;
-        _store         = new CustomProviderCredentialStore(authDir);
         _oauthDetector = new OAuthTokenDetector(authDir);
         _watcher       = new AuthFileWatcher(authDir);
         _oauth         = new OAuthService(config);
@@ -77,8 +75,6 @@ public sealed class ProviderCatalogService : IDisposable
     /// </summary>
     public async Task InitializeAsync()
     {
-        await MigrateLegacyCredentialStoreAsync();
-
         var fromConfig = await _config.ReadProviderSettingsFromConfigAsync();
         foreach (var provider in fromConfig)
         {
@@ -106,12 +102,12 @@ public sealed class ProviderCatalogService : IDisposable
     /// </summary>
     public async Task<bool> AddAccountAsync(
         string providerId, string baseUrl, string apiKey,
-        string? label = null, string? displayName = null) =>
-        await AddAccountAsync(providerId, baseUrl, apiKey, label, displayName, GetDefaultKind(providerId));
+        string? displayName = null) =>
+        await AddAccountAsync(providerId, baseUrl, apiKey, displayName, GetDefaultKind(providerId));
 
     public async Task<bool> AddAccountAsync(
         string providerId, string baseUrl, string apiKey,
-        string? label, string? displayName, ProviderKind kind)
+        string? displayName, ProviderKind kind)
     {
         // Ensure provider settings entry exists
         var ps = _settings.Current.Providers.FirstOrDefault(p => p.Id == providerId && p.Kind == kind);
@@ -131,11 +127,10 @@ public sealed class ProviderCatalogService : IDisposable
         {
             created = false;
             existing.Disabled = false;
-            if (label is not null) existing.Label = label;
         }
         else
         {
-            ps.Accounts.Add(new ProviderAccountSettings { ApiKey = apiKey, Label = label ?? "" });
+            ps.Accounts.Add(new ProviderAccountSettings { ApiKey = apiKey });
         }
         _settings.Save();
 
@@ -163,7 +158,7 @@ public sealed class ProviderCatalogService : IDisposable
     /// Add a custom OpenAI-compatible provider (name + base-url + api key) to
     /// proxy-config.yaml under <c>openai-compatibility</c>, then rebuild the list.
     /// </summary>
-    public async Task AddCustomProviderAsync(string name, string baseUrl, string apiKey, string? label, IReadOnlyList<string>? models = null)
+    public async Task AddCustomProviderAsync(string name, string baseUrl, string apiKey, IReadOnlyList<string>? models = null)
     {
         var id = UniqueProviderId(name);
         var ps = new ProviderSettings
@@ -172,7 +167,7 @@ public sealed class ProviderCatalogService : IDisposable
             Enabled = true,
             Kind = ProviderKind.OpenAICompatibility,
             BaseUrl = baseUrl,
-            Accounts = [new ProviderAccountSettings { ApiKey = apiKey, Label = label ?? "" }],
+            Accounts = [new ProviderAccountSettings { ApiKey = apiKey }],
             Models = models?.ToList() ?? []
         };
         _settings.Current.Providers.Add(ps);
@@ -340,34 +335,6 @@ public sealed class ProviderCatalogService : IDisposable
     /// openai-compat-*.json files into proxy-config.yaml (the correct store),
     /// then deletes the json files. No-op when none exist.
     /// </summary>
-    private async Task MigrateLegacyCredentialStoreAsync()
-    {
-        var records = _store.LoadAll();
-        if (records.Count == 0) return;
-
-        foreach (var group in records.GroupBy(r => r.ProviderId))
-        {
-            var kind = GetDefaultKind(group.Key);
-            var ps = _settings.Current.Providers.FirstOrDefault(p => p.Id == group.Key && p.Kind == kind);
-            if (ps is null)
-            {
-                ps = new ProviderSettings { Id = group.Key, Enabled = true, Kind = kind };
-                _settings.Current.Providers.Add(ps);
-            }
-            foreach (var r in group)
-            {
-                if (ps.Accounts.Any(a => a.ApiKey == r.ApiKey)) continue;
-                ps.Accounts.Add(new ProviderAccountSettings { ApiKey = r.ApiKey, Label = r.Label, Disabled = r.IsDisabled });
-            }
-        }
-
-        _settings.Save();
-        await _config.WriteConfigAsync();
-
-        foreach (var r in records)
-            try { File.Delete(r.FilePath); } catch { }
-    }
-
     private void BuildProviderList()
     {
         Providers.Clear();
@@ -538,7 +505,7 @@ public sealed class ProviderCatalogService : IDisposable
         // Add new
         foreach (var r in records.Where(r => !vm.Accounts.Any(a => a.ApiKey == r.ApiKey)))
         {
-            var acct = new ProviderAccountViewModel(vm.Id, r.ApiKey, r.Label, isDisabled: false)
+            var acct = new ProviderAccountViewModel(vm.Id, r.ApiKey, "", isDisabled: false)
             {
                 IsProviderEnabled = vm.IsEnabled,
                 ProviderBaseUrl = vm.ApiKeyBaseUrl,

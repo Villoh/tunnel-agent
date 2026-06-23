@@ -79,8 +79,8 @@ public sealed class AppSettingsTests
                     DisplayName = "Local AI",
                     Accounts =
                     [
-                        new ProviderAccountSettings { ApiKey = "sk-test-key", Label = "Primary" },
-                        new ProviderAccountSettings { ApiKey = "sk-disabled", Label = "Disabled", Disabled = true }
+                        new ProviderAccountSettings { ApiKey = "sk-test-key" },
+                        new ProviderAccountSettings { ApiKey = "sk-disabled", Disabled = true }
                     ]
                 },
                 new ProviderSettings
@@ -107,7 +107,6 @@ public sealed class AppSettingsTests
         Assert.Equal("Local AI", custom.DisplayName);
         Assert.Equal(2, custom.Accounts.Count);
         Assert.Equal("sk-test-key", custom.Accounts[0].ApiKey);
-        Assert.Equal("Primary", custom.Accounts[0].Label);
         Assert.False(custom.Accounts[0].Disabled);
         Assert.True(custom.Accounts[1].Disabled);
 
@@ -123,7 +122,6 @@ public sealed class AppSettingsTests
         var account = new ProviderAccountSettings();
 
         Assert.Equal("", account.ApiKey);
-        Assert.Equal("", account.Label);
         Assert.False(account.Disabled);
     }
 

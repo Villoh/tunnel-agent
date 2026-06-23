@@ -106,7 +106,6 @@ openai-compatibility:
     base-url: "http://localhost:11434/v1"
     api-key-entries:
       - api-key: "key"
-        label: "Local key"
 """);
 
         var providers = await config.ReadProviderSettingsFromConfigAsync();
@@ -117,7 +116,7 @@ openai-compatibility:
         Assert.True(local.Enabled);
         Assert.Equal("Local AI", local.DisplayName);
         Assert.Equal("http://localhost:11434/v1", local.BaseUrl);
-        Assert.Equal("Local key", Assert.Single(local.Accounts).Label);
+        Assert.Equal("key", Assert.Single(local.Accounts).ApiKey);
     }
 
 }

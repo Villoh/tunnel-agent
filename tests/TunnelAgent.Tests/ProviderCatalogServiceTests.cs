@@ -35,31 +35,33 @@ public sealed class ProviderCatalogServiceTests
         using var catalog = new ProviderCatalogService(settings, config, authDir);
         await catalog.InitializeAsync();
 
-        await catalog.AddAccountAsync("gemini-cli", "", "AIza-test", "Gemini", null, ProviderKind.GeminiApiKey);
+        await catalog.AddAccountAsync("gemini-cli", "", "AIza-test", null, ProviderKind.GeminiApiKey);
         await Task.Delay(300);
 
         var gemini = Assert.Single(catalog.Providers, p => p.Id == "gemini-cli");
         var account = Assert.Single(gemini.Accounts);
-        Assert.Equal("Gemini", account.Label);
         Assert.Equal("AIza-test", account.ApiKey);
     }
 
     [Fact]
-    public async Task InitializeAsync_CustomProviderInSettings_AddsAccountsFromCredentialStore()
+    public async Task InitializeAsync_CustomProviderInYaml_LoadsProvider()
     {
         using var temp = new TestTempDirectory();
         var authDir = temp.File("auth");
         var settings = new SettingsService(temp.File("settings.json"));
         await settings.LoadAsync();
-        settings.Current.Providers.Add(new ProviderSettings
-        {
-            Id = "local-ai",
-            Enabled = true,
-            BaseUrl = "https://local.example/v1",
-            DisplayName = "Local AI"
-        });
-        new CustomProviderCredentialStore(authDir).Save("local-ai", "test-key", "Primary");
         var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir);
+        await File.WriteAllTextAsync(config.ConfigPath, """
+host: "127.0.0.1"
+port: 8317
+auth-dir: "auth"
+openai-compatibility:
+  - name: local-ai
+    display-name: "Local AI"
+    base-url: "https://local.example/v1"
+    api-key-entries:
+      - api-key: "test-key"
+""");
         using var catalog = new ProviderCatalogService(settings, config, authDir);
 
         await catalog.InitializeAsync();
@@ -68,7 +70,7 @@ public sealed class ProviderCatalogServiceTests
         Assert.False(provider.IsOAuth);
         Assert.Equal("Local AI", provider.Name);
         var account = Assert.Single(provider.Accounts);
-        Assert.Equal("Primary", account.Label);
+        Assert.Equal("test-key", account.ApiKey);
     }
 
     [Fact]
@@ -82,7 +84,7 @@ public sealed class ProviderCatalogServiceTests
         using var catalog = new ProviderCatalogService(settings, config, authDir);
         await catalog.InitializeAsync();
 
-        await catalog.AddCustomProviderAsync("OpenRouter", "https://openrouter.ai/api/v1", "sk-or", null, ["a", "b"]);
+        await catalog.AddCustomProviderAsync("OpenRouter", "https://openrouter.ai/api/v1", "sk-or", ["a", "b"]);
         var providerId = Assert.Single(catalog.Providers, p => p.Id == "openrouter").Id;
 
         await catalog.UpdateCustomProviderModelsAsync(providerId, ["b", "c", "d"]);
@@ -93,33 +95,6 @@ public sealed class ProviderCatalogServiceTests
         var yaml = await File.ReadAllTextAsync(config.ConfigPath);
         Assert.Contains("      - name: \"c\"", yaml);
         Assert.DoesNotContain("      - name: \"a\"", yaml);
-    }
-
-    [Fact]
-    public async Task AddAccountAsync_ExistingKey_WithBlankLabel_ClearsLabelInConfig()
-    {
-        using var temp = new TestTempDirectory();
-        var authDir = temp.File("auth");
-        var settings = new SettingsService(temp.File("settings.json"));
-        await settings.LoadAsync();
-        settings.Current.Providers.Add(new ProviderSettings
-        {
-            Id = "opencode",
-            Enabled = true,
-            Kind = ProviderKind.OpenAICompatibility,
-            BaseUrl = "https://opencode.ai/zen/go/v1",
-            Accounts = [new ProviderAccountSettings { ApiKey = "1234", Label = "Test" }]
-        });
-        var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir);
-        using var catalog = new ProviderCatalogService(settings, config, authDir);
-
-        var created = await catalog.AddAccountAsync("opencode", "https://opencode.ai/zen/go/v1", "1234", "", null, ProviderKind.OpenAICompatibility);
-
-        Assert.False(created);
-        Assert.Equal("", Assert.Single(settings.Current.Providers.Single(p => p.Id == "opencode").Accounts).Label);
-        var yaml = await File.ReadAllTextAsync(config.ConfigPath);
-        Assert.Contains("      - api-key: \"1234\"", yaml);
-        Assert.DoesNotContain("label:", yaml);
     }
 
     [Fact]

@@ -78,9 +78,9 @@ public sealed class ConfigServiceTests
             DisplayName = "Local AI",
             Accounts =
             [
-                new ProviderAccountSettings { ApiKey = inlineKey, Label = "Primary" },
-                new ProviderAccountSettings { ApiKey = inlineKey, Label = "Duplicate" },
-                new ProviderAccountSettings { ApiKey = disabledKey, Label = "Backup", Disabled = true }
+                new ProviderAccountSettings { ApiKey = inlineKey },
+                new ProviderAccountSettings { ApiKey = inlineKey },
+                new ProviderAccountSettings { ApiKey = disabledKey, Disabled = true }
             ]
         });
         var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir);
@@ -94,9 +94,9 @@ public sealed class ConfigServiceTests
         Assert.Contains("    disabled: false", yaml);
         Assert.Contains("    base-url: \"https://local.example/v1\"", yaml);
         Assert.Contains($"      - api-key: \"{inlineKey}\"", yaml);
-        Assert.Contains("        label: \"Primary\"", yaml);
         Assert.Contains($"      - api-key: \"{disabledKey}\"", yaml);
-        Assert.Contains("        label: \"Backup\"", yaml);
+        // Labels are stored in settings.json, never written to the engine-owned yaml.
+        Assert.DoesNotContain("label:", yaml);
         Assert.Equal(1, CountOccurrences(yaml, inlineKey));
     }
 
@@ -112,7 +112,7 @@ public sealed class ConfigServiceTests
             Enabled = false,
             Kind = ProviderKind.OpenAICompatibility,
             BaseUrl = "https://openrouter.ai/api/v1",
-            Accounts = [new ProviderAccountSettings { ApiKey = "sk-or-test", Label = "OpenRouter" }]
+            Accounts = [new ProviderAccountSettings { ApiKey = "sk-or-test" }]
         });
         var config = new ConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
 
@@ -123,7 +123,7 @@ public sealed class ConfigServiceTests
         Assert.Contains("  - name: openrouter", yaml);
         Assert.Contains("    disabled: true", yaml);
         Assert.Contains("      - api-key: \"sk-or-test\"", yaml);
-        Assert.Contains("        label: \"OpenRouter\"", yaml);
+        Assert.DoesNotContain("label:", yaml);
     }
 
     [Fact]

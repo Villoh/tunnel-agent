@@ -540,10 +540,6 @@
                                 </Button>
                             </Grid>
                         </StackPanel>
-                        <StackPanel Spacing="4">
-                            <TextBlock Classes="section-label" Text="{l:Loc Dialog_AddAccount_LabelLabel}" />
-                            <TextBox x:Name="LabelBox" Classes="app" Watermark="{l:Loc Dialog_AddAccount_LabelPlaceholder}" Text="{Binding AddAccountLabelDraft, Mode=TwoWay}" />
-                        </StackPanel>
                     </StackPanel>
                     <Border Classes="row-divider" />
                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
@@ -590,10 +586,6 @@
                                     <lucide:PackIconLucide Kind="{Binding ShowCustomProviderApiKey, Converter={StaticResource EyeIcon}}" Width="14" Height="14" />
                                 </Button>
                             </Grid>
-                        </StackPanel>
-                        <StackPanel Spacing="4">
-                            <TextBlock Classes="section-label" Text="{l:Loc Dialog_AddAccount_LabelLabel}" />
-                            <TextBox Classes="app" Watermark="{l:Loc Dialog_AddAccount_LabelPlaceholder}" Text="{Binding CustomProviderApiKeyLabelDraft, Mode=TwoWay}" />
                         </StackPanel>
                     </StackPanel>
                     <Border Classes="row-divider" />

@@ -184,7 +184,6 @@ SelectedSection is SectionKey.Logs;
     [ObservableProperty] private string _customProviderNameDraft = "";
     [ObservableProperty] private string _customProviderBaseUrlDraft = "";
     [ObservableProperty] private string _customProviderApiKeyDraft = "";
-    [ObservableProperty] private string _customProviderApiKeyLabelDraft = "";
     [ObservableProperty] private bool _showCustomProviderApiKey;
     [ObservableProperty] private bool _isFetchingCustomProviderModels;
     [ObservableProperty] private bool _showCustomProviderModelsDialog;
@@ -265,7 +264,6 @@ SelectedSection is SectionKey.Logs;
     [ObservableProperty] private bool _showApiKeyDraft;
     [ObservableProperty] private string _addAccountApiKeyDraft = "";
     [ObservableProperty] private string _addAccountBaseUrlDraft = "";
-    [ObservableProperty] private string _addAccountLabelDraft = "";
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ApiKeyDialogTitle))]
     [NotifyPropertyChangedFor(nameof(ApiKeyDialogApplyText))]
@@ -1428,7 +1426,6 @@ SelectedSection is SectionKey.Logs;
             AddAccountTarget = vm;
             AddAccountApiKeyDraft = "";
             AddAccountBaseUrlDraft = vm.ApiKeyBaseUrl;
-            AddAccountLabelDraft = "";
             EditApiAccountTarget = null;
             ShowAddAccountApiKey = false;
             AddAccountUseApiKey = vm.SupportsApiKey && !vm.SupportsOAuth;
@@ -1437,12 +1434,11 @@ SelectedSection is SectionKey.Logs;
         }
     }
 
-    public async Task ConfirmAddAccountAsync(string providerId, string baseUrl, string apiKey, string? label)
+    public async Task ConfirmAddAccountAsync(string providerId, string baseUrl, string apiKey)
     {
         ShowAddAccountDialog = false;
         AddAccountApiKeyDraft = "";
         AddAccountBaseUrlDraft = "";
-        AddAccountLabelDraft = "";
         ShowAddAccountApiKey = false;
         var kind = AddAccountUseApiKey ? ProviderCatalogService.GetDefaultKind(providerId) : ProviderKind.OpenAICompatibility;
         var edited = EditApiAccountTarget;
@@ -1450,10 +1446,9 @@ SelectedSection is SectionKey.Logs;
         {
             await _catalog.RemoveAccountAsync(edited.ProviderId, edited.ApiKey);
         }
-        var created = await _catalog.AddAccountAsync(providerId, baseUrl, apiKey, label, null, kind);
+        var created = await _catalog.AddAccountAsync(providerId, baseUrl, apiKey, null, kind);
         if (edited is not null && edited.ApiKey == apiKey)
         {
-            edited.Label = label ?? "";
             edited.ProviderBaseUrl = baseUrl;
             created = true;
         }
@@ -1711,7 +1706,6 @@ SelectedSection is SectionKey.Logs;
         ShowAddAccountModeDialog = false;
         AddAccountApiKeyDraft = "";
         AddAccountBaseUrlDraft = "";
-        AddAccountLabelDraft = "";
         EditApiAccountTarget = null;
         ShowAddAccountApiKey = false;
     }
@@ -1722,7 +1716,6 @@ SelectedSection is SectionKey.Logs;
         CustomProviderNameDraft = "";
         CustomProviderBaseUrlDraft = "";
         CustomProviderApiKeyDraft = "";
-        CustomProviderApiKeyLabelDraft = "";
         ShowCustomProviderApiKey = false;
         ShowAddCustomProviderDialog = true;
     }
@@ -1734,7 +1727,6 @@ SelectedSection is SectionKey.Logs;
         CustomProviderNameDraft = "";
         CustomProviderBaseUrlDraft = "";
         CustomProviderApiKeyDraft = "";
-        CustomProviderApiKeyLabelDraft = "";
         ShowCustomProviderApiKey = false;
     }
 
@@ -1855,11 +1847,10 @@ SelectedSection is SectionKey.Logs;
         var name = CustomProviderNameDraft.Trim();
         var baseUrl = CustomProviderBaseUrlDraft.Trim();
         var apiKey = CustomProviderApiKeyDraft.Trim();
-        var label = CustomProviderApiKeyLabelDraft.Trim();
         if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(baseUrl) || string.IsNullOrEmpty(apiKey)) return;
 
         ShowCustomProviderModelsDialog = false;
-        await _catalog.AddCustomProviderAsync(name, baseUrl, apiKey, string.IsNullOrEmpty(label) ? null : label, selected);
+        await _catalog.AddCustomProviderAsync(name, baseUrl, apiKey, selected);
         ResetCustomProviderDrafts();
         OnPropertyChanged(nameof(ConnectedProviderCount));
     }
@@ -1941,7 +1932,6 @@ SelectedSection is SectionKey.Logs;
         CustomProviderNameDraft = "";
         CustomProviderBaseUrlDraft = "";
         CustomProviderApiKeyDraft = "";
-        CustomProviderApiKeyLabelDraft = "";
         CustomProviderModelSearch = "";
         ShowCustomProviderApiKey = false;
     }
@@ -1964,7 +1954,6 @@ SelectedSection is SectionKey.Logs;
         AddAccountUseApiKey = true;
         AddAccountApiKeyDraft = account.ApiKey;
         AddAccountBaseUrlDraft = provider?.ApiKeyBaseUrl ?? "";
-        AddAccountLabelDraft = account.Label;
         ShowAddAccountApiKey = false;
         ShowAddAccountModeDialog = false;
         ShowAddAccountDialog = true;

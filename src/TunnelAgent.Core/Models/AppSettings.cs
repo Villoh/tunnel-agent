@@ -7,7 +7,6 @@ namespace TunnelAgent.Services;
 public sealed class ProviderAccountSettings
 {
     public string ApiKey   { get; set; } = "";
-    public string Label    { get; set; } = "";
     public bool   Disabled { get; set; } = false;
 }
 

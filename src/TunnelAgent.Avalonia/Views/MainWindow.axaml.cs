@@ -254,13 +254,11 @@ public partial class MainWindow : Window
 
         var baseUrl = vm.AddAccountBaseUrlDraft.Trim();
         var apiKey = ApiKeyBox.Text?.Trim() ?? "";
-        var label = LabelBox.Text?.Trim();
         if (string.IsNullOrEmpty(apiKey)) return;
 
         ApiKeyBox.Text = "";
-        LabelBox.Text = "";
 
-        await vm.ConfirmAddAccountAsync(target.Id, baseUrl, apiKey, label ?? "");
+        await vm.ConfirmAddAccountAsync(target.Id, baseUrl, apiKey);
     }
 
     private async void OnConfirmPerplexityAccount(object? sender, RoutedEventArgs e) =>

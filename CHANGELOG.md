@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Logs request model filter** (`LogsViewModel`, `RequestLogEntry`, `LogsView.axaml`, `Resources/Strings*.resx`): the Logs → Requests tab now exposes a model filter alongside the provider filter and shows each request as `Provider · model` above the path. Request search and CSV export also include the model.
 
+### Removed
+
+- **API-key account labels** (`AppSettings`, `ConfigService`, `ProviderCatalogService`, `MainWindowViewModel`, `MainWindow.axaml`): removed the per-key label feature for upstream API-key accounts. Labels were written to `proxy-config.yaml`, but CLIProxyAPI has no per-key `label` field and strips it whenever it rewrites/normalizes the config (so labels silently disappeared on engine start, and were lost entirely when a native API-key provider was disabled). Since the label added no functional value, it was dropped instead of reworked: the label input is gone from the add-account and add-custom-provider dialogs, `ProviderAccountSettings.Label` and the label read/write paths in `ConfigService` are removed, and `AddAccountAsync`/`AddCustomProviderAsync` no longer take a label. API-key rows now display the masked key. (Perplexity account labels are unaffected.)
+- **Dead `CustomProviderCredentialStore`** (`ProviderCatalogService`, `ConfigService`): removed the unused `openai-compat-*.json` credential store and its one-time `MigrateLegacyCredentialStoreAsync` migration (which read, migrated, and deleted the legacy files), plus the unused `credentialStore` constructor parameter on `ConfigService`. Credentials live in `proxy-config.yaml`.
+
 ## [0.9.0] - 2026-06-22
 
 ### Fixed

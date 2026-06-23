@@ -20,7 +20,7 @@ public sealed class ProviderCatalogServiceEdgeTests
             Enabled = true,
             BaseUrl = "https://local.example/v1",
             DisplayName = "Local AI",
-            Accounts = [new ProviderAccountSettings { ApiKey = "sk-key", Label = "Primary" }]
+            Accounts = [new ProviderAccountSettings { ApiKey = "sk-key" }]
         });
 
         var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir);
@@ -63,7 +63,7 @@ public sealed class ProviderCatalogServiceEdgeTests
             Enabled = true,
             Kind = ProviderKind.OpenAICompatibility,
             BaseUrl = "https://opencode.ai/zen/go/v1",
-            Accounts = [new ProviderAccountSettings { ApiKey = "1234", Label = "mikel" }]
+            Accounts = [new ProviderAccountSettings { ApiKey = "1234" }]
         });
 
         var config = new ConfigService(settings, temp.File("proxy-config.yaml"), authDir);
@@ -79,7 +79,7 @@ public sealed class ProviderCatalogServiceEdgeTests
         Assert.Contains("  - name: opencode", yaml);
         Assert.Contains("    base-url: \"https://opencode.ai/zen/go/v1\"", yaml);
         Assert.DoesNotContain("api-key-entries:", yaml);
-        Assert.DoesNotContain("label: \"mikel\"", yaml);
+        Assert.DoesNotContain("label:", yaml);
     }
 
     [Fact]
