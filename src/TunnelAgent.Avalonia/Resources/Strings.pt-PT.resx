@@ -1340,4 +1340,16 @@
   <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
     <value>A API de quota de {0} está indisponível ({1}). Tente mais tarde.</value>
   </data>
+  <data name="Toast_EngineError_PortInUse" xml:space="preserve">
+    <value>A porta {0} já está a ser utilizada por outro processo. Pare-o e inicie o {1} novamente.</value>
+  </data>
+  <data name="Toast_EngineError_Timeout" xml:space="preserve">
+    <value>O {0} não respondeu a tempo. Tente novamente.</value>
+  </data>
+  <data name="Toast_EngineError_LaunchFailed" xml:space="preserve">
+    <value>Falha ao iniciar o {0}. Verifique a instalação e tente novamente.</value>
+  </data>
+  <data name="Toast_EngineError_Crashed" xml:space="preserve">
+    <value>O {0} parou inesperadamente. Verifique os registos e tente novamente.</value>
+  </data>
 </root>

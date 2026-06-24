@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using TunnelAgent.ViewModels;
@@ -18,6 +20,7 @@ public sealed class ProcessService
     public int Port { get; private set; }
     public EngineState State { get; private set; } = EngineState.Stopped;
     public string? LastError { get; private set; }
+    public EngineErrorKind LastErrorKind { get; private set; } = EngineErrorKind.None;
 
     public event EventHandler? StateChanged;
 
@@ -32,6 +35,15 @@ public sealed class ProcessService
         {
             _process.Dispose();
             _process = null;
+        }
+
+        // Pre-flight: fail fast with a clear message if the port is already taken.
+        if (IsPortInUse(port))
+        {
+            LastError = $"Port {port} is already in use by another process.";
+            LastErrorKind = EngineErrorKind.PortInUse;
+            SetState(EngineState.Error);
+            return;
         }
 
         _process = new Process
@@ -68,6 +80,7 @@ public sealed class ProcessService
                 LastError = string.IsNullOrEmpty(stderr)
                     ? "Process exited unexpectedly."
                     : stderr.Split('\n')[^1].Trim(); // last stderr line
+                LastErrorKind = EngineErrorKind.Crashed;
                 SetState(EngineState.Error);
             }
         };
@@ -85,12 +98,14 @@ public sealed class ProcessService
                 return;
             }
             LastError = "Engine did not respond in time.";
+            LastErrorKind = EngineErrorKind.Timeout;
             StopProcess();
             SetState(EngineState.Error);
             return;
         }
 
         LastError = null;
+        LastErrorKind = EngineErrorKind.None;
         SetState(EngineState.Running);
     }
 
@@ -141,6 +156,21 @@ public sealed class ProcessService
         }
 
         return false;
+    }
+
+    private static bool IsPortInUse(int port)
+    {
+        try
+        {
+            using var listener = new TcpListener(IPAddress.Loopback, port);
+            listener.Start();
+            listener.Stop();
+            return false;
+        }
+        catch (SocketException)
+        {
+            return true;
+        }
     }
 
     private void SetState(EngineState state)

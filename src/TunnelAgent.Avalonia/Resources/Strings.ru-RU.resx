@@ -1340,4 +1340,16 @@
   <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
     <value>API квоты {0} недоступен ({1}). Повторите позже.</value>
   </data>
+  <data name="Toast_EngineError_PortInUse" xml:space="preserve">
+    <value>Порт {0} уже используется другим процессом. Остановите его и снова запустите {1}.</value>
+  </data>
+  <data name="Toast_EngineError_Timeout" xml:space="preserve">
+    <value>{0} не ответил вовремя. Повторите попытку.</value>
+  </data>
+  <data name="Toast_EngineError_LaunchFailed" xml:space="preserve">
+    <value>Не удалось запустить {0}. Проверьте установку и повторите попытку.</value>
+  </data>
+  <data name="Toast_EngineError_Crashed" xml:space="preserve">
+    <value>{0} неожиданно остановился. Проверьте журналы и повторите попытку.</value>
+  </data>
 </root>

@@ -1340,4 +1340,16 @@
   <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
     <value>واجهة برمجة حصة {0} غير متاحة ({1}). حاول لاحقًا.</value>
   </data>
+  <data name="Toast_EngineError_PortInUse" xml:space="preserve">
+    <value>المنفذ {0} مُستخدَم بالفعل بواسطة عملية أخرى. أوقفها ثم ابدأ تشغيل {1} مرة أخرى.</value>
+  </data>
+  <data name="Toast_EngineError_Timeout" xml:space="preserve">
+    <value>لم يستجب {0} في الوقت المناسب. يرجى المحاولة مرة أخرى.</value>
+  </data>
+  <data name="Toast_EngineError_LaunchFailed" xml:space="preserve">
+    <value>تعذّر تشغيل {0}. تحقق من التثبيت وحاول مرة أخرى.</value>
+  </data>
+  <data name="Toast_EngineError_Crashed" xml:space="preserve">
+    <value>توقف {0} بشكل غير متوقع. تحقق من السجلات وحاول مرة أخرى.</value>
+  </data>
 </root>

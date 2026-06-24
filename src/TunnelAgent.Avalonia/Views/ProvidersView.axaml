@@ -100,6 +100,7 @@
                                    Text="{Binding ServerState, Converter={StaticResource StateToText}}"
                                    Classes="status"
                                    Foreground="{Binding ServerState, Converter={StaticResource StateToBrush}}"
+                                   ToolTip.Tip="{Binding FocusedEngineErrorTooltip}"
                                    VerticalAlignment="Center" />
                     </Grid>
                 </Border>

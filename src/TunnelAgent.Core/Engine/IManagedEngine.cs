@@ -22,6 +22,7 @@ public interface IManagedEngine
     bool IsRunning { get; }
     int Port { get; }
     string? LastError { get; }
+    EngineErrorKind LastErrorKind { get; }
 
     event EventHandler? StateChanged;
 

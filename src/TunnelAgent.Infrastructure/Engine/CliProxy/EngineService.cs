@@ -38,6 +38,7 @@ public sealed class EngineService : IManagedEngine
     public bool IsRunning           => _process.IsRunning;
     public int Port                 => _process.Port;
     public string? LastError        => _download.IntegrityError ?? _process.LastError;
+    public EngineErrorKind LastErrorKind => _download.IntegrityError is not null ? EngineErrorKind.None : _process.LastErrorKind;
 
     public event EventHandler? StateChanged;
 

@@ -1340,4 +1340,16 @@
   <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
     <value>{0} kota API’si kullanılamıyor ({1}). Daha sonra tekrar deneyin.</value>
   </data>
+  <data name="Toast_EngineError_PortInUse" xml:space="preserve">
+    <value>{0} bağlantı noktası başka bir işlem tarafından kullanılıyor. Onu durdurup {1} öğesini yeniden başlatın.</value>
+  </data>
+  <data name="Toast_EngineError_Timeout" xml:space="preserve">
+    <value>{0} zamanında yanıt vermedi. Lütfen tekrar deneyin.</value>
+  </data>
+  <data name="Toast_EngineError_LaunchFailed" xml:space="preserve">
+    <value>{0} başlatılamadı. Kurulumu kontrol edip tekrar deneyin.</value>
+  </data>
+  <data name="Toast_EngineError_Crashed" xml:space="preserve">
+    <value>{0} beklenmedik şekilde durdu. Günlükleri kontrol edip tekrar deneyin.</value>
+  </data>
 </root>

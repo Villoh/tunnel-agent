@@ -1340,4 +1340,16 @@
   <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
     <value>{0} 额度 API 不可用（{1}）。请稍后重试。</value>
   </data>
+  <data name="Toast_EngineError_PortInUse" xml:space="preserve">
+    <value>端口 {0} 已被其他进程占用。请停止该进程后重新启动 {1}。</value>
+  </data>
+  <data name="Toast_EngineError_Timeout" xml:space="preserve">
+    <value>{0} 未及时响应。请重试。</value>
+  </data>
+  <data name="Toast_EngineError_LaunchFailed" xml:space="preserve">
+    <value>无法启动 {0}。请检查安装后重试。</value>
+  </data>
+  <data name="Toast_EngineError_Crashed" xml:space="preserve">
+    <value>{0} 意外停止。请查看日志后重试。</value>
+  </data>
 </root>

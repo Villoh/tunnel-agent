@@ -1340,4 +1340,16 @@
   <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
     <value>{0} のクォータ API を利用できません（{1}）。後でもう一度お試しください。</value>
   </data>
+  <data name="Toast_EngineError_PortInUse" xml:space="preserve">
+    <value>ポート {0} は別のプロセスによって既に使用されています。それを停止してから {1} を再度起動してください。</value>
+  </data>
+  <data name="Toast_EngineError_Timeout" xml:space="preserve">
+    <value>{0} が時間内に応答しませんでした。もう一度お試しください。</value>
+  </data>
+  <data name="Toast_EngineError_LaunchFailed" xml:space="preserve">
+    <value>{0} を起動できませんでした。インストールを確認してもう一度お試しください。</value>
+  </data>
+  <data name="Toast_EngineError_Crashed" xml:space="preserve">
+    <value>{0} が予期せず停止しました。ログを確認してもう一度お試しください。</value>
+  </data>
 </root>

@@ -1340,4 +1340,16 @@
   <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
     <value>{0} कोटा API उपलब्ध नहीं है ({1})। बाद में फिर प्रयास करें।</value>
   </data>
+  <data name="Toast_EngineError_PortInUse" xml:space="preserve">
+    <value>पोर्ट {0} पहले से ही किसी अन्य प्रक्रिया द्वारा उपयोग में है। उसे रोकें और {1} को फिर से शुरू करें।</value>
+  </data>
+  <data name="Toast_EngineError_Timeout" xml:space="preserve">
+    <value>{0} ने समय पर प्रतिक्रिया नहीं दी। कृपया पुनः प्रयास करें।</value>
+  </data>
+  <data name="Toast_EngineError_LaunchFailed" xml:space="preserve">
+    <value>{0} शुरू करने में विफल। इंस्टॉलेशन जांचें और पुनः प्रयास करें।</value>
+  </data>
+  <data name="Toast_EngineError_Crashed" xml:space="preserve">
+    <value>{0} अप्रत्याशित रूप से रुक गया। लॉग जांचें और पुनः प्रयास करें।</value>
+  </data>
 </root>

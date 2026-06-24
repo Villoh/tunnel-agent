@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using TunnelAgent.ViewModels;
@@ -20,6 +22,7 @@ public sealed class ProcessService
     public int Port { get; private set; }
     public EngineState State { get; private set; } = EngineState.Stopped;
     public string? LastError { get; private set; }
+    public EngineErrorKind LastErrorKind { get; private set; } = EngineErrorKind.None;
 
     public event EventHandler? StateChanged;
 
@@ -34,6 +37,18 @@ public sealed class ProcessService
         {
             _process.Dispose();
             _process = null;
+        }
+
+        // Pre-flight: if the port is already taken (e.g. CLIProxyAPI is running in a
+        // terminal or another app), bail out deterministically. Without this, the
+        // foreign instance can answer our health check before our own process finishes
+        // exiting, which would surface a misleading "exited unexpectedly" error.
+        if (IsPortInUse(port))
+        {
+            LastError = $"Port {port} is already in use by another process.";
+            LastErrorKind = EngineErrorKind.PortInUse;
+            SetState(EngineState.Error);
+            return;
         }
 
         _process = new Process
@@ -54,23 +69,47 @@ public sealed class ProcessService
             if (State == EngineState.Running)
             {
                 LastError = "Process exited unexpectedly.";
+                LastErrorKind = EngineErrorKind.Crashed;
                 SetState(EngineState.Error);
             }
         };
 
-        _process.Start();
-
-        // Poll the health endpoint until the server is up (up to 5s)
-        var healthy = await WaitForHealthAsync(port, apiKey, ct);
-        if (!healthy)
+        try
         {
-            LastError = "Engine did not respond in time.";
+            _process.Start();
+        }
+        catch (Exception ex)
+        {
+            LastError = $"Failed to launch engine: {ex.Message}";
+            LastErrorKind = EngineErrorKind.LaunchFailed;
+            StopProcess();
+            SetState(EngineState.Error);
+            return;
+        }
+
+        // Poll the health endpoint until the server is up (up to 5s).
+        // WaitForHealthAsync also detects our own process exiting early, which is
+        // what happens when the port is already in use by another instance.
+        var result = await WaitForHealthAsync(port, apiKey, ct);
+        if (result != HealthResult.Healthy)
+        {
+            if (result == HealthResult.ProcessExited)
+            {
+                LastError = $"Engine exited on startup — port {port} may already be in use by another process.";
+                LastErrorKind = EngineErrorKind.PortInUse;
+            }
+            else
+            {
+                LastError = "Engine did not respond in time.";
+                LastErrorKind = EngineErrorKind.Timeout;
+            }
             StopProcess();
             SetState(EngineState.Error);
             return;
         }
 
         LastError = null;
+        LastErrorKind = EngineErrorKind.None;
         SetState(EngineState.Running);
     }
 
@@ -96,11 +135,19 @@ public sealed class ProcessService
         }
     }
 
-    private static async Task<bool> WaitForHealthAsync(int port, string? apiKey, CancellationToken ct)
+    private enum HealthResult { Healthy, Timeout, ProcessExited }
+
+    private async Task<HealthResult> WaitForHealthAsync(int port, string? apiKey, CancellationToken ct)
     {
         var url = $"http://127.0.0.1:{port}/v1/models";
         for (var i = 0; i < 25; i++)
         {
+            // If our own process already exited, a healthy endpoint would only mean
+            // some other instance owns the port. Report that distinctly so the engine
+            // surfaces a clear, retryable error instead of a false "Running".
+            if (_process is { HasExited: true })
+                return HealthResult.ProcessExited;
+
             try
             {
                 await Task.Delay(200, ct);
@@ -108,13 +155,30 @@ public sealed class ProcessService
                 if (!string.IsNullOrWhiteSpace(apiKey))
                     request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {apiKey}");
                 var response = await HealthClient.SendAsync(request, ct);
+                if (_process is { HasExited: true })
+                    return HealthResult.ProcessExited;
                 if ((int)response.StatusCode < 500)
-                    return true;
+                    return HealthResult.Healthy;
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
             catch { /* not up yet or http timeout — retry */ }
         }
-        return false;
+        return HealthResult.Timeout;
+    }
+
+    private static bool IsPortInUse(int port)
+    {
+        try
+        {
+            using var listener = new TcpListener(IPAddress.Loopback, port);
+            listener.Start();
+            listener.Stop();
+            return false;
+        }
+        catch (SocketException)
+        {
+            return true;
+        }
     }
 
     private void SetState(EngineState state)

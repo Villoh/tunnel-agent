@@ -1340,4 +1340,16 @@
   <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
     <value>API квоти {0} недоступний ({1}). Спробуйте пізніше.</value>
   </data>
+  <data name="Toast_EngineError_PortInUse" xml:space="preserve">
+    <value>Порт {0} вже використовується іншим процесом. Зупиніть його та запустіть {1} знову.</value>
+  </data>
+  <data name="Toast_EngineError_Timeout" xml:space="preserve">
+    <value>{0} не відповів вчасно. Спробуйте ще раз.</value>
+  </data>
+  <data name="Toast_EngineError_LaunchFailed" xml:space="preserve">
+    <value>Не вдалося запустити {0}. Перевірте встановлення та спробуйте ще раз.</value>
+  </data>
+  <data name="Toast_EngineError_Crashed" xml:space="preserve">
+    <value>{0} несподівано зупинився. Перегляньте журнали та спробуйте ще раз.</value>
+  </data>
 </root>

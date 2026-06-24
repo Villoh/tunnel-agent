@@ -1314,4 +1314,16 @@
   <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
     <value>La API de cuota de {0} no está disponible ({1}). Inténtalo más tarde.</value>
   </data>
+  <data name="Toast_EngineError_PortInUse" xml:space="preserve">
+    <value>El puerto {0} ya está en uso por otro proceso. Deténlo e inicia {1} de nuevo.</value>
+  </data>
+  <data name="Toast_EngineError_Timeout" xml:space="preserve">
+    <value>{0} no respondió a tiempo. Inténtalo de nuevo.</value>
+  </data>
+  <data name="Toast_EngineError_LaunchFailed" xml:space="preserve">
+    <value>No se pudo iniciar {0}. Comprueba la instalación e inténtalo de nuevo.</value>
+  </data>
+  <data name="Toast_EngineError_Crashed" xml:space="preserve">
+    <value>{0} se detuvo inesperadamente. Revisa los registros e inténtalo de nuevo.</value>
+  </data>
 </root>

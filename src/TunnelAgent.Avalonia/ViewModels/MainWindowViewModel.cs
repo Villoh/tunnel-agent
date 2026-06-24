@@ -58,6 +58,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     private ConfigService _configService = null!;
     private readonly TokenGeneratorService _perplexityTokenGenerator = new();
     private readonly Dictionary<string, bool> _engineUpdateToastShown = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, string> _lastEngineErrorShown = new(StringComparer.OrdinalIgnoreCase);
     private readonly QuotaFetchService _quota = new(IPlatformInfo.Current.AuthDirectory);
     private readonly QuotaProviderService _quotaProviders = new();
     private static readonly HashSet<string> QuotaSupportedProviderIds = new(StringComparer.OrdinalIgnoreCase)
@@ -766,6 +767,11 @@ SelectedSection is SectionKey.Logs;
 
     public ServerState ServerState => ToServerState(EngineState);
 
+    /// <summary>Localized last-error reason for the focused engine, shown as the status label
+    /// tooltip so the cause stays visible after the transient error toast disappears.</summary>
+    public string? FocusedEngineErrorTooltip =>
+        FocusedConfigEngine.State == EngineState.Error ? BuildEngineErrorMessage(FocusedConfigEngine) : null;
+
     public string SelectedEngineVersionDescription => SelectedEngineRelease is null
         ? $"Choose {ActiveEngineName} release to install."
         : CanInstallSelectedEngine ? "Install selected release with SHA256 verification." : "Selected release is already installed.";
@@ -1139,6 +1145,8 @@ SelectedSection is SectionKey.Logs;
 
                 if (engine.State == EngineState.Running)
                 {
+                    // A successful (re)start clears the last error so a future failure re-toasts.
+                    _lastEngineErrorShown.Remove(engine.Definition.Id);
                     if (cts is null || cts.IsCancellationRequested)
                     {
                         cts = new CancellationTokenSource();
@@ -1174,6 +1182,25 @@ SelectedSection is SectionKey.Logs;
                         _usage.Stop();
                         _logsInitialLoadPending = true;
                     }
+
+                    // Surface engine failures (e.g. port already in use) as a localized error
+                    // toast so the user understands why and can retry. Show once per Error transition.
+                    if (engine.State == EngineState.Error)
+                    {
+                        var message = BuildEngineErrorMessage(engine);
+                        if (!string.IsNullOrWhiteSpace(message)
+                            && !string.Equals(_lastEngineErrorShown.GetValueOrDefault(engine.Definition.Id), message, StringComparison.Ordinal))
+                        {
+                            _lastEngineErrorShown[engine.Definition.Id] = message;
+                            ConfigurationStatusIsError = true;
+                            ConfigurationStatusMessage = message;
+                            ShowConfigurationStatus = true;
+                        }
+                    }
+                    else
+                    {
+                        _lastEngineErrorShown.Remove(engine.Definition.Id);
+                    }
                 }
 
                 // Refresh focused state when the active config engine changes
@@ -1208,6 +1235,19 @@ SelectedSection is SectionKey.Logs;
         });
     }
 
+    private string? BuildEngineErrorMessage(IManagedEngine engine)
+    {
+        return engine.LastErrorKind switch
+        {
+            EngineErrorKind.PortInUse    => _localization.GetString("Toast_EngineError_PortInUse", engine.Port, engine.Definition.DisplayName),
+            EngineErrorKind.Timeout      => _localization.GetString("Toast_EngineError_Timeout", engine.Definition.DisplayName),
+            EngineErrorKind.LaunchFailed => _localization.GetString("Toast_EngineError_LaunchFailed", engine.Definition.DisplayName),
+            EngineErrorKind.Crashed      => _localization.GetString("Toast_EngineError_Crashed", engine.Definition.DisplayName),
+            // None: fall back to the raw engine message (e.g. integrity errors).
+            _                            => engine.LastError
+        };
+    }
+
     private void RefreshFocusedEngineState()
     {
         EngineState = FocusedConfigEngine.State;
@@ -1219,6 +1259,7 @@ SelectedSection is SectionKey.Logs;
         UpdateBadgeState();
         RefreshEngineSectionProperties();
         OnPropertyChanged(nameof(ServerState));
+        OnPropertyChanged(nameof(FocusedEngineErrorTooltip));
         OnPropertyChanged(nameof(InstalledEngineHashLabel));
         OnPropertyChanged(nameof(InstalledEngineHashShort));
         OnPropertyChanged(nameof(InstalledEngineHashFull));
@@ -2824,6 +2865,7 @@ SelectedSection is SectionKey.Logs;
     [RelayCommand]
     public async Task RestartEngineAsync()
     {
+        _lastEngineErrorShown.Remove(FocusedConfigEngineId);
         await FocusedConfigEngine.StopAsync();
         await FocusedConfigEngine.StartAsync();
     }
@@ -2831,12 +2873,24 @@ SelectedSection is SectionKey.Logs;
     [RelayCommand]
     public async Task StartServerAsync()
     {
-        if (FocusedConfigEngine.State is EngineState.Stopped or EngineState.NotInstalled)
-            try { await FocusedConfigEngine.StartAsync(); }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"[StartServer] {ex.Message}");
-            }
+        // Allow (re)starting from any non-active state. Crucially this includes
+        // EngineState.Error, so a failed start (e.g. the port was momentarily in
+        // use by another process) can be retried without restarting the whole app.
+        if (FocusedConfigEngine.State is EngineState.Running or EngineState.Starting)
+            return;
+
+        // Reset the dedupe so an explicit user-initiated start always re-toasts on failure,
+        // even when the error message is identical to the previous attempt (e.g. the other
+        // instance is still holding the port).
+        _lastEngineErrorShown.Remove(FocusedConfigEngineId);
+
+        // A failed start (state -> Error) is surfaced as an error toast centrally
+        // in OnAnyEngineStateChanged, which also covers autostart failures.
+        try { await FocusedConfigEngine.StartAsync(); }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[StartServer] {ex.Message}");
+        }
     }
 
     [RelayCommand] public async Task StopServerAsync() => await FocusedConfigEngine.StopAsync();
