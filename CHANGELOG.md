@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.2] - 2026-06-24
+
 ### Changed
 
 - **Smaller Scoop zip** (`.github/workflows/release.yml`): the `TunnelAgent-<version>-win-<arch>-scoop.zip` is now produced from a dedicated single-file publish (`PublishSingleFile=true`, `EnableCompressionInSingleFile=true`, `IncludeNativeLibrariesForSelfExtract=true`) instead of the multi-file Velopack publish output. The zip now contains just `TunnelAgent.exe` (no loose runtime DLLs) and is substantially smaller. The Velopack packages are unaffected — they still use the multi-file `artifacts/publish` output.
@@ -884,7 +886,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
 [Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.9.1...HEAD
-[0.9.0]: https://github.com/Villoh/tunnel-agent/compare/v0.9.0...v0.9.1
+[0.9.2]: https://github.com/Villoh/tunnel-agent/compare/v0.9.1...v0.9.2
+[0.9.1]: https://github.com/Villoh/tunnel-agent/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/Villoh/tunnel-agent/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Villoh/tunnel-agent/compare/v0.7.2...v0.8.0
 [0.7.2]: https://github.com/Villoh/tunnel-agent/compare/v0.7.1...v0.7.2
