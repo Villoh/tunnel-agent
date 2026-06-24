@@ -1350,4 +1350,32 @@
   <data name="Quota_Error_ApiUnavailable" xml:space="preserve">
     <value>{0} quota API is unavailable ({1}). Try again later.</value>
   </data>
+  <data name="OAuth_Status_BrowserOpened" xml:space="preserve">
+    <value>Browser opened for authentication.
+
+Complete the login in your browser. The app will detect when you're authenticated automatically.</value>
+  </data>
+  <data name="OAuth_Status_BrowserOpenedWithUrl" xml:space="preserve">
+    <value>Browser opened for authentication. If it didn't open automatically, use the sign-in URL below. The app will detect when you're authenticated automatically.</value>
+  </data>
+  <data name="OAuth_Status_NotSupported" xml:space="preserve">
+    <value>Provider '{0}' does not support OAuth login.</value>
+  </data>
+  <data name="OAuth_Status_BinaryMissing" xml:space="preserve">
+    <value>CLIProxyAPI binary is not installed yet. Start the server first.</value>
+  </data>
+  <data name="OAuth_Status_StartFailed" xml:space="preserve">
+    <value>Failed to start authentication: {0}</value>
+  </data>
+  <data name="OAuth_Status_Failed" xml:space="preserve">
+    <value>Authentication failed:
+
+{0}</value>
+  </data>
+  <data name="OAuth_Status_FailedUnexpected" xml:space="preserve">
+    <value>Authentication process failed unexpectedly.</value>
+  </data>
+  <data name="OAuth_Status_CopyUrl" xml:space="preserve">
+    <value>Copy URL</value>
+  </data>
 </root>

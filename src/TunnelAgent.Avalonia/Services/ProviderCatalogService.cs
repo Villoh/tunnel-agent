@@ -215,8 +215,12 @@ public sealed class ProviderCatalogService : IDisposable
     /// Starts the OAuth login flow for the given provider.
     /// Opens the browser; auth-dir watcher updates Connected state on completion.
     /// </summary>
-    public Task<(bool Success, string Message)> ConnectOAuthAsync(string providerId) =>
+    public Task<OAuthConnectResult> ConnectOAuthAsync(string providerId) =>
         _oauth.ConnectAsync(providerId);
+
+    /// <summary>Latest token-file write time (UTC) for an OAuth provider, or null when none exist.</summary>
+    public DateTime? LatestOAuthTokenWriteUtc(string providerId) =>
+        _oauthDetector.GetLatestTokenWriteUtc(providerId);
 
     public Task RefreshAccountQuotaAsync(ProviderViewModel provider, ProviderAccountViewModel account) =>
         _quota.FetchAccountPublicAsync(provider.Id, account);

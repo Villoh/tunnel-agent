@@ -1352,4 +1352,32 @@
   <data name="Toast_EngineError_Crashed" xml:space="preserve">
     <value>{0} s'est arrêté de manière inattendue. Consultez les journaux et réessayez.</value>
   </data>
+  <data name="OAuth_Status_BrowserOpened" xml:space="preserve">
+    <value>Le navigateur s'est ouvert pour l'authentification.
+
+Terminez la connexion dans votre navigateur. L'application détectera automatiquement votre authentification.</value>
+  </data>
+  <data name="OAuth_Status_BrowserOpenedWithUrl" xml:space="preserve">
+    <value>Le navigateur s'est ouvert pour l'authentification. S'il ne s'est pas ouvert automatiquement, utilisez l'URL de connexion ci-dessous. L'application détectera automatiquement votre authentification.</value>
+  </data>
+  <data name="OAuth_Status_NotSupported" xml:space="preserve">
+    <value>Le fournisseur « {0} » ne prend pas en charge la connexion OAuth.</value>
+  </data>
+  <data name="OAuth_Status_BinaryMissing" xml:space="preserve">
+    <value>Le binaire CLIProxyAPI n'est pas encore installé. Démarrez d'abord le serveur.</value>
+  </data>
+  <data name="OAuth_Status_StartFailed" xml:space="preserve">
+    <value>Échec du démarrage de l'authentification : {0}</value>
+  </data>
+  <data name="OAuth_Status_Failed" xml:space="preserve">
+    <value>Échec de l'authentification :
+
+{0}</value>
+  </data>
+  <data name="OAuth_Status_FailedUnexpected" xml:space="preserve">
+    <value>Le processus d'authentification a échoué de manière inattendue.</value>
+  </data>
+  <data name="OAuth_Status_CopyUrl" xml:space="preserve">
+    <value>Copier l'URL</value>
+  </data>
 </root>

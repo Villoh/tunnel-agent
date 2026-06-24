@@ -1352,4 +1352,32 @@
   <data name="Toast_EngineError_Crashed" xml:space="preserve">
     <value>{0} अप्रत्याशित रूप से रुक गया। लॉग जांचें और पुनः प्रयास करें।</value>
   </data>
+  <data name="OAuth_Status_BrowserOpened" xml:space="preserve">
+    <value>प्रमाणीकरण के लिए ब्राउज़र खुल गया।
+
+ब्राउज़र में लॉगिन पूरा करें। प्रमाणित होने पर ऐप स्वतः इसका पता लगा लेगा।</value>
+  </data>
+  <data name="OAuth_Status_BrowserOpenedWithUrl" xml:space="preserve">
+    <value>प्रमाणीकरण के लिए ब्राउज़र खुल गया। यदि यह स्वतः नहीं खुला, तो नीचे दी गई साइन-इन URL का उपयोग करें। प्रमाणित होने पर ऐप स्वतः इसका पता लगा लेगा।</value>
+  </data>
+  <data name="OAuth_Status_NotSupported" xml:space="preserve">
+    <value>प्रदाता '{0}' OAuth लॉगिन का समर्थन नहीं करता।</value>
+  </data>
+  <data name="OAuth_Status_BinaryMissing" xml:space="preserve">
+    <value>CLIProxyAPI बाइनरी अभी इंस्टॉल नहीं है। पहले सर्वर शुरू करें।</value>
+  </data>
+  <data name="OAuth_Status_StartFailed" xml:space="preserve">
+    <value>प्रमाणीकरण शुरू नहीं किया जा सका: {0}</value>
+  </data>
+  <data name="OAuth_Status_Failed" xml:space="preserve">
+    <value>प्रमाणीकरण विफल रहा:
+
+{0}</value>
+  </data>
+  <data name="OAuth_Status_FailedUnexpected" xml:space="preserve">
+    <value>प्रमाणीकरण प्रक्रिया अप्रत्याशित रूप से विफल रही।</value>
+  </data>
+  <data name="OAuth_Status_CopyUrl" xml:space="preserve">
+    <value>URL कॉपी करें</value>
+  </data>
 </root>

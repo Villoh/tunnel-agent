@@ -467,6 +467,17 @@ public partial class MainWindow : Window
         }
     }
 
+    private async void OnCopyOAuthUrl(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm || string.IsNullOrEmpty(vm.OAuthStatusUrl)) return;
+        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+        if (clipboard is null) return;
+        await clipboard.SetTextAsync(vm.OAuthStatusUrl);
+        vm.OAuthUrlCopied = true;
+        await Task.Delay(2000);
+        vm.OAuthUrlCopied = false;
+    }
+
     private async void OnCopyAgentConfigClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not MainWindowViewModel vm) return;

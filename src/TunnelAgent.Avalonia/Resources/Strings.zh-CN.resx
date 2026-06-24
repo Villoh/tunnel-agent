@@ -1352,4 +1352,32 @@
   <data name="Toast_EngineError_Crashed" xml:space="preserve">
     <value>{0} 意外停止。请查看日志后重试。</value>
   </data>
+  <data name="OAuth_Status_BrowserOpened" xml:space="preserve">
+    <value>已打开浏览器进行身份验证。
+
+请在浏览器中完成登录。应用将自动检测到您已通过身份验证。</value>
+  </data>
+  <data name="OAuth_Status_BrowserOpenedWithUrl" xml:space="preserve">
+    <value>已打开浏览器进行身份验证。如果未自动打开，请使用下方的登录网址。应用将自动检测到您已通过身份验证。</value>
+  </data>
+  <data name="OAuth_Status_NotSupported" xml:space="preserve">
+    <value>提供商“{0}”不支持 OAuth 登录。</value>
+  </data>
+  <data name="OAuth_Status_BinaryMissing" xml:space="preserve">
+    <value>尚未安装 CLIProxyAPI 二进制文件。请先启动服务器。</value>
+  </data>
+  <data name="OAuth_Status_StartFailed" xml:space="preserve">
+    <value>无法启动身份验证：{0}</value>
+  </data>
+  <data name="OAuth_Status_Failed" xml:space="preserve">
+    <value>身份验证失败：
+
+{0}</value>
+  </data>
+  <data name="OAuth_Status_FailedUnexpected" xml:space="preserve">
+    <value>身份验证过程意外失败。</value>
+  </data>
+  <data name="OAuth_Status_CopyUrl" xml:space="preserve">
+    <value>复制网址</value>
+  </data>
 </root>

@@ -1352,4 +1352,32 @@
   <data name="Toast_EngineError_Crashed" xml:space="preserve">
     <value>{0} beklenmedik şekilde durdu. Günlükleri kontrol edip tekrar deneyin.</value>
   </data>
+  <data name="OAuth_Status_BrowserOpened" xml:space="preserve">
+    <value>Kimlik doğrulama için tarayıcı açıldı.
+
+Girişi tarayıcınızda tamamlayın. Kimliğiniz doğrulandığında uygulama bunu otomatik olarak algılar.</value>
+  </data>
+  <data name="OAuth_Status_BrowserOpenedWithUrl" xml:space="preserve">
+    <value>Kimlik doğrulama için tarayıcı açıldı. Otomatik açılmadıysa aşağıdaki oturum açma URL'sini kullanın. Kimliğiniz doğrulandığında uygulama bunu otomatik olarak algılar.</value>
+  </data>
+  <data name="OAuth_Status_NotSupported" xml:space="preserve">
+    <value>'{0}' sağlayıcısı OAuth ile oturum açmayı desteklemiyor.</value>
+  </data>
+  <data name="OAuth_Status_BinaryMissing" xml:space="preserve">
+    <value>CLIProxyAPI ikili dosyası henüz yüklü değil. Önce sunucuyu başlatın.</value>
+  </data>
+  <data name="OAuth_Status_StartFailed" xml:space="preserve">
+    <value>Kimlik doğrulama başlatılamadı: {0}</value>
+  </data>
+  <data name="OAuth_Status_Failed" xml:space="preserve">
+    <value>Kimlik doğrulama başarısız oldu:
+
+{0}</value>
+  </data>
+  <data name="OAuth_Status_FailedUnexpected" xml:space="preserve">
+    <value>Kimlik doğrulama işlemi beklenmedik şekilde başarısız oldu.</value>
+  </data>
+  <data name="OAuth_Status_CopyUrl" xml:space="preserve">
+    <value>URL'yi kopyala</value>
+  </data>
 </root>

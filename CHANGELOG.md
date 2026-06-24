@@ -7,8 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **OAuth login feedback toast for every entry point** (`OAuthService`, `OAuthConnectResult`/`OAuthConnectStatus`, `ProviderCatalogService`, `MainWindowViewModel`, `ProvidersView.axaml.cs`, `MainWindow.axaml`, `Resources/Strings*.resx`): the "Add account → OAuth login" dialog button previously called `ConnectOAuthAsync` and discarded its result, so adding an account for a provider that already had one (Claude, Codex, …) ran the flow with no visible feedback. `OAuthService.ConnectAsync` now returns a structured `OAuthConnectResult` (status + dynamic detail) instead of an English string, and `MainWindowViewModel.ConnectOAuthAsync` centralizes the status toast so both the provider-card button and the add-account dialog surface it. New `OAuth_Status_*` strings localized across all fourteen languages.
+- **Headless sign-in URL fallback** (`OAuthService`, `MainWindowViewModel`, `MainWindow.axaml`, `MainWindow.axaml.cs`): when the login process stays alive, the captured stdout is scanned for an `http(s)` URL (`ExtractAuthUrl`) and surfaced in the toast as a dedicated accent-colored, monospace "endpoint"-style row with an icon-only copy button (Copy→Check), so environments where the binary cannot open a browser can still complete the flow. The toast stays open while a URL is shown.
+- **Auto-dismiss on successful authentication** (`OAuthTokenDetector.GetLatestTokenWriteUtc`, `ProviderCatalogService.LatestOAuthTokenWriteUtc`, `MainWindowViewModel`): the OAuth status toast now closes itself once the awaited provider gains a new account **or** its token file is rewritten (re-authenticating an existing account), detected via the auth-dir watcher against a baseline captured when the flow started, with a synchronous post-show check covering fast re-auth.
+
 ### Changed
 
+- **OAuth quick-exit success detection by exit code** (`OAuthService`): a login process that exits within the startup window is now judged by its exit code instead of grepping stdout for `"Opening browser"`/`"Attempting to open URL"` literals (which break across binary releases). The exit code is captured inside the `Exited` handler via a `TaskCompletionSource` so callers never touch a disposed `Process`, and the process is always disposed once it exits (a successful login keeps it alive until the user completes the flow).
 - **Strip native PDBs from the Scoop zip** (`.github/workflows/release.yml`): the SkiaSharp NuGet packages ship `libSkiaSharp.pdb` (~84 MB) and `libHarfBuzzSharp.pdb` (~20 MB) in the publish output, and `DebugType=None` only removes our own managed PDBs. These native symbols are now deleted from `artifacts/publish-scoop` before zipping, so the Scoop zip contains just `TunnelAgent.exe` (no loose DLLs or PDBs) and is substantially smaller.
 
 ## [0.9.2] - 2026-06-24

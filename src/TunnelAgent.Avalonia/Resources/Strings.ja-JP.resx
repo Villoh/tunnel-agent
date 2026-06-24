@@ -1352,4 +1352,32 @@
   <data name="Toast_EngineError_Crashed" xml:space="preserve">
     <value>{0} が予期せず停止しました。ログを確認してもう一度お試しください。</value>
   </data>
+  <data name="OAuth_Status_BrowserOpened" xml:space="preserve">
+    <value>認証のためにブラウザーを開きました。
+
+ブラウザーでログインを完了してください。認証されると、アプリが自動的に検出します。</value>
+  </data>
+  <data name="OAuth_Status_BrowserOpenedWithUrl" xml:space="preserve">
+    <value>認証のためにブラウザーを開きました。自動的に開かない場合は、下のサインイン URL を使用してください。認証されると、アプリが自動的に検出します。</value>
+  </data>
+  <data name="OAuth_Status_NotSupported" xml:space="preserve">
+    <value>プロバイダー「{0}」は OAuth ログインに対応していません。</value>
+  </data>
+  <data name="OAuth_Status_BinaryMissing" xml:space="preserve">
+    <value>CLIProxyAPI のバイナリがまだインストールされていません。先にサーバーを起動してください。</value>
+  </data>
+  <data name="OAuth_Status_StartFailed" xml:space="preserve">
+    <value>認証を開始できませんでした: {0}</value>
+  </data>
+  <data name="OAuth_Status_Failed" xml:space="preserve">
+    <value>認証に失敗しました:
+
+{0}</value>
+  </data>
+  <data name="OAuth_Status_FailedUnexpected" xml:space="preserve">
+    <value>認証プロセスが予期せず失敗しました。</value>
+  </data>
+  <data name="OAuth_Status_CopyUrl" xml:space="preserve">
+    <value>URL をコピー</value>
+  </data>
 </root>

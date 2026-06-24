@@ -36,10 +36,10 @@ public sealed class OAuthServiceTests
         var config = new ConfigService(settings, temp.File("proxy-config.yaml"), temp.File("auth"));
         using var service = new OAuthService(config);
 
-        var (success, message) = await service.ConnectAsync("local-ai");
+        var result = await service.ConnectAsync("local-ai");
 
-        Assert.False(success);
-        Assert.Contains("does not support OAuth", message);
+        Assert.False(result.Success);
+        Assert.Equal(OAuthConnectStatus.NotSupported, result.Status);
     }
 
     [Fact]

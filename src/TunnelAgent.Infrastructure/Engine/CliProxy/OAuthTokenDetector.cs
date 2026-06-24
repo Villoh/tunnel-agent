@@ -89,6 +89,27 @@ public sealed class OAuthTokenDetector
         }
     }
 
+    /// <summary>
+    /// Returns the most recent write time (UTC) among the provider's token files,
+    /// or null when none exist. Used to detect a fresh login even when re-authenticating
+    /// an already-present account (the account count stays the same but the file is rewritten).
+    /// </summary>
+    public DateTime? GetLatestTokenWriteUtc(string providerId)
+    {
+        if (!KnownProviders.TryGetValue(providerId, out var prefix)) return null;
+        if (!Directory.Exists(_directory)) return null;
+
+        DateTime? latest = null;
+        foreach (var file in Directory.GetFiles(_directory, $"{prefix}-*.json"))
+        {
+            if (Path.GetFileName(file).StartsWith("openai-compat-", StringComparison.OrdinalIgnoreCase))
+                continue;
+            var t = File.GetLastWriteTimeUtc(file);
+            if (latest is null || t > latest) latest = t;
+        }
+        return latest;
+    }
+
     /// <summary>Returns IDs of providers that have at least one active account.</summary>
     public HashSet<string> GetConnectedProviderIds()
     {

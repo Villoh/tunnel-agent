@@ -1352,4 +1352,32 @@
   <data name="Toast_EngineError_Crashed" xml:space="preserve">
     <value>{0} si è arrestato in modo imprevisto. Controlla i log e riprova.</value>
   </data>
+  <data name="OAuth_Status_BrowserOpened" xml:space="preserve">
+    <value>Browser aperto per l'autenticazione.
+
+Completa l'accesso nel browser. L'app rileverà automaticamente quando sei autenticato.</value>
+  </data>
+  <data name="OAuth_Status_BrowserOpenedWithUrl" xml:space="preserve">
+    <value>Browser aperto per l'autenticazione. Se non si è aperto automaticamente, usa l'URL di accesso qui sotto: l'app rileverà automaticamente quando sei autenticato.</value>
+  </data>
+  <data name="OAuth_Status_NotSupported" xml:space="preserve">
+    <value>Il provider '{0}' non supporta l'accesso OAuth.</value>
+  </data>
+  <data name="OAuth_Status_BinaryMissing" xml:space="preserve">
+    <value>Il binario di CLIProxyAPI non è ancora installato. Avvia prima il server.</value>
+  </data>
+  <data name="OAuth_Status_StartFailed" xml:space="preserve">
+    <value>Impossibile avviare l'autenticazione: {0}</value>
+  </data>
+  <data name="OAuth_Status_Failed" xml:space="preserve">
+    <value>Autenticazione non riuscita:
+
+{0}</value>
+  </data>
+  <data name="OAuth_Status_FailedUnexpected" xml:space="preserve">
+    <value>Il processo di autenticazione non è riuscito in modo imprevisto.</value>
+  </data>
+  <data name="OAuth_Status_CopyUrl" xml:space="preserve">
+    <value>Copia URL</value>
+  </data>
 </root>

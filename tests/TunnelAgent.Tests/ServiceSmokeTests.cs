@@ -43,7 +43,7 @@ public sealed class ServiceSmokeTests
         var result = await service.ConnectAsync("local-ai");
 
         Assert.False(result.Success);
-        Assert.Contains("does not support OAuth", result.Message);
+        Assert.Equal(OAuthConnectStatus.NotSupported, result.Status);
     }
 
     [Fact]

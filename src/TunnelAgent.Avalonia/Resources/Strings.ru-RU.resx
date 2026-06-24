@@ -1352,4 +1352,32 @@
   <data name="Toast_EngineError_Crashed" xml:space="preserve">
     <value>{0} неожиданно остановился. Проверьте журналы и повторите попытку.</value>
   </data>
+  <data name="OAuth_Status_BrowserOpened" xml:space="preserve">
+    <value>Браузер открыт для аутентификации.
+
+Завершите вход в браузере. Приложение автоматически определит, когда вы пройдёте аутентификацию.</value>
+  </data>
+  <data name="OAuth_Status_BrowserOpenedWithUrl" xml:space="preserve">
+    <value>Браузер открыт для аутентификации. Если он не открылся автоматически, используйте ссылку для входа ниже. Приложение автоматически определит, когда вы пройдёте аутентификацию.</value>
+  </data>
+  <data name="OAuth_Status_NotSupported" xml:space="preserve">
+    <value>Поставщик «{0}» не поддерживает вход через OAuth.</value>
+  </data>
+  <data name="OAuth_Status_BinaryMissing" xml:space="preserve">
+    <value>Двоичный файл CLIProxyAPI ещё не установлен. Сначала запустите сервер.</value>
+  </data>
+  <data name="OAuth_Status_StartFailed" xml:space="preserve">
+    <value>Не удалось запустить аутентификацию: {0}</value>
+  </data>
+  <data name="OAuth_Status_Failed" xml:space="preserve">
+    <value>Ошибка аутентификации:
+
+{0}</value>
+  </data>
+  <data name="OAuth_Status_FailedUnexpected" xml:space="preserve">
+    <value>Процесс аутентификации неожиданно завершился ошибкой.</value>
+  </data>
+  <data name="OAuth_Status_CopyUrl" xml:space="preserve">
+    <value>Копировать ссылку</value>
+  </data>
 </root>

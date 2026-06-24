@@ -1352,4 +1352,32 @@
   <data name="Toast_EngineError_Crashed" xml:space="preserve">
     <value>توقف {0} بشكل غير متوقع. تحقق من السجلات وحاول مرة أخرى.</value>
   </data>
+  <data name="OAuth_Status_BrowserOpened" xml:space="preserve">
+    <value>تم فتح المتصفح للمصادقة.
+
+أكمل تسجيل الدخول في المتصفح. سيكتشف التطبيق تلقائيًا عند اكتمال المصادقة.</value>
+  </data>
+  <data name="OAuth_Status_BrowserOpenedWithUrl" xml:space="preserve">
+    <value>تم فتح المتصفح للمصادقة. إذا لم يُفتح تلقائيًا، فاستخدم رابط تسجيل الدخول أدناه. سيكتشف التطبيق تلقائيًا عند اكتمال المصادقة.</value>
+  </data>
+  <data name="OAuth_Status_NotSupported" xml:space="preserve">
+    <value>الموفّر '{0}' لا يدعم تسجيل الدخول عبر OAuth.</value>
+  </data>
+  <data name="OAuth_Status_BinaryMissing" xml:space="preserve">
+    <value>لم يتم تثبيت ملف CLIProxyAPI الثنائي بعد. ابدأ الخادم أولًا.</value>
+  </data>
+  <data name="OAuth_Status_StartFailed" xml:space="preserve">
+    <value>تعذّر بدء المصادقة: {0}</value>
+  </data>
+  <data name="OAuth_Status_Failed" xml:space="preserve">
+    <value>فشلت المصادقة:
+
+{0}</value>
+  </data>
+  <data name="OAuth_Status_FailedUnexpected" xml:space="preserve">
+    <value>فشلت عملية المصادقة بشكل غير متوقع.</value>
+  </data>
+  <data name="OAuth_Status_CopyUrl" xml:space="preserve">
+    <value>نسخ الرابط</value>
+  </data>
 </root>

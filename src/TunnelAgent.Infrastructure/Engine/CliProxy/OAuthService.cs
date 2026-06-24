@@ -3,10 +3,33 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace TunnelAgent.Infrastructure.Engine.CliProxy;
+
+/// <summary>Outcome of an OAuth connect attempt. The UI layer maps each status to a localized message.</summary>
+public enum OAuthConnectStatus
+{
+    /// <summary>Browser flow started; AuthFileWatcher will detect completion.</summary>
+    BrowserOpened,
+    /// <summary>Browser flow started and a sign-in URL was captured as a manual fallback (<c>Detail</c> = URL).</summary>
+    BrowserOpenedWithUrl,
+    /// <summary>Provider does not support OAuth login (<c>Detail</c> = provider id).</summary>
+    NotSupported,
+    /// <summary>CLIProxyAPI binary is not installed yet.</summary>
+    BinaryMissing,
+    /// <summary>The login process could not be started (<c>Detail</c> = error message).</summary>
+    StartFailed,
+    /// <summary>The login process exited with a non-zero code (<c>Detail</c> = captured output).</summary>
+    Failed,
+    /// <summary>The login process exited with a non-zero code and produced no output.</summary>
+    FailedUnexpected,
+}
+
+/// <summary>Structured result of <see cref="OAuthService.ConnectAsync"/>. <c>Detail</c> carries dynamic, non-localizable data.</summary>
+public readonly record struct OAuthConnectResult(bool Success, OAuthConnectStatus Status, string Detail = "");
 
 /// <summary>
 /// Launches the CLIProxyAPI binary in OAuth login mode for a given provider.
@@ -44,14 +67,14 @@ public sealed class OAuthService : IDisposable
     /// The AuthFileWatcher handles the completion detection.
     /// </summary>
     /// <returns>A user-facing status message.</returns>
-    public async Task<(bool Success, string Message)> ConnectAsync(string providerId)
+    public async Task<OAuthConnectResult> ConnectAsync(string providerId)
     {
         if (!LoginFlags.TryGetValue(providerId, out var flag))
-            return (false, $"Provider '{providerId}' does not support OAuth login.");
+            return new OAuthConnectResult(false, OAuthConnectStatus.NotSupported, providerId);
 
         var binaryPath = DownloadService.BinaryPath;
         if (!File.Exists(binaryPath))
-            return (false, "CLIProxyAPI binary is not installed yet. Start the server first.");
+            return new OAuthConnectResult(false, OAuthConnectStatus.BinaryMissing);
 
         // Kill any previously running auth process for this session
         CancelPreviousAuth();
@@ -80,12 +103,21 @@ public sealed class OAuthService : IDisposable
             if (e.Data is not null) outputBuilder.AppendLine(e.Data);
         };
 
-        lock (_lock) { _authProcess = process; }
-
+        // Capture the exit code from inside the handler so callers never touch a
+        // disposed Process, and always dispose once it exits (a successful login
+        // keeps the process alive until the user completes the flow).
+        var exitTcs = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
         process.Exited += (_, _) =>
         {
+            var code = -1;
+            try { code = process.ExitCode; } catch { /* already gone */ }
+            exitTcs.TrySetResult(code);
+
             lock (_lock) { if (_authProcess == process) _authProcess = null; }
+            try { process.Dispose(); } catch { /* idempotent */ }
         };
+
+        lock (_lock) { _authProcess = process; }
 
         try
         {
@@ -95,27 +127,36 @@ public sealed class OAuthService : IDisposable
         }
         catch (Exception ex)
         {
-            return (false, $"Failed to start authentication: {ex.Message}");
+            return new OAuthConnectResult(false, OAuthConnectStatus.StartFailed, ex.Message);
         }
 
         // Provider-specific stdin automation
         if (providerId == "codex")
             _ = SendDelayedNewlineAsync(process, CodexKeepaliveDelay);
 
-        // Wait up to 2s to check the process is alive and capture initial output
-        await Task.Delay(1000);
+        // Give the process ~1s: a live process means the browser flow started and
+        // the AuthFileWatcher will detect completion. A quick exit is judged by
+        // exit code, never by parsing stdout (which changes between binary releases).
+        var finished = await Task.WhenAny(exitTcs.Task, Task.Delay(1000));
 
-        if (!process.HasExited)
-            return (true, "Browser opened for authentication.\n\nComplete the login in your browser. The app will detect when you're authenticated automatically.");
+        if (finished != exitTcs.Task)
+        {
+            // Still running: surface the sign-in URL as a fallback for headless
+            // environments where the binary could not open a browser.
+            var url = ExtractAuthUrl(outputBuilder.ToString());
+            return string.IsNullOrEmpty(url)
+                ? new OAuthConnectResult(true, OAuthConnectStatus.BrowserOpened)
+                : new OAuthConnectResult(true, OAuthConnectStatus.BrowserOpenedWithUrl, url);
+        }
 
-        // Process exited quickly — check output
-        var earlyOutput = outputBuilder.ToString();
-        if (earlyOutput.Contains("Opening browser") || earlyOutput.Contains("Attempting to open URL"))
-            return (true, "Browser opened for authentication. The app will detect when you're authenticated.");
+        var exitCode = await exitTcs.Task;
+        if (exitCode == 0)
+            return new OAuthConnectResult(true, OAuthConnectStatus.BrowserOpened);
 
-        return (false, string.IsNullOrWhiteSpace(earlyOutput)
-            ? "Authentication process failed unexpectedly."
-            : earlyOutput.Trim());
+        var earlyOutput = outputBuilder.ToString().Trim();
+        return string.IsNullOrWhiteSpace(earlyOutput)
+            ? new OAuthConnectResult(false, OAuthConnectStatus.FailedUnexpected)
+            : new OAuthConnectResult(false, OAuthConnectStatus.Failed, earlyOutput);
     }
 
     /// <summary>Kills any active auth process (e.g. when user clicks Disconnect or starts a new auth).</summary>
@@ -151,6 +192,17 @@ public sealed class OAuthService : IDisposable
         "xai"            => "xAI",
         _                => providerId,
     };
+
+    private static readonly Regex UrlPattern =
+        new(@"https?://[^\s'""<>]+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    /// <summary>Returns the first http(s) URL found in the captured output, or empty when none.</summary>
+    private static string ExtractAuthUrl(string output)
+    {
+        if (string.IsNullOrEmpty(output)) return "";
+        var match = UrlPattern.Match(output);
+        return match.Success ? match.Value.TrimEnd('.', ',', ')', ']') : "";
+    }
 
     private static async Task SendDelayedNewlineAsync(Process process, TimeSpan delay)
     {

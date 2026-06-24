@@ -1352,4 +1352,32 @@
   <data name="Toast_EngineError_Crashed" xml:space="preserve">
     <value>{0} wurde unerwartet beendet. Überprüfen Sie die Protokolle und versuchen Sie es erneut.</value>
   </data>
+  <data name="OAuth_Status_BrowserOpened" xml:space="preserve">
+    <value>Browser zur Authentifizierung geöffnet.
+
+Schließen Sie die Anmeldung im Browser ab. Die App erkennt automatisch, wenn Sie authentifiziert sind.</value>
+  </data>
+  <data name="OAuth_Status_BrowserOpenedWithUrl" xml:space="preserve">
+    <value>Browser zur Authentifizierung geöffnet. Falls er sich nicht automatisch geöffnet hat, verwenden Sie die Anmelde-URL unten. Die App erkennt automatisch, wenn Sie authentifiziert sind.</value>
+  </data>
+  <data name="OAuth_Status_NotSupported" xml:space="preserve">
+    <value>Der Anbieter „{0}“ unterstützt die OAuth-Anmeldung nicht.</value>
+  </data>
+  <data name="OAuth_Status_BinaryMissing" xml:space="preserve">
+    <value>Die CLIProxyAPI-Binärdatei ist noch nicht installiert. Starten Sie zuerst den Server.</value>
+  </data>
+  <data name="OAuth_Status_StartFailed" xml:space="preserve">
+    <value>Authentifizierung konnte nicht gestartet werden: {0}</value>
+  </data>
+  <data name="OAuth_Status_Failed" xml:space="preserve">
+    <value>Authentifizierung fehlgeschlagen:
+
+{0}</value>
+  </data>
+  <data name="OAuth_Status_FailedUnexpected" xml:space="preserve">
+    <value>Der Authentifizierungsprozess ist unerwartet fehlgeschlagen.</value>
+  </data>
+  <data name="OAuth_Status_CopyUrl" xml:space="preserve">
+    <value>URL kopieren</value>
+  </data>
 </root>

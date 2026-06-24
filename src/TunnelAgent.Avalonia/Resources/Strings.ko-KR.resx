@@ -1352,4 +1352,32 @@
   <data name="Toast_EngineError_Crashed" xml:space="preserve">
     <value>{0}이(가) 예기치 않게 중지되었습니다. 로그를 확인하고 다시 시도하세요.</value>
   </data>
+  <data name="OAuth_Status_BrowserOpened" xml:space="preserve">
+    <value>인증을 위해 브라우저를 열었습니다.
+
+브라우저에서 로그인을 완료하세요. 인증이 완료되면 앱이 자동으로 감지합니다.</value>
+  </data>
+  <data name="OAuth_Status_BrowserOpenedWithUrl" xml:space="preserve">
+    <value>인증을 위해 브라우저를 열었습니다. 자동으로 열리지 않으면 아래의 로그인 URL을 사용하세요. 인증이 완료되면 앱이 자동으로 감지합니다.</value>
+  </data>
+  <data name="OAuth_Status_NotSupported" xml:space="preserve">
+    <value>제공업체 '{0}'은(는) OAuth 로그인을 지원하지 않습니다.</value>
+  </data>
+  <data name="OAuth_Status_BinaryMissing" xml:space="preserve">
+    <value>CLIProxyAPI 바이너리가 아직 설치되지 않았습니다. 먼저 서버를 시작하세요.</value>
+  </data>
+  <data name="OAuth_Status_StartFailed" xml:space="preserve">
+    <value>인증을 시작하지 못했습니다: {0}</value>
+  </data>
+  <data name="OAuth_Status_Failed" xml:space="preserve">
+    <value>인증에 실패했습니다:
+
+{0}</value>
+  </data>
+  <data name="OAuth_Status_FailedUnexpected" xml:space="preserve">
+    <value>인증 프로세스가 예기치 않게 실패했습니다.</value>
+  </data>
+  <data name="OAuth_Status_CopyUrl" xml:space="preserve">
+    <value>URL 복사</value>
+  </data>
 </root>

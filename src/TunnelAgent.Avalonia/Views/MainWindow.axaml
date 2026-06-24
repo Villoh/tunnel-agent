@@ -840,8 +840,28 @@
                     <lucide:PackIconLucide Grid.Column="0" Kind="Info" Width="19" Height="19"
                                            Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Top" Margin="0,1,10,0"
                                            IsVisible="{Binding !OAuthStatusIsError}" />
-                    <TextBlock Grid.Column="1" Classes="alert-body" Text="{Binding OAuthStatusMessage}"
-                               VerticalAlignment="Center" MaxWidth="370" />
+                    <StackPanel Grid.Column="1" Spacing="8" MaxWidth="370" VerticalAlignment="Center">
+                        <TextBlock Classes="alert-body" Text="{Binding OAuthStatusMessage}" TextWrapping="Wrap" />
+                        <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding OAuthStatusHasUrl}">
+                            <Border Classes="endpoint" VerticalAlignment="Center" MaxWidth="320">
+                                <TextBlock Text="{Binding OAuthStatusUrl}"
+                                           FontFamily="Cascadia Mono,Consolas,monospace"
+                                           FontSize="11.5"
+                                           Foreground="{DynamicResource AccentBrush}"
+                                           TextTrimming="CharacterEllipsis"
+                                           VerticalAlignment="Center" />
+                            </Border>
+                            <Button Classes="icon-btn copy-endpoint"
+                                    Classes.copied="{Binding OAuthUrlCopied}"
+                                    ToolTip.Tip="{l:Loc OAuth_Status_CopyUrl}"
+                                    Click="OnCopyOAuthUrl">
+                                <Panel>
+                                    <lucide:PackIconLucide Kind="Copy" Width="13" Height="13" IsVisible="{Binding !OAuthUrlCopied}" />
+                                    <lucide:PackIconLucide Kind="Check" Width="13" Height="13" IsVisible="{Binding OAuthUrlCopied}" />
+                                </Panel>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
                     <Button Grid.Column="2" Classes="icon-btn" Margin="10,0,0,0" VerticalAlignment="Top"
                             Command="{Binding DismissOAuthStatusCommand}">
                         <lucide:PackIconLucide Kind="X" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
