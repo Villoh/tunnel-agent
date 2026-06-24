@@ -1053,9 +1053,6 @@
   <data name="Agent_opencode_Description" xml:space="preserve">
     <value>오픈 소스 AI 코딩 에이전트입니다.</value>
   </data>
-  <data name="Agent_aider_Description" xml:space="preserve">
-    <value>터미널에서의 AI 페어 프로그래밍. pip로 설치하세요.</value>
-  </data>
   <data name="Agent_pi_Description" xml:space="preserve">
     <value>pi.dev의 Pi 코딩 에이전트입니다.</value>
   </data>

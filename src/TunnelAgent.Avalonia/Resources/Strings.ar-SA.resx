@@ -1053,9 +1053,6 @@
   <data name="Agent_opencode_Description" xml:space="preserve">
     <value>وكيل ترميز AI مفتوح المصدر.</value>
   </data>
-  <data name="Agent_aider_Description" xml:space="preserve">
-    <value>برمجة ثنائية باستخدام AI في الطرفية. ثبّت عبر pip.</value>
-  </data>
   <data name="Agent_pi_Description" xml:space="preserve">
     <value>وكيل ترميز Pi من pi.dev.</value>
   </data>

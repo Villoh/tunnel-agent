@@ -1053,9 +1053,6 @@
   <data name="Agent_opencode_Description" xml:space="preserve">
     <value>Agente di codifica AI open source.</value>
   </data>
-  <data name="Agent_aider_Description" xml:space="preserve">
-    <value>Programmazione in coppia con l'AI nel terminale. Installa tramite pip.</value>
-  </data>
   <data name="Agent_pi_Description" xml:space="preserve">
     <value>Agente di codifica Pi di pi.dev.</value>
   </data>

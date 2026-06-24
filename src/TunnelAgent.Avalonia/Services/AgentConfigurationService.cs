@@ -112,7 +112,6 @@ public sealed class AgentConfigurationService
             "opencode"       => new[] { OpenCodeRaw(proxyBaseUrl, apiKey, models) },
             "pi"             => new[] { PiRaw(proxyBaseUrl, apiKey, models) },
             "factory-droid"  => new[] { FactoryDroidRaw(proxyBaseUrl, apiKey, modelEntries) },
-            "aider"          => new[] { EnvExportRaw("aider", AiderEnv(proxyBaseUrl, apiKey)) },
             _                => Array.Empty<RawConfigPreview>()
         };
 
@@ -130,9 +129,6 @@ public sealed class AgentConfigurationService
                 "amp"          => ApplyAmp(proxyBaseUrl, apiKey, remove),
                 "opencode"     => AgentConfigApplyResult.Failure("OpenCode requires async apply."),
                 "factory-droid"=> ApplyFactoryDroid(proxyBaseUrl, apiKey, remove, modelEntries),
-                "aider"        => AgentConfigApplyResult.Ok(
-                    "Aider uses environment variables. Copy the shell export and add it to your shell profile.",
-                    raw: new[] { EnvExportRaw("aider", AiderEnv(proxyBaseUrl, apiKey)) }),
                 _              => AgentConfigApplyResult.Failure("Unknown agent.")
             };
         }
@@ -714,22 +710,6 @@ public sealed class AgentConfigurationService
         var content    = new JsonObject { ["customModels"] = entries }
             .ToJsonString(new JsonSerializerOptions { WriteIndented = true });
         return new RawConfigPreview("config.json", configPath, content);
-    }
-
-    // ── Env-var agents (Aider) ──────────────────────────────────────────────
-
-    private static string[] AiderEnv(string proxyBaseUrl, string apiKey) =>
-        HasApiKey(apiKey)
-            ? ["OPENAI_API_BASE" + "=" + proxyBaseUrl, "OPENAI_API_KEY" + "=" + apiKey]
-            : ["OPENAI_API_BASE" + "=" + proxyBaseUrl];
-
-    private static RawConfigPreview EnvExportRaw(string agentId, string[] vars)
-    {
-        var sb = new StringBuilder();
-        sb.AppendLine("# Add to your shell profile (~/.zshrc or ~/.bashrc):");
-        foreach (var v in vars)
-            sb.AppendLine($"export {v}");
-        return new RawConfigPreview($"{agentId}-env.sh", "Shell profile", sb.ToString().TrimEnd());
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

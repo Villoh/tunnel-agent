@@ -1053,9 +1053,6 @@
   <data name="Agent_opencode_Description" xml:space="preserve">
     <value>Open-Source-AI-Coding-Agent.</value>
   </data>
-  <data name="Agent_aider_Description" xml:space="preserve">
-    <value>AI-Pair-Programming im Terminal. Installation über pip.</value>
-  </data>
   <data name="Agent_pi_Description" xml:space="preserve">
     <value>Pi-Coding-Agent von pi.dev.</value>
   </data>

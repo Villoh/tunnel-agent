@@ -1028,9 +1028,6 @@
   <data name="Agent_opencode_Description" xml:space="preserve">
     <value>Agente de programación con IA de código abierto.</value>
   </data>
-  <data name="Agent_aider_Description" xml:space="preserve">
-    <value>Programación en pareja con IA en la terminal. Instálalo con pip.</value>
-  </data>
   <data name="Agent_pi_Description" xml:space="preserve">
     <value>Agente de programación Pi de pi.dev.</value>
   </data>

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace TunnelAgent.Services;
@@ -57,14 +56,6 @@ public static class AgentCatalog
             "#8B5CF6",
             AssetsBase + "opencode.svg",
             IconNeedsDarkBg: true),
-
-        new AgentDefinition(
-            "aider", "Aider",
-            "AI pair programming in the terminal. Install via pip.",
-            new[] { "aider", "aider.cmd", "aider.exe" },
-            Array.Empty<string>(),
-            "https://aider.chat",
-            "#E5A731"),
 
         new AgentDefinition(
             "pi", "Pi",

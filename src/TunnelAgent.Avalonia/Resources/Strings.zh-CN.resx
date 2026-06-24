@@ -1053,9 +1053,6 @@
   <data name="Agent_opencode_Description" xml:space="preserve">
     <value>开源 AI 编程智能体。</value>
   </data>
-  <data name="Agent_aider_Description" xml:space="preserve">
-    <value>终端中的 AI 结对编程。通过 pip 安装。</value>
-  </data>
   <data name="Agent_pi_Description" xml:space="preserve">
     <value>pi.dev 的 Pi 编程智能体。</value>
   </data>
