@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-06-24
+
 ### Added
 
 - **Updater-free Scoop zip** (`.github/workflows/release.yml`): Windows releases now also publish a plain `TunnelAgent-<version>-win-x64-scoop.zip` (and `win-arm64`) built straight from the publish output, without the Velopack shim, `Update.exe` or `.portable` marker. The Scoop manifest consumes this instead of the Velopack portable zip, so `UpdateManager.IsInstalled` is `false`, the in-app updater stays disabled, and Scoop — not Velopack — owns updates (no more self-updates writing into the Scoop directory). The hash is exposed under `platforms.<rid>.scoop` in `latest.json`.
@@ -877,7 +879,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.9.1...HEAD
+[0.9.0]: https://github.com/Villoh/tunnel-agent/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/Villoh/tunnel-agent/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Villoh/tunnel-agent/compare/v0.7.2...v0.8.0
 [0.7.2]: https://github.com/Villoh/tunnel-agent/compare/v0.7.1...v0.7.2
