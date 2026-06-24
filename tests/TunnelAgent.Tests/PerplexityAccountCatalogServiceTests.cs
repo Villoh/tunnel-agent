@@ -3,12 +3,33 @@ using TunnelAgent.Services;
 
 namespace TunnelAgent.Tests;
 
-public sealed class PerplexityAccountCatalogServiceTests
+public sealed class PerplexityAccountCatalogServiceTests : IDisposable
 {
+    private readonly InMemoryUserEnvironmentService _env = new();
+    private readonly TunnelAgent.Services.IUserEnvironmentService _previousEnv;
+
+    public PerplexityAccountCatalogServiceTests()
+    {
+        _previousEnv = TunnelAgent.Infrastructure.Services.UserEnvironmentService.SetImplementation(_env);
+    }
+
+    public void Dispose()
+    {
+        TunnelAgent.Infrastructure.Services.UserEnvironmentService.SetImplementation(_previousEnv);
+    }
+
     private static PerplexityAccountCatalogService CreateService(TestTempDirectory temp)
     {
         var dir = System.IO.Path.Combine(temp.Path, "perplexity-accounts");
         return new PerplexityAccountCatalogService(new AccountService(dir));
+    }
+
+    private sealed class InMemoryUserEnvironmentService : TunnelAgent.Services.IUserEnvironmentService
+    {
+        private readonly System.Collections.Generic.Dictionary<string, string> _values = new();
+        public string? Get(string name) => _values.TryGetValue(name, out var v) ? v : null;
+        public void Set(string name, string value) => _values[name] = value;
+        public void Remove(string name) => _values.Remove(name);
     }
 
     [Fact]
@@ -76,21 +97,14 @@ public sealed class PerplexityAccountCatalogServiceTests
         using var temp = new TestTempDirectory();
         var service = CreateService(temp);
         var envName = PerplexityAccountCatalogService.EnvVarName;
-        try
-        {
-            Environment.SetEnvironmentVariable(envName, "stale-token", EnvironmentVariableTarget.Process);
-            await service.AddAsync("Primary", "token-1");
-            Assert.Equal("token-1", TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get(envName));
+        _env.Set(envName, "stale-token");
+        await service.AddAsync("Primary", "token-1");
+        Assert.Equal("token-1", _env.Get(envName));
 
-            await service.RemoveAllAsync();
+        await service.RemoveAllAsync();
 
-            Assert.Null(TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get(envName));
-            Assert.Empty(service.List());
-        }
-        finally
-        {
-            TunnelAgent.Infrastructure.Services.UserEnvironmentService.Remove(envName);
-        }
+        Assert.Null(_env.Get(envName));
+        Assert.Empty(service.List());
     }
 
     [Fact]

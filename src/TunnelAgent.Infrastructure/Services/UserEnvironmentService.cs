@@ -28,6 +28,18 @@ public static class UserEnvironmentService
     /// that <see cref="Get"/> returns persisted values immediately after startup.
     /// No-op on Windows (the registry is already the source of truth).
     /// </summary>
+    /// <summary>
+    /// Replaces the active implementation. Intended for tests so they can inject
+    /// an in-memory fake instead of mutating the real user environment. Returns
+    /// the previous implementation so callers can restore it afterwards.
+    /// </summary>
+    public static IUserEnvironmentService SetImplementation(IUserEnvironmentService impl)
+    {
+        var previous = _impl;
+        _impl = impl ?? throw new ArgumentNullException(nameof(impl));
+        return previous;
+    }
+
     public static void Initialize()
     {
         if (OperatingSystem.IsWindows()) return;
