@@ -154,6 +154,11 @@ jobs:
         if: startsWith(matrix.rid, 'win-')
         shell: pwsh
         run: |
+          # Drop native debug symbols (e.g. libSkiaSharp.pdb ~84 MB,
+          # libHarfBuzzSharp.pdb ~20 MB) shipped by the SkiaSharp NuGet
+          # packages. DebugType=None only strips our own managed PDBs, not
+          # these third-party native ones, and they are not needed at runtime.
+          Remove-Item artifacts/publish-scoop/*.pdb -Force -ErrorAction Ignore
           New-Item -ItemType Directory -Force -Path artifacts/velopack | Out-Null
           Compress-Archive -Path artifacts/publish-scoop/* `
             -DestinationPath "artifacts/velopack/TunnelAgent-${env:SEMVER}-${{ matrix.channel }}-scoop.zip" `

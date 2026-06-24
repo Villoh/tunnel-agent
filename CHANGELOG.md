@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Strip native PDBs from the Scoop zip** (`.github/workflows/release.yml`): the SkiaSharp NuGet packages ship `libSkiaSharp.pdb` (~84 MB) and `libHarfBuzzSharp.pdb` (~20 MB) in the publish output, and `DebugType=None` only removes our own managed PDBs. These native symbols are now deleted from `artifacts/publish-scoop` before zipping, so the Scoop zip contains just `TunnelAgent.exe` (no loose DLLs or PDBs) and is substantially smaller.
+
 ## [0.9.2] - 2026-06-24
 
 ### Changed
