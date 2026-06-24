@@ -2596,11 +2596,19 @@ SelectedSection is SectionKey.Logs;
         var keys   = await _configService.ReadApiKeysFromConfigAsync();
         var defKey = TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get("TUNNEL_AGENT_CLIPROXY_API_KEY") ?? "";
 
-        // If env var has a key not in yaml, add it so both stay in sync
+        // If env var has a key not in yaml, add it so both stay in sync.
         if (!string.IsNullOrWhiteSpace(defKey) && !keys.Contains(defKey, StringComparer.Ordinal))
         {
             keys.Add(defKey);
             await _configService.WriteApiKeysToConfigAsync(keys);
+        }
+        // If env var is empty but yaml has keys, adopt the first as default.
+        // The yaml is the source of truth for accepted keys, so without this the
+        // agent configs would fall back to "no-key" while the proxy still requires one.
+        else if (string.IsNullOrWhiteSpace(defKey) && keys.Count > 0)
+        {
+            defKey = keys[0];
+            await SyncCliProxyEnvVarAsync(defKey);
         }
 
         CliProxyApiKeys.Clear();

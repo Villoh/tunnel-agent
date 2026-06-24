@@ -390,7 +390,7 @@ public sealed class AgentConfigurationService
             ["baseURL"]      = !string.IsNullOrEmpty(first.EngineBaseUrl) ? first.EngineBaseUrl : (string?)null,
             ["litellmProxy"] = true
         };
-        options["apiKey"] = HasApiKey(first.ApiKey) ? $"{{env:{first.ApiKey}}}" : "no-key";
+        options["apiKey"] = HasResolvedApiKey(first.ApiKey) ? $"{{env:{first.ApiKey}}}" : "no-key";
 
         var modelsObj = new JsonObject();
         foreach (var m in entries)
@@ -540,7 +540,7 @@ public sealed class AgentConfigurationService
             ["baseUrl"] = baseUrl,
             ["api"]     = api
         };
-        provider["apiKey"] = HasApiKey(first.ApiKey) ? $"${{{first.ApiKey}}}" : "no-key";
+        provider["apiKey"] = HasResolvedApiKey(first.ApiKey) ? $"${{{first.ApiKey}}}" : "no-key";
         provider["models"] = new JsonArray(
             entries.Select(m =>
             {
@@ -735,6 +735,14 @@ public sealed class AgentConfigurationService
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private static bool HasApiKey(string apiKey) => !string.IsNullOrWhiteSpace(apiKey);
+
+    // ModelEntry.ApiKey holds the env var *name* (e.g. TUNNEL_AGENT_CLIPROXY_API_KEY),
+    // which is never empty. Resolve it to its actual value so that, when the variable
+    // does not exist (and is therefore absent from proxy-config.yaml), we emit
+    // "no-key" instead of a placeholder that would expand to an empty apiKey and error.
+    private static bool HasResolvedApiKey(string varName) =>
+        HasApiKey(varName) &&
+        !string.IsNullOrWhiteSpace(TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get(varName));
 
     private static string StripV1(string url) =>
         url.EndsWith("/v1", StringComparison.OrdinalIgnoreCase) ? url[..^3] : url;
