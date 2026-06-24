@@ -18,7 +18,7 @@ dotnet build TunnelAgent.slnx
 
 ## Publishing Options
 
-### Option 1 — Self-contained, single file (portable / no runtime required) ✅ Used for portable release
+### Option 1 — Self-contained, single file (portable / no runtime required) ✅ Used for portable release & Scoop zip
 
 Bundles the entire .NET 10 runtime inside the exe. No prerequisites for the user.  
 No trimming — avoids Avalonia reflection binding issues.
@@ -26,6 +26,7 @@ No trimming — avoids Avalonia reflection binding issues.
 ```pwsh
 dotnet publish src/TunnelAgent.Avalonia/TunnelAgent.Avalonia.csproj -c Release -r win-x64 --self-contained true `
   -p:PublishSingleFile=true `
+  -p:EnableCompressionInSingleFile=true `
   -p:IncludeNativeLibrariesForSelfExtract=true `
   -p:DebugType=None -p:DebugSymbols=false
 ```
@@ -33,12 +34,17 @@ dotnet publish src/TunnelAgent.Avalonia/TunnelAgent.Avalonia.csproj -c Release -
 | | |
 |---|---|
 | Output | `artifacts/portable/TunnelAgent.exe` |
-| Size | ~110 MB |
+| Size | ~110 MB uncompressed / ~45 MB with `EnableCompressionInSingleFile` |
 | Files | 1 |
 | Requires | Nothing |
 
 > ⚠️ `EnableCompressionInSingleFile=true` is **only** valid with `--self-contained true`.  
 > ⚠️ `PublishTrimmed=true` is omitted intentionally — trimming breaks Avalonia reflection bindings.
+
+The release workflow (`.github/workflows/release.yml`) uses this option for the
+updater-free `TunnelAgent-<version>-win-<arch>-scoop.zip` consumed by Scoop,
+published to `artifacts/publish-scoop`. This keeps the Scoop zip a single
+compressed exe (no loose DLLs) instead of the multi-file Velopack output.
 
 ---
 

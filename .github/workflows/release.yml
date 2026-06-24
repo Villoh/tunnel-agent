@@ -133,15 +133,29 @@ jobs:
           -p:DebugType=None -p:DebugSymbols=false
           -o artifacts/publish
 
-      # Plain, updater-free zip for package managers (Scoop). Built straight from
-      # the publish output so it has no Velopack shim/Update.exe/.portable marker,
-      # which keeps the in-app updater disabled and lets Scoop own updates.
+      # Plain, updater-free zip for package managers (Scoop). Published on
+      # its own as a single self-contained, compressed exe so it has no
+      # loose DLLs and is far smaller than the multi-file Velopack output.
+      # No Velopack shim/Update.exe/.portable marker, which keeps the in-app
+      # updater disabled and lets Scoop own updates.
+      - name: Publish single-file build for Scoop (Windows)
+        if: startsWith(matrix.rid, 'win-')
+        run: >
+          dotnet publish src/TunnelAgent.Avalonia/TunnelAgent.Avalonia.csproj
+          --no-restore -c Release
+          -r ${{ matrix.rid }} --self-contained true
+          -p:PublishSingleFile=true
+          -p:EnableCompressionInSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:DebugType=None -p:DebugSymbols=false
+          -o artifacts/publish-scoop
+
       - name: Package plain zip for Scoop (Windows)
         if: startsWith(matrix.rid, 'win-')
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path artifacts/velopack | Out-Null
-          Compress-Archive -Path artifacts/publish/* `
+          Compress-Archive -Path artifacts/publish-scoop/* `
             -DestinationPath "artifacts/velopack/TunnelAgent-${env:SEMVER}-${{ matrix.channel }}-scoop.zip" `
             -Force
 

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Smaller Scoop zip** (`.github/workflows/release.yml`): the `TunnelAgent-<version>-win-<arch>-scoop.zip` is now produced from a dedicated single-file publish (`PublishSingleFile=true`, `EnableCompressionInSingleFile=true`, `IncludeNativeLibrariesForSelfExtract=true`) instead of the multi-file Velopack publish output. The zip now contains just `TunnelAgent.exe` (no loose runtime DLLs) and is substantially smaller. The Velopack packages are unaffected — they still use the multi-file `artifacts/publish` output.
+
 ## [0.9.1] - 2026-06-24
 
 ### Added
