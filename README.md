@@ -20,6 +20,8 @@
   ·
   <a href="https://github.com/Villoh/tunnel-agent/issues">Issues</a>
   ·
+  <a href="TODO.md">TODO</a>
+  ·
   <a href="CONTRIBUTING.md">Contributing</a>
 </p>
 
@@ -44,6 +46,7 @@
 - 👥 **Provider Management**: connect Claude Code, OpenAI Codex, Gemini CLI, Kimi, Antigravity, xAI (Grok), and custom OpenAI-compatible providers
 - 🧠 **Perplexity WebUI Sessions**: add multiple Perplexity accounts, set a default session, reset accounts safely, and auto-install the Perplexity engine when needed
 - 🎚️ **Model Visibility**: browse available models grouped by connected provider or engine source, including Perplexity-backed model listings
+- 🔁 **Model Fallback**: create virtual models backed by ordered provider/model chains, automatically fail over when quota is exhausted, expose the virtual models through `/v1/models`, and cache the last working route for a configurable duration
 - 📈 **Usage Dashboard**: Home view with live usage telemetry (calls, tokens, success rate) over selectable time ranges, an interactive usage chart, and a summary table that groups by provider or model — backed by SQLite history that persists across restarts
 - 💰 **Cost Estimation**: per-request cost estimates using live OpenRouter pricing (input/output/cache read & write rates) cached on disk for offline use, with a built-in price table fallback
 - 📊 **Live Status**: see sidebar engine health plus focused engine state, endpoint, and release info

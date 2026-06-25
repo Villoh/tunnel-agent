@@ -1,5 +1,3 @@
 # TODO
 
-## Ideas / polish
-
-- [ ] Refactor next/previous navigation in the Logs window.
+- [ ] [refactor] Logs: refactor next/previous navigation. _(added: 2026-06-25)_
