@@ -71,7 +71,7 @@ public sealed class FallbackProxyService
     private readonly Action<string>? _log;
 
     // virtual model name -> (entry id, cached at). Reused while route caching is on.
-    private readonly ConcurrentDictionary<string, (string EntryId, DateTime CachedAt)> _routeCache = new();
+    private static readonly ConcurrentDictionary<string, (string EntryId, DateTime CachedAt)> RouteCache = new(StringComparer.OrdinalIgnoreCase);
 
     private HttpListener? _listener;
     private CancellationTokenSource? _cts;
@@ -133,7 +133,7 @@ public sealed class FallbackProxyService
         _listener = null;
         _cts = null;
         IsRunning = false;
-        _routeCache.Clear();
+        RouteCache.Clear();
         RouteStates.Clear();
         RouteStatesCleared?.Invoke();
     }
@@ -470,11 +470,12 @@ public sealed class FallbackProxyService
     private List<FallbackEntry> ApplyRouteCache(string modelName, List<FallbackEntry> entries)
     {
         if (!_configProvider().RouteCachingEnabled) return entries;
-        if (!_routeCache.TryGetValue(modelName, out var cached)) return entries;
+        if (!RouteCache.TryGetValue(modelName, out var cached)) return entries;
 
-        if (DateTime.UtcNow - cached.CachedAt > TimeSpan.FromMinutes(Math.Clamp(_configProvider().RouteCacheMinutes, 1, 24 * 60)))
+        var ttlMinutes = _configProvider().RouteCacheMinutes;
+        if (ttlMinutes > 0 && DateTime.UtcNow - cached.CachedAt > TimeSpan.FromMinutes(Math.Clamp(ttlMinutes, 1, 24 * 60)))
         {
-            _routeCache.TryRemove(modelName, out _);
+            RouteCache.TryRemove(modelName, out _);
             return entries;
         }
 
@@ -490,10 +491,22 @@ public sealed class FallbackProxyService
     private void CacheRoute(string modelName, string entryId)
     {
         if (!_configProvider().RouteCachingEnabled) return;
-        _routeCache[modelName] = (entryId, DateTime.UtcNow);
+        RouteCache[modelName] = (entryId, DateTime.UtcNow);
     }
 
-    public void ClearRouteCache() => _routeCache.Clear();
+    public void ClearRouteCache() => RouteCache.Clear();
+
+    public static void SetCachedRoute(string virtualModelName, FallbackEntry entry, int entryIndex, int totalEntries)
+    {
+        RouteCache[virtualModelName] = (entry.Id, DateTime.UtcNow);
+        UpdateRouteState(virtualModelName, entry, entryIndex, totalEntries);
+    }
+
+    public static void ClearCachedRoute(string virtualModelName)
+    {
+        RouteCache.TryRemove(virtualModelName, out _);
+        RouteStates.TryRemove(virtualModelName, out _);
+    }
 
     // ── Header filters ─────────────────────────────────────────────────────────
 

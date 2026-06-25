@@ -160,6 +160,21 @@
   <data name="Fallback_RemoveEntry_Tooltip" xml:space="preserve">
     <value>항목 제거 (최소 하나는 유지)</value>
   </data>
+  <data name="Fallback_RouteCache_UntilRestart" xml:space="preserve">
+    <value>다시 시작할 때까지</value>
+  </data>
+  <data name="Fallback_ResetRoute_Tooltip" xml:space="preserve">
+    <value>캐시된 경로 재설정</value>
+  </data>
+  <data name="Fallback_UseEntryNow_Tooltip" xml:space="preserve">
+    <value>이 경로 지금 사용</value>
+  </data>
+  <data name="Fallback_MoveEntryUp_Tooltip" xml:space="preserve">
+    <value>위로 이동</value>
+  </data>
+  <data name="Fallback_MoveEntryDown_Tooltip" xml:space="preserve">
+    <value>아래로 이동</value>
+  </data>
   <data name="Fallback_AddEntry_Title" xml:space="preserve">
     <value>폴백 항목 추가</value>
   </data>

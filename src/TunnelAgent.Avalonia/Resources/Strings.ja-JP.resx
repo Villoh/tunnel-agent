@@ -160,6 +160,21 @@
   <data name="Fallback_RemoveEntry_Tooltip" xml:space="preserve">
     <value>エントリを削除（最低1つは残す）</value>
   </data>
+  <data name="Fallback_RouteCache_UntilRestart" xml:space="preserve">
+    <value>再起動まで</value>
+  </data>
+  <data name="Fallback_ResetRoute_Tooltip" xml:space="preserve">
+    <value>キャッシュ済みルートをリセット</value>
+  </data>
+  <data name="Fallback_UseEntryNow_Tooltip" xml:space="preserve">
+    <value>このルートを今すぐ使用</value>
+  </data>
+  <data name="Fallback_MoveEntryUp_Tooltip" xml:space="preserve">
+    <value>上へ移動</value>
+  </data>
+  <data name="Fallback_MoveEntryDown_Tooltip" xml:space="preserve">
+    <value>下へ移動</value>
+  </data>
   <data name="Fallback_AddEntry_Title" xml:space="preserve">
     <value>フォールバックエントリを追加</value>
   </data>

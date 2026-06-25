@@ -160,6 +160,21 @@
   <data name="Fallback_RemoveEntry_Tooltip" xml:space="preserve">
     <value>删除条目（至少保留一个）</value>
   </data>
+  <data name="Fallback_RouteCache_UntilRestart" xml:space="preserve">
+    <value>直到重启</value>
+  </data>
+  <data name="Fallback_ResetRoute_Tooltip" xml:space="preserve">
+    <value>重置缓存路由</value>
+  </data>
+  <data name="Fallback_UseEntryNow_Tooltip" xml:space="preserve">
+    <value>立即使用此路由</value>
+  </data>
+  <data name="Fallback_MoveEntryUp_Tooltip" xml:space="preserve">
+    <value>上移</value>
+  </data>
+  <data name="Fallback_MoveEntryDown_Tooltip" xml:space="preserve">
+    <value>下移</value>
+  </data>
   <data name="Fallback_AddEntry_Title" xml:space="preserve">
     <value>添加回退条目</value>
   </data>

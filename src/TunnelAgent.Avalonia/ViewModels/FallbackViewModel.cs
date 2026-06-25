@@ -37,10 +37,17 @@ public sealed class FallbackModelOption
     public bool HasCustomIcon => CustomIconData is not null;
 }
 
-public sealed class RouteCacheDurationOption(int minutes, string display)
+public sealed class RouteCacheDurationOption(int minutes, string display, bool isResourceKey = false) : INotifyPropertyChanged
 {
     public int Minutes { get; } = minutes;
-    public string Display { get; } = display;
+    private string DisplayValue { get; } = display;
+    public string Display => isResourceKey ? LocalizationService.Instance.GetString(DisplayValue) : DisplayValue;
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public RouteCacheDurationOption(int minutes, string display) : this(minutes, display, false) { }
+
+    public void Refresh() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Display)));
 }
 
 /// <summary>Editable view over a single <see cref="FallbackEntry"/>.</summary>
@@ -52,6 +59,8 @@ public partial class FallbackEntryEditViewModel : ViewModelBase
     [ObservableProperty] private string _providerDisplayName;
     [ObservableProperty] private string _modelId;
     [ObservableProperty] private int _position;
+    [ObservableProperty] private bool _canMoveUp;
+    [ObservableProperty] private bool _canMoveDown;
 
     public string Id { get; }
 
@@ -171,7 +180,11 @@ public partial class VirtualModelEditViewModel : ViewModelBase
     private void Reindex()
     {
         for (var i = 0; i < Entries.Count; i++)
+        {
             Entries[i].Position = i + 1;
+            Entries[i].CanMoveUp = i > 0;
+            Entries[i].CanMoveDown = i < Entries.Count - 1;
+        }
     }
 
     [RelayCommand]
@@ -195,6 +208,42 @@ public partial class VirtualModelEditViewModel : ViewModelBase
         if (entry is null) return;
         Entries.Remove(entry);
         _onChanged();
+    }
+
+    [RelayCommand]
+    private void MoveEntryUp(FallbackEntryEditViewModel? entry)
+    {
+        if (entry is null) return;
+        var index = Entries.IndexOf(entry);
+        if (index <= 0) return;
+        Entries.Move(index, index - 1);
+        _onChanged();
+    }
+
+    [RelayCommand]
+    private void MoveEntryDown(FallbackEntryEditViewModel? entry)
+    {
+        if (entry is null) return;
+        var index = Entries.IndexOf(entry);
+        if (index < 0 || index >= Entries.Count - 1) return;
+        Entries.Move(index, index + 1);
+        _onChanged();
+    }
+
+    [RelayCommand]
+    private void UseEntryNow(FallbackEntryEditViewModel? entry)
+    {
+        if (entry is null) return;
+        var index = Entries.IndexOf(entry);
+        if (index < 0) return;
+        FallbackProxyService.SetCachedRoute(Name, entry.ToModel(index + 1), index, Entries.Count);
+    }
+
+    [RelayCommand]
+    private void ResetCachedRoute()
+    {
+        FallbackProxyService.ClearCachedRoute(Name);
+        RouteState = null;
     }
 
     public VirtualModel ToModel()
@@ -239,7 +288,8 @@ public partial class FallbackViewModel : ViewModelBase
         new(30, "30 min"),
         new(60, "1 h"),
         new(360, "6 h"),
-        new(1440, "24 h")
+        new(1440, "24 h"),
+        new(-1, "Fallback_RouteCache_UntilRestart", isResourceKey: true)
     ];
 
     public int VirtualModelCount => VirtualModels.Count;
@@ -272,6 +322,10 @@ public partial class FallbackViewModel : ViewModelBase
 
         FallbackProxyService.RouteStateChanged += OnRouteStateChanged;
         FallbackProxyService.RouteStatesCleared += OnRouteStatesCleared;
+        LocalizationService.Instance.PropertyChanged += (_, _) =>
+        {
+            foreach (var option in RouteCacheDurations) option.Refresh();
+        };
         ApplyRouteStates(FallbackProxyService.SnapshotRouteStates());
     }
 

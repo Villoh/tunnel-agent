@@ -158,6 +158,21 @@
   <data name="Fallback_RemoveEntry_Tooltip" xml:space="preserve">
     <value>Quitar entrada (deja al menos una)</value>
   </data>
+  <data name="Fallback_RouteCache_UntilRestart" xml:space="preserve">
+    <value>Hasta reiniciar</value>
+  </data>
+  <data name="Fallback_ResetRoute_Tooltip" xml:space="preserve">
+    <value>Restablecer ruta en caché</value>
+  </data>
+  <data name="Fallback_UseEntryNow_Tooltip" xml:space="preserve">
+    <value>Usar esta ruta ahora</value>
+  </data>
+  <data name="Fallback_MoveEntryUp_Tooltip" xml:space="preserve">
+    <value>Subir</value>
+  </data>
+  <data name="Fallback_MoveEntryDown_Tooltip" xml:space="preserve">
+    <value>Bajar</value>
+  </data>
   <data name="Fallback_AddEntry_Title" xml:space="preserve">
     <value>Añadir entrada de fallback</value>
   </data>

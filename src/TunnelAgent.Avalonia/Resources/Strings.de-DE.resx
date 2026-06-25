@@ -160,6 +160,21 @@
   <data name="Fallback_RemoveEntry_Tooltip" xml:space="preserve">
     <value>Eintrag entfernen (mindestens einen behalten)</value>
   </data>
+  <data name="Fallback_RouteCache_UntilRestart" xml:space="preserve">
+    <value>Bis zum Neustart</value>
+  </data>
+  <data name="Fallback_ResetRoute_Tooltip" xml:space="preserve">
+    <value>Zwischengespeicherte Route zurücksetzen</value>
+  </data>
+  <data name="Fallback_UseEntryNow_Tooltip" xml:space="preserve">
+    <value>Diese Route jetzt verwenden</value>
+  </data>
+  <data name="Fallback_MoveEntryUp_Tooltip" xml:space="preserve">
+    <value>Nach oben</value>
+  </data>
+  <data name="Fallback_MoveEntryDown_Tooltip" xml:space="preserve">
+    <value>Nach unten</value>
+  </data>
   <data name="Fallback_AddEntry_Title" xml:space="preserve">
     <value>Fallback-Eintrag hinzufügen</value>
   </data>

@@ -160,6 +160,21 @@
   <data name="Fallback_RemoveEntry_Tooltip" xml:space="preserve">
     <value>إزالة الإدخال (أبقِ واحدًا على الأقل)</value>
   </data>
+  <data name="Fallback_RouteCache_UntilRestart" xml:space="preserve">
+    <value>حتى إعادة التشغيل</value>
+  </data>
+  <data name="Fallback_ResetRoute_Tooltip" xml:space="preserve">
+    <value>إعادة ضبط المسار المخزن مؤقتًا</value>
+  </data>
+  <data name="Fallback_UseEntryNow_Tooltip" xml:space="preserve">
+    <value>استخدم هذا المسار الآن</value>
+  </data>
+  <data name="Fallback_MoveEntryUp_Tooltip" xml:space="preserve">
+    <value>نقل للأعلى</value>
+  </data>
+  <data name="Fallback_MoveEntryDown_Tooltip" xml:space="preserve">
+    <value>نقل للأسفل</value>
+  </data>
   <data name="Fallback_AddEntry_Title" xml:space="preserve">
     <value>إضافة إدخال احتياطي</value>
   </data>
