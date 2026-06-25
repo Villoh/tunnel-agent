@@ -10,11 +10,14 @@
     <UserControl.Resources>
         <cv:EngineStateToTextConverter x:Key="EngineStateToText" />
         <cv:SectionEqualsConverter x:Key="SectionEq" />
+        <cv:ServerStateToTextConverter x:Key="StateToText" />
+        <cv:ServerStateToBrushConverter x:Key="StateToBrush" />
+        <cv:ServerStateRunningConverter x:Key="StateIsRunning" />
     </UserControl.Resources>
 
     <Panel>
-        <ScrollViewer>
-            <StackPanel Spacing="0">
+        <ScrollViewer x:Name="ConfigurationScrollViewer">
+            <StackPanel x:Name="ConfigurationContent" Spacing="0">
 
                 <!-- ── Tab bar ──────────────────────────────────────────── -->
                 <ctrl:SlidingTabBar Margin="0,0,0,16"
@@ -348,6 +351,86 @@
                             </Grid>
                         </StackPanel>
                     </Border>
+                    <TextBlock x:Name="LocalProxySectionLabel" Classes="section-label" Text="{l:Loc ConfigView_CLIProxy_LocalProxySection}"/>
+                    <Border Classes="card" Margin="0,0,0,16">
+                        <StackPanel>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="{l:Loc Sidebar_ProxyCard_Title}"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="7" Margin="0,2,0,0">
+                                        <Grid Classes="status-indicator" VerticalAlignment="Center">
+                                            <Ellipse Classes="status-pulse"
+                                                     Fill="{Binding FallbackProxyServerState, Converter={StaticResource StateToBrush}}"
+                                                     IsVisible="{Binding FallbackProxyServerState, Converter={StaticResource StateIsRunning}}" />
+                                            <Ellipse Classes="status-dot"
+                                                     Fill="{Binding FallbackProxyServerState, Converter={StaticResource StateToBrush}}" />
+                                        </Grid>
+                                        <TextBlock Classes="row-desc"
+                                                   Text="{Binding FallbackProxyServerState, Converter={StaticResource StateToText}}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Border Classes="endpoint" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding CliProxyEndpointUrl}"
+                                                   FontFamily="Cascadia Mono,Consolas,monospace"
+                                                   FontSize="11.5"
+                                                   Foreground="{DynamicResource FgBrush}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center" />
+                                    </Border>
+                                    <Button Classes="icon-btn copy-endpoint"
+                                            Classes.copied="{Binding EndpointCopied}"
+                                            ToolTip.Tip="{l:Loc ProvidersView_CopyEndpointTooltip}"
+                                            Click="OnCopyCliProxyEndpoint">
+                                        <Panel>
+                                            <lucide:PackIconLucide Kind="Copy" Width="13" Height="13" IsVisible="{Binding !EndpointCopied}" />
+                                            <lucide:PackIconLucide Kind="Check" Width="13" Height="13" IsVisible="{Binding EndpointCopied}" />
+                                        </Panel>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                            <Border Classes="row-divider" />
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="{l:Loc Fallback_RouteCaching_Label}" />
+                                    <TextBlock Classes="row-desc" Text="{l:Loc Fallback_RouteCaching_Description}" />
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                              IsChecked="{Binding Fallback.RouteCachingEnabled, Mode=TwoWay}" />
+                            </Grid>
+                            <Border Classes="row-divider" />
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_RouteCacheDuration_Label}" />
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_RouteCacheDuration_Description}" />
+                                </StackPanel>
+                                <ComboBox Grid.Column="1"
+                                          ItemsSource="{Binding Fallback.RouteCacheDurations}"
+                                          SelectedItem="{Binding Fallback.SelectedRouteCacheDuration, Mode=TwoWay}"
+                                          IsEnabled="{Binding Fallback.RouteCachingEnabled}"
+                                          Width="92" Height="26" MinHeight="0" Padding="8,0"
+                                          VerticalContentAlignment="Center">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Display}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </Grid>
+                            <Border Classes="row-divider" IsVisible="{Binding IsFallbackBridgeActive}"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto" IsVisible="{Binding IsFallbackBridgeActive}">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_FallbackBridge_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_FallbackBridge_Description}"/>
+                                </StackPanel>
+                                <Border Grid.Column="1" Classes="chip" Background="{DynamicResource AccentSoftBrush}" VerticalAlignment="Center">
+                                    <TextBlock Foreground="{DynamicResource AccentBrush}"
+                                               Text="{l:LocFormat Key=ConfigView_CLIProxy_InternalPort, Path=CliProxyInternalPort}" />
+                                </Border>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
                 </StackPanel>
 
                 <!-- ══ PERPLEXITY ══════════════════════════════════════════ -->

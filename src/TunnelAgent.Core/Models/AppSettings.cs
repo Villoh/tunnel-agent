@@ -96,6 +96,12 @@ public sealed class AppSettings
     /// </summary>
     public List<ProviderSettings> Providers { get; set; } = [];
 
+    /// <summary>
+    /// Experimental model-fallback configuration. Virtual models map to ordered
+    /// provider/model entries with automatic retry when quota is exhausted.
+    /// </summary>
+    public FallbackConfiguration Fallback { get; set; } = new();
+
     public EngineRuntimeSettings GetOrAddEngine(string engineId, int defaultPort)
     {
         var engine = Engines.FirstOrDefault(e => e.EngineId == engineId);

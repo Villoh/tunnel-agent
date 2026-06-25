@@ -171,11 +171,11 @@ public sealed class ConfigService
     /// <summary>
     /// Writes config from current AppSettings. Must be called before starting the process.
     /// </summary>
-    public async Task WriteConfigAsync(bool forceManagementKey = false)
+    public async Task WriteConfigAsync(bool forceManagementKey = false, int? portOverride = null)
     {
         var s       = _settings.Current;
         var authDir = _authDir.Replace('\\', '/');
-        var yaml    = await BuildYamlAsync(s, authDir, forceManagementKey);
+        var yaml    = await BuildYamlAsync(s, authDir, forceManagementKey, portOverride);
 
         Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath)!);
         await File.WriteAllTextAsync(ConfigPath, yaml);
@@ -220,7 +220,7 @@ public sealed class ConfigService
 
     // ── YAML builder ─────────────────────────────────────────────────────────
 
-    private async Task<string> BuildYamlAsync(AppSettings s, string authDir, bool forceManagementKey)
+    private async Task<string> BuildYamlAsync(AppSettings s, string authDir, bool forceManagementKey, int? portOverride = null)
     {
         var sb = new StringBuilder();
 
@@ -231,9 +231,10 @@ public sealed class ConfigService
         };
 
         var runtime = s.GetOrAddEngine(Core.Engine.EngineCatalog.CliProxyApi.Id, Core.Engine.EngineCatalog.CliProxyApi.DefaultPort);
+        var listenPort = portOverride ?? runtime.Port;
 
         sb.AppendLine("host: \"127.0.0.1\"");
-        sb.AppendLine($"port: {runtime.Port}");
+        sb.AppendLine($"port: {listenPort}");
         sb.AppendLine($"auth-dir: \"{authDir}\"");
 
         AppendApiKeys(sb, await ReadApiKeysFromConfigAsync());

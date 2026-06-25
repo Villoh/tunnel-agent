@@ -70,6 +70,93 @@
   <data name="Sidebar_Quota" xml:space="preserve">
     <value>Kontingent</value>
   </data>
+  <data name="Sidebar_Fallback" xml:space="preserve">
+    <value>Fallback</value>
+  </data>
+  <data name="Fallback_Title" xml:space="preserve">
+    <value>Modell-Fallback</value>
+  </data>
+  <data name="Fallback_Experimental" xml:space="preserve">
+    <value>Experimentell</value>
+  </data>
+  <data name="Fallback_Subtitle" xml:space="preserve">
+    <value>Virtuelle Modelle werden realen Anbietermodellen zugeordnet, mit automatischem Fallback, wenn das Kontingent erschöpft ist.</value>
+  </data>
+  <data name="Fallback_SettingsSection" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
+  <data name="Fallback_Enable_Label" xml:space="preserve">
+    <value>Fallback aktivieren</value>
+  </data>
+  <data name="Fallback_Enable_Description" xml:space="preserve">
+    <value>Wenn aktiviert, wechseln virtuelle Modelle automatisch zu alternativen Anbietern, sobald das Kontingent erschöpft ist.</value>
+  </data>
+  <data name="Fallback_RouteCaching_Label" xml:space="preserve">
+    <value>Funktionierende Routen zwischenspeichern</value>
+  </data>
+  <data name="Fallback_RouteCaching_Description" xml:space="preserve">
+    <value>Verwendet den letzten erfolgreichen Eintrag für die ausgewählte Dauer erneut, bevor wieder von oben versucht wird.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Label" xml:space="preserve">
+    <value>Cache-Dauer</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Description" xml:space="preserve">
+    <value>Wie lange die letzte erfolgreiche Fallback-Route weiterverwendet wird.</value>
+  </data>
+  <data name="Fallback_VirtualModelsSection" xml:space="preserve">
+    <value>Virtuelle Modelle</value>
+  </data>
+  <data name="Fallback_NewModel_Watermark" xml:space="preserve">
+    <value>Name des virtuellen Modells (z. B. my-opus-thinking)</value>
+  </data>
+  <data name="Fallback_AddModel" xml:space="preserve">
+    <value>Modell hinzufügen</value>
+  </data>
+  <data name="Fallback_RemoveModel_Tooltip" xml:space="preserve">
+    <value>Virtuelles Modell entfernen</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Title" xml:space="preserve">
+    <value>Virtuelles Modell hinzufügen</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Subtitle" xml:space="preserve">
+    <value>Wählen Sie eines der aktuell von CLIProxyAPI bereitgestellten Modelle aus.</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Title" xml:space="preserve">
+    <value>Server zuerst starten</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Description" xml:space="preserve">
+    <value>Tunnel Agent benötigt eine laufende CLIProxyAPI, um /v1/models zu lesen und verfügbare Anbietermodelle zuzuordnen.</value>
+  </data>
+  <data name="Fallback_Empty" xml:space="preserve">
+    <value>Noch keine virtuellen Modelle. Fügen Sie oben eines hinzu, um eine Fallback-Kette zu erstellen.</value>
+  </data>
+  <data name="Fallback_AddEntry" xml:space="preserve">
+    <value>Eintrag hinzufügen</value>
+  </data>
+  <data name="Fallback_AddEntry_Tooltip" xml:space="preserve">
+    <value>Ein Fallback-Modell zu dieser Kette hinzufügen</value>
+  </data>
+  <data name="Fallback_RemoveEntry_Tooltip" xml:space="preserve">
+    <value>Eintrag entfernen (mindestens einen behalten)</value>
+  </data>
+  <data name="Fallback_AddEntry_Title" xml:space="preserve">
+    <value>Fallback-Eintrag hinzufügen</value>
+  </data>
+  <data name="Fallback_Entry_Provider" xml:space="preserve">
+    <value>Anbieter-ID</value>
+  </data>
+  <data name="Fallback_Entry_Model" xml:space="preserve">
+    <value>Modell-ID</value>
+  </data>
+  <data name="Fallback_Entry_Pick" xml:space="preserve">
+    <value>Anbietermodell auswählen…</value>
+  </data>
+  <data name="Fallback_Footnote" xml:space="preserve">
+    <value>Virtuelle Modelle werden realen Anbietermodellen zugeordnet, mit automatischem Fallback, wenn das Kontingent erschöpft ist. Richten Sie Ihren Agenten auf den Namen eines virtuellen Modells, um die Kette zu nutzen.</value>
+  </data>
+  <data name="Fallback_CreditPrefix" xml:space="preserve">
+    <value>Inspiriert von</value>
+  </data>
   <data name="Sidebar_Agents" xml:space="preserve">
     <value>Agents</value>
   </data>
@@ -82,8 +169,23 @@
   <data name="Sidebar_Status" xml:space="preserve">
     <value>STATUS</value>
   </data>
+  <data name="Sidebar_ProxyCard_Title" xml:space="preserve">
+    <value>Lokaler Proxy</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Subtitle" xml:space="preserve">
+    <value>:{0}</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Hint" xml:space="preserve">
+    <value>Proxy-Konfiguration öffnen</value>
+  </data>
   <data name="Sidebar_CLIProxyAPI" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="Sidebar_CLIProxyAPI_StatusTooltip" xml:space="preserve">
+    <value>CLIProxyAPI-Anbieter öffnen</value>
+  </data>
+  <data name="Sidebar_Perplexity_StatusTooltip" xml:space="preserve">
+    <value>Perplexity-Anbieter öffnen</value>
   </data>
   <data name="Sidebar_Perplexity" xml:space="preserve">
     <value>Perplexity</value>
@@ -673,6 +775,18 @@
        ═══════════════════════════════════════════════════════════════════════════ -->
   <data name="ConfigView_CLIProxy_Title" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LocalProxySection" xml:space="preserve">
+    <value>LOKALER PROXY</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Label" xml:space="preserve">
+    <value>Model-Fallback-Bridge</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Description" xml:space="preserve">
+    <value>Wenn Fallback aktiv ist, behält diese Bridge den öffentlichen Endpunkt und führt CLIProxyAPI dahinter aus.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_InternalPort" xml:space="preserve">
+    <value>Intern :{0}</value>
   </data>
   <data name="ConfigView_CLIProxy_Subtitle" xml:space="preserve">
     <value>Engine-Version, Netzwerk und Update-Einstellungen.</value>

@@ -70,6 +70,93 @@
   <data name="Sidebar_Quota" xml:space="preserve">
     <value>الحصة</value>
   </data>
+  <data name="Sidebar_Fallback" xml:space="preserve">
+    <value>احتياطي</value>
+  </data>
+  <data name="Fallback_Title" xml:space="preserve">
+    <value>احتياطي النماذج</value>
+  </data>
+  <data name="Fallback_Experimental" xml:space="preserve">
+    <value>تجريبي</value>
+  </data>
+  <data name="Fallback_Subtitle" xml:space="preserve">
+    <value>تُربط النماذج الافتراضية بنماذج موفّرين حقيقية مع تحوّل احتياطي تلقائي عند نفاد الحصة.</value>
+  </data>
+  <data name="Fallback_SettingsSection" xml:space="preserve">
+    <value>الإعدادات</value>
+  </data>
+  <data name="Fallback_Enable_Label" xml:space="preserve">
+    <value>تفعيل الاحتياطي</value>
+  </data>
+  <data name="Fallback_Enable_Description" xml:space="preserve">
+    <value>عند التفعيل، تتحوّل النماذج الافتراضية تلقائيًا إلى موفّرين بدلاء عند نفاد الحصة.</value>
+  </data>
+  <data name="Fallback_RouteCaching_Label" xml:space="preserve">
+    <value>تخزين المسارات الناجحة مؤقتًا</value>
+  </data>
+  <data name="Fallback_RouteCaching_Description" xml:space="preserve">
+    <value>يعيد استخدام آخر إدخال ناجح للمدة المحددة قبل إعادة المحاولة من البداية.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Label" xml:space="preserve">
+    <value>مدة التخزين المؤقت</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Description" xml:space="preserve">
+    <value>مدة الاستمرار في استخدام آخر مسار احتياطي ناجح.</value>
+  </data>
+  <data name="Fallback_VirtualModelsSection" xml:space="preserve">
+    <value>النماذج الافتراضية</value>
+  </data>
+  <data name="Fallback_NewModel_Watermark" xml:space="preserve">
+    <value>اسم النموذج الافتراضي (مثل my-opus-thinking)</value>
+  </data>
+  <data name="Fallback_AddModel" xml:space="preserve">
+    <value>إضافة نموذج</value>
+  </data>
+  <data name="Fallback_RemoveModel_Tooltip" xml:space="preserve">
+    <value>إزالة النموذج الافتراضي</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Title" xml:space="preserve">
+    <value>إضافة نموذج افتراضي</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Subtitle" xml:space="preserve">
+    <value>اختر أحد النماذج التي يعرضها CLIProxyAPI حاليًا.</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Title" xml:space="preserve">
+    <value>ابدأ الخادم أولاً</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Description" xml:space="preserve">
+    <value>يحتاج Tunnel Agent إلى تشغيل CLIProxyAPI لقراءة /v1/models وربط نماذج الموفّرين المتاحة.</value>
+  </data>
+  <data name="Fallback_Empty" xml:space="preserve">
+    <value>لا توجد نماذج افتراضية بعد. أضف واحدًا أعلاه لبدء سلسلة احتياطية.</value>
+  </data>
+  <data name="Fallback_AddEntry" xml:space="preserve">
+    <value>إضافة إدخال</value>
+  </data>
+  <data name="Fallback_AddEntry_Tooltip" xml:space="preserve">
+    <value>أضف نموذجًا احتياطيًا إلى هذه السلسلة</value>
+  </data>
+  <data name="Fallback_RemoveEntry_Tooltip" xml:space="preserve">
+    <value>إزالة الإدخال (أبقِ واحدًا على الأقل)</value>
+  </data>
+  <data name="Fallback_AddEntry_Title" xml:space="preserve">
+    <value>إضافة إدخال احتياطي</value>
+  </data>
+  <data name="Fallback_Entry_Provider" xml:space="preserve">
+    <value>معرّف الموفّر</value>
+  </data>
+  <data name="Fallback_Entry_Model" xml:space="preserve">
+    <value>معرّف النموذج</value>
+  </data>
+  <data name="Fallback_Entry_Pick" xml:space="preserve">
+    <value>اختر نموذج موفّر…</value>
+  </data>
+  <data name="Fallback_Footnote" xml:space="preserve">
+    <value>تُربط النماذج الافتراضية بنماذج موفّرين حقيقية مع تحوّل احتياطي تلقائي عند نفاد الحصة. وجّه وكيلك إلى اسم نموذج افتراضي لاستخدام السلسلة.</value>
+  </data>
+  <data name="Fallback_CreditPrefix" xml:space="preserve">
+    <value>مستوحى من</value>
+  </data>
   <data name="Sidebar_Agents" xml:space="preserve">
     <value>الوكلاء</value>
   </data>
@@ -82,8 +169,23 @@
   <data name="Sidebar_Status" xml:space="preserve">
     <value>الحالة</value>
   </data>
+  <data name="Sidebar_ProxyCard_Title" xml:space="preserve">
+    <value>وكيل محلي</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Subtitle" xml:space="preserve">
+    <value>:{0}</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Hint" xml:space="preserve">
+    <value>فتح إعدادات الوكيل</value>
+  </data>
   <data name="Sidebar_CLIProxyAPI" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="Sidebar_CLIProxyAPI_StatusTooltip" xml:space="preserve">
+    <value>فتح موفري CLIProxyAPI</value>
+  </data>
+  <data name="Sidebar_Perplexity_StatusTooltip" xml:space="preserve">
+    <value>فتح موفري Perplexity</value>
   </data>
   <data name="Sidebar_Perplexity" xml:space="preserve">
     <value>Perplexity</value>
@@ -673,6 +775,18 @@
        ═══════════════════════════════════════════════════════════════════════════ -->
   <data name="ConfigView_CLIProxy_Title" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LocalProxySection" xml:space="preserve">
+    <value>وكيل محلي</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Label" xml:space="preserve">
+    <value>جسر Model Fallback</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Description" xml:space="preserve">
+    <value>عند تفعيل Fallback، يحافظ هذا الجسر على نقطة النهاية العامة ويشغّل CLIProxyAPI خلفها.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_InternalPort" xml:space="preserve">
+    <value>داخلي :{0}</value>
   </data>
   <data name="ConfigView_CLIProxy_Subtitle" xml:space="preserve">
     <value>إصدار المحرك والشبكة وإعدادات التحديث.</value>

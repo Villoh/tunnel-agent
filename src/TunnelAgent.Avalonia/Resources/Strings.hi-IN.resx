@@ -70,6 +70,93 @@
   <data name="Sidebar_Quota" xml:space="preserve">
     <value>कोटा</value>
   </data>
+  <data name="Sidebar_Fallback" xml:space="preserve">
+    <value>फ़ॉलबैक</value>
+  </data>
+  <data name="Fallback_Title" xml:space="preserve">
+    <value>मॉडल फ़ॉलबैक</value>
+  </data>
+  <data name="Fallback_Experimental" xml:space="preserve">
+    <value>प्रायोगिक</value>
+  </data>
+  <data name="Fallback_Subtitle" xml:space="preserve">
+    <value>वर्चुअल मॉडल असली प्रोवाइडर मॉडल से मैप होते हैं और कोटा समाप्त होने पर स्वतः फ़ॉलबैक करते हैं।</value>
+  </data>
+  <data name="Fallback_SettingsSection" xml:space="preserve">
+    <value>सेटिंग्स</value>
+  </data>
+  <data name="Fallback_Enable_Label" xml:space="preserve">
+    <value>फ़ॉलबैक सक्षम करें</value>
+  </data>
+  <data name="Fallback_Enable_Description" xml:space="preserve">
+    <value>सक्षम होने पर, कोटा समाप्त होने पर वर्चुअल मॉडल स्वतः वैकल्पिक प्रोवाइडर पर चले जाते हैं।</value>
+  </data>
+  <data name="Fallback_RouteCaching_Label" xml:space="preserve">
+    <value>काम करने वाले रूट कैश करें</value>
+  </data>
+  <data name="Fallback_RouteCaching_Description" xml:space="preserve">
+    <value>ऊपर से फिर प्रयास करने से पहले चुनी गई अवधि तक अंतिम सफल एंट्री का दोबारा उपयोग करता है.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Label" xml:space="preserve">
+    <value>कैश अवधि</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Description" xml:space="preserve">
+    <value>अंतिम सफल fallback route को कितनी देर तक उपयोग करना है.</value>
+  </data>
+  <data name="Fallback_VirtualModelsSection" xml:space="preserve">
+    <value>वर्चुअल मॉडल</value>
+  </data>
+  <data name="Fallback_NewModel_Watermark" xml:space="preserve">
+    <value>वर्चुअल मॉडल नाम (उदा. my-opus-thinking)</value>
+  </data>
+  <data name="Fallback_AddModel" xml:space="preserve">
+    <value>मॉडल जोड़ें</value>
+  </data>
+  <data name="Fallback_RemoveModel_Tooltip" xml:space="preserve">
+    <value>वर्चुअल मॉडल हटाएँ</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Title" xml:space="preserve">
+    <value>वर्चुअल मॉडल जोड़ें</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Subtitle" xml:space="preserve">
+    <value>CLIProxyAPI द्वारा अभी उपलब्ध कराए गए मॉडलों में से एक चुनें।</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Title" xml:space="preserve">
+    <value>पहले सर्वर शुरू करें</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Description" xml:space="preserve">
+    <value>Tunnel Agent को /v1/models पढ़ने और उपलब्ध प्रोवाइडर मॉडल मैप करने के लिए CLIProxyAPI चलना चाहिए।</value>
+  </data>
+  <data name="Fallback_Empty" xml:space="preserve">
+    <value>अभी कोई वर्चुअल मॉडल नहीं है। फ़ॉलबैक श्रृंखला शुरू करने के लिए ऊपर एक जोड़ें।</value>
+  </data>
+  <data name="Fallback_AddEntry" xml:space="preserve">
+    <value>प्रविष्टि जोड़ें</value>
+  </data>
+  <data name="Fallback_AddEntry_Tooltip" xml:space="preserve">
+    <value>इस श्रृंखला में एक फ़ॉलबैक मॉडल जोड़ें</value>
+  </data>
+  <data name="Fallback_RemoveEntry_Tooltip" xml:space="preserve">
+    <value>प्रविष्टि हटाएँ (कम से कम एक रखें)</value>
+  </data>
+  <data name="Fallback_AddEntry_Title" xml:space="preserve">
+    <value>फ़ॉलबैक प्रविष्टि जोड़ें</value>
+  </data>
+  <data name="Fallback_Entry_Provider" xml:space="preserve">
+    <value>प्रोवाइडर आईडी</value>
+  </data>
+  <data name="Fallback_Entry_Model" xml:space="preserve">
+    <value>मॉडल आईडी</value>
+  </data>
+  <data name="Fallback_Entry_Pick" xml:space="preserve">
+    <value>एक प्रोवाइडर मॉडल चुनें…</value>
+  </data>
+  <data name="Fallback_Footnote" xml:space="preserve">
+    <value>वर्चुअल मॉडल असली प्रोवाइडर मॉडल से मैप होते हैं और कोटा समाप्त होने पर स्वतः फ़ॉलबैक करते हैं। श्रृंखला का उपयोग करने के लिए अपने एजेंट को किसी वर्चुअल मॉडल नाम पर इंगित करें।</value>
+  </data>
+  <data name="Fallback_CreditPrefix" xml:space="preserve">
+    <value>प्रेरणा स्रोत:</value>
+  </data>
   <data name="Sidebar_Agents" xml:space="preserve">
     <value>एजेंट</value>
   </data>
@@ -82,8 +169,23 @@
   <data name="Sidebar_Status" xml:space="preserve">
     <value>स्थिति</value>
   </data>
+  <data name="Sidebar_ProxyCard_Title" xml:space="preserve">
+    <value>स्थानीय प्रॉक्सी</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Subtitle" xml:space="preserve">
+    <value>:{0}</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Hint" xml:space="preserve">
+    <value>प्रॉक्सी कॉन्फ़िगरेशन खोलें</value>
+  </data>
   <data name="Sidebar_CLIProxyAPI" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="Sidebar_CLIProxyAPI_StatusTooltip" xml:space="preserve">
+    <value>CLIProxyAPI प्रदाता खोलें</value>
+  </data>
+  <data name="Sidebar_Perplexity_StatusTooltip" xml:space="preserve">
+    <value>Perplexity प्रदाता खोलें</value>
   </data>
   <data name="Sidebar_Perplexity" xml:space="preserve">
     <value>Perplexity</value>
@@ -673,6 +775,18 @@
        ═══════════════════════════════════════════════════════════════════════════ -->
   <data name="ConfigView_CLIProxy_Title" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LocalProxySection" xml:space="preserve">
+    <value>स्थानीय प्रॉक्सी</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Label" xml:space="preserve">
+    <value>Model Fallback ब्रिज</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Description" xml:space="preserve">
+    <value>Fallback सक्षम होने पर यह ब्रिज public endpoint रखता है और उसके पीछे CLIProxyAPI चलाता है.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_InternalPort" xml:space="preserve">
+    <value>आंतरिक :{0}</value>
   </data>
   <data name="ConfigView_CLIProxy_Subtitle" xml:space="preserve">
     <value>इंजन वर्शन, नेटवर्क, और अपडेट सेटिंग्स।</value>

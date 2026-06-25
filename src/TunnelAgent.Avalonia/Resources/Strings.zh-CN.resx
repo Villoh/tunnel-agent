@@ -70,6 +70,93 @@
   <data name="Sidebar_Quota" xml:space="preserve">
     <value>配额</value>
   </data>
+  <data name="Sidebar_Fallback" xml:space="preserve">
+    <value>回退</value>
+  </data>
+  <data name="Fallback_Title" xml:space="preserve">
+    <value>模型回退</value>
+  </data>
+  <data name="Fallback_Experimental" xml:space="preserve">
+    <value>实验性</value>
+  </data>
+  <data name="Fallback_Subtitle" xml:space="preserve">
+    <value>虚拟模型映射到真实的提供商模型，当配额耗尽时自动回退。</value>
+  </data>
+  <data name="Fallback_SettingsSection" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Fallback_Enable_Label" xml:space="preserve">
+    <value>启用回退</value>
+  </data>
+  <data name="Fallback_Enable_Description" xml:space="preserve">
+    <value>启用后，当配额耗尽时，虚拟模型将自动回退到备用提供商。</value>
+  </data>
+  <data name="Fallback_RouteCaching_Label" xml:space="preserve">
+    <value>缓存可用路由</value>
+  </data>
+  <data name="Fallback_RouteCaching_Description" xml:space="preserve">
+    <value>在重新从顶部尝试前，在所选时长内复用上一次成功的条目。</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Label" xml:space="preserve">
+    <value>缓存时长</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Description" xml:space="preserve">
+    <value>保持使用上一次成功回退路由的时长。</value>
+  </data>
+  <data name="Fallback_VirtualModelsSection" xml:space="preserve">
+    <value>虚拟模型</value>
+  </data>
+  <data name="Fallback_NewModel_Watermark" xml:space="preserve">
+    <value>虚拟模型名称（例如 my-opus-thinking）</value>
+  </data>
+  <data name="Fallback_AddModel" xml:space="preserve">
+    <value>添加模型</value>
+  </data>
+  <data name="Fallback_RemoveModel_Tooltip" xml:space="preserve">
+    <value>删除虚拟模型</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Title" xml:space="preserve">
+    <value>添加虚拟模型</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Subtitle" xml:space="preserve">
+    <value>选择 CLIProxyAPI 当前公开的模型之一。</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Title" xml:space="preserve">
+    <value>请先启动服务器</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Description" xml:space="preserve">
+    <value>Tunnel Agent 需要 CLIProxyAPI 正在运行，才能读取 /v1/models 并映射可用的提供商模型。</value>
+  </data>
+  <data name="Fallback_Empty" xml:space="preserve">
+    <value>暂无虚拟模型。在上方添加一个以开始构建回退链。</value>
+  </data>
+  <data name="Fallback_AddEntry" xml:space="preserve">
+    <value>添加条目</value>
+  </data>
+  <data name="Fallback_AddEntry_Tooltip" xml:space="preserve">
+    <value>向此链添加一个回退模型</value>
+  </data>
+  <data name="Fallback_RemoveEntry_Tooltip" xml:space="preserve">
+    <value>删除条目（至少保留一个）</value>
+  </data>
+  <data name="Fallback_AddEntry_Title" xml:space="preserve">
+    <value>添加回退条目</value>
+  </data>
+  <data name="Fallback_Entry_Provider" xml:space="preserve">
+    <value>提供商 ID</value>
+  </data>
+  <data name="Fallback_Entry_Model" xml:space="preserve">
+    <value>模型 ID</value>
+  </data>
+  <data name="Fallback_Entry_Pick" xml:space="preserve">
+    <value>选择一个提供商模型…</value>
+  </data>
+  <data name="Fallback_Footnote" xml:space="preserve">
+    <value>虚拟模型映射到真实的提供商模型，当配额耗尽时自动回退。将你的智能体指向某个虚拟模型名称即可使用该链。</value>
+  </data>
+  <data name="Fallback_CreditPrefix" xml:space="preserve">
+    <value>灵感来自</value>
+  </data>
   <data name="Sidebar_Agents" xml:space="preserve">
     <value>智能体</value>
   </data>
@@ -82,8 +169,23 @@
   <data name="Sidebar_Status" xml:space="preserve">
     <value>状态</value>
   </data>
+  <data name="Sidebar_ProxyCard_Title" xml:space="preserve">
+    <value>本地代理</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Subtitle" xml:space="preserve">
+    <value>:{0}</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Hint" xml:space="preserve">
+    <value>打开代理配置</value>
+  </data>
   <data name="Sidebar_CLIProxyAPI" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="Sidebar_CLIProxyAPI_StatusTooltip" xml:space="preserve">
+    <value>打开 CLIProxyAPI 提供商</value>
+  </data>
+  <data name="Sidebar_Perplexity_StatusTooltip" xml:space="preserve">
+    <value>打开 Perplexity 提供商</value>
   </data>
   <data name="Sidebar_Perplexity" xml:space="preserve">
     <value>Perplexity</value>
@@ -673,6 +775,18 @@
        ═══════════════════════════════════════════════════════════════════════════ -->
   <data name="ConfigView_CLIProxy_Title" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LocalProxySection" xml:space="preserve">
+    <value>本地代理</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Label" xml:space="preserve">
+    <value>模型回退桥接</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Description" xml:space="preserve">
+    <value>启用 Fallback 时，此桥接保留公共端点，并在其后运行 CLIProxyAPI。</value>
+  </data>
+  <data name="ConfigView_CLIProxy_InternalPort" xml:space="preserve">
+    <value>内部 :{0}</value>
   </data>
   <data name="ConfigView_CLIProxy_Subtitle" xml:space="preserve">
     <value>引擎版本、网络和更新设置。</value>

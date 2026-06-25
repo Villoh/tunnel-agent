@@ -20,7 +20,9 @@ public sealed class EngineService : IManagedEngine
     private readonly ConfigService _config;
     private readonly ProcessService _process;
     private readonly SettingsService _settings;
+    private readonly FallbackProxyService _bridge;
     private readonly SemaphoreSlim _updateLock = new(1, 1);
+    private int _publicPort;
 
     public EngineDefinition Definition { get; } = EngineCatalog.CliProxyApi;
 
@@ -36,7 +38,9 @@ public sealed class EngineService : IManagedEngine
     public bool UpdateAvailable           => _download.UpdateAvailable;
     public double DownloadProgress        => _download.DownloadProgress;
     public bool IsRunning           => _process.IsRunning;
-    public int Port                 => _process.Port;
+    // When the fallback bridge is active CLIProxyAPI binds an internal port while the
+    // bridge owns the public port; expose the public port so agents/UI stay correct.
+    public int Port                 => _bridge.IsRunning ? _publicPort : _process.Port;
     public string? LastError        => _download.IntegrityError ?? _process.LastError;
     public EngineErrorKind LastErrorKind => _download.IntegrityError is not null ? EngineErrorKind.None : _process.LastErrorKind;
 
@@ -48,6 +52,9 @@ public sealed class EngineService : IManagedEngine
         _download = new DownloadService();
         _config   = new ConfigService(settings);
         _process  = new ProcessService();
+        _bridge   = new FallbackProxyService(
+            () => _settings.Current.Fallback,
+            log: msg => Debug.WriteLine($"[FallbackBridge] {msg}"));
 
         _download.StateChanged += OnSubStateChanged;
         _process.StateChanged  += OnSubStateChanged;
@@ -99,17 +106,35 @@ public sealed class EngineService : IManagedEngine
     {
         if (!DownloadService.IsBinaryInstalled()) return;
 
-        await _config.WriteConfigAsync();
+        _bridge.Stop();
+        _publicPort = _settings.Current.GetOrAddEngine(Definition.Id, Definition.DefaultPort).Port;
+
+        // When fallback is active the bridge owns the public port and CLIProxyAPI
+        // listens on an internal one; otherwise CLIProxyAPI binds the public port directly.
+        var bridgeOn   = _settings.Current.Fallback.HasActiveRoutes;
+        var enginePort = bridgeOn ? FallbackProxyService.InternalPortFor(_publicPort) : _publicPort;
+
+        await _config.WriteConfigAsync(portOverride: bridgeOn ? enginePort : null);
         var defaultKey = TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get("TUNNEL_AGENT_CLIPROXY_API_KEY") ?? "";
         await _process.StartAsync(
             DownloadService.BinaryPath,
             _config.ConfigPath,
-            _settings.Current.GetOrAddEngine(Definition.Id, Definition.DefaultPort).Port,
+            enginePort,
             defaultKey,
             ct);
+
+        if (bridgeOn && _process.IsRunning)
+        {
+            try { _bridge.Start(_publicPort, enginePort); }
+            catch (Exception ex) { Debug.WriteLine($"[EngineService] Bridge failed to start: {ex.Message}"); }
+        }
     }
 
-    public Task StopAsync() => _process.StopAsync();
+    public async Task StopAsync()
+    {
+        _bridge.Stop();
+        await _process.StopAsync();
+    }
 
     public Task WriteConfigAsync() => _config.WriteConfigAsync();
 

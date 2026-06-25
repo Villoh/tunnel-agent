@@ -1,0 +1,288 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TunnelAgent.ViewModels"
+             xmlns:cv="using:TunnelAgent.Converters"
+             xmlns:si="using:IconPacks.Avalonia.SimpleIcons"
+             xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+             xmlns:l="using:TunnelAgent.Services"
+             x:Class="TunnelAgent.Views.FallbackView"
+             x:Name="Root"
+             x:DataType="vm:MainWindowViewModel">
+
+    <UserControl.Resources>
+        <cv:HexToBrushConverter x:Key="HexBrush" />
+        <DataTemplate x:Key="ModelOptionTemplate" x:DataType="vm:FallbackModelOption">
+            <Grid ColumnDefinitions="22,*" ColumnSpacing="8">
+                <Border Grid.Column="0" Width="20" Height="20" CornerRadius="5" VerticalAlignment="Center"
+                        Background="{Binding LogoColor, Converter={StaticResource HexBrush}}">
+                    <Panel>
+                        <si:PackIconSimpleIcons Kind="{Binding IconKind}" Foreground="White" Width="11" Height="11"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                IsVisible="{Binding !HasCustomIcon}" />
+                        <Viewbox Width="11" Height="11" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                 IsVisible="{Binding HasCustomIcon}">
+                            <Path Data="{Binding CustomIconData}" Fill="White" Stretch="Uniform" />
+                        </Viewbox>
+                    </Panel>
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="0">
+                    <TextBlock Text="{Binding ModelId}" FontSize="12" FontWeight="SemiBold"
+                               FontFamily="Cascadia Mono,Consolas,monospace" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding ProviderName}" Classes="row-desc" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <StackPanel Spacing="0" Margin="0,0,0,24" DataContext="{Binding Fallback}">
+
+        <!-- Header -->
+        <StackPanel Margin="0,0,0,16">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Classes="page-title" Text="{l:Loc Fallback_Title}" />
+                <Border CornerRadius="999" Background="{DynamicResource WarnBrush}" Padding="7,1"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="{l:Loc Fallback_Experimental}" FontSize="11" Foreground="White" />
+                </Border>
+            </StackPanel>
+            <TextBlock Classes="page-sub" Text="{l:Loc Fallback_Subtitle}" />
+        </StackPanel>
+
+        <!-- Settings -->
+        <TextBlock Classes="section-label" Text="{l:Loc Fallback_SettingsSection}" />
+        <Border Classes="card" Margin="0,0,0,18">
+            <StackPanel>
+                <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                    <StackPanel>
+                        <TextBlock Classes="row-label" Text="{l:Loc Fallback_Enable_Label}" />
+                        <TextBlock Classes="row-desc" Text="{l:Loc Fallback_Enable_Description}" />
+                    </StackPanel>
+                    <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                  IsChecked="{Binding IsEnabled, Mode=TwoWay}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Virtual models header -->
+        <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,10" ColumnSpacing="8">
+            <TextBlock Classes="section-label" Text="{l:Loc Fallback_VirtualModelsSection}"
+                       VerticalAlignment="Center" Margin="0" />
+            <Border Grid.Column="1" Classes="chip" Background="{DynamicResource AccentSoftBrush}" VerticalAlignment="Center">
+                <TextBlock Text="{Binding VirtualModelCount}" FontSize="11" Foreground="{DynamicResource AccentBrush}" />
+            </Border>
+            <Button Grid.Column="2" x:Name="AddModelButton" Classes="icon"
+                    ToolTip.Tip="{l:Loc Fallback_AddModel}"
+                    Command="{Binding OpenAddVirtualModelPopupCommand}">
+                <lucide:PackIconLucide Kind="Plus" Width="15" Height="15" />
+
+                <Button.Flyout>
+                    <Flyout Placement="BottomEdgeAlignedRight" FlyoutPresenterClasses="fallback-flyout">
+                        <StackPanel Spacing="12" Width="360">
+                            <StackPanel Spacing="2">
+                                <TextBlock Classes="row-label" Text="{l:Loc Fallback_AddModelPopup_Title}" />
+                                <TextBlock Classes="row-desc" Text="{l:Loc Fallback_AddModelPopup_Subtitle}" />
+                            </StackPanel>
+
+                            <Border Background="#18F59E0B" BorderBrush="#44F59E0B" BorderThickness="1" CornerRadius="8" Padding="10"
+                                    IsVisible="{Binding !HasAvailableModels}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Classes="row-label" Text="{l:Loc Fallback_AddModelPopup_ServerWarning_Title}" />
+                                    <TextBlock Classes="row-desc" TextWrapping="Wrap"
+                                               Text="{l:Loc Fallback_AddModelPopup_ServerWarning_Description}" />
+                                </StackPanel>
+                            </Border>
+
+                            <StackPanel Spacing="10" IsVisible="{Binding HasAvailableModels}">
+                                <ComboBox HorizontalAlignment="Stretch"
+                                          ItemsSource="{Binding AvailableModels}"
+                                          SelectedItem="{Binding SelectedNewModelOption, Mode=TwoWay}"
+                                          PlaceholderText="{l:Loc Fallback_Entry_Pick}"
+                                          ItemTemplate="{StaticResource ModelOptionTemplate}" />
+                                <Button Classes="app primary" HorizontalAlignment="Right"
+                                        Content="{l:Loc Fallback_AddModel}"
+                                        Command="{Binding AddVirtualModelFromSelectionCommand}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+        </Grid>
+
+        <TextBlock Classes="row-desc" Text="{l:Loc Fallback_Empty}"
+                   IsVisible="{Binding !HasVirtualModels}" Margin="2,2,0,0" />
+
+        <!-- Virtual models list -->
+        <ItemsControl ItemsSource="{Binding VirtualModels}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:VirtualModelEditViewModel">
+                    <Border Classes="card" Margin="0,0,0,8">
+                        <StackPanel>
+                            <!-- Header row -->
+                            <Grid Margin="12,10" ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="10">
+                                <ToggleButton Grid.Column="0" Classes="chevron" Width="22" Height="22" VerticalAlignment="Center"
+                                              IsChecked="{Binding IsExpanded, Mode=TwoWay}">
+                                    <lucide:PackIconLucide Kind="ChevronRight" Width="14" Height="14"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource FgMutedBrush}" />
+                                </ToggleButton>
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13"
+                                               FontFamily="Cascadia Mono,Consolas,monospace"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Classes="row-desc" VerticalAlignment="Center"
+                                                   Text="{Binding EntryCount, StringFormat='{}{0} entries'}" />
+                                        <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding HasRouteState}">
+                                            <Border Width="1" Height="11" VerticalAlignment="Center"
+                                                    Background="{DynamicResource FgFaintBrush}" />
+                                            <Border CornerRadius="999" Background="#1850C878" Padding="7,1" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding RouteProgress}" FontSize="11" Foreground="#50C878" />
+                                            </Border>
+                                            <Border Width="16" Height="16" CornerRadius="4" VerticalAlignment="Center"
+                                                    Background="{Binding RouteLogoColor, Converter={StaticResource HexBrush}}">
+                                                <Panel>
+                                                    <si:PackIconSimpleIcons Kind="{Binding RouteIconKind}" Foreground="White"
+                                                                            Width="10" Height="10"
+                                                                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                            IsVisible="{Binding !RouteHasCustomIcon}" />
+                                                    <Viewbox Width="10" Height="10" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                             IsVisible="{Binding RouteHasCustomIcon}">
+                                                        <Path Data="{Binding RouteCustomIconData}" Fill="White" Stretch="Uniform" />
+                                                    </Viewbox>
+                                                </Panel>
+                                            </Border>
+                                            <TextBlock Text="{Binding RouteModelId}" FontSize="12"
+                                                       Foreground="{DynamicResource FgBrush}"
+                                                       FontFamily="Cascadia Mono,Consolas,monospace" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <lucide:PackIconLucide Grid.Column="2" Kind="CircleCheck" Width="16" Height="16"
+                                                       VerticalAlignment="Center" Foreground="#50C878"
+                                                       IsVisible="{Binding IsModelEnabled}" />
+
+                                <ToggleButton Grid.Column="3" Classes="enable-toggle" VerticalAlignment="Center"
+                                              IsChecked="{Binding IsModelEnabled, Mode=TwoWay}" />
+
+                                <Button Grid.Column="4" Classes="icon-btn" VerticalAlignment="Center"
+                                        ToolTip.Tip="{l:Loc Fallback_RemoveModel_Tooltip}"
+                                        Command="{Binding #Root.DataContext.Fallback.RemoveVirtualModelCommand}"
+                                        CommandParameter="{Binding}">
+                                    <lucide:PackIconLucide Kind="Trash2" Width="14" Height="14" Foreground="#D46A6A" />
+                                </Button>
+                            </Grid>
+
+                            <Border Classes="collapsible" Classes.expanded="{Binding IsExpanded}">
+                              <StackPanel>
+                                <Border Classes="row-divider" />
+
+                                <!-- Entries -->
+                                <ItemsControl ItemsSource="{Binding Entries}" Margin="12,6,12,2">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:FallbackEntryEditViewModel">
+                                            <Grid ColumnDefinitions="26,28,*,Auto" ColumnSpacing="10" Margin="0,4">
+                                                <Border Grid.Column="0" Width="22" Height="22" CornerRadius="999"
+                                                        Background="#14000000" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Position}" FontSize="11"
+                                                               Foreground="{DynamicResource FgMutedBrush}"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+
+                                                <Border Grid.Column="1" Width="26" Height="26" CornerRadius="6"
+                                                        VerticalAlignment="Center"
+                                                        Background="{Binding LogoColor, Converter={StaticResource HexBrush}}">
+                                                    <Panel>
+                                                        <si:PackIconSimpleIcons Kind="{Binding IconKind}" Foreground="White"
+                                                                                Width="13" Height="13"
+                                                                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                                IsVisible="{Binding !HasCustomIcon}" />
+                                                        <Viewbox Width="13" Height="13" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                 IsVisible="{Binding HasCustomIcon}">
+                                                            <Path Data="{Binding CustomIconData}" Fill="White" Stretch="Uniform" />
+                                                        </Viewbox>
+                                                    </Panel>
+                                                </Border>
+
+                                                <StackPanel Grid.Column="2" VerticalAlignment="Center" MinWidth="0">
+                                                    <TextBlock Text="{Binding ProviderLabel}" FontWeight="SemiBold" FontSize="12"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Text="{Binding ModelId}" Classes="row-desc"
+                                                               FontFamily="Cascadia Mono,Consolas,monospace"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                </StackPanel>
+
+                                                <Button Grid.Column="3" Classes="icon-btn" VerticalAlignment="Center"
+                                                        IsEnabled="{Binding $parent[ItemsControl].DataContext.CanRemoveEntry}"
+                                                        ToolTip.Tip="{l:Loc Fallback_RemoveEntry_Tooltip}"
+                                                        Command="{Binding $parent[ItemsControl].DataContext.RemoveEntryCommand}"
+                                                        CommandParameter="{Binding}">
+                                                    <lucide:PackIconLucide Kind="CircleMinus" Width="15" Height="15" Foreground="#D46A6A" />
+                                                </Button>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <!-- Add entry -->
+                                <Button Classes="link-add" Margin="12,4,12,10"
+                                        HorizontalAlignment="Left"
+                                        ToolTip.Tip="{l:Loc Fallback_AddEntry_Tooltip}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <lucide:PackIconLucide Kind="CirclePlus" Width="14" Height="14"
+                                                               Foreground="{DynamicResource AccentBrush}" />
+                                        <TextBlock Text="{l:Loc Fallback_AddEntry}" Foreground="{DynamicResource AccentBrush}" />
+                                    </StackPanel>
+
+                                    <Button.Flyout>
+                                        <Flyout Placement="BottomEdgeAlignedLeft" FlyoutPresenterClasses="fallback-flyout">
+                                            <StackPanel Spacing="12" Width="360">
+                                                <StackPanel Spacing="2">
+                                                    <TextBlock Classes="row-label" Text="{l:Loc Fallback_AddEntry_Title}" />
+                                                    <TextBlock Classes="row-desc" Text="{l:Loc Fallback_AddModelPopup_Subtitle}" />
+                                                </StackPanel>
+
+                                                <Border Background="#18F59E0B" BorderBrush="#44F59E0B" BorderThickness="1" CornerRadius="8" Padding="10"
+                                                        IsVisible="{Binding !HasAvailableOptions}">
+                                                    <StackPanel Spacing="4">
+                                                        <TextBlock Classes="row-label" Text="{l:Loc Fallback_AddModelPopup_ServerWarning_Title}" />
+                                                        <TextBlock Classes="row-desc" TextWrapping="Wrap"
+                                                                   Text="{l:Loc Fallback_AddModelPopup_ServerWarning_Description}" />
+                                                    </StackPanel>
+                                                </Border>
+
+                                                <StackPanel Spacing="10" IsVisible="{Binding HasAvailableOptions}">
+                                                    <ComboBox HorizontalAlignment="Stretch"
+                                                              ItemsSource="{Binding AvailableOptions}"
+                                                              SelectedItem="{Binding NewEntrySelection, Mode=TwoWay}"
+                                                              PlaceholderText="{l:Loc Fallback_Entry_Pick}"
+                                                              ItemTemplate="{StaticResource ModelOptionTemplate}" />
+                                                    <Button Classes="app primary" HorizontalAlignment="Right"
+                                                            Content="{l:Loc Fallback_AddEntry}"
+                                                            Command="{Binding AddEntryCommand}" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                              </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <TextBlock Classes="row-desc" Margin="2,8,0,0" TextWrapping="Wrap"
+                   Text="{l:Loc Fallback_Footnote}" />
+        <StackPanel Orientation="Horizontal" Spacing="4" Margin="2,6,0,0">
+            <TextBlock Classes="row-desc" Text="{l:Loc Fallback_CreditPrefix}" VerticalAlignment="Center" />
+            <Button Classes="link" Padding="0" VerticalAlignment="Center"
+                    Tag="https://github.com/nguyenphutrong/quotio"
+                    Click="OnOpenUrlClick">
+                <TextBlock Text="Quotio" FontSize="12" />
+            </Button>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

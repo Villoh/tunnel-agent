@@ -161,7 +161,7 @@
                                                     Command="{Binding #Root.DataContext.RemovePerplexityAccountCommand}"
                                                     CommandParameter="{Binding}">
                                                 <lucide:PackIconLucide Kind="Trash2" Width="13" Height="13"
-                                                                       Foreground="{DynamicResource FgMutedBrush}" />
+                                                                       Foreground="#D46A6A" />
                                             </Button>
                                         </Grid>
                                     </Border>
@@ -233,7 +233,7 @@
                                                     <Button Classes="icon-btn" ToolTip.Tip="{l:Loc ProvidersView_Provider_RemoveAllTooltip}" IsVisible="{Binding Connected}"
                                                             IsEnabled="{Binding IsConnecting, Converter={StaticResource InvertBool}}"
                                                             Click="OnOAuthDisconnect" Tag="{Binding}">
-                                                        <lucide:PackIconLucide Kind="Trash2" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                                                        <lucide:PackIconLucide Kind="Trash2" Width="14" Height="14" Foreground="#D46A6A" />
                                                     </Button>
                                                     <Button Classes="icon-btn" ToolTip.Tip="{l:Loc ProvidersView_Provider_AddApiKeyTooltip}"
                                                             IsVisible="{Binding SupportsOAuth, Converter={StaticResource InvertBool}}"
@@ -256,7 +256,7 @@
                                                             IsVisible="{Binding IsCustomProvider}"
                                                             Command="{Binding #Root.DataContext.RemoveCustomProviderCommand}"
                                                             CommandParameter="{Binding}">
-                                                        <lucide:PackIconLucide Kind="Trash2" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                                                        <lucide:PackIconLucide Kind="Trash2" Width="14" Height="14" Foreground="#D46A6A" />
                                                     </Button>
                                                 </StackPanel>
                                                 <Panel Grid.Column="4" Width="20" VerticalAlignment="Center">
@@ -302,7 +302,7 @@
                                                                 <Button Grid.Column="3" Classes="icon-btn" ToolTip.Tip="{l:Loc ProvidersView_Provider_RemoveAccountTooltip}"
                                                                         Command="{Binding #Root.DataContext.RemoveAccountCommand}"
                                                                         CommandParameter="{Binding}" VerticalAlignment="Center">
-                                                                    <lucide:PackIconLucide Kind="Trash2" Width="13" Height="13" Foreground="{DynamicResource FgMutedBrush}" />
+                                                                    <lucide:PackIconLucide Kind="Trash2" Width="13" Height="13" Foreground="#D46A6A" />
                                                                 </Button>
                                                             </Grid>
                                                         </StackPanel>

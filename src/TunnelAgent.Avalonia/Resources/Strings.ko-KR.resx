@@ -70,6 +70,93 @@
   <data name="Sidebar_Quota" xml:space="preserve">
     <value>할당량</value>
   </data>
+  <data name="Sidebar_Fallback" xml:space="preserve">
+    <value>폴백</value>
+  </data>
+  <data name="Fallback_Title" xml:space="preserve">
+    <value>모델 폴백</value>
+  </data>
+  <data name="Fallback_Experimental" xml:space="preserve">
+    <value>실험적</value>
+  </data>
+  <data name="Fallback_Subtitle" xml:space="preserve">
+    <value>가상 모델은 실제 공급자 모델에 매핑되며 할당량이 소진되면 자동으로 폴백합니다.</value>
+  </data>
+  <data name="Fallback_SettingsSection" xml:space="preserve">
+    <value>설정</value>
+  </data>
+  <data name="Fallback_Enable_Label" xml:space="preserve">
+    <value>폴백 사용</value>
+  </data>
+  <data name="Fallback_Enable_Description" xml:space="preserve">
+    <value>사용하면 할당량이 소진될 때 가상 모델이 자동으로 대체 공급자로 폴백합니다.</value>
+  </data>
+  <data name="Fallback_RouteCaching_Label" xml:space="preserve">
+    <value>작동하는 경로 캐시</value>
+  </data>
+  <data name="Fallback_RouteCaching_Description" xml:space="preserve">
+    <value>처음부터 다시 시도하기 전에 선택한 기간 동안 마지막으로 성공한 항목을 재사용합니다.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Label" xml:space="preserve">
+    <value>캐시 기간</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Description" xml:space="preserve">
+    <value>마지막으로 성공한 폴백 경로를 계속 사용할 기간입니다.</value>
+  </data>
+  <data name="Fallback_VirtualModelsSection" xml:space="preserve">
+    <value>가상 모델</value>
+  </data>
+  <data name="Fallback_NewModel_Watermark" xml:space="preserve">
+    <value>가상 모델 이름 (예: my-opus-thinking)</value>
+  </data>
+  <data name="Fallback_AddModel" xml:space="preserve">
+    <value>모델 추가</value>
+  </data>
+  <data name="Fallback_RemoveModel_Tooltip" xml:space="preserve">
+    <value>가상 모델 제거</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Title" xml:space="preserve">
+    <value>가상 모델 추가</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Subtitle" xml:space="preserve">
+    <value>현재 CLIProxyAPI가 노출하는 모델 중 하나를 선택하세요.</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Title" xml:space="preserve">
+    <value>먼저 서버를 시작하세요</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Description" xml:space="preserve">
+    <value>Tunnel Agent가 /v1/models를 읽고 사용 가능한 공급자 모델을 매핑하려면 CLIProxyAPI가 실행 중이어야 합니다.</value>
+  </data>
+  <data name="Fallback_Empty" xml:space="preserve">
+    <value>아직 가상 모델이 없습니다. 위에서 추가하여 폴백 체인을 시작하세요.</value>
+  </data>
+  <data name="Fallback_AddEntry" xml:space="preserve">
+    <value>항목 추가</value>
+  </data>
+  <data name="Fallback_AddEntry_Tooltip" xml:space="preserve">
+    <value>이 체인에 폴백 모델 추가</value>
+  </data>
+  <data name="Fallback_RemoveEntry_Tooltip" xml:space="preserve">
+    <value>항목 제거 (최소 하나는 유지)</value>
+  </data>
+  <data name="Fallback_AddEntry_Title" xml:space="preserve">
+    <value>폴백 항목 추가</value>
+  </data>
+  <data name="Fallback_Entry_Provider" xml:space="preserve">
+    <value>공급자 ID</value>
+  </data>
+  <data name="Fallback_Entry_Model" xml:space="preserve">
+    <value>모델 ID</value>
+  </data>
+  <data name="Fallback_Entry_Pick" xml:space="preserve">
+    <value>공급자 모델 선택…</value>
+  </data>
+  <data name="Fallback_Footnote" xml:space="preserve">
+    <value>가상 모델은 실제 공급자 모델에 매핑되며 할당량이 소진되면 자동으로 폴백합니다. 에이전트를 가상 모델 이름으로 지정하면 체인을 사용합니다.</value>
+  </data>
+  <data name="Fallback_CreditPrefix" xml:space="preserve">
+    <value>영감을 받은 출처:</value>
+  </data>
   <data name="Sidebar_Agents" xml:space="preserve">
     <value>에이전트</value>
   </data>
@@ -82,8 +169,23 @@
   <data name="Sidebar_Status" xml:space="preserve">
     <value>상태</value>
   </data>
+  <data name="Sidebar_ProxyCard_Title" xml:space="preserve">
+    <value>로컬 프록시</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Subtitle" xml:space="preserve">
+    <value>:{0}</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Hint" xml:space="preserve">
+    <value>프록시 구성 열기</value>
+  </data>
   <data name="Sidebar_CLIProxyAPI" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="Sidebar_CLIProxyAPI_StatusTooltip" xml:space="preserve">
+    <value>CLIProxyAPI 공급자 열기</value>
+  </data>
+  <data name="Sidebar_Perplexity_StatusTooltip" xml:space="preserve">
+    <value>Perplexity 공급자 열기</value>
   </data>
   <data name="Sidebar_Perplexity" xml:space="preserve">
     <value>Perplexity</value>
@@ -673,6 +775,18 @@
        ═══════════════════════════════════════════════════════════════════════════ -->
   <data name="ConfigView_CLIProxy_Title" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LocalProxySection" xml:space="preserve">
+    <value>로컬 프록시</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Label" xml:space="preserve">
+    <value>Model Fallback 브리지</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Description" xml:space="preserve">
+    <value>Fallback이 켜져 있으면 이 브리지가 공개 엔드포인트를 유지하고 뒤에서 CLIProxyAPI를 실행합니다.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_InternalPort" xml:space="preserve">
+    <value>내부 :{0}</value>
   </data>
   <data name="ConfigView_CLIProxy_Subtitle" xml:space="preserve">
     <value>엔진 버전, 네트워크 및 업데이트 설정입니다.</value>

@@ -70,6 +70,93 @@
   <data name="Sidebar_Quota" xml:space="preserve">
     <value>Kota</value>
   </data>
+  <data name="Sidebar_Fallback" xml:space="preserve">
+    <value>Yedek</value>
+  </data>
+  <data name="Fallback_Title" xml:space="preserve">
+    <value>Model Yedeği</value>
+  </data>
+  <data name="Fallback_Experimental" xml:space="preserve">
+    <value>Deneysel</value>
+  </data>
+  <data name="Fallback_Subtitle" xml:space="preserve">
+    <value>Sanal modeller gerçek sağlayıcı modellerine eşlenir ve kota tükendiğinde otomatik olarak yedeğe geçer.</value>
+  </data>
+  <data name="Fallback_SettingsSection" xml:space="preserve">
+    <value>Ayarlar</value>
+  </data>
+  <data name="Fallback_Enable_Label" xml:space="preserve">
+    <value>Yedeği etkinleştir</value>
+  </data>
+  <data name="Fallback_Enable_Description" xml:space="preserve">
+    <value>Etkinleştirildiğinde, kota tükendiğinde sanal modeller otomatik olarak alternatif sağlayıcılara geçer.</value>
+  </data>
+  <data name="Fallback_RouteCaching_Label" xml:space="preserve">
+    <value>Çalışan rotaları önbelleğe al</value>
+  </data>
+  <data name="Fallback_RouteCaching_Description" xml:space="preserve">
+    <value>Baştan yeniden denemeden önce son başarılı girdiyi seçilen süre boyunca yeniden kullanır.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Label" xml:space="preserve">
+    <value>Önbellek süresi</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Description" xml:space="preserve">
+    <value>Son başarılı fallback rotasının ne kadar süre kullanılacağı.</value>
+  </data>
+  <data name="Fallback_VirtualModelsSection" xml:space="preserve">
+    <value>Sanal Modeller</value>
+  </data>
+  <data name="Fallback_NewModel_Watermark" xml:space="preserve">
+    <value>Sanal model adı (örn. my-opus-thinking)</value>
+  </data>
+  <data name="Fallback_AddModel" xml:space="preserve">
+    <value>Model ekle</value>
+  </data>
+  <data name="Fallback_RemoveModel_Tooltip" xml:space="preserve">
+    <value>Sanal modeli kaldır</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Title" xml:space="preserve">
+    <value>Sanal model ekle</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Subtitle" xml:space="preserve">
+    <value>CLIProxyAPI tarafından şu anda sunulan modellerden birini seçin.</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Title" xml:space="preserve">
+    <value>Önce sunucuyu başlatın</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Description" xml:space="preserve">
+    <value>Tunnel Agent’ın /v1/models okumak ve kullanılabilir sağlayıcı modellerini eşlemek için CLIProxyAPI’nin çalışmasına ihtiyacı var.</value>
+  </data>
+  <data name="Fallback_Empty" xml:space="preserve">
+    <value>Henüz sanal model yok. Bir yedek zinciri oluşturmak için yukarıdan bir tane ekleyin.</value>
+  </data>
+  <data name="Fallback_AddEntry" xml:space="preserve">
+    <value>Giriş ekle</value>
+  </data>
+  <data name="Fallback_AddEntry_Tooltip" xml:space="preserve">
+    <value>Bu zincire bir yedek model ekleyin</value>
+  </data>
+  <data name="Fallback_RemoveEntry_Tooltip" xml:space="preserve">
+    <value>Girişi kaldır (en az bir tane bırakın)</value>
+  </data>
+  <data name="Fallback_AddEntry_Title" xml:space="preserve">
+    <value>Yedek girişi ekle</value>
+  </data>
+  <data name="Fallback_Entry_Provider" xml:space="preserve">
+    <value>Sağlayıcı kimliği</value>
+  </data>
+  <data name="Fallback_Entry_Model" xml:space="preserve">
+    <value>Model kimliği</value>
+  </data>
+  <data name="Fallback_Entry_Pick" xml:space="preserve">
+    <value>Bir sağlayıcı modeli seçin…</value>
+  </data>
+  <data name="Fallback_Footnote" xml:space="preserve">
+    <value>Sanal modeller gerçek sağlayıcı modellerine eşlenir ve kota tükendiğinde otomatik olarak yedeğe geçer. Zinciri kullanmak için aracınızı bir sanal model adına yönlendirin.</value>
+  </data>
+  <data name="Fallback_CreditPrefix" xml:space="preserve">
+    <value>İlham kaynağı:</value>
+  </data>
   <data name="Sidebar_Agents" xml:space="preserve">
     <value>Aracılar</value>
   </data>
@@ -82,8 +169,23 @@
   <data name="Sidebar_Status" xml:space="preserve">
     <value>DURUM</value>
   </data>
+  <data name="Sidebar_ProxyCard_Title" xml:space="preserve">
+    <value>Yerel Proxy</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Subtitle" xml:space="preserve">
+    <value>:{0}</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Hint" xml:space="preserve">
+    <value>Proxy yapılandırmasını aç</value>
+  </data>
   <data name="Sidebar_CLIProxyAPI" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="Sidebar_CLIProxyAPI_StatusTooltip" xml:space="preserve">
+    <value>CLIProxyAPI sağlayıcılarını aç</value>
+  </data>
+  <data name="Sidebar_Perplexity_StatusTooltip" xml:space="preserve">
+    <value>Perplexity sağlayıcılarını aç</value>
   </data>
   <data name="Sidebar_Perplexity" xml:space="preserve">
     <value>Perplexity</value>
@@ -673,6 +775,18 @@
        ═══════════════════════════════════════════════════════════════════════════ -->
   <data name="ConfigView_CLIProxy_Title" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LocalProxySection" xml:space="preserve">
+    <value>YEREL PROXY</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Label" xml:space="preserve">
+    <value>Model Fallback köprüsü</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Description" xml:space="preserve">
+    <value>Fallback etkinse bu köprü genel endpoint'i korur ve arkasında CLIProxyAPI çalıştırır.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_InternalPort" xml:space="preserve">
+    <value>Dahili :{0}</value>
   </data>
   <data name="ConfigView_CLIProxy_Subtitle" xml:space="preserve">
     <value>Motor sürümü, ağ ve güncelleme ayarları.</value>

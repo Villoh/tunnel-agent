@@ -70,6 +70,93 @@
   <data name="Sidebar_Quota" xml:space="preserve">
     <value>Quota</value>
   </data>
+  <data name="Sidebar_Fallback" xml:space="preserve">
+    <value>Fallback</value>
+  </data>
+  <data name="Fallback_Title" xml:space="preserve">
+    <value>Fallback dei modelli</value>
+  </data>
+  <data name="Fallback_Experimental" xml:space="preserve">
+    <value>Sperimentale</value>
+  </data>
+  <data name="Fallback_Subtitle" xml:space="preserve">
+    <value>I modelli virtuali si mappano a modelli reali dei provider con fallback automatico quando la quota è esaurita.</value>
+  </data>
+  <data name="Fallback_SettingsSection" xml:space="preserve">
+    <value>Impostazioni</value>
+  </data>
+  <data name="Fallback_Enable_Label" xml:space="preserve">
+    <value>Abilita fallback</value>
+  </data>
+  <data name="Fallback_Enable_Description" xml:space="preserve">
+    <value>Se abilitato, i modelli virtuali passano automaticamente a provider alternativi quando la quota è esaurita.</value>
+  </data>
+  <data name="Fallback_RouteCaching_Label" xml:space="preserve">
+    <value>Memorizza le route funzionanti</value>
+  </data>
+  <data name="Fallback_RouteCaching_Description" xml:space="preserve">
+    <value>Riutilizza l'ultima voce riuscita per la durata selezionata prima di riprovare dall'inizio.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Label" xml:space="preserve">
+    <value>Durata cache</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Description" xml:space="preserve">
+    <value>Per quanto tempo continuare a usare l'ultima rotta di fallback riuscita.</value>
+  </data>
+  <data name="Fallback_VirtualModelsSection" xml:space="preserve">
+    <value>Modelli virtuali</value>
+  </data>
+  <data name="Fallback_NewModel_Watermark" xml:space="preserve">
+    <value>Nome del modello virtuale (es. my-opus-thinking)</value>
+  </data>
+  <data name="Fallback_AddModel" xml:space="preserve">
+    <value>Aggiungi modello</value>
+  </data>
+  <data name="Fallback_RemoveModel_Tooltip" xml:space="preserve">
+    <value>Rimuovi modello virtuale</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Title" xml:space="preserve">
+    <value>Aggiungi modello virtuale</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Subtitle" xml:space="preserve">
+    <value>Scegli uno dei modelli attualmente esposti da CLIProxyAPI.</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Title" xml:space="preserve">
+    <value>Avvia prima il server</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Description" xml:space="preserve">
+    <value>Tunnel Agent richiede CLIProxyAPI in esecuzione per leggere /v1/models e mappare i modelli disponibili dei provider.</value>
+  </data>
+  <data name="Fallback_Empty" xml:space="preserve">
+    <value>Ancora nessun modello virtuale. Aggiungine uno sopra per iniziare una catena di fallback.</value>
+  </data>
+  <data name="Fallback_AddEntry" xml:space="preserve">
+    <value>Aggiungi voce</value>
+  </data>
+  <data name="Fallback_AddEntry_Tooltip" xml:space="preserve">
+    <value>Aggiungi un modello di fallback a questa catena</value>
+  </data>
+  <data name="Fallback_RemoveEntry_Tooltip" xml:space="preserve">
+    <value>Rimuovi voce (mantienine almeno una)</value>
+  </data>
+  <data name="Fallback_AddEntry_Title" xml:space="preserve">
+    <value>Aggiungi voce di fallback</value>
+  </data>
+  <data name="Fallback_Entry_Provider" xml:space="preserve">
+    <value>ID provider</value>
+  </data>
+  <data name="Fallback_Entry_Model" xml:space="preserve">
+    <value>ID modello</value>
+  </data>
+  <data name="Fallback_Entry_Pick" xml:space="preserve">
+    <value>Scegli un modello del provider…</value>
+  </data>
+  <data name="Fallback_Footnote" xml:space="preserve">
+    <value>I modelli virtuali si mappano a modelli reali dei provider con fallback automatico quando la quota è esaurita. Punta il tuo agente al nome di un modello virtuale per usare la catena.</value>
+  </data>
+  <data name="Fallback_CreditPrefix" xml:space="preserve">
+    <value>Ispirato a</value>
+  </data>
   <data name="Sidebar_Agents" xml:space="preserve">
     <value>Agenti</value>
   </data>
@@ -82,8 +169,23 @@
   <data name="Sidebar_Status" xml:space="preserve">
     <value>STATO</value>
   </data>
+  <data name="Sidebar_ProxyCard_Title" xml:space="preserve">
+    <value>Proxy locale</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Subtitle" xml:space="preserve">
+    <value>:{0}</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Hint" xml:space="preserve">
+    <value>Apri configurazione proxy</value>
+  </data>
   <data name="Sidebar_CLIProxyAPI" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="Sidebar_CLIProxyAPI_StatusTooltip" xml:space="preserve">
+    <value>Apri provider CLIProxyAPI</value>
+  </data>
+  <data name="Sidebar_Perplexity_StatusTooltip" xml:space="preserve">
+    <value>Apri provider Perplexity</value>
   </data>
   <data name="Sidebar_Perplexity" xml:space="preserve">
     <value>Perplexity</value>
@@ -673,6 +775,18 @@
        ═══════════════════════════════════════════════════════════════════════════ -->
   <data name="ConfigView_CLIProxy_Title" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LocalProxySection" xml:space="preserve">
+    <value>PROXY LOCALE</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Label" xml:space="preserve">
+    <value>Bridge Model Fallback</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Description" xml:space="preserve">
+    <value>Quando Fallback è attivo, questo bridge mantiene l'endpoint pubblico ed esegue CLIProxyAPI dietro di esso.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_InternalPort" xml:space="preserve">
+    <value>Interno :{0}</value>
   </data>
   <data name="ConfigView_CLIProxy_Subtitle" xml:space="preserve">
     <value>Versione del motore, rete e impostazioni di aggiornamento.</value>

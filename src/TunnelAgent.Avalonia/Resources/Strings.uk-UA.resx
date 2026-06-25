@@ -70,6 +70,93 @@
   <data name="Sidebar_Quota" xml:space="preserve">
     <value>Квота</value>
   </data>
+  <data name="Sidebar_Fallback" xml:space="preserve">
+    <value>Резерв</value>
+  </data>
+  <data name="Fallback_Title" xml:space="preserve">
+    <value>Резервні моделі</value>
+  </data>
+  <data name="Fallback_Experimental" xml:space="preserve">
+    <value>Експериментально</value>
+  </data>
+  <data name="Fallback_Subtitle" xml:space="preserve">
+    <value>Віртуальні моделі зіставляються зі справжніми моделями постачальників з автоматичним резервуванням, коли квоту вичерпано.</value>
+  </data>
+  <data name="Fallback_SettingsSection" xml:space="preserve">
+    <value>Налаштування</value>
+  </data>
+  <data name="Fallback_Enable_Label" xml:space="preserve">
+    <value>Увімкнути резервування</value>
+  </data>
+  <data name="Fallback_Enable_Description" xml:space="preserve">
+    <value>Якщо ввімкнено, віртуальні моделі автоматично переходять до альтернативних постачальників, коли квоту вичерпано.</value>
+  </data>
+  <data name="Fallback_RouteCaching_Label" xml:space="preserve">
+    <value>Кешувати робочі маршрути</value>
+  </data>
+  <data name="Fallback_RouteCaching_Description" xml:space="preserve">
+    <value>Повторно використовує останній успішний запис протягом вибраної тривалості перед повтором з початку.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Label" xml:space="preserve">
+    <value>Тривалість кешу</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Description" xml:space="preserve">
+    <value>Як довго використовувати останній успішний fallback-маршрут.</value>
+  </data>
+  <data name="Fallback_VirtualModelsSection" xml:space="preserve">
+    <value>Віртуальні моделі</value>
+  </data>
+  <data name="Fallback_NewModel_Watermark" xml:space="preserve">
+    <value>Назва віртуальної моделі (напр. my-opus-thinking)</value>
+  </data>
+  <data name="Fallback_AddModel" xml:space="preserve">
+    <value>Додати модель</value>
+  </data>
+  <data name="Fallback_RemoveModel_Tooltip" xml:space="preserve">
+    <value>Видалити віртуальну модель</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Title" xml:space="preserve">
+    <value>Додати віртуальну модель</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Subtitle" xml:space="preserve">
+    <value>Виберіть одну з моделей, які CLIProxyAPI зараз надає.</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Title" xml:space="preserve">
+    <value>Спочатку запустіть сервер</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Description" xml:space="preserve">
+    <value>Tunnel Agent потребує запущений CLIProxyAPI, щоб прочитати /v1/models і зіставити доступні моделі постачальників.</value>
+  </data>
+  <data name="Fallback_Empty" xml:space="preserve">
+    <value>Поки немає віртуальних моделей. Додайте одну вище, щоб почати ланцюг резервування.</value>
+  </data>
+  <data name="Fallback_AddEntry" xml:space="preserve">
+    <value>Додати запис</value>
+  </data>
+  <data name="Fallback_AddEntry_Tooltip" xml:space="preserve">
+    <value>Додати резервну модель до цього ланцюга</value>
+  </data>
+  <data name="Fallback_RemoveEntry_Tooltip" xml:space="preserve">
+    <value>Видалити запис (залиште принаймні один)</value>
+  </data>
+  <data name="Fallback_AddEntry_Title" xml:space="preserve">
+    <value>Додати запис резерву</value>
+  </data>
+  <data name="Fallback_Entry_Provider" xml:space="preserve">
+    <value>ID постачальника</value>
+  </data>
+  <data name="Fallback_Entry_Model" xml:space="preserve">
+    <value>ID моделі</value>
+  </data>
+  <data name="Fallback_Entry_Pick" xml:space="preserve">
+    <value>Виберіть модель постачальника…</value>
+  </data>
+  <data name="Fallback_Footnote" xml:space="preserve">
+    <value>Віртуальні моделі зіставляються зі справжніми моделями постачальників з автоматичним резервуванням, коли квоту вичерпано. Спрямуйте свого агента на назву віртуальної моделі, щоб використовувати ланцюг.</value>
+  </data>
+  <data name="Fallback_CreditPrefix" xml:space="preserve">
+    <value>Натхненно</value>
+  </data>
   <data name="Sidebar_Agents" xml:space="preserve">
     <value>Агенти</value>
   </data>
@@ -82,8 +169,23 @@
   <data name="Sidebar_Status" xml:space="preserve">
     <value>СТАТУС</value>
   </data>
+  <data name="Sidebar_ProxyCard_Title" xml:space="preserve">
+    <value>Локальний проксі</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Subtitle" xml:space="preserve">
+    <value>:{0}</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Hint" xml:space="preserve">
+    <value>Відкрити налаштування проксі</value>
+  </data>
   <data name="Sidebar_CLIProxyAPI" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="Sidebar_CLIProxyAPI_StatusTooltip" xml:space="preserve">
+    <value>Відкрити провайдери CLIProxyAPI</value>
+  </data>
+  <data name="Sidebar_Perplexity_StatusTooltip" xml:space="preserve">
+    <value>Відкрити провайдери Perplexity</value>
   </data>
   <data name="Sidebar_Perplexity" xml:space="preserve">
     <value>Perplexity</value>
@@ -673,6 +775,18 @@
        ═══════════════════════════════════════════════════════════════════════════ -->
   <data name="ConfigView_CLIProxy_Title" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LocalProxySection" xml:space="preserve">
+    <value>ЛОКАЛЬНИЙ ПРОКСІ</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Label" xml:space="preserve">
+    <value>Міст Model Fallback</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Description" xml:space="preserve">
+    <value>Коли Fallback увімкнено, цей міст зберігає публічний endpoint і запускає CLIProxyAPI позаду нього.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_InternalPort" xml:space="preserve">
+    <value>Внутрішній :{0}</value>
   </data>
   <data name="ConfigView_CLIProxy_Subtitle" xml:space="preserve">
     <value>Налаштування версії рушія, мережі та оновлень.</value>

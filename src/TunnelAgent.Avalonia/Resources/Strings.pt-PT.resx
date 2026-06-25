@@ -70,6 +70,93 @@
   <data name="Sidebar_Quota" xml:space="preserve">
     <value>Quota</value>
   </data>
+  <data name="Sidebar_Fallback" xml:space="preserve">
+    <value>Fallback</value>
+  </data>
+  <data name="Fallback_Title" xml:space="preserve">
+    <value>Fallback de modelos</value>
+  </data>
+  <data name="Fallback_Experimental" xml:space="preserve">
+    <value>Experimental</value>
+  </data>
+  <data name="Fallback_Subtitle" xml:space="preserve">
+    <value>Os modelos virtuais mapeiam para modelos reais de fornecedores com fallback automático quando a quota se esgota.</value>
+  </data>
+  <data name="Fallback_SettingsSection" xml:space="preserve">
+    <value>Definições</value>
+  </data>
+  <data name="Fallback_Enable_Label" xml:space="preserve">
+    <value>Ativar fallback</value>
+  </data>
+  <data name="Fallback_Enable_Description" xml:space="preserve">
+    <value>Quando ativado, os modelos virtuais recorrem automaticamente a fornecedores alternativos quando a quota se esgota.</value>
+  </data>
+  <data name="Fallback_RouteCaching_Label" xml:space="preserve">
+    <value>Memorizar rotas que funcionam</value>
+  </data>
+  <data name="Fallback_RouteCaching_Description" xml:space="preserve">
+    <value>Reutiliza a última entrada bem-sucedida durante a duração selecionada antes de tentar novamente desde o início.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Label" xml:space="preserve">
+    <value>Duração da cache</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Description" xml:space="preserve">
+    <value>Durante quanto tempo usar a última rota de fallback bem-sucedida.</value>
+  </data>
+  <data name="Fallback_VirtualModelsSection" xml:space="preserve">
+    <value>Modelos virtuais</value>
+  </data>
+  <data name="Fallback_NewModel_Watermark" xml:space="preserve">
+    <value>Nome do modelo virtual (ex.: meu-opus-thinking)</value>
+  </data>
+  <data name="Fallback_AddModel" xml:space="preserve">
+    <value>Adicionar modelo</value>
+  </data>
+  <data name="Fallback_RemoveModel_Tooltip" xml:space="preserve">
+    <value>Remover modelo virtual</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Title" xml:space="preserve">
+    <value>Adicionar modelo virtual</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Subtitle" xml:space="preserve">
+    <value>Escolha um dos modelos atualmente expostos pelo CLIProxyAPI.</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Title" xml:space="preserve">
+    <value>Inicie primeiro o servidor</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Description" xml:space="preserve">
+    <value>O Tunnel Agent precisa do CLIProxyAPI em execução para ler /v1/models e mapear os modelos disponíveis dos fornecedores.</value>
+  </data>
+  <data name="Fallback_Empty" xml:space="preserve">
+    <value>Ainda não há modelos virtuais. Adicione um acima para começar uma cadeia de fallback.</value>
+  </data>
+  <data name="Fallback_AddEntry" xml:space="preserve">
+    <value>Adicionar entrada</value>
+  </data>
+  <data name="Fallback_AddEntry_Tooltip" xml:space="preserve">
+    <value>Adicionar um modelo de fallback a esta cadeia</value>
+  </data>
+  <data name="Fallback_RemoveEntry_Tooltip" xml:space="preserve">
+    <value>Remover entrada (mantenha pelo menos uma)</value>
+  </data>
+  <data name="Fallback_AddEntry_Title" xml:space="preserve">
+    <value>Adicionar entrada de fallback</value>
+  </data>
+  <data name="Fallback_Entry_Provider" xml:space="preserve">
+    <value>ID do fornecedor</value>
+  </data>
+  <data name="Fallback_Entry_Model" xml:space="preserve">
+    <value>ID do modelo</value>
+  </data>
+  <data name="Fallback_Entry_Pick" xml:space="preserve">
+    <value>Escolha um modelo de fornecedor…</value>
+  </data>
+  <data name="Fallback_Footnote" xml:space="preserve">
+    <value>Os modelos virtuais mapeiam para modelos reais de fornecedores com fallback automático quando a quota se esgota. Aponte o seu agente para o nome de um modelo virtual para usar a cadeia.</value>
+  </data>
+  <data name="Fallback_CreditPrefix" xml:space="preserve">
+    <value>Inspirado em</value>
+  </data>
   <data name="Sidebar_Agents" xml:space="preserve">
     <value>Agentes</value>
   </data>
@@ -82,8 +169,23 @@
   <data name="Sidebar_Status" xml:space="preserve">
     <value>ESTADO</value>
   </data>
+  <data name="Sidebar_ProxyCard_Title" xml:space="preserve">
+    <value>Proxy local</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Subtitle" xml:space="preserve">
+    <value>:{0}</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Hint" xml:space="preserve">
+    <value>Abrir configuração do proxy</value>
+  </data>
   <data name="Sidebar_CLIProxyAPI" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="Sidebar_CLIProxyAPI_StatusTooltip" xml:space="preserve">
+    <value>Abrir fornecedores do CLIProxyAPI</value>
+  </data>
+  <data name="Sidebar_Perplexity_StatusTooltip" xml:space="preserve">
+    <value>Abrir fornecedores do Perplexity</value>
   </data>
   <data name="Sidebar_Perplexity" xml:space="preserve">
     <value>Perplexity</value>
@@ -673,6 +775,18 @@
        ═══════════════════════════════════════════════════════════════════════════ -->
   <data name="ConfigView_CLIProxy_Title" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LocalProxySection" xml:space="preserve">
+    <value>PROXY LOCAL</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Label" xml:space="preserve">
+    <value>Ponte de Model Fallback</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Description" xml:space="preserve">
+    <value>Quando o Fallback está ativo, esta ponte mantém o endpoint público e executa o CLIProxyAPI por trás.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_InternalPort" xml:space="preserve">
+    <value>Interno :{0}</value>
   </data>
   <data name="ConfigView_CLIProxy_Subtitle" xml:space="preserve">
     <value>Versão do motor, rede e definições de atualização.</value>

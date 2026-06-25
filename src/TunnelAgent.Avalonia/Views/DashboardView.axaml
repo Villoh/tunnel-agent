@@ -62,7 +62,7 @@
                     <Button Classes="icon"
                             ToolTip.Tip="{l:Loc Common_ClearUsageHistoryTooltip}"
                             Command="{Binding ShowClearUsageConfirmCommand}">
-                        <lucide:PackIconLucide Kind="Trash2" Width="14" Height="14" />
+                        <lucide:PackIconLucide Kind="Trash2" Width="14" Height="14" Foreground="#D46A6A" />
                     </Button>
                 </StackPanel>
             </Grid>

@@ -289,6 +289,30 @@
         <Setter Property="Foreground" Value="White" />
     </Style>
 
+    <!-- Sidebar footer proxy status card (Quotio-style) -->
+    <Style Selector="Button.proxy-card">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="BorderBrush" Duration="0:0:0.15" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Button.proxy-card:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+    </Style>
+    <Style Selector="Button.proxy-card:pointerover">
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+    </Style>
+
+
     <!-- In-card expandable model group header -->
     <Style Selector="ToggleButton.provider-row">
         <Setter Property="Background" Value="Transparent" />
@@ -587,6 +611,78 @@
     </Style>
     <Style Selector="Button.power-toggle:disabled /template/ ContentPresenter">
         <Setter Property="Opacity" Value="0.35" />
+    </Style>
+
+    <!-- Inline text+icon "add" link (e.g. Add Entry) -->
+    <Style Selector="Button.link-add">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="6,4" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+    <Style Selector="Button.link-add:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#14000000" />
+    </Style>
+
+    <!-- Rounded, slightly darker flyout used by the fallback add pickers -->
+    <Style Selector="FlyoutPresenter.fallback-flyout">
+        <Setter Property="Background" Value="{DynamicResource SideBgBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="14" />
+        <Setter Property="Cursor" Value="Arrow" />
+    </Style>
+
+    <!-- Borderless expand/collapse chevron (no checked highlight) -->
+    <Style Selector="ToggleButton.chevron">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="ToggleButton.chevron /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+        <Setter Property="RenderTransform" Value="rotate(0deg)" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="ToggleButton.chevron:checked /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="RenderTransform" Value="rotate(90deg)" />
+    </Style>
+
+    <!-- Animated collapsible region (height + fade) -->
+    <Style Selector="Border.collapsible">
+        <Setter Property="ClipToBounds" Value="True" />
+        <Setter Property="MaxHeight" Value="0" />
+        <Setter Property="Opacity" Value="0" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <DoubleTransition Property="MaxHeight" Duration="0:0:0.20" Easing="CubicEaseOut" />
+                <DoubleTransition Property="Opacity" Duration="0:0:0.18" Easing="CubicEaseOut" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Border.collapsible.expanded">
+        <Setter Property="MaxHeight" Value="2000" />
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="ToggleButton.chevron:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#14000000" />
+    </Style>
+    <Style Selector="ToggleButton.chevron:checked:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#14000000" />
+    </Style>
+    <Style Selector="ToggleButton.chevron:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="#22000000" />
     </Style>
 
     <!-- Small icon-only button (e.g. trash) -->

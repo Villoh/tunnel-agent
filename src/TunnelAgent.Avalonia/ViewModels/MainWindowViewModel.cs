@@ -84,6 +84,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     private readonly UsageService _usage;
     public LogsViewModel Logs { get; } = new();
     public DashboardViewModel Dashboard { get; } = new();
+    public FallbackViewModel Fallback { get; }
     private bool _logsInitialLoadPending;
     private bool _isWindowVisibleForLogs = true;
     private bool _managementKeyRepairAttempted;
@@ -366,6 +367,7 @@ SelectedSection is SectionKey.Logs;
         _selectedThemeMode = ThemeModes.First(mode => mode.Value == NormalizeThemeMode(_settings.Current.ThemeMode));
         _selectedRoutingStrategy = RoutingStrategyOptions.First(strategy => strategy.Value == _settings.Current.RoutingStrategy);
         _engineRegistry = engineRegistry ?? new EngineRegistryService(settings);
+        Fallback = new FallbackViewModel(_settings, ApplyFallbackChangeAsync);
         _configService = new ConfigService(settings);
         var engineConfig = _configService;
         _catalog = catalog ?? new ProviderCatalogService(settings, engineConfig);
@@ -386,6 +388,7 @@ SelectedSection is SectionKey.Logs;
             OnPropertyChanged(nameof(TotalAvailableModelCount));
             OnPropertyChanged(nameof(HasCliProxySelectableModels));
             OnPropertyChanged(nameof(HasPerplexitySelectableModels));
+            RefreshFallbackModelOptions();
         }
         CliProxyModelGroups.CollectionChanged += OnEngineModelsChanged;
         PerplexityModelGroups.CollectionChanged += OnEngineModelsChanged;
@@ -820,6 +823,11 @@ SelectedSection is SectionKey.Logs;
     public int CliProxyPort => _settings.Current.GetOrAddEngine(EngineCatalog.CliProxyApi.Id, EngineCatalog.CliProxyApi.DefaultPort).Port;
     public string CliProxyEndpointUrl => $"http://127.0.0.1:{CliProxyPort}";
     public bool IsCliProxyFocused => IsCliProxyEngineSelected;
+    public ServerState FallbackProxyServerState =>
+        _settings.Current.Fallback.Enabled && CliProxyEngine.State == EngineState.Running
+            ? ServerState.Running : ServerState.Stopped;
+    public bool IsFallbackBridgeActive => FallbackProxyServerState == ServerState.Running;
+    public int CliProxyInternalPort => FallbackProxyService.InternalPortFor(CliProxyPort);
 
     public string PerplexityInstalledVersion => PerplexityEngine.InstalledVersion ?? "Not installed";
     public string? PerplexityLatestVersion => PerplexityEngine.LatestVersion;
@@ -1309,6 +1317,9 @@ SelectedSection is SectionKey.Logs;
         OnPropertyChanged(nameof(CliProxyServerState));
         OnPropertyChanged(nameof(CliProxyPort));
         OnPropertyChanged(nameof(CliProxyEndpointUrl));
+        OnPropertyChanged(nameof(FallbackProxyServerState));
+        OnPropertyChanged(nameof(IsFallbackBridgeActive));
+        OnPropertyChanged(nameof(CliProxyInternalPort));
         OnPropertyChanged(nameof(PerplexityInstalledVersion));
         OnPropertyChanged(nameof(PerplexityLatestVersion));
         OnPropertyChanged(nameof(PerplexityUpdateAvailable));
@@ -2342,6 +2353,20 @@ SelectedSection is SectionKey.Logs;
     }
 
     [RelayCommand]
+    private void SelectCliProxyProviders()
+    {
+        FocusCliProxy();
+        SelectedSection = SectionKey.Providers;
+    }
+
+    [RelayCommand]
+    private void SelectPerplexityProviders()
+    {
+        FocusPerplexity();
+        SelectedSection = SectionKey.Providers;
+    }
+
+    [RelayCommand]
     private void SelectQuota()
     {
         SelectedSection = SectionKey.Quota;
@@ -2379,6 +2404,33 @@ SelectedSection is SectionKey.Logs;
 
     [RelayCommand]
     private void SelectAgents() => SelectedSection = SectionKey.Agents;
+
+    [RelayCommand]
+    private void SelectFallback() => SelectedSection = SectionKey.Fallback;
+
+    private void RefreshFallbackModelOptions()
+    {
+        var options = CliProxyModelGroups
+            .SelectMany(g => g.Models.Select(m =>
+                new FallbackModelOption(g.ProviderId, g.ProviderName, m.Name)));
+        Fallback.SetAvailableModels(options);
+    }
+
+    /// <summary>
+    /// Restarts CLIProxyAPI when fallback activation changes so the bridge can take over
+    /// (or release) the public port. No-op when the engine is not running.
+    /// </summary>
+    private async Task ApplyFallbackChangeAsync()
+    {
+        var engine = CliProxyEngine;
+        if (engine.State is not (EngineState.Running or EngineState.Starting)) return;
+
+        await engine.StopAsync();
+        await engine.StartAsync();
+        ConfigureLogsService(engine.Port);
+        OnPropertyChanged(nameof(FallbackProxyServerState));
+        OnPropertyChanged(nameof(IsFallbackBridgeActive));
+    }
 
     [RelayCommand]
     private void SelectLogs()
@@ -2805,9 +2857,18 @@ SelectedSection is SectionKey.Logs;
             TunnelAgent.Infrastructure.Services.UserEnvironmentService.Remove("TUNNEL_AGENT_CLIPROXY_API_KEY");
     });
 
+    public int LocalProxyScrollRequestId { get; private set; }
+
     [RelayCommand] private void SelectConfiguration() => SelectedSection = SectionKey.ConfigGeneral;
     [RelayCommand] private void SelectConfigGeneral() => SelectedSection = SectionKey.ConfigGeneral;
     [RelayCommand] private void SelectConfigCliProxy() => SelectedSection = SectionKey.ConfigCliProxy;
+    [RelayCommand]
+    private void SelectConfigLocalProxy()
+    {
+        SelectedSection = SectionKey.ConfigCliProxy;
+        LocalProxyScrollRequestId++;
+        OnPropertyChanged(nameof(LocalProxyScrollRequestId));
+    }
     [RelayCommand] private void SelectConfigPerplexity() => SelectedSection = SectionKey.ConfigPerplexity;
 
     public bool IsConfigSection => SelectedSection is SectionKey.ConfigGeneral or SectionKey.ConfigCliProxy or SectionKey.ConfigPerplexity;

@@ -197,6 +197,25 @@
                             </Button>
 
                             <Button Classes="side"
+                                    Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Fallback}"
+                                    Command="{Binding SelectFallbackCommand}">
+                                <Grid ColumnDefinitions="20,*">
+                                    <lucide:PackIconLucide Grid.Column="0" Kind="GitFork" Width="15" Height="15"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    <Panel Grid.Column="1"
+                                           Opacity="{Binding SidebarContentOpacity}">
+                                        <Panel.Transitions>
+                                            <Transitions>
+                                                <DoubleTransition Property="Opacity" Duration="0:0:0.18" Easing="CubicEaseInOut" />
+                                            </Transitions>
+                                        </Panel.Transitions>
+                                        <TextBlock Text="{l:Loc Sidebar_Fallback}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
+                                                   IsVisible="{Binding !IsSidebarCollapsed}"/>
+                                    </Panel>
+                                </Grid>
+                            </Button>
+
+                            <Button Classes="side"
                                     Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Agents}"
                                     Command="{Binding SelectAgentsCommand}">
                                 <Grid ColumnDefinitions="20,*,Auto">
@@ -264,6 +283,7 @@
                         </StackPanel>
 
                         <StackPanel Grid.Row="2" Margin="8,0,8,10" Spacing="6">
+                            <Border Height="1" Margin="2,0,2,2" Background="{DynamicResource SideBorderBrush}" />
                             <Panel Opacity="{Binding SidebarContentOpacity}">
                                 <Panel.Transitions>
                                     <Transitions>
@@ -274,47 +294,68 @@
                                            IsVisible="{Binding !IsSidebarCollapsed}"/>
                             </Panel>
 
-                            <Grid Margin="10,0" ColumnDefinitions="Auto,*">
-                                <Grid Grid.Column="0" Classes="status-indicator">
-                                    <Ellipse Classes="status-pulse"
-                                             Fill="{Binding CliProxyServerState, Converter={StaticResource StateToBrush}}"
-                                             IsVisible="{Binding CliProxyServerState, Converter={StaticResource StateIsRunning}}" />
-                                    <Ellipse Classes="status-dot"
-                                             Fill="{Binding CliProxyServerState, Converter={StaticResource StateToBrush}}" />
+                            <Button Classes="proxy-card" Margin="2,0"
+                                    Command="{Binding SelectCliProxyProvidersCommand}"
+                                    ToolTip.Tip="{l:Loc Sidebar_CLIProxyAPI_StatusTooltip}"
+                                    IsVisible="{Binding !IsSidebarCollapsed}"
+                                    Opacity="{Binding SidebarContentOpacity}">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="9">
+                                    <Grid Grid.Column="0" Classes="status-indicator" VerticalAlignment="Center">
+                                        <Ellipse Classes="status-pulse"
+                                                 Fill="{Binding CliProxyServerState, Converter={StaticResource StateToBrush}}"
+                                                 IsVisible="{Binding CliProxyServerState, Converter={StaticResource StateIsRunning}}" />
+                                        <Ellipse Classes="status-dot"
+                                                 Fill="{Binding CliProxyServerState, Converter={StaticResource StateToBrush}}" />
+                                    </Grid>
+                                    <TextBlock Grid.Column="1" Text="{l:Loc Sidebar_CLIProxyAPI}" FontSize="12" FontWeight="Medium"
+                                               Foreground="{DynamicResource FgBrush}" TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center" />
+                                    <lucide:PackIconLucide Grid.Column="2" Kind="ChevronRight" Width="13" Height="13"
+                                                           VerticalAlignment="Center" Foreground="{DynamicResource FgFaintBrush}" />
                                 </Grid>
-                                <Panel Grid.Column="1"
-                                       Opacity="{Binding SidebarContentOpacity}">
-                                    <Panel.Transitions>
-                                        <Transitions>
-                                            <DoubleTransition Property="Opacity" Duration="0:0:0.18" Easing="CubicEaseInOut" />
-                                        </Transitions>
-                                    </Panel.Transitions>
-                                    <TextBlock Text="{l:Loc Sidebar_CLIProxyAPI}" Margin="8,0,0,0" FontSize="12" Foreground="{DynamicResource FgBrush}"
-                                               VerticalAlignment="Center"
-                                               IsVisible="{Binding !IsSidebarCollapsed}" />
-                                </Panel>
-                            </Grid>
+                            </Button>
 
-                            <Grid Margin="10,0" ColumnDefinitions="Auto,*">
-                                <Grid Grid.Column="0" Classes="status-indicator">
-                                    <Ellipse Classes="status-pulse"
-                                             Fill="{Binding PerplexityServerState, Converter={StaticResource StateToBrush}}"
-                                             IsVisible="{Binding PerplexityServerState, Converter={StaticResource StateIsRunning}}" />
-                                    <Ellipse Classes="status-dot"
-                                             Fill="{Binding PerplexityServerState, Converter={StaticResource StateToBrush}}" />
+                            <Button Classes="proxy-card" Margin="2,0"
+                                    Command="{Binding SelectPerplexityProvidersCommand}"
+                                    ToolTip.Tip="{l:Loc Sidebar_Perplexity_StatusTooltip}"
+                                    IsVisible="{Binding !IsSidebarCollapsed}"
+                                    Opacity="{Binding SidebarContentOpacity}">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="9">
+                                    <Grid Grid.Column="0" Classes="status-indicator" VerticalAlignment="Center">
+                                        <Ellipse Classes="status-pulse"
+                                                 Fill="{Binding PerplexityServerState, Converter={StaticResource StateToBrush}}"
+                                                 IsVisible="{Binding PerplexityServerState, Converter={StaticResource StateIsRunning}}" />
+                                        <Ellipse Classes="status-dot"
+                                                 Fill="{Binding PerplexityServerState, Converter={StaticResource StateToBrush}}" />
+                                    </Grid>
+                                    <TextBlock Grid.Column="1" Text="{l:Loc Sidebar_Perplexity}" FontSize="12" FontWeight="Medium"
+                                               Foreground="{DynamicResource FgBrush}" TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center" />
+                                    <lucide:PackIconLucide Grid.Column="2" Kind="ChevronRight" Width="13" Height="13"
+                                                           VerticalAlignment="Center" Foreground="{DynamicResource FgFaintBrush}" />
                                 </Grid>
-                                <Panel Grid.Column="1"
-                                       Opacity="{Binding SidebarContentOpacity}">
-                                    <Panel.Transitions>
-                                        <Transitions>
-                                            <DoubleTransition Property="Opacity" Duration="0:0:0.18" Easing="CubicEaseInOut" />
-                                        </Transitions>
-                                    </Panel.Transitions>
-                                    <TextBlock Text="{l:Loc Sidebar_Perplexity}" Margin="8,0,0,0" FontSize="12" Foreground="{DynamicResource FgBrush}"
-                                               VerticalAlignment="Center"
-                                               IsVisible="{Binding !IsSidebarCollapsed}" />
-                                </Panel>
-                            </Grid>
+                            </Button>
+
+                            <Button Classes="proxy-card" Margin="2,0"
+                                    Command="{Binding SelectConfigLocalProxyCommand}"
+                                    ToolTip.Tip="{l:Loc Sidebar_ProxyCard_Hint}"
+                                    IsVisible="{Binding !IsSidebarCollapsed}"
+                                    Opacity="{Binding SidebarContentOpacity}">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="9">
+                                    <Grid Grid.Column="0" Classes="status-indicator" VerticalAlignment="Center">
+                                        <Ellipse Classes="status-pulse"
+                                                 Fill="{Binding FallbackProxyServerState, Converter={StaticResource StateToBrush}}"
+                                                 IsVisible="{Binding FallbackProxyServerState, Converter={StaticResource StateIsRunning}}" />
+                                        <Ellipse Classes="status-dot"
+                                                 Fill="{Binding FallbackProxyServerState, Converter={StaticResource StateToBrush}}" />
+                                    </Grid>
+                                    <TextBlock Grid.Column="1" Text="{l:Loc Sidebar_ProxyCard_Title}" FontSize="12" FontWeight="Medium"
+                                               Foreground="{DynamicResource FgBrush}" TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center" />
+                                    <lucide:PackIconLucide Grid.Column="2" Kind="ChevronRight" Width="13" Height="13"
+                                                           VerticalAlignment="Center" Foreground="{DynamicResource FgFaintBrush}" />
+                                </Grid>
+                            </Button>
                         </StackPanel>
 
                         <Border Grid.Row="3"

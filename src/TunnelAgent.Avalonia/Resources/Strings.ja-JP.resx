@@ -70,6 +70,93 @@
   <data name="Sidebar_Quota" xml:space="preserve">
     <value>クォータ</value>
   </data>
+  <data name="Sidebar_Fallback" xml:space="preserve">
+    <value>フォールバック</value>
+  </data>
+  <data name="Fallback_Title" xml:space="preserve">
+    <value>モデルフォールバック</value>
+  </data>
+  <data name="Fallback_Experimental" xml:space="preserve">
+    <value>実験的</value>
+  </data>
+  <data name="Fallback_Subtitle" xml:space="preserve">
+    <value>仮想モデルは実際のプロバイダーモデルにマッピングされ、クォータが尽きると自動的にフォールバックします。</value>
+  </data>
+  <data name="Fallback_SettingsSection" xml:space="preserve">
+    <value>設定</value>
+  </data>
+  <data name="Fallback_Enable_Label" xml:space="preserve">
+    <value>フォールバックを有効化</value>
+  </data>
+  <data name="Fallback_Enable_Description" xml:space="preserve">
+    <value>有効にすると、クォータが尽きたときに仮想モデルが自動的に代替プロバイダーへフォールバックします。</value>
+  </data>
+  <data name="Fallback_RouteCaching_Label" xml:space="preserve">
+    <value>成功したルートをキャッシュ</value>
+  </data>
+  <data name="Fallback_RouteCaching_Description" xml:space="preserve">
+    <value>先頭から再試行する前に、選択した時間だけ最後に成功したエントリを再利用します。</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Label" xml:space="preserve">
+    <value>キャッシュ期間</value>
+  </data>
+  <data name="ConfigView_CLIProxy_RouteCacheDuration_Description" xml:space="preserve">
+    <value>最後に成功したフォールバックルートを使い続ける時間。</value>
+  </data>
+  <data name="Fallback_VirtualModelsSection" xml:space="preserve">
+    <value>仮想モデル</value>
+  </data>
+  <data name="Fallback_NewModel_Watermark" xml:space="preserve">
+    <value>仮想モデル名（例: my-opus-thinking）</value>
+  </data>
+  <data name="Fallback_AddModel" xml:space="preserve">
+    <value>モデルを追加</value>
+  </data>
+  <data name="Fallback_RemoveModel_Tooltip" xml:space="preserve">
+    <value>仮想モデルを削除</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Title" xml:space="preserve">
+    <value>仮想モデルを追加</value>
+  </data>
+  <data name="Fallback_AddModelPopup_Subtitle" xml:space="preserve">
+    <value>CLIProxyAPI が現在公開しているモデルから選択します。</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Title" xml:space="preserve">
+    <value>先にサーバーを起動してください</value>
+  </data>
+  <data name="Fallback_AddModelPopup_ServerWarning_Description" xml:space="preserve">
+    <value>Tunnel Agent が /v1/models を読み取り、利用可能なプロバイダーモデルをマッピングするには CLIProxyAPI の実行が必要です。</value>
+  </data>
+  <data name="Fallback_Empty" xml:space="preserve">
+    <value>仮想モデルはまだありません。上で追加してフォールバックチェーンを作成してください。</value>
+  </data>
+  <data name="Fallback_AddEntry" xml:space="preserve">
+    <value>エントリを追加</value>
+  </data>
+  <data name="Fallback_AddEntry_Tooltip" xml:space="preserve">
+    <value>このチェーンにフォールバックモデルを追加</value>
+  </data>
+  <data name="Fallback_RemoveEntry_Tooltip" xml:space="preserve">
+    <value>エントリを削除（最低1つは残す）</value>
+  </data>
+  <data name="Fallback_AddEntry_Title" xml:space="preserve">
+    <value>フォールバックエントリを追加</value>
+  </data>
+  <data name="Fallback_Entry_Provider" xml:space="preserve">
+    <value>プロバイダー ID</value>
+  </data>
+  <data name="Fallback_Entry_Model" xml:space="preserve">
+    <value>モデル ID</value>
+  </data>
+  <data name="Fallback_Entry_Pick" xml:space="preserve">
+    <value>プロバイダーモデルを選択…</value>
+  </data>
+  <data name="Fallback_Footnote" xml:space="preserve">
+    <value>仮想モデルは実際のプロバイダーモデルにマッピングされ、クォータが尽きると自動的にフォールバックします。エージェントを仮想モデル名に向けるとチェーンを使用できます。</value>
+  </data>
+  <data name="Fallback_CreditPrefix" xml:space="preserve">
+    <value>インスピレーション元:</value>
+  </data>
   <data name="Sidebar_Agents" xml:space="preserve">
     <value>エージェント</value>
   </data>
@@ -82,8 +169,23 @@
   <data name="Sidebar_Status" xml:space="preserve">
     <value>状態</value>
   </data>
+  <data name="Sidebar_ProxyCard_Title" xml:space="preserve">
+    <value>ローカルプロキシ</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Subtitle" xml:space="preserve">
+    <value>:{0}</value>
+  </data>
+  <data name="Sidebar_ProxyCard_Hint" xml:space="preserve">
+    <value>プロキシ設定を開く</value>
+  </data>
   <data name="Sidebar_CLIProxyAPI" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="Sidebar_CLIProxyAPI_StatusTooltip" xml:space="preserve">
+    <value>CLIProxyAPI プロバイダーを開く</value>
+  </data>
+  <data name="Sidebar_Perplexity_StatusTooltip" xml:space="preserve">
+    <value>Perplexity プロバイダーを開く</value>
   </data>
   <data name="Sidebar_Perplexity" xml:space="preserve">
     <value>Perplexity</value>
@@ -673,6 +775,18 @@
        ═══════════════════════════════════════════════════════════════════════════ -->
   <data name="ConfigView_CLIProxy_Title" xml:space="preserve">
     <value>CLIProxyAPI</value>
+  </data>
+  <data name="ConfigView_CLIProxy_LocalProxySection" xml:space="preserve">
+    <value>ローカルプロキシ</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Label" xml:space="preserve">
+    <value>Model Fallback ブリッジ</value>
+  </data>
+  <data name="ConfigView_CLIProxy_FallbackBridge_Description" xml:space="preserve">
+    <value>Fallback が有効な場合、このブリッジが公開エンドポイントを保持し、その背後で CLIProxyAPI を実行します。</value>
+  </data>
+  <data name="ConfigView_CLIProxy_InternalPort" xml:space="preserve">
+    <value>内部 :{0}</value>
   </data>
   <data name="ConfigView_CLIProxy_Subtitle" xml:space="preserve">
     <value>エンジンバージョン、ネットワーク、更新設定。</value>

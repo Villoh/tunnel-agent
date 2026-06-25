@@ -150,6 +150,7 @@ public partial class MainWindow : Window
         SectionKey.Home => new DashboardView(),
         SectionKey.Providers => new ProvidersView(),
         SectionKey.Quota => new QuotaView(),
+        SectionKey.Fallback => new FallbackView(),
         SectionKey.Agents => new AgentsView(),
         SectionKey.Logs => new LogsView(),
         SectionKey.Configuration => new ConfigurationView(),
@@ -238,6 +239,7 @@ public partial class MainWindow : Window
             "Home"          => SectionKey.Home,
             "Providers"     => SectionKey.Providers,
             "Quota"         => SectionKey.Quota,
+            "Fallback"      => SectionKey.Fallback,
             "Agents"        => SectionKey.Agents,
             "Configuration" => SectionKey.Configuration,
             _ => vm.SelectedSection
