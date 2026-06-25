@@ -133,6 +133,27 @@
   <data name="Fallback_AddEntry" xml:space="preserve">
     <value>Giriş ekle</value>
   </data>
+  <data name="Fallback_EntryCount" xml:space="preserve">
+    <value>{0} girdi</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_Choose" xml:space="preserve">
+    <value>Kurulacak {0} sürümünü seçin.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_InstallDescription" xml:space="preserve">
+    <value>Seçilen sürümü SHA256 doğrulamasıyla kurar.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_AlreadyInstalled" xml:space="preserve">
+    <value>Seçilen sürüm zaten kurulu.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_InstalledPackageSha256" xml:space="preserve">
+    <value>Kurulu paket SHA256</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_LocalBinarySha256" xml:space="preserve">
+    <value>Yerel ikili SHA256</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_RemotePackageSha256" xml:space="preserve">
+    <value>Uzak paket SHA256</value>
+  </data>
   <data name="Fallback_AddEntry_Tooltip" xml:space="preserve">
     <value>Bu zincire bir yedek model ekleyin</value>
   </data>

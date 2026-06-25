@@ -692,6 +692,8 @@ SelectedSection is SectionKey.Logs;
                 OnPropertyChanged(nameof(AgentConfigDialogTitle));
                 OnPropertyChanged(nameof(AgentConfigDialogDescription));
                 OnPropertyChanged(nameof(ModelsExpanderLabel));
+                OnPropertyChanged(nameof(SelectedEngineVersionDescription));
+                OnPropertyChanged(nameof(InstalledEngineHashLabel));
                 foreach (var mode in ThemeModes)
                     mode.Refresh();
                 foreach (var strategy in RoutingStrategyOptions)
@@ -800,10 +802,14 @@ SelectedSection is SectionKey.Logs;
         FocusedConfigEngine.State == EngineState.Error ? BuildEngineErrorMessage(FocusedConfigEngine) : null;
 
     public string SelectedEngineVersionDescription => SelectedEngineRelease is null
-        ? $"Choose {ActiveEngineName} release to install."
-        : CanInstallSelectedEngine ? "Install selected release with SHA256 verification." : "Selected release is already installed.";
+        ? LocalizationService.Instance.GetString("ConfigView_CLIProxy_EngineVersion_Choose", ActiveEngineName)
+        : CanInstallSelectedEngine
+            ? LocalizationService.Instance.GetString("ConfigView_CLIProxy_EngineVersion_InstallDescription")
+            : LocalizationService.Instance.GetString("ConfigView_CLIProxy_EngineVersion_AlreadyInstalled");
 
-    public string InstalledEngineHashLabel => FocusedConfigEngine.InstalledArchiveSha256 is not null ? "Installed package SHA256" : "Local binary SHA256";
+    public string InstalledEngineHashLabel => FocusedConfigEngine.InstalledArchiveSha256 is not null
+        ? LocalizationService.Instance.GetString("ConfigView_CLIProxy_Integrity_InstalledPackageSha256")
+        : LocalizationService.Instance.GetString("ConfigView_CLIProxy_Integrity_LocalBinarySha256");
     public string InstalledEngineHashShort => ShortHash(FocusedConfigEngine.InstalledArchiveSha256 ?? FocusedConfigEngine.InstalledBinarySha256);
     public string InstalledEngineHashFull => FocusedConfigEngine.InstalledArchiveSha256 ?? FocusedConfigEngine.InstalledBinarySha256 ?? "Not available";
     public string LatestEngineHashShort => ShortHash(FocusedConfigEngine.LatestAssetSha256);

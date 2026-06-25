@@ -34,15 +34,11 @@ public partial class ConfigurationView : UserControl
 
     private async Task ScrollToLocalProxySectionAsync()
     {
-        // Let SelectedSection + IsVisible layout settle before measuring.
+        // Local Proxy is the last section in the CLIProxy tab. Let tab visibility/layout settle,
+        // then jump to the bottom; measuring a just-shown section races Avalonia layout.
         await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Loaded);
-        await Task.Delay(50);
-
-        var point = LocalProxySectionLabel.TranslatePoint(new Point(0, 0), ConfigurationContent);
-        if (point is null) return;
-
-        var y = point.Value.Y - 24;
-        ConfigurationScrollViewer.Offset = new Vector(0, y < 0 ? 0 : y);
+        await Task.Delay(100);
+        ConfigurationScrollViewer.Offset = new Vector(0, ConfigurationScrollViewer.Extent.Height);
     }
 
     private async void OnCopyCliProxyEndpoint(object? sender, RoutedEventArgs e)

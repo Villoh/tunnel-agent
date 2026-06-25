@@ -133,6 +133,27 @@
   <data name="Fallback_AddEntry" xml:space="preserve">
     <value>항목 추가</value>
   </data>
+  <data name="Fallback_EntryCount" xml:space="preserve">
+    <value>항목 {0}개</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_Choose" xml:space="preserve">
+    <value>설치할 {0} 릴리스를 선택하세요.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_InstallDescription" xml:space="preserve">
+    <value>선택한 릴리스를 SHA256 검증과 함께 설치합니다.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_AlreadyInstalled" xml:space="preserve">
+    <value>선택한 릴리스가 이미 설치되어 있습니다.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_InstalledPackageSha256" xml:space="preserve">
+    <value>설치된 패키지 SHA256</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_LocalBinarySha256" xml:space="preserve">
+    <value>로컬 바이너리 SHA256</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_RemotePackageSha256" xml:space="preserve">
+    <value>원격 패키지 SHA256</value>
+  </data>
   <data name="Fallback_AddEntry_Tooltip" xml:space="preserve">
     <value>이 체인에 폴백 모델 추가</value>
   </data>

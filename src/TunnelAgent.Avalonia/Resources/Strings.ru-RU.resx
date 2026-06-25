@@ -133,6 +133,27 @@
   <data name="Fallback_AddEntry" xml:space="preserve">
     <value>Добавить запись</value>
   </data>
+  <data name="Fallback_EntryCount" xml:space="preserve">
+    <value>{0} записей</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_Choose" xml:space="preserve">
+    <value>Выберите релиз {0} для установки.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_InstallDescription" xml:space="preserve">
+    <value>Устанавливает выбранный релиз с проверкой SHA256.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_AlreadyInstalled" xml:space="preserve">
+    <value>Выбранный релиз уже установлен.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_InstalledPackageSha256" xml:space="preserve">
+    <value>SHA256 установленного пакета</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_LocalBinarySha256" xml:space="preserve">
+    <value>SHA256 локального бинарного файла</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_RemotePackageSha256" xml:space="preserve">
+    <value>SHA256 удалённого пакета</value>
+  </data>
   <data name="Fallback_AddEntry_Tooltip" xml:space="preserve">
     <value>Добавить резервную модель в эту цепочку</value>
   </data>

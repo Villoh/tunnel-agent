@@ -133,6 +133,27 @@
   <data name="Fallback_AddEntry" xml:space="preserve">
     <value>エントリを追加</value>
   </data>
+  <data name="Fallback_EntryCount" xml:space="preserve">
+    <value>{0} 件のエントリ</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_Choose" xml:space="preserve">
+    <value>インストールする {0} リリースを選択します。</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_InstallDescription" xml:space="preserve">
+    <value>SHA256 検証付きで選択したリリースをインストールします。</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_AlreadyInstalled" xml:space="preserve">
+    <value>選択したリリースは既にインストールされています。</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_InstalledPackageSha256" xml:space="preserve">
+    <value>インストール済みパッケージ SHA256</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_LocalBinarySha256" xml:space="preserve">
+    <value>ローカルバイナリ SHA256</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_RemotePackageSha256" xml:space="preserve">
+    <value>リモートパッケージ SHA256</value>
+  </data>
   <data name="Fallback_AddEntry_Tooltip" xml:space="preserve">
     <value>このチェーンにフォールバックモデルを追加</value>
   </data>

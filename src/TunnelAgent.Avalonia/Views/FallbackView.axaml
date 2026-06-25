@@ -132,7 +132,7 @@
                                                TextTrimming="CharacterEllipsis" />
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <TextBlock Classes="row-desc" VerticalAlignment="Center"
-                                                   Text="{Binding EntryCount, StringFormat='{}{0} entries'}" />
+                                                   Text="{l:LocFormat Key=Fallback_EntryCount, Path=EntryCount}" />
                                         <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding HasRouteState}">
                                             <Border Width="1" Height="11" VerticalAlignment="Center"
                                                     Background="{DynamicResource FgFaintBrush}" />

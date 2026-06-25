@@ -207,7 +207,7 @@
                                         <Run Text="{Binding InstalledEngineHashLabel}" /><Run Text=": " /><Run Text="{Binding InstalledEngineHashShort}" />
                                     </TextBlock>
                                     <TextBlock Classes="row-desc" ToolTip.Tip="{Binding LatestEngineHashFull}">
-                                        <Run Text="Remote package SHA256: " /><Run Text="{Binding LatestEngineHashShort}" />
+                                        <Run Text="{l:Loc ConfigView_CLIProxy_Integrity_RemotePackageSha256}" /><Run Text=": " /><Run Text="{Binding LatestEngineHashShort}" />
                                     </TextBlock>
                                     <TextBlock Classes="row-desc" Foreground="{DynamicResource ErrBrush}"
                                                Text="{Binding EngineIntegrityMessage}"
@@ -512,7 +512,7 @@
                                         <Run Text="{Binding InstalledEngineHashLabel}" /><Run Text=": " /><Run Text="{Binding InstalledEngineHashShort}" />
                                     </TextBlock>
                                     <TextBlock Classes="row-desc" ToolTip.Tip="{Binding LatestEngineHashFull}">
-                                        <Run Text="Remote package SHA256: " /><Run Text="{Binding LatestEngineHashShort}" />
+                                        <Run Text="{l:Loc ConfigView_CLIProxy_Integrity_RemotePackageSha256}" /><Run Text=": " /><Run Text="{Binding LatestEngineHashShort}" />
                                     </TextBlock>
                                     <TextBlock Classes="row-desc" Foreground="{DynamicResource ErrBrush}"
                                                Text="{Binding EngineIntegrityMessage}"

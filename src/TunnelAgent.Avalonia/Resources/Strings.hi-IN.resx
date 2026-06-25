@@ -133,6 +133,27 @@
   <data name="Fallback_AddEntry" xml:space="preserve">
     <value>प्रविष्टि जोड़ें</value>
   </data>
+  <data name="Fallback_EntryCount" xml:space="preserve">
+    <value>{0} प्रविष्टियाँ</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_Choose" xml:space="preserve">
+    <value>इंस्टॉल करने के लिए {0} रिलीज़ चुनें.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_InstallDescription" xml:space="preserve">
+    <value>चुनी गई रिलीज़ को SHA256 सत्यापन के साथ इंस्टॉल करें.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_AlreadyInstalled" xml:space="preserve">
+    <value>चुनी गई रिलीज़ पहले से इंस्टॉल है.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_InstalledPackageSha256" xml:space="preserve">
+    <value>इंस्टॉल किए गए पैकेज का SHA256</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_LocalBinarySha256" xml:space="preserve">
+    <value>स्थानीय बाइनरी SHA256</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_RemotePackageSha256" xml:space="preserve">
+    <value>रिमोट पैकेज SHA256</value>
+  </data>
   <data name="Fallback_AddEntry_Tooltip" xml:space="preserve">
     <value>इस श्रृंखला में एक फ़ॉलबैक मॉडल जोड़ें</value>
   </data>

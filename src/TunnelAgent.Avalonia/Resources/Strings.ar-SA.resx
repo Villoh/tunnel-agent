@@ -133,6 +133,27 @@
   <data name="Fallback_AddEntry" xml:space="preserve">
     <value>إضافة إدخال</value>
   </data>
+  <data name="Fallback_EntryCount" xml:space="preserve">
+    <value>{0} إدخالات</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_Choose" xml:space="preserve">
+    <value>اختر إصدار {0} لتثبيته.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_InstallDescription" xml:space="preserve">
+    <value>ثبّت الإصدار المحدد مع التحقق عبر SHA256.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_EngineVersion_AlreadyInstalled" xml:space="preserve">
+    <value>الإصدار المحدد مثبت بالفعل.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_InstalledPackageSha256" xml:space="preserve">
+    <value>SHA256 للحزمة المثبتة</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_LocalBinarySha256" xml:space="preserve">
+    <value>SHA256 للملف الثنائي المحلي</value>
+  </data>
+  <data name="ConfigView_CLIProxy_Integrity_RemotePackageSha256" xml:space="preserve">
+    <value>SHA256 للحزمة البعيدة</value>
+  </data>
   <data name="Fallback_AddEntry_Tooltip" xml:space="preserve">
     <value>أضف نموذجًا احتياطيًا إلى هذه السلسلة</value>
   </data>
