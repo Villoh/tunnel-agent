@@ -726,19 +726,32 @@
                     <TextBlock Classes="row-desc" Margin="2,8"
                                Text="{l:Loc AgentConfigOverlay_NoModelSearchResults}"
                                IsVisible="{Binding ShowNoCustomProviderModelResults}" />
-                    <ScrollViewer>
-                        <ItemsControl ItemsSource="{Binding VisibleCustomProviderModels}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="vm:SelectableModelViewModel">
-                                    <Grid ColumnDefinitions="Auto,*" Margin="2,3" IsVisible="{Binding IsVisible}">
-                                        <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}" VerticalAlignment="Center" />
-                                        <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="12" VerticalAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis" />
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                    <ListBox ItemsSource="{Binding VisibleCustomProviderModels}"
+                             Background="Transparent" BorderThickness="0" Padding="0">
+                        <ListBox.Styles>
+                            <Style Selector="ListBoxItem">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="0" />
+                                <Setter Property="MinHeight" Value="0" />
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                            <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                            <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                        </ListBox.Styles>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:SelectableModelViewModel">
+                                <Grid ColumnDefinitions="Auto,*" Margin="2,3">
+                                    <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="12" VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </DockPanel>
             </Border>
         </Border>

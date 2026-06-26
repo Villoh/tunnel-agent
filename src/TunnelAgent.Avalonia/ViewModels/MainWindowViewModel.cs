@@ -347,7 +347,9 @@ SelectedSection is SectionKey.Logs;
     public ObservableCollection<EngineOptionViewModel> EngineOptions { get; } = new();
     public ObservableCollection<CliProxyApiKeyViewModel> CliProxyApiKeys { get; } = new();
     public ObservableCollection<SelectableModelViewModel> SelectableModels { get; } = new();
+    private bool _suppressSelectableModelState;
     public ObservableCollection<SelectableModelViewModel> CustomProviderModels { get; } = new();
+    private bool _suppressCustomProviderModelState;
 
     public MainWindowViewModel() : this(new SettingsService(), null!, null!, null!, null!, null!) { }
 
@@ -529,9 +531,20 @@ SelectedSection is SectionKey.Logs;
         set
         {
             var select = value != false;
-            foreach (var model in SelectableModels.Where(m => m.IsVisible))
-                model.IsSelected = select;
+            _suppressSelectableModelState = true;
+            try
+            {
+                foreach (var model in SelectableModels.Where(m => m.IsVisible))
+                    model.IsSelected = select;
+            }
+            finally
+            {
+                _suppressSelectableModelState = false;
+            }
+            OnPropertyChanged(nameof(ModelsExpanderLabel));
             OnPropertyChanged(nameof(AllVisibleModelsSelected));
+            if (IsAgentConfigManualMode && ShowAgentConfigDialog && !AgentConfigHasResult)
+                _ = RefreshManualPreviewAsync();
         }
     }
     public string ModelsExpanderLabel => _localization.GetString(
@@ -2060,8 +2073,16 @@ SelectedSection is SectionKey.Logs;
         set
         {
             var select = value != false;
-            foreach (var model in CustomProviderModels.Where(m => m.IsVisible))
-                model.IsSelected = select;
+            _suppressCustomProviderModelState = true;
+            try
+            {
+                foreach (var model in CustomProviderModels.Where(m => m.IsVisible))
+                    model.IsSelected = select;
+            }
+            finally
+            {
+                _suppressCustomProviderModelState = false;
+            }
             RaiseCustomProviderModelState();
         }
     }
@@ -2089,6 +2110,7 @@ SelectedSection is SectionKey.Logs;
     private void OnCustomProviderModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(SelectableModelViewModel.IsSelected)) return;
+        if (_suppressCustomProviderModelState) return;
         RaiseCustomProviderModelState();
     }
 
@@ -2778,6 +2800,7 @@ SelectedSection is SectionKey.Logs;
     private void OnSelectableModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(SelectableModelViewModel.IsSelected)) return;
+        if (_suppressSelectableModelState) return;
         OnPropertyChanged(nameof(ModelsExpanderLabel));
         OnPropertyChanged(nameof(AllVisibleModelsSelected));
         if (IsAgentConfigManualMode && ShowAgentConfigDialog && !AgentConfigHasResult)
