@@ -69,7 +69,7 @@ public sealed class ServiceSmokeTests
         var service = new ModelFetchService(settings);
         var groups = new ObservableCollection<AvailableModelGroupViewModel>
         {
-            new("Existing", "existing", PackIconSimpleIconsKind.OpenAi, "#000000")
+            new("Existing", "existing")
         };
 
         await service.FetchAndApplyAsync(groups, 1, null);

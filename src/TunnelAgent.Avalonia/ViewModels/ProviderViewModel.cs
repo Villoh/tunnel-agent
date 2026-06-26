@@ -166,7 +166,13 @@ public partial class ProviderViewModel : ViewModelBase
     public PackIconSimpleIconsKind IconKind   { get; }
     public string? CustomIconData { get; }
     public bool HasCustomIcon => CustomIconData is not null;
-    public string LogoColor   { get; }
+    private readonly string _logoColor;
+    // Unknown/custom providers (arbitrary names) render a monogram over a name-derived colour
+    // instead of the misleading generic OpenAI glyph.
+    public bool UseMonogram => !HasCustomIcon && !Services.ProviderIconRegistry.IsKnown(Id);
+    public bool ShowSimpleIcon => !UseMonogram && !HasCustomIcon;
+    public string Monogram => Services.ProviderIconRegistry.Monogram(Name);
+    public string LogoColor => UseMonogram ? Services.ProviderIconRegistry.FallbackColor(Name) : _logoColor;
     public string ApiKeyBaseUrl { get; set; } = "";
     private readonly string _descriptionFallback;
     public string Description => GetLocalizedDescription();
@@ -369,7 +375,7 @@ public partial class ProviderViewModel : ViewModelBase
         Id             = id;
         Name           = name;
         IconKind       = iconKind;
-        LogoColor      = logoColor;
+        _logoColor     = logoColor;
         _descriptionFallback = description;
         SupportsOAuth  = isOAuth;
         SupportsApiKey = supportsApiKey;

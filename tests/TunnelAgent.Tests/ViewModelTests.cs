@@ -63,12 +63,12 @@ public sealed class ViewModelTests
     [InlineData(5, 2)]
     public void AvailableModelGroupViewModel_ModelCountAndHiddenModelCount_ReflectModels(int count, int hidden)
     {
-        var vm = new AvailableModelGroupViewModel("OpenAI", "openai", PackIconSimpleIconsKind.OpenAi, "#000000", customIconData: "svg", isExpanded: true);
+        var vm = new AvailableModelGroupViewModel("Kimi", "moonshot", isExpanded: true);
         for (var i = 0; i < count; i++)
-            vm.Models.Add(new AvailableModelViewModel($"model-{i}", "OAuth", "", "OpenAI"));
+            vm.Models.Add(new AvailableModelViewModel($"model-{i}", "OAuth", "", "Kimi"));
 
-        Assert.Equal("OpenAI", vm.ProviderName);
-        Assert.Equal("openai", vm.ProviderId);
+        Assert.Equal("Kimi", vm.ProviderName);
+        Assert.Equal("moonshot", vm.ProviderId);
         Assert.True(vm.HasCustomIcon);
         Assert.True(vm.IsExpanded);
         Assert.Equal(count, vm.ModelCount);

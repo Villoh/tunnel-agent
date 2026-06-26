@@ -36,7 +36,68 @@ public static class ProviderIconRegistry
     public record ProviderIcon(
         PackIconSimpleIconsKind IconKind,
         string LogoColor,
-        string? CustomIconData = null);
+        string? CustomIconData = null,
+        bool IsFallback = false);
+
+    /// <summary>
+    /// How a provider's icon should be rendered. Known providers use their brand glyph;
+    /// unknown/custom providers (arbitrary user-chosen names) fall back to a monogram
+    /// (first letter of the name) over a stable, name-derived accent colour.
+    /// </summary>
+    public sealed record ProviderIconDisplay(
+        PackIconSimpleIconsKind IconKind,
+        string LogoColor,
+        string? CustomIconData,
+        bool UseMonogram,
+        string Monogram)
+    {
+        public bool HasCustomIcon  => CustomIconData is not null;
+        public bool ShowSimpleIcon => !UseMonogram && !HasCustomIcon;
+    }
+
+    // Accent palette for unknown/custom providers. A name always maps to the same entry.
+    private static readonly string[] FallbackPalette =
+    {
+        "#6366F1", "#8B5CF6", "#A855F7", "#EC4899", "#F43F5E",
+        "#EF4444", "#F59E0B", "#10B981", "#14B8A6", "#0EA5E9",
+        "#3B82F6", "#84CC16",
+    };
+
+    /// <summary>True when the provider id maps to a known brand icon (not the generic fallback).</summary>
+    public static bool IsKnown(string providerId) => !Get(providerId).IsFallback;
+
+    /// <summary>Single-character monogram derived from a provider's display name.</summary>
+    public static string Monogram(string name)
+    {
+        if (!string.IsNullOrWhiteSpace(name))
+            foreach (var ch in name)
+                if (char.IsLetterOrDigit(ch))
+                    return char.ToUpperInvariant(ch).ToString();
+        return "?";
+    }
+
+    /// <summary>Stable accent colour derived from a name (FNV-1a hash into <see cref="FallbackPalette"/>).</summary>
+    public static string FallbackColor(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return FallbackPalette[0];
+        uint hash = 2166136261;
+        foreach (var ch in name) { hash ^= ch; hash *= 16777619; }
+        return FallbackPalette[hash % (uint)FallbackPalette.Length];
+    }
+
+    /// <summary>
+    /// Resolves the full icon presentation for a provider, applying the monogram fallback
+    /// (with a name-derived colour) when the provider id is not a known brand.
+    /// </summary>
+    public static ProviderIconDisplay GetDisplay(string providerId, string? displayName = null)
+    {
+        var icon = Get(providerId);
+        if (!icon.IsFallback)
+            return new(icon.IconKind, icon.LogoColor, icon.CustomIconData, UseMonogram: false, Monogram: "");
+
+        var name = string.IsNullOrWhiteSpace(displayName) ? providerId : displayName!;
+        return new(icon.IconKind, FallbackColor(name), CustomIconData: null, UseMonogram: true, Monogram(name));
+    }
 
     /// <summary>Lookup by provider ID or owned_by value (case-insensitive).</summary>
     public static ProviderIcon Get(string providerId) =>
@@ -54,6 +115,6 @@ public static class ProviderIconRegistry
             "kiro"                          => new(PackIconSimpleIconsKind.OpenAi,       "#9046FF", KiroIconData),
             "trae"                          => new(PackIconSimpleIconsKind.OpenAi,       "#32F08C", TraeIconData),
             "xai"  or "grok"               => new(PackIconSimpleIconsKind.OpenAi,       "#000000", XaiIconData),
-            _                               => new(PackIconSimpleIconsKind.OpenAi,       "#555555"),
+            _                               => new(PackIconSimpleIconsKind.OpenAi,       "#555555", IsFallback: true),
         };
 }

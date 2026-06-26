@@ -8,10 +8,14 @@ public partial class QuotaProviderViewModel : ViewModelBase
     public string Id          { get; }
     public string Name        { get; }
     public PackIconSimpleIconsKind IconKind    { get; }
-    public string                  LogoColor   { get; }
+    public string                  LogoColor   => UseMonogram ? Services.ProviderIconRegistry.FallbackColor(Name) : _logoColor;
     public string                  Description { get; }
     public string?                 CustomIconData { get; }
     public bool                    HasCustomIcon  => CustomIconData is not null;
+    private readonly string        _logoColor;
+    public bool   UseMonogram   => !HasCustomIcon && !Services.ProviderIconRegistry.IsKnown(Id);
+    public bool   ShowSimpleIcon => !UseMonogram && !HasCustomIcon;
+    public string Monogram      => Services.ProviderIconRegistry.Monogram(Name);
 
     [ObservableProperty] private string  _email      = "";
     [ObservableProperty] private bool    _isDetected;
@@ -42,7 +46,7 @@ public partial class QuotaProviderViewModel : ViewModelBase
         Id             = id;
         Name           = name;
         IconKind       = iconKind;
-        LogoColor      = logoColor;
+        _logoColor     = logoColor;
         Description    = description;
         CustomIconData = customIconData;
     }

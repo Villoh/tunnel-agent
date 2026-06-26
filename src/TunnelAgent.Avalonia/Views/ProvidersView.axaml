@@ -194,11 +194,14 @@
                                                     <Panel>
                                                         <si:PackIconSimpleIcons Kind="{Binding IconKind}" Foreground="White" Width="14" Height="14"
                                                                                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                                                IsVisible="{Binding !HasCustomIcon}" />
+                                                                                IsVisible="{Binding ShowSimpleIcon}" />
                                                         <Viewbox Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center"
                                                                  IsVisible="{Binding HasCustomIcon}">
                                                             <Path Data="{Binding CustomIconData}" Fill="White" Stretch="Uniform" />
                                                         </Viewbox>
+                                                        <TextBlock Text="{Binding Monogram}" Foreground="White" FontSize="17" FontWeight="SemiBold"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                   IsVisible="{Binding UseMonogram}" />
                                                     </Panel>
                                                 </Border>
                                                 <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="1">
@@ -382,11 +385,14 @@
                                                         <si:PackIconSimpleIcons Kind="{Binding IconKind}" Foreground="White"
                                                                                 Width="14" Height="14"
                                                                                 HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                                                IsVisible="{Binding !HasCustomIcon}" />
+                                                                                IsVisible="{Binding ShowSimpleIcon}" />
                                                         <Viewbox Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center"
                                                                  IsVisible="{Binding HasCustomIcon}">
                                                             <Path Data="{Binding CustomIconData}" Fill="White" Stretch="Uniform" />
                                                         </Viewbox>
+                                                        <TextBlock Text="{Binding Monogram}" Foreground="White" FontSize="17" FontWeight="SemiBold"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                   IsVisible="{Binding UseMonogram}" />
                                                     </Panel>
                                                 </Border>
                                                 <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">

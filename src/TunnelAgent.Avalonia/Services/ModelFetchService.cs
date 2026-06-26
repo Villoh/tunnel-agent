@@ -89,8 +89,7 @@ public sealed class ModelFetchService
                         ? "perplexity"
                         : owner;
                     var displayName = OwnerDisplayName(effectiveOwner);
-                    var icon        = ProviderIconRegistry.Get(effectiveOwner);
-                    var group       = new AvailableModelGroupViewModel(displayName, effectiveOwner, icon.IconKind, icon.LogoColor, icon.CustomIconData);
+                    var group       = new AvailableModelGroupViewModel(displayName, effectiveOwner);
 
                     foreach (var (id, _) in models.OrderBy(m => m.id))
                     {

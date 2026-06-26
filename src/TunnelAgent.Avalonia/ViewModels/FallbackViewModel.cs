@@ -31,10 +31,14 @@ public sealed class FallbackModelOption
 
     public string Display => $"{ProviderName} · {ModelId}";
 
-    public PackIconSimpleIconsKind IconKind => ProviderIconRegistry.Get(ProviderId).IconKind;
-    public string LogoColor => ProviderIconRegistry.Get(ProviderId).LogoColor;
-    public string? CustomIconData => ProviderIconRegistry.Get(ProviderId).CustomIconData;
-    public bool HasCustomIcon => CustomIconData is not null;
+    private ProviderIconRegistry.ProviderIconDisplay Icon => ProviderIconRegistry.GetDisplay(ProviderId, ProviderName);
+    public PackIconSimpleIconsKind IconKind => Icon.IconKind;
+    public string LogoColor => Icon.LogoColor;
+    public string? CustomIconData => Icon.CustomIconData;
+    public bool HasCustomIcon => Icon.HasCustomIcon;
+    public bool ShowSimpleIcon => Icon.ShowSimpleIcon;
+    public bool UseMonogram => Icon.UseMonogram;
+    public string Monogram => Icon.Monogram;
 }
 
 public sealed class RouteCacheDurationOption(int minutes, string display, bool isResourceKey = false) : INotifyPropertyChanged
@@ -67,10 +71,14 @@ public partial class FallbackEntryEditViewModel : ViewModelBase
     public string ProviderLabel =>
         string.IsNullOrWhiteSpace(ProviderDisplayName) ? ProviderId : ProviderDisplayName;
 
-    public PackIconSimpleIconsKind IconKind => ProviderIconRegistry.Get(ProviderId).IconKind;
-    public string LogoColor => ProviderIconRegistry.Get(ProviderId).LogoColor;
-    public string? CustomIconData => ProviderIconRegistry.Get(ProviderId).CustomIconData;
-    public bool HasCustomIcon => CustomIconData is not null;
+    private ProviderIconRegistry.ProviderIconDisplay Icon => ProviderIconRegistry.GetDisplay(ProviderId, ProviderLabel);
+    public PackIconSimpleIconsKind IconKind => Icon.IconKind;
+    public string LogoColor => Icon.LogoColor;
+    public string? CustomIconData => Icon.CustomIconData;
+    public bool HasCustomIcon => Icon.HasCustomIcon;
+    public bool ShowSimpleIcon => Icon.ShowSimpleIcon;
+    public bool UseMonogram => Icon.UseMonogram;
+    public string Monogram => Icon.Monogram;
 
     public FallbackEntryEditViewModel(FallbackEntry entry, Action onChanged)
     {
@@ -85,13 +93,25 @@ public partial class FallbackEntryEditViewModel : ViewModelBase
     partial void OnProviderIdChanged(string value)
     {
         OnPropertyChanged(nameof(ProviderLabel));
+        RaiseIconChanged();
+        _onChanged();
+    }
+    partial void OnProviderDisplayNameChanged(string value)
+    {
+        OnPropertyChanged(nameof(ProviderLabel));
+        RaiseIconChanged();
+    }
+
+    private void RaiseIconChanged()
+    {
         OnPropertyChanged(nameof(IconKind));
         OnPropertyChanged(nameof(LogoColor));
         OnPropertyChanged(nameof(CustomIconData));
         OnPropertyChanged(nameof(HasCustomIcon));
-        _onChanged();
+        OnPropertyChanged(nameof(ShowSimpleIcon));
+        OnPropertyChanged(nameof(UseMonogram));
+        OnPropertyChanged(nameof(Monogram));
     }
-    partial void OnProviderDisplayNameChanged(string value) => OnPropertyChanged(nameof(ProviderLabel));
 
     public FallbackEntry ToModel(int priority) => new()
     {
@@ -125,10 +145,15 @@ public partial class VirtualModelEditViewModel : ViewModelBase
     public string RouteProgress => RouteState?.ProgressString ?? "";
     public string RouteProviderLabel => RouteState?.ProviderLabel ?? "";
     public string RouteModelId => RouteState?.ModelId ?? "";
-    public PackIconSimpleIconsKind RouteIconKind => ProviderIconRegistry.Get(RouteState?.ProviderId ?? "").IconKind;
-    public string RouteLogoColor => ProviderIconRegistry.Get(RouteState?.ProviderId ?? "").LogoColor;
-    public string? RouteCustomIconData => ProviderIconRegistry.Get(RouteState?.ProviderId ?? "").CustomIconData;
-    public bool RouteHasCustomIcon => RouteCustomIconData is not null;
+    private ProviderIconRegistry.ProviderIconDisplay RouteIcon =>
+        ProviderIconRegistry.GetDisplay(RouteState?.ProviderId ?? "", RouteState?.ProviderLabel);
+    public PackIconSimpleIconsKind RouteIconKind => RouteIcon.IconKind;
+    public string RouteLogoColor => RouteIcon.LogoColor;
+    public string? RouteCustomIconData => RouteIcon.CustomIconData;
+    public bool RouteHasCustomIcon => RouteIcon.HasCustomIcon;
+    public bool RouteShowSimpleIcon => RouteIcon.ShowSimpleIcon;
+    public bool RouteUseMonogram => RouteIcon.UseMonogram;
+    public string RouteMonogram => RouteIcon.Monogram;
 
     public IReadOnlyList<FallbackModelOption> AvailableOptions => _optionsProvider();
     public bool HasAvailableOptions => AvailableOptions.Count > 0;
@@ -169,6 +194,9 @@ public partial class VirtualModelEditViewModel : ViewModelBase
         OnPropertyChanged(nameof(RouteLogoColor));
         OnPropertyChanged(nameof(RouteCustomIconData));
         OnPropertyChanged(nameof(RouteHasCustomIcon));
+        OnPropertyChanged(nameof(RouteShowSimpleIcon));
+        OnPropertyChanged(nameof(RouteUseMonogram));
+        OnPropertyChanged(nameof(RouteMonogram));
     }
 
     public void RefreshOptions()
