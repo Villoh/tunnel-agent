@@ -89,7 +89,7 @@
     <value>폴백 사용</value>
   </data>
   <data name="Fallback_Enable_Description" xml:space="preserve">
-    <value>사용하면 할당량이 소진될 때 가상 모델이 자동으로 대체 공급자로 폴백합니다.</value>
+    <value>사용하면 할당량이 소진될 때 가상 모델이 자동으로 대체 공급자로 폴백합니다. 이 스위치만으로 로컬 프록시를 제어합니다. 끄면 프록시가 중지되고, 켜면 가상 모델이 없어도 시작됩니다(트래픽은 투명하게 전달됩니다).</value>
   </data>
   <data name="Fallback_RouteCaching_Label" xml:space="preserve">
     <value>작동하는 경로 캐시</value>

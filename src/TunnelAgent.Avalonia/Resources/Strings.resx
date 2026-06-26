@@ -89,7 +89,7 @@
     <value>Enable Fallback</value>
   </data>
   <data name="Fallback_Enable_Description" xml:space="preserve">
-    <value>When enabled, virtual models will automatically fall back to alternative providers when quota is exhausted.</value>
+    <value>When enabled, virtual models will automatically fall back to alternative providers when quota is exhausted. This switch alone governs the local proxy: turning it off stops the proxy, and turning it on starts it even without virtual models (traffic is forwarded transparently).</value>
   </data>
   <data name="Fallback_RouteCaching_Label" xml:space="preserve">
     <value>Cache working routes</value>

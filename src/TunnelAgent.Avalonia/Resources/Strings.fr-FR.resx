@@ -89,7 +89,7 @@
     <value>Activer le fallback</value>
   </data>
   <data name="Fallback_Enable_Description" xml:space="preserve">
-    <value>Lorsqu'il est activé, les modèles virtuels basculent automatiquement vers d'autres fournisseurs lorsque le quota est épuisé.</value>
+    <value>Lorsqu'il est activé, les modèles virtuels basculent automatiquement vers d'autres fournisseurs lorsque le quota est épuisé. Ce commutateur gouverne à lui seul le proxy local : le désactiver arrête le proxy, et l'activer le démarre même sans modèles virtuels (le trafic est transféré de manière transparente).</value>
   </data>
   <data name="Fallback_RouteCaching_Label" xml:space="preserve">
     <value>Mettre en cache les routes fonctionnelles</value>

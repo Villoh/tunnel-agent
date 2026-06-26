@@ -89,7 +89,7 @@
     <value>启用回退</value>
   </data>
   <data name="Fallback_Enable_Description" xml:space="preserve">
-    <value>启用后，当配额耗尽时，虚拟模型将自动回退到备用提供商。</value>
+    <value>启用后，当配额耗尽时，虚拟模型将自动回退到备用提供商。此开关单独控制本地代理：关闭它会停止代理，开启它即使没有虚拟模型也会启动代理（流量将被透明转发）。</value>
   </data>
   <data name="Fallback_RouteCaching_Label" xml:space="preserve">
     <value>缓存可用路由</value>

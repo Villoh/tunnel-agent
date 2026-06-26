@@ -89,7 +89,7 @@
     <value>Ativar fallback</value>
   </data>
   <data name="Fallback_Enable_Description" xml:space="preserve">
-    <value>Quando ativado, os modelos virtuais recorrem automaticamente a fornecedores alternativos quando a quota se esgota.</value>
+    <value>Quando ativado, os modelos virtuais recorrem automaticamente a fornecedores alternativos quando a quota se esgota. Este interruptor governa sozinho o proxy local: desativá-lo para o proxy e ativá-lo inicia-o mesmo sem modelos virtuais (o tráfego é reencaminhado de forma transparente).</value>
   </data>
   <data name="Fallback_RouteCaching_Label" xml:space="preserve">
     <value>Memorizar rotas que funcionam</value>

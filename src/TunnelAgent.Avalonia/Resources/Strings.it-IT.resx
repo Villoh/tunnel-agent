@@ -89,7 +89,7 @@
     <value>Abilita fallback</value>
   </data>
   <data name="Fallback_Enable_Description" xml:space="preserve">
-    <value>Se abilitato, i modelli virtuali passano automaticamente a provider alternativi quando la quota è esaurita.</value>
+    <value>Se abilitato, i modelli virtuali passano automaticamente a provider alternativi quando la quota è esaurita. Questo interruttore governa da solo il proxy locale: disattivarlo arresta il proxy e attivarlo lo avvia anche senza modelli virtuali (il traffico viene inoltrato in modo trasparente).</value>
   </data>
   <data name="Fallback_RouteCaching_Label" xml:space="preserve">
     <value>Memorizza le route funzionanti</value>

@@ -89,7 +89,7 @@
     <value>Yedeği etkinleştir</value>
   </data>
   <data name="Fallback_Enable_Description" xml:space="preserve">
-    <value>Etkinleştirildiğinde, kota tükendiğinde sanal modeller otomatik olarak alternatif sağlayıcılara geçer.</value>
+    <value>Etkinleştirildiğinde, kota tükendiğinde sanal modeller otomatik olarak alternatif sağlayıcılara geçer. Bu anahtar tek başına yerel proxy'yi yönetir: kapatmak proxy'yi durdurur, açmak ise sanal model olmadan bile başlatır (trafik şeffaf biçimde iletilir).</value>
   </data>
   <data name="Fallback_RouteCaching_Label" xml:space="preserve">
     <value>Çalışan rotaları önbelleğe al</value>

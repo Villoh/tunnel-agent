@@ -89,7 +89,7 @@
     <value>フォールバックを有効化</value>
   </data>
   <data name="Fallback_Enable_Description" xml:space="preserve">
-    <value>有効にすると、クォータが尽きたときに仮想モデルが自動的に代替プロバイダーへフォールバックします。</value>
+    <value>有効にすると、クォータが尽きたときに仮想モデルが自動的に代替プロバイダーへフォールバックします。このスイッチだけでローカルプロキシを制御します。オフにするとプロキシが停止し、オンにすると仮想モデルがなくても起動します（トラフィックは透過的に転送されます）。</value>
   </data>
   <data name="Fallback_RouteCaching_Label" xml:space="preserve">
     <value>成功したルートをキャッシュ</value>

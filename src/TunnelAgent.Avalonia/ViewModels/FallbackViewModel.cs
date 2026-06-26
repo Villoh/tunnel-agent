@@ -299,7 +299,7 @@ public partial class FallbackViewModel : ViewModelBase
     private readonly Func<Task> _onActiveRoutesChanged;
     private readonly List<FallbackModelOption> _availableModels = new();
     private bool _loading;
-    private bool _lastHasActiveRoutes;
+    private bool _lastEnabled;
 
     [ObservableProperty] private bool _isEnabled;
     [ObservableProperty] private bool _routeCachingEnabled;
@@ -339,7 +339,7 @@ public partial class FallbackViewModel : ViewModelBase
             VirtualModels.Add(CreateModelVm(model));
         _loading = false;
 
-        _lastHasActiveRoutes = config.HasActiveRoutes;
+        _lastEnabled = config.Enabled;
 
         VirtualModels.CollectionChanged += (_, _) =>
         {
@@ -473,10 +473,11 @@ public partial class FallbackViewModel : ViewModelBase
         _settings.Current.Fallback = config;
         _settings.Save();
 
-        var nowActive = config.HasActiveRoutes;
-        if (nowActive != _lastHasActiveRoutes)
+        // The bridge lifecycle is governed by the master switch; it reads virtual models
+        // live, so only toggling Enabled requires restarting the engine.
+        if (config.Enabled != _lastEnabled)
         {
-            _lastHasActiveRoutes = nowActive;
+            _lastEnabled = config.Enabled;
             _ = _onActiveRoutesChanged();
         }
     }

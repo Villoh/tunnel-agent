@@ -109,9 +109,11 @@ public sealed class EngineService : IManagedEngine
         _bridge.Stop();
         _publicPort = _settings.Current.GetOrAddEngine(Definition.Id, Definition.DefaultPort).Port;
 
-        // When fallback is active the bridge owns the public port and CLIProxyAPI
-        // listens on an internal one; otherwise CLIProxyAPI binds the public port directly.
-        var bridgeOn   = _settings.Current.Fallback.HasActiveRoutes;
+        // The fallback master switch governs the bridge lifecycle. When enabled the bridge
+        // owns the public port and CLIProxyAPI listens on an internal one (forwarding is
+        // transparent when no virtual model matches); otherwise CLIProxyAPI binds the
+        // public port directly.
+        var bridgeOn   = _settings.Current.Fallback.Enabled;
         var enginePort = bridgeOn ? FallbackProxyService.InternalPortFor(_publicPort) : _publicPort;
 
         await _config.WriteConfigAsync(portOverride: bridgeOn ? enginePort : null);

@@ -89,7 +89,7 @@
     <value>Fallback aktivieren</value>
   </data>
   <data name="Fallback_Enable_Description" xml:space="preserve">
-    <value>Wenn aktiviert, wechseln virtuelle Modelle automatisch zu alternativen Anbietern, sobald das Kontingent erschöpft ist.</value>
+    <value>Wenn aktiviert, wechseln virtuelle Modelle automatisch zu alternativen Anbietern, sobald das Kontingent erschöpft ist. Dieser Schalter allein steuert den lokalen Proxy: Ausschalten stoppt den Proxy, Einschalten startet ihn auch ohne virtuelle Modelle (der Datenverkehr wird transparent weitergeleitet).</value>
   </data>
   <data name="Fallback_RouteCaching_Label" xml:space="preserve">
     <value>Funktionierende Routen zwischenspeichern</value>
