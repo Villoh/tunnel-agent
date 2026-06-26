@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Gray Fluent press background bleeding through all buttons** (`Controls.axaml`): clicking and holding (or click-dragging) almost any button briefly revealed the FluentTheme default `:pressed` gray `ContentPresenter` background, because the custom button styles only overrode `:pointerover`. Added matching `:pressed` states for every affected control (`Button.app`/`.primary`, `rail`, `icon`, `link`, `side`/`.selected`, `proxy-card`, `provider-row-name`, `link-add`, `tab-item`/`.active`, and the `ToggleButton.provider-row`/`model-group` headers) so each uses its own pressed color instead of the stray gray.
 - **Off-center provider icons in the Fallback page** (`FallbackView.axaml`): the SimpleIcons glyphs (e.g. OpenAI) in the model-selection popup and virtual-model entry rows looked nudged up and to the left. The icon containers used odd icon/box size differences (an 11px icon in a 20px box → 4.5px margins, 13px in 26px → 6.5px margins), so layout rounding snapped the half-pixel and offset the glyph. The icon sizes are now `12` (popup) and `14` (entries), giving exact integer margins so every fallback icon centers precisely. ProvidersView was unaffected because it already uses even differences (14px in 28/30px boxes).
 
 ### Changed
