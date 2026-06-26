@@ -1,9 +1,11 @@
+using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using TunnelAgent.ViewModels;
 
 namespace TunnelAgent.Views;
@@ -11,11 +13,14 @@ namespace TunnelAgent.Views;
 public partial class ConfigurationView : UserControl
 {
     private MainWindowViewModel? _vm;
+    private int _lastScrollRequestId = -1;
+    private DispatcherTimer? _scrollTimer;
 
     public ConfigurationView()
     {
         InitializeComponent();
         DataContextChanged += (_, _) => HookViewModel();
+        Loaded += (_, _) => HookViewModel();
         HookViewModel();
     }
 
@@ -29,16 +34,33 @@ public partial class ConfigurationView : UserControl
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(MainWindowViewModel.LocalProxyScrollRequestId)) return;
-        Dispatcher.UIThread.Post(async () => await ScrollToLocalProxySectionAsync(), DispatcherPriority.Background);
+        TryScrollToLocalProxySection();
     }
 
-    private async Task ScrollToLocalProxySectionAsync()
+    private void TryScrollToLocalProxySection()
     {
-        // Local Proxy is the last section in the CLIProxy tab. Let tab visibility/layout settle,
-        // then jump to the bottom; measuring a just-shown section races Avalonia layout.
-        await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Loaded);
-        await Task.Delay(100);
-        ConfigurationScrollViewer.Offset = new Vector(0, ConfigurationScrollViewer.Extent.Height);
+        if (_vm is null || _vm.LocalProxyScrollRequestId == _lastScrollRequestId) return;
+        _lastScrollRequestId = _vm.LocalProxyScrollRequestId;
+
+        _scrollTimer?.Stop();
+        _scrollTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+        var deadline = DateTime.UtcNow.AddSeconds(2);
+        _scrollTimer.Tick += (_, _) =>
+        {
+            if (DateTime.UtcNow > deadline)
+            {
+                _scrollTimer?.Stop();
+                return;
+            }
+
+            if (LocalProxySectionLabel.GetVisualRoot() is null ||
+                LocalProxySectionLabel.Bounds.Height <= 0)
+                return;
+
+            LocalProxySectionCard.BringIntoView();
+            _scrollTimer?.Stop();
+        };
+        _scrollTimer.Start();
     }
 
     private async void OnCopyCliProxyEndpoint(object? sender, RoutedEventArgs e)

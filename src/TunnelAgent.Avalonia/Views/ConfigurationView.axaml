@@ -352,7 +352,7 @@
                         </StackPanel>
                     </Border>
                     <TextBlock x:Name="LocalProxySectionLabel" Classes="section-label" Text="{l:Loc ConfigView_CLIProxy_LocalProxySection}"/>
-                    <Border Classes="card" Margin="0,0,0,16">
+                    <Border x:Name="LocalProxySectionCard" Classes="card" Margin="0,0,0,16">
                         <StackPanel>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto" ColumnSpacing="10">
                                 <StackPanel>

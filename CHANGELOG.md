@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-06-28
+
 ### Added
 
 - **Edit custom provider dialog** (`ProviderCatalogService`, `MainWindowViewModel`, `ProvidersView.axaml`, `MainWindow.axaml`, `MainWindow.axaml.cs`, `Resources/Strings.resx`): custom OpenAI-compatible providers now have a pencil **Edit provider** action that opens an in-place popup mirroring the Add dialog, pre-filled with the provider's current name, base URL and API key. Confirming saves the changes via the new `UpdateCustomProviderAsync`, which rewrites `proxy-config.yaml` and rebuilds the provider list. The dialog supports click-outside/Escape to dismiss and Enter to save.
@@ -24,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Local Proxy sidebar card now scrolls to the section content** (`ConfigurationView.axaml`, `ConfigurationView.axaml.cs`): clicking the sidebar **Local Proxy** status card switched to the CLIProxyAPI configuration tab but the follow-up scroll usually failed — a single delayed jump to the scroll extent raced Avalonia layout while the just-shown CLIProxy panel was still measuring, so the offset was computed against a stale/clamped extent and left the view at the top. The scroll is now retried on a short timer until the Local Proxy section is laid out and then `BringIntoView()` is called on the section card, so the card reliably comes into view.
 - **Home momentarily showed hardcoded fallback prices instead of cached OpenRouter pricing** (`OpenRouterContextService`, `MainWindowViewModel`): on launch the dashboard seeded persisted usage events and computed cost figures (`OnUsageEventsLoaded` → `Recompute`) before `WarmModelPricingAsync` had loaded the on-disk OpenRouter price JSON, so the first render briefly used the built-in fallback table. `OpenRouterContextService` gained a synchronous `SeedFromDisk()` that loads the cached `openrouter-models.json` into memory, and `MainWindowViewModel` now calls it before the initial usage seed — so cost estimates use real OpenRouter pricing from the first compute and the hardcoded table is only a true fallback for models the JSON does not list. The background `WarmAsync` refresh still re-fetches stale pricing from the network.
 - **Model selection UI froze on "Select all" / search with large providers** (`MainWindowViewModel`, `MainWindow.axaml`): selecting all models (or, for the custom-provider dialog, typing in the search box) froze the UI when a provider exposed hundreds of models (e.g. OpenRouter with 339+). Toggling "Select all" set `IsSelected` on every model, and each change fired the per-item `PropertyChanged` handler which re-evaluated LINQ over the whole list (and, in the agent config overlay's Manual mode, re-ran `RefreshManualPreviewAsync` per model) — an O(n²) cascade. Bulk selection now suppresses the per-item handler and raises the aggregate state once (custom-provider dialog and agent config overlay). The custom-provider model list also switched from a non-virtualizing `ItemsControl` inside a `ScrollViewer` to a virtualizing `ListBox`, so "Select all" and search are now smooth.
 - **Theme/Language combos clipped their text** (`ConfigurationView.axaml`): the General → Theme and Language combo boxes were `140px` wide, which truncated longer entries such as "System default". Both are now `155px` so the full text fits.
@@ -913,7 +916,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v0.9.1...HEAD
+[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/Villoh/tunnel-agent/compare/v0.9.2...v1.0.0
 [0.9.2]: https://github.com/Villoh/tunnel-agent/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/Villoh/tunnel-agent/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/Villoh/tunnel-agent/compare/v0.8.0...v0.9.0
