@@ -78,6 +78,27 @@ public sealed class OpenRouterContextService
     }
 
     /// <summary>
+    /// Synchronously seeds the in-memory cache from the on-disk JSON when present and not
+    /// already loaded. Call this before the first cost computation so dashboard figures use
+    /// OpenRouter prices from the start instead of momentarily falling back to the built-in
+    /// table. Returns true when the cache is populated.
+    /// </summary>
+    public bool SeedFromDisk()
+    {
+        if (_cache is not null) return true;
+        _lock.Wait();
+        try
+        {
+            if (_cache is not null) return true;
+            return LoadFromDiskLocked();
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    /// <summary>
     /// Warms the cache for startup: seeds from disk first (instant, offline-capable),
     /// invoking <paramref name="onUpdated"/>, then refreshes from the network in the
     /// background when the disk copy is stale, invoking <paramref name="onUpdated"/> again.

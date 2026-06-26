@@ -406,6 +406,9 @@ SelectedSection is SectionKey.Logs;
         };
         _modelFetch = new TunnelAgent.Services.ModelFetchService(settings);
         _usage = new UsageService(_usageStore);
+        // Seed OpenRouter prices from the on-disk JSON first so the initial cost figures
+        // use real pricing instead of momentarily falling back to the built-in table.
+        TunnelAgent.Services.OpenRouterContextService.Instance.SeedFromDisk();
         // Seed telemetry-backed views before logs load, so request_id → provider
         // overrides are available when log entries are parsed.
         var persistedUsage = _usageStore.LoadRecent(50_000);
