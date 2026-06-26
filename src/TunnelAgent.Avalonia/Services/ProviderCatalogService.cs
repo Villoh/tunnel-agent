@@ -181,18 +181,22 @@ public sealed class ProviderCatalogService : IDisposable
     /// Update a custom OpenAI-compatible provider's name, base-url and api key,
     /// then rewrite config.yaml and rebuild the list.
     /// </summary>
-    public async Task UpdateCustomProviderAsync(string providerId, string name, string baseUrl, string apiKey)
+    public async Task<string> UpdateCustomProviderAsync(string providerId, string name, string baseUrl, string apiKey)
     {
         var ps = _settings.Current.Providers.FirstOrDefault(p => p.Id == providerId && p.Kind == ProviderKind.OpenAICompatibility);
-        if (ps is null) return;
+        if (ps is null) return providerId;
 
-        ps.DisplayName = name;
+        // The proxy's openai-compatibility schema has no display-name field; the
+        // provider's `name:` (mapped to Id) is the only human-readable identifier,
+        // so renaming updates the Id (kept unique against the other providers).
+        ps.Id = UniqueProviderId(name, ps.Id);
         ps.BaseUrl = baseUrl;
         ps.Accounts = [new ProviderAccountSettings { ApiKey = apiKey }];
         _settings.Save();
         await _config.WriteConfigAsync();
         BuildProviderList();
         ProvidersRebuilt?.Invoke(this, EventArgs.Empty);
+        return ps.Id;
     }
 
     /// <summary>Replace the exposed model list for a custom provider and rewrite config.yaml.</summary>
@@ -218,14 +222,16 @@ public sealed class ProviderCatalogService : IDisposable
         ProvidersRebuilt?.Invoke(this, EventArgs.Empty);
     }
 
-    private string UniqueProviderId(string name)
+    private string UniqueProviderId(string name, string? excludeSelfId = null)
     {
-        var slug = System.Text.RegularExpressions.Regex.Replace(name.ToLowerInvariant(), @"[^a-z0-9]+", "-").Trim('-');
-        if (string.IsNullOrEmpty(slug)) slug = "provider";
-        var id = slug;
+        // The proxy uses `name` verbatim (it becomes owned_by in /v1/models and the UI label),
+        // so keep the user's exact text instead of slugifying — only de-duplicate on collision.
+        var baseName = name.Trim();
+        if (string.IsNullOrEmpty(baseName)) baseName = "provider";
+        var id = baseName;
         var n = 2;
-        while (_settings.Current.Providers.Any(p => p.Id == id))
-            id = $"{slug}-{n++}";
+        while (_settings.Current.Providers.Any(p => p.Id == id && !string.Equals(p.Id, excludeSelfId, StringComparison.Ordinal)))
+            id = $"{baseName} {n++}";
         return id;
     }
 
@@ -424,7 +430,7 @@ public sealed class ProviderCatalogService : IDisposable
 
     private ProviderViewModel BuildCustomProviderViewModel(ProviderSettings ps)
     {
-        var name = string.IsNullOrEmpty(ps.DisplayName) ? TitleCase(ps.Id) : ps.DisplayName;
+        var name = string.IsNullOrEmpty(ps.DisplayName) ? ps.Id : ps.DisplayName;
         var vm   = new ProviderViewModel(
             ps.Id, name,
             PackIconSimpleIconsKind.OpenAi, "#555555",
@@ -580,11 +586,6 @@ public sealed class ProviderCatalogService : IDisposable
 
     private static bool SupportsNativeApiKey(string providerId) =>
         GetDefaultKind(providerId) is ProviderKind.ClaudeApiKey or ProviderKind.GeminiApiKey or ProviderKind.CodexApiKey;
-
-    private static string TitleCase(string id) =>
-        System.Text.RegularExpressions.Regex.Replace(id, @"[^A-Za-z0-9]+", " ") is { } s
-            ? System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(s)
-            : id;
 
     public void Dispose()
     {

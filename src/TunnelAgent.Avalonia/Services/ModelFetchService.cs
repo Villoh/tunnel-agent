@@ -30,12 +30,18 @@ public sealed class ModelFetchService
         System.Collections.ObjectModel.ObservableCollection<AvailableModelGroupViewModel> groups,
         int port,
         string? engineId = null,
-        CancellationToken ct = default)
+        CancellationToken ct = default,
+        string? expectedOwner = null,
+        int expectedModelCount = 0)
     {
         var url  = $"http://127.0.0.1:{port}/v1/models";
 
         // Poll until models are available (CLIProxy loads auth/models after health check).
         // Max 30 seconds: 1 immediate attempt + 14 retries every 2s.
+        // After a config edit + restart the proxy registers providers incrementally (OAuth
+        // first, custom openai-compatibility providers a moment later). When an expected owner
+        // is given, keep polling until that provider's models have actually registered so we
+        // don't apply a half-loaded list — deterministic regardless of registration timing.
         const int pollIntervalMs = 2000;
         const int maxAttempts    = 15;
         JsonArray? data          = null;
@@ -54,7 +60,14 @@ public sealed class ModelFetchService
                 if (!resp.IsSuccessStatusCode) continue;
                 var body = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
                 var candidate = body?["data"]?.AsArray();
-                if (candidate is { Count: > 0 }) { data = candidate; break; }
+                if (candidate is not { Count: > 0 }) continue;
+                // Still waiting for the edited provider's models to finish registering after the
+                // restart — keep polling rather than applying a partial list.
+                if (expectedOwner is not null && expectedModelCount > 0 &&
+                    CountOwnedBy(candidate, expectedOwner) < expectedModelCount)
+                    continue;
+                data = candidate;
+                break;
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested) { return; }
             catch { /* server not ready — retry */ }
@@ -107,6 +120,15 @@ public sealed class ModelFetchService
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────
+
+    private static int CountOwnedBy(JsonArray data, string ownedBy)
+    {
+        var n = 0;
+        foreach (var item in data)
+            if (string.Equals(item?["owned_by"]?.GetValue<string>(), ownedBy, StringComparison.Ordinal))
+                n++;
+        return n;
+    }
 
     private static string OwnerDisplayName(string ownedBy) => ownedBy.ToLowerInvariant() switch
     {

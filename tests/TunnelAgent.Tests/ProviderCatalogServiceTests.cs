@@ -85,7 +85,7 @@ openai-compatibility:
         await catalog.InitializeAsync();
 
         await catalog.AddCustomProviderAsync("OpenRouter", "https://openrouter.ai/api/v1", "sk-or", ["a", "b"]);
-        var providerId = Assert.Single(catalog.Providers, p => p.Id == "openrouter").Id;
+        var providerId = Assert.Single(catalog.Providers, p => p.Id == "OpenRouter").Id;
 
         await catalog.UpdateCustomProviderModelsAsync(providerId, ["b", "c", "d"]);
 

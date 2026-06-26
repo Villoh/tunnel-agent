@@ -721,6 +721,11 @@
                                 Content="{l:Loc Dialog_AddAccount_Cancel}" Command="{Binding DismissCustomProviderModelsCommand}" />
                         <Button Grid.Column="2" Classes="app primary"
                                 Content="{l:Loc Dialog_AddCustomProvider_Add}" Command="{Binding ConfirmCustomProviderModelsCommand}"
+                                IsVisible="{Binding !IsEditingCustomProviderModels}"
+                                IsEnabled="{Binding CanConfirmCustomProviderModels}" />
+                        <Button Grid.Column="2" Classes="app primary"
+                                Content="{l:Loc Dialog_EditCustomProvider_Save}" Command="{Binding ConfirmCustomProviderModelsCommand}"
+                                IsVisible="{Binding IsEditingCustomProviderModels}"
                                 IsEnabled="{Binding CanConfirmCustomProviderModels}" />
                     </Grid>
                     <TextBlock Classes="row-desc" Margin="2,8"

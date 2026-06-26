@@ -76,6 +76,8 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
 
     private CancellationTokenSource? _cliProxyModelFetchCts;
     private CancellationTokenSource? _perplexityModelFetchCts;
+    private string? _pendingCliProxyModelOwner;
+    private int _pendingCliProxyModelCount;
     private bool _engineReleaseSelectionReady;
     private string? _suppressAutoUpdateForEngineId;
     private readonly AppUpdateService _appUpdate = new();
@@ -1137,6 +1139,52 @@ SelectedSection is SectionKey.Logs;
             MaybeCompletePendingOAuth();
         });
 
+    /// <summary>
+    /// Restart the running CLIProxyAPI so a custom-provider config change is fully applied.
+    /// A rename re-keys the provider; CLIProxyAPI's hot-reload cannot re-bind the existing auth
+    /// to the new name, so /v1/models only reflects it after a restart. The restart drives the
+    /// engine through Stopped→Running, which deterministically re-fetches the model list.
+    /// No-op when the engine is not running.
+    /// </summary>
+    private async Task RestartCliProxyIfRunningAsync()
+    {
+        var engine = CliProxyEngine;
+        if (engine.State != EngineState.Running) return;
+        try
+        {
+            _lastEngineErrorShown.Remove(engine.Definition.Id);
+            await engine.StopAsync();
+            await engine.StartAsync();
+        }
+        catch (Exception ex)
+        {
+            TraceStartupWarning("Failed to restart CLIProxyAPI after custom provider edit", ex);
+        }
+    }
+
+    private async Task FetchPendingCliProxyModelsAsync(IManagedEngine engine, CancellationToken token, string expectedOwner, int expectedModelCount)
+    {
+        await _modelFetch.FetchAndApplyAsync(CliProxyModelGroups, engine.Port, engine.Definition.Id, token, expectedOwner, expectedModelCount);
+        if (!token.IsCancellationRequested && string.Equals(_pendingCliProxyModelOwner, expectedOwner, StringComparison.Ordinal) && _pendingCliProxyModelCount == expectedModelCount)
+        {
+            _pendingCliProxyModelOwner = null;
+            _pendingCliProxyModelCount = 0;
+        }
+    }
+
+    private async Task RestartCliProxyIfRunningAndWaitForModelsAsync(string expectedOwner, int expectedModelCount)
+    {
+        _pendingCliProxyModelOwner = expectedOwner;
+        _pendingCliProxyModelCount = expectedModelCount;
+        await RestartCliProxyIfRunningAsync();
+        if (CliProxyEngine.State == EngineState.Running)
+        {
+            _cliProxyModelFetchCts?.Cancel();
+            _cliProxyModelFetchCts = new CancellationTokenSource();
+            _ = FetchPendingCliProxyModelsAsync(CliProxyEngine, _cliProxyModelFetchCts.Token, expectedOwner, expectedModelCount);
+        }
+    }
+
     private void RebindProviders()
     {
         foreach (var existing in Providers)
@@ -1205,7 +1253,14 @@ SelectedSection is SectionKey.Logs;
                     if (cts is null || cts.IsCancellationRequested)
                     {
                         cts = new CancellationTokenSource();
-                        _ = _modelFetch.FetchAndApplyAsync(modelGroups, engine.Port, engine.Definition.Id, cts.Token);
+                        if (isCliProxy && _pendingCliProxyModelOwner is { } owner && _pendingCliProxyModelCount > 0)
+                        {
+                            _ = FetchPendingCliProxyModelsAsync(engine, cts.Token, owner, _pendingCliProxyModelCount);
+                        }
+                        else
+                        {
+                            _ = _modelFetch.FetchAndApplyAsync(modelGroups, engine.Port, engine.Definition.Id, cts.Token);
+                        }
                     }
                     if (isCliProxy)
                     {
@@ -1905,6 +1960,7 @@ SelectedSection is SectionKey.Logs;
     [RelayCommand]
     private async Task ConfirmEditCustomProvider()
     {
+        if (IsFetchingCustomProviderModels) return;
         if (_editingCustomProviderId is not { } editId) return;
 
         var name = CustomProviderNameDraft.Trim();
@@ -1912,10 +1968,36 @@ SelectedSection is SectionKey.Logs;
         var apiKey = CustomProviderApiKeyDraft.Trim();
         if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(baseUrl) || string.IsNullOrEmpty(apiKey)) return;
 
+        // Probe the upstream /models endpoint, mirroring the add flow. A non-200 (or
+        // unreachable) URL aborts the save and surfaces an error toast.
+        _customProviderModelFetchCts?.Cancel();
+        _customProviderModelFetchCts = new CancellationTokenSource();
+        IsFetchingCustomProviderModels = true;
+        ShowOAuthStatus = false;
+        var result = await _upstreamModelFetch.FetchAsync(baseUrl, apiKey, _customProviderModelFetchCts.Token);
+        IsFetchingCustomProviderModels = false;
+
+        if (!result.Success)
+        {
+            // Close the modal so the top-right status toast (rendered under the overlay) is visible.
+            ShowEditCustomProviderDialog = false;
+            OAuthStatusIsError = true;
+            OAuthStatusMessage = _localization.GetString("Dialog_CustomProviderModels_FetchError");
+            ShowOAuthStatus = true;
+            return;
+        }
+
         ShowEditCustomProviderDialog = false;
-        await _catalog.UpdateCustomProviderAsync(editId, name, baseUrl, apiKey);
+        var expectedModelCount = Providers.FirstOrDefault(p => p.Id == editId)?.Models.Count ?? 0;
+        var updatedId = await _catalog.UpdateCustomProviderAsync(editId, name, baseUrl, apiKey);
         _editingCustomProviderId = null;
         ResetCustomProviderDrafts();
+
+        // A rename re-keys the provider in the config; CLIProxyAPI's hot-reload can't re-bind the
+        // auth to the new name, so the Available Models list (from /v1/models) only updates after
+        // a restart. URL/key edits are picked up by hot-reload and don't change the model listing.
+        if (updatedId != editId)
+            await RestartCliProxyIfRunningAndWaitForModelsAsync(updatedId, expectedModelCount);
     }
 
     [RelayCommand]
@@ -1947,7 +2029,7 @@ SelectedSection is SectionKey.Logs;
             return;
         }
 
-        _editingProviderModelsId = null;
+        SetEditingProviderModelsId(null);
         PopulateCustomProviderModels(result.Models, name, []);
 
         ShowAddCustomProviderDialog = false;
@@ -1994,7 +2076,7 @@ SelectedSection is SectionKey.Logs;
             return;
         }
 
-        _editingProviderModelsId = provider.Id;
+        SetEditingProviderModelsId(provider.Id);
         PopulateCustomProviderModels(result.Models, provider.Name, provider.Models);
 
         ShowCustomProviderModelsDialog = true;
@@ -2025,8 +2107,11 @@ SelectedSection is SectionKey.Logs;
         {
             ShowCustomProviderModelsDialog = false;
             await _catalog.UpdateCustomProviderModelsAsync(editId, selected);
-            _editingProviderModelsId = null;
+            SetEditingProviderModelsId(null);
             ClearCustomProviderModels();
+            // Restart so the changed model list is reflected in /v1/models (Available Models),
+            // then wait until this provider's models have re-registered before applying.
+            await RestartCliProxyIfRunningAndWaitForModelsAsync(editId, selected.Count);
             return;
         }
 
@@ -2047,13 +2132,14 @@ SelectedSection is SectionKey.Logs;
         ShowCustomProviderModelsDialog = false;
         ClearCustomProviderModels();
         if (_editingProviderModelsId is null) ResetCustomProviderDrafts();
-        _editingProviderModelsId = null;
+        SetEditingProviderModelsId(null);
     }
 
     public IEnumerable<SelectableModelViewModel> VisibleCustomProviderModels =>
         CustomProviderModels.Where(m => m.IsVisible);
     public int CustomProviderModelCount => CustomProviderModels.Count;
     public int SelectedCustomProviderModelCount => CustomProviderModels.Count(m => m.IsSelected);
+    public bool IsEditingCustomProviderModels => _editingProviderModelsId is not null;
     public bool HasCustomProviderModels => CustomProviderModels.Count > 0;
     public bool HasVisibleCustomProviderModels => CustomProviderModels.Any(m => m.IsVisible);
     public bool ShowNoCustomProviderModelResults => HasCustomProviderModels && !HasVisibleCustomProviderModels;
@@ -2092,6 +2178,12 @@ SelectedSection is SectionKey.Logs;
         foreach (var model in CustomProviderModels)
             model.IsVisible = model.Matches(CustomProviderModelSearch);
         RaiseCustomProviderModelState();
+    }
+
+    private void SetEditingProviderModelsId(string? providerId)
+    {
+        _editingProviderModelsId = providerId;
+        OnPropertyChanged(nameof(IsEditingCustomProviderModels));
     }
 
     private void RaiseCustomProviderModelState()
