@@ -38,13 +38,7 @@
 
         <!-- Header -->
         <StackPanel Margin="0,0,0,16">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <TextBlock Classes="page-title" Text="{l:Loc Fallback_Title}" />
-                <Border CornerRadius="999" Background="{DynamicResource WarnBrush}" Padding="7,1"
-                        VerticalAlignment="Center">
-                    <TextBlock Text="{l:Loc Fallback_Experimental}" FontSize="11" Foreground="White" />
-                </Border>
-            </StackPanel>
+            <TextBlock Classes="page-title" Text="{l:Loc Fallback_Title}" />
             <TextBlock Classes="page-sub" Text="{l:Loc Fallback_Subtitle}" />
         </StackPanel>
 
@@ -118,7 +112,7 @@
                     <Border Classes="card" Margin="0,0,0,8">
                         <StackPanel>
                             <!-- Header row -->
-                            <Grid Margin="12,10" ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto" ColumnSpacing="10">
+                            <Grid Margin="12,10" ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="8">
                                 <ToggleButton Grid.Column="0" Classes="chevron" Width="22" Height="22" VerticalAlignment="Center"
                                               IsChecked="{Binding IsExpanded, Mode=TwoWay}">
                                     <lucide:PackIconLucide Kind="ChevronRight" Width="14" Height="14"
@@ -163,22 +157,19 @@
                                         IsVisible="{Binding HasRouteState}"
                                         ToolTip.Tip="{l:Loc Fallback_ResetRoute_Tooltip}"
                                         Command="{Binding ResetCachedRouteCommand}">
-                                    <lucide:PackIconLucide Kind="RotateCcw" Width="14" Height="14" />
+                                    <lucide:PackIconLucide Kind="RotateCcw" Width="14" Height="14"
+                                                           Foreground="{DynamicResource FgMutedBrush}" />
                                 </Button>
 
-                                <lucide:PackIconLucide Grid.Column="3" Kind="CircleCheck" Width="16" Height="16"
-                                                       VerticalAlignment="Center" Foreground="#50C878"
-                                                       IsVisible="{Binding IsModelEnabled}" />
-
-                                <ToggleButton Grid.Column="4" Classes="enable-toggle" VerticalAlignment="Center"
-                                              IsChecked="{Binding IsModelEnabled, Mode=TwoWay}" />
-
-                                <Button Grid.Column="5" Classes="icon-btn" VerticalAlignment="Center"
+                                <Button Grid.Column="3" Classes="icon-btn" VerticalAlignment="Center"
                                         ToolTip.Tip="{l:Loc Fallback_RemoveModel_Tooltip}"
                                         Command="{Binding #Root.DataContext.Fallback.RemoveVirtualModelCommand}"
                                         CommandParameter="{Binding}">
                                     <lucide:PackIconLucide Kind="Trash2" Width="14" Height="14" Foreground="#D46A6A" />
                                 </Button>
+
+                                <ToggleButton Grid.Column="4" Classes="enable-toggle" VerticalAlignment="Center"
+                                              IsChecked="{Binding IsModelEnabled, Mode=TwoWay}" />
                             </Grid>
 
                             <Border Classes="collapsible" Classes.expanded="{Binding IsExpanded}">
@@ -224,22 +215,24 @@
                                                     <Button Classes="icon-btn" ToolTip.Tip="{l:Loc Fallback_UseEntryNow_Tooltip}"
                                                             Command="{Binding $parent[ItemsControl].DataContext.UseEntryNowCommand}"
                                                             CommandParameter="{Binding}">
-                                                        <lucide:PackIconLucide Kind="CirclePlay" Width="14" Height="14" Foreground="{DynamicResource AccentBrush}" />
+                                                        <lucide:PackIconLucide Kind="CirclePlay" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
                                                     </Button>
                                                     <Button Classes="icon-btn" ToolTip.Tip="{l:Loc Fallback_MoveEntryUp_Tooltip}"
-                                                            IsEnabled="{Binding CanMoveUp}"
+                                                            IsVisible="{Binding CanMoveUp}"
                                                             Command="{Binding $parent[ItemsControl].DataContext.MoveEntryUpCommand}"
                                                             CommandParameter="{Binding}">
-                                                        <lucide:PackIconLucide Kind="MoveUp" Width="14" Height="14" />
+                                                        <lucide:PackIconLucide Kind="MoveUp" Width="14" Height="14"
+                                                                               Foreground="{DynamicResource FgMutedBrush}" />
                                                     </Button>
                                                     <Button Classes="icon-btn" ToolTip.Tip="{l:Loc Fallback_MoveEntryDown_Tooltip}"
-                                                            IsEnabled="{Binding CanMoveDown}"
+                                                            IsVisible="{Binding CanMoveDown}"
                                                             Command="{Binding $parent[ItemsControl].DataContext.MoveEntryDownCommand}"
                                                             CommandParameter="{Binding}">
-                                                        <lucide:PackIconLucide Kind="MoveDown" Width="14" Height="14" />
+                                                        <lucide:PackIconLucide Kind="MoveDown" Width="14" Height="14"
+                                                                               Foreground="{DynamicResource FgMutedBrush}" />
                                                     </Button>
                                                     <Button Classes="icon-btn"
-                                                            IsEnabled="{Binding $parent[ItemsControl].DataContext.CanRemoveEntry}"
+                                                            IsVisible="{Binding $parent[ItemsControl].DataContext.CanRemoveEntry}"
                                                             ToolTip.Tip="{l:Loc Fallback_RemoveEntry_Tooltip}"
                                                             Command="{Binding $parent[ItemsControl].DataContext.RemoveEntryCommand}"
                                                             CommandParameter="{Binding}">

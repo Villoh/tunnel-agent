@@ -695,12 +695,28 @@
         <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+        <Setter Property="RenderTransform" Value="scale(1)" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12" Easing="CubicEaseOut" />
+            </Transitions>
+        </Setter>
     </Style>
     <Style Selector="Button.icon-btn:pointerover /template/ ContentPresenter">
         <Setter Property="Background" Value="#14000000" />
     </Style>
+    <Style Selector="Button.icon-btn:pointerover">
+        <Setter Property="RenderTransform" Value="scale(1.18)" />
+    </Style>
     <Style Selector="Button.icon-btn:pressed /template/ ContentPresenter">
         <Setter Property="Background" Value="#22000000" />
+    </Style>
+    <Style Selector="Button.icon-btn:pressed">
+        <Setter Property="RenderTransform" Value="scale(0.9)" />
+    </Style>
+    <Style Selector="Button.icon-btn:disabled">
+        <Setter Property="RenderTransform" Value="scale(1)" />
     </Style>
     <Style Selector="Button.icon-btn.engine-action.start">
         <Setter Property="Foreground" Value="#58B97B" />
