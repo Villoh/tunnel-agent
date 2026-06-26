@@ -177,6 +177,24 @@ public sealed class ProviderCatalogService : IDisposable
         ProvidersRebuilt?.Invoke(this, EventArgs.Empty);
     }
 
+    /// <summary>
+    /// Update a custom OpenAI-compatible provider's name, base-url and api key,
+    /// then rewrite config.yaml and rebuild the list.
+    /// </summary>
+    public async Task UpdateCustomProviderAsync(string providerId, string name, string baseUrl, string apiKey)
+    {
+        var ps = _settings.Current.Providers.FirstOrDefault(p => p.Id == providerId && p.Kind == ProviderKind.OpenAICompatibility);
+        if (ps is null) return;
+
+        ps.DisplayName = name;
+        ps.BaseUrl = baseUrl;
+        ps.Accounts = [new ProviderAccountSettings { ApiKey = apiKey }];
+        _settings.Save();
+        await _config.WriteConfigAsync();
+        BuildProviderList();
+        ProvidersRebuilt?.Invoke(this, EventArgs.Empty);
+    }
+
     /// <summary>Replace the exposed model list for a custom provider and rewrite config.yaml.</summary>
     public async Task UpdateCustomProviderModelsAsync(string providerId, IReadOnlyList<string> models)
     {

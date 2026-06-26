@@ -89,6 +89,8 @@ public partial class MainWindow : Window
             Dispatcher.UIThread.Post(() => AddAccountOverlay.Focus(), DispatcherPriority.Input);
         else if (args.PropertyName == nameof(MainWindowViewModel.ShowAddCustomProviderDialog) && vm.ShowAddCustomProviderDialog)
             Dispatcher.UIThread.Post(() => AddCustomProviderOverlay.Focus(), DispatcherPriority.Input);
+        else if (args.PropertyName == nameof(MainWindowViewModel.ShowEditCustomProviderDialog) && vm.ShowEditCustomProviderDialog)
+            Dispatcher.UIThread.Post(() => EditCustomProviderOverlay.Focus(), DispatcherPriority.Input);
         else if (args.PropertyName == nameof(MainWindowViewModel.ShowPerplexityAccountDialog) && vm.ShowPerplexityAccountDialog)
             Dispatcher.UIThread.Post(() => PerplexityAccountOverlay.Focus(), DispatcherPriority.Input);
         else if (args.PropertyName == nameof(MainWindowViewModel.ShowAgentConfigDialog) && vm.ShowAgentConfigDialog)
@@ -373,6 +375,26 @@ public partial class MainWindow : Window
         {
             e.Handled = true;
             vm.ConfirmAddCustomProviderCommand.Execute(null);
+        }
+    }
+
+    private void OnEditCustomProviderOverlayPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm) vm.DismissEditCustomProviderCommand.Execute(null);
+    }
+
+    private void OnEditCustomProviderDialogKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            vm.DismissEditCustomProviderCommand.Execute(null);
+        }
+        else if (e.Key == Key.Enter)
+        {
+            e.Handled = true;
+            vm.ConfirmEditCustomProviderCommand.Execute(null);
         }
     }
 

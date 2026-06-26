@@ -183,6 +183,8 @@ SelectedSection is SectionKey.Logs;
     [ObservableProperty] private bool _showAddAccountModeDialog;
     [ObservableProperty] private bool _addAccountUseApiKey;
     [ObservableProperty] private bool _showAddCustomProviderDialog;
+    [ObservableProperty] private bool _showEditCustomProviderDialog;
+    private string? _editingCustomProviderId;
     [ObservableProperty] private string _customProviderNameDraft = "";
     [ObservableProperty] private string _customProviderBaseUrlDraft = "";
     [ObservableProperty] private string _customProviderApiKeyDraft = "";
@@ -1866,6 +1868,42 @@ SelectedSection is SectionKey.Logs;
     }
 
     [RelayCommand] private void ToggleCustomProviderApiKeyVisibility() => ShowCustomProviderApiKey = !ShowCustomProviderApiKey;
+
+    [RelayCommand]
+    private void OpenEditCustomProvider(ProviderViewModel provider)
+    {
+        if (provider is null || !provider.IsCustomProvider) return;
+        _editingCustomProviderId = provider.Id;
+        CustomProviderNameDraft = provider.Name;
+        CustomProviderBaseUrlDraft = provider.ApiKeyBaseUrl;
+        CustomProviderApiKeyDraft = provider.Accounts.FirstOrDefault(a => a.IsCustomKey)?.ApiKey ?? "";
+        ShowCustomProviderApiKey = false;
+        ShowEditCustomProviderDialog = true;
+    }
+
+    [RelayCommand]
+    private void DismissEditCustomProvider()
+    {
+        ShowEditCustomProviderDialog = false;
+        _editingCustomProviderId = null;
+        ResetCustomProviderDrafts();
+    }
+
+    [RelayCommand]
+    private async Task ConfirmEditCustomProvider()
+    {
+        if (_editingCustomProviderId is not { } editId) return;
+
+        var name = CustomProviderNameDraft.Trim();
+        var baseUrl = CustomProviderBaseUrlDraft.Trim();
+        var apiKey = CustomProviderApiKeyDraft.Trim();
+        if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(baseUrl) || string.IsNullOrEmpty(apiKey)) return;
+
+        ShowEditCustomProviderDialog = false;
+        await _catalog.UpdateCustomProviderAsync(editId, name, baseUrl, apiKey);
+        _editingCustomProviderId = null;
+        ResetCustomProviderDrafts();
+    }
 
     [RelayCommand]
     private async Task ConfirmAddCustomProvider()

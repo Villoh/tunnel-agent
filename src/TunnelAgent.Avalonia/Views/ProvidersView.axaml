@@ -243,6 +243,12 @@
                                                             Command="{Binding RequestAddAccountCommand}">
                                                         <lucide:PackIconLucide Kind="Plus" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
                                                     </Button>
+                                                    <Button Classes="icon-btn" ToolTip.Tip="{l:Loc ProvidersView_Provider_EditProviderTooltip}"
+                                                            IsVisible="{Binding IsCustomProvider}"
+                                                            Command="{Binding #Root.DataContext.OpenEditCustomProviderCommand}"
+                                                            CommandParameter="{Binding}">
+                                                        <lucide:PackIconLucide Kind="Pencil" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                                                    </Button>
                                                     <Button Classes="icon-btn" ToolTip.Tip="{l:Loc ProvidersView_Provider_EditModelsTooltip}"
                                                             IsVisible="{Binding IsCustomProvider}"
                                                             IsEnabled="{Binding !IsFetchingModels}"

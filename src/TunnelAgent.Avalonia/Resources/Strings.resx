@@ -358,6 +358,15 @@
   <data name="ProvidersView_Provider_EditModelsTooltip" xml:space="preserve">
     <value>Edit models</value>
   </data>
+  <data name="ProvidersView_Provider_EditProviderTooltip" xml:space="preserve">
+    <value>Edit provider</value>
+  </data>
+  <data name="Dialog_EditCustomProvider_Title" xml:space="preserve">
+    <value>Edit custom provider</value>
+  </data>
+  <data name="Dialog_EditCustomProvider_Save" xml:space="preserve">
+    <value>Save changes</value>
+  </data>
   <data name="Dialog_AddCustomProvider_Title" xml:space="preserve">
     <value>Add custom provider</value>
   </data>
