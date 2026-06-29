@@ -219,7 +219,7 @@ public partial class DashboardViewModel : ViewModelBase
 
         // Distinct-provider count drives the TOTAL CALLS card regardless of the summary tab.
         ProviderSummaryCount = source
-            .Select(e => string.IsNullOrWhiteSpace(e.Provider) ? "—" : e.Provider!)
+            .Select(e => ProviderLabel(e.Provider))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Count()
             .ToString(CultureInfo.InvariantCulture);
@@ -246,7 +246,7 @@ public partial class DashboardViewModel : ViewModelBase
     {
         Func<UsageEvent, string> keySelector = SummaryMode == DashboardSummaryMode.Model
             ? e => string.IsNullOrWhiteSpace(e.Model) ? "—" : e.Model
-            : e => string.IsNullOrWhiteSpace(e.Provider) ? "—" : e.Provider!;
+            : e => ProviderLabel(e.Provider);
 
         var rows = source
             .GroupBy(keySelector, StringComparer.OrdinalIgnoreCase)
@@ -358,6 +358,15 @@ public partial class DashboardViewModel : ViewModelBase
     }
 
     // ── Formatting ──────────────────────────────────────────────────────
+    private static string ProviderLabel(string? provider)
+    {
+        const string prefix = "OpenAI-compatible-";
+        if (string.IsNullOrWhiteSpace(provider)) return "—";
+        return provider.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+            ? provider[prefix.Length..]
+            : provider;
+    }
+
     private static string FormatLatency(double ms) =>
         ms >= 1000
             ? (ms / 1000).ToString("0.0", CultureInfo.InvariantCulture) + "s"

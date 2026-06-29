@@ -37,7 +37,7 @@ public sealed partial class RequestLogEntry
         Latency    = latency;
         Method     = method;
         Path       = path;
-        Provider   = string.IsNullOrWhiteSpace(provider) ? InferProvider(path) : Titlecase(provider.Trim());
+        Provider   = string.IsNullOrWhiteSpace(provider) ? InferProvider(path) : Titlecase(CleanProvider(provider));
         Model      = string.IsNullOrWhiteSpace(model) ? "—" : model.Trim();
     }
 
@@ -146,6 +146,15 @@ public sealed partial class RequestLogEntry
         return latency.TotalMilliseconds >= 1000
             ? latency.TotalSeconds.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) + "s"
             : latency.TotalMilliseconds.ToString("0", System.Globalization.CultureInfo.InvariantCulture) + "ms";
+    }
+
+    private static string CleanProvider(string provider)
+    {
+        const string prefix = "OpenAI-compatible-";
+        var trimmed = provider.Trim();
+        return trimmed.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+            ? trimmed[prefix.Length..]
+            : trimmed;
     }
 
     private static string Titlecase(string s) =>
