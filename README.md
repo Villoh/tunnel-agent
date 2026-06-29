@@ -52,6 +52,24 @@
 - 📊 **Live Status**: see sidebar engine health plus focused engine state, endpoint, and release info
 - ⚙️ **Configuration**: control startup behaviour, per-engine ports, updates, release selection, routing strategy, and credential actions
 
+## Screenshots
+
+| Home (usage dashboard) | Providers (CLIProxyAPI) |
+| --- | --- |
+| <img src="https://raw.githubusercontent.com/Villoh/tunnel-agent/main/assets/home.png" alt="Home usage dashboard" width="410"> | <img src="https://raw.githubusercontent.com/Villoh/tunnel-agent/main/assets/providers-cliproxy.png" alt="CLIProxyAPI providers" width="410"> |
+
+| Providers (Perplexity) | Quota |
+| --- | --- |
+| <img src="https://raw.githubusercontent.com/Villoh/tunnel-agent/main/assets/providers-perplexity.png" alt="Perplexity providers" width="410"> | <img src="https://raw.githubusercontent.com/Villoh/tunnel-agent/main/assets/quota.png" alt="Quota tracking" width="410"> |
+
+| Agents | Model Fallback |
+| --- | --- |
+| <img src="https://raw.githubusercontent.com/Villoh/tunnel-agent/main/assets/agents.png" alt="Agents configuration" width="410"> | <img src="https://raw.githubusercontent.com/Villoh/tunnel-agent/main/assets/fallback.png" alt="Model fallback" width="410"> |
+
+| Configuration | Logs |
+| --- | --- |
+| <img src="https://raw.githubusercontent.com/Villoh/tunnel-agent/main/assets/configuration.png" alt="Configuration" width="410"> | <img src="https://raw.githubusercontent.com/Villoh/tunnel-agent/main/assets/logs.png" alt="Logs" width="410"> |
+
 ## Engine Overview
 
 ### [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
