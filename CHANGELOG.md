@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Logs pagination controls** (`LogsView.axaml`, `LogsViewModel`, `Controls.axaml`, `Resources/Strings*.resx`): request-log pagination now uses icon-only first/previous/next/last controls with localized tooltips, hides unavailable navigation actions instead of disabling them, and shows a compact Google-style page range with ellipses. Number buttons keep stable sizing to avoid hover/selection repaint artifacts while the icon buttons retain the existing scale animation.
+
 ## [1.0.0] - 2026-06-28
 
 ### Added

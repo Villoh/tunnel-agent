@@ -758,6 +758,24 @@
     <Style Selector="Button.icon-btn:disabled">
         <Setter Property="RenderTransform" Value="scale(1)" />
     </Style>
+    <Style Selector="Button.icon-btn.page:pointerover">
+        <Setter Property="RenderTransform" Value="scale(1)" />
+    </Style>
+    <Style Selector="Button.icon-btn.page:pressed">
+        <Setter Property="RenderTransform" Value="scale(1)" />
+    </Style>
+    <Style Selector="Button.icon-btn.page.current /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+    </Style>
+    <Style Selector="Button.icon-btn.page.current:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+    </Style>
+    <Style Selector="Button.icon-btn.page.current:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+    </Style>
+    <Style Selector="Button.icon-btn.page.current">
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+    </Style>
     <Style Selector="Button.icon-btn.engine-action.start">
         <Setter Property="Foreground" Value="#58B97B" />
     </Style>

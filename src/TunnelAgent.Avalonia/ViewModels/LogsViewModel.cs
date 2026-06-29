@@ -13,6 +13,8 @@ namespace TunnelAgent.ViewModels;
 
 public enum LogsTab { Requests, ProxyLogs }
 
+public sealed record LogPageItem(int? PageNumber, string Label, bool IsCurrent, bool IsEllipsis);
+
 public partial class LogsViewModel : ViewModelBase
 {
     private const int PageSize       = 25;
@@ -55,6 +57,7 @@ public partial class LogsViewModel : ViewModelBase
 
     // ── Requests tab ─────────────────────────────────────────────────────
     public ObservableCollection<RequestLogEntry> FilteredEntries { get; } = new();
+    public ObservableCollection<LogPageItem> PageNavigationItems { get; } = new();
     public ObservableCollection<string> ProviderOptions { get; } = new();
     public ObservableCollection<string> ModelOptions { get; } = new();
     private string _allProvidersLabel = LocalizationService.Instance.GetString("LogsView_Requests_AllProviders");
@@ -95,11 +98,27 @@ public partial class LogsViewModel : ViewModelBase
         OnPropertyChanged(nameof(CanGoPrev));
         OnPropertyChanged(nameof(CanGoNext));
         OnPropertyChanged(nameof(PageLabel));
+        RebuildPageNavigation();
         ApplyPage();
     }
 
+    partial void OnTotalPagesChanged(int value)
+    {
+        OnPropertyChanged(nameof(CanGoNext));
+        OnPropertyChanged(nameof(PageLabel));
+        RebuildPageNavigation();
+    }
+
+    [RelayCommand] private void FirstPage() { if (CanGoPrev) CurrentPage = 1; }
     [RelayCommand] private void PrevPage() { if (CanGoPrev) CurrentPage--; }
     [RelayCommand] private void NextPage() { if (CanGoNext) CurrentPage++; }
+    [RelayCommand] private void LastPage() { if (CanGoNext) CurrentPage = TotalPages; }
+    [RelayCommand]
+    private void GoToPage(LogPageItem item)
+    {
+        if (item.PageNumber is { } page && page >= 1 && page <= TotalPages && page != CurrentPage)
+            CurrentPage = page;
+    }
 
     // ── Proxy Logs tab ───────────────────────────────────────────────────
     public ObservableCollection<string> ProxyLogLines { get; } = new();
@@ -276,6 +295,7 @@ public partial class LogsViewModel : ViewModelBase
         OnPropertyChanged(nameof(CanGoPrev));
         OnPropertyChanged(nameof(CanGoNext));
         OnPropertyChanged(nameof(PageLabel));
+        RebuildPageNavigation();
 
         ApplyPage();
         UpdateStats(_filteredAll);
@@ -290,6 +310,41 @@ public partial class LogsViewModel : ViewModelBase
 
         FilteredEntries.Clear();
         foreach (var e in page) FilteredEntries.Add(e);
+    }
+
+    private void RebuildPageNavigation()
+    {
+        PageNavigationItems.Clear();
+        foreach (var item in BuildPageNavigation(CurrentPage, TotalPages))
+            PageNavigationItems.Add(item);
+    }
+
+    private static IEnumerable<LogPageItem> BuildPageNavigation(int currentPage, int totalPages)
+    {
+        if (totalPages <= 1) yield break;
+
+        var last = 0;
+        foreach (var page in Pages())
+        {
+            if (page - last > 1)
+                yield return new LogPageItem(null, "…", false, true);
+
+            yield return new LogPageItem(page, page.ToString(), page == currentPage, false);
+            last = page;
+        }
+
+        IEnumerable<int> Pages()
+        {
+            const int visiblePages = 7;
+            var set = new SortedSet<int> { 1, totalPages };
+            var start = Math.Clamp(currentPage - visiblePages / 2, 2, Math.Max(2, totalPages - visiblePages));
+            var end = Math.Min(totalPages - 1, start + visiblePages - 1);
+
+            for (var page = start; page <= end; page++)
+                set.Add(page);
+
+            return set;
+        }
     }
 
     private void ApplyProxyFilter()

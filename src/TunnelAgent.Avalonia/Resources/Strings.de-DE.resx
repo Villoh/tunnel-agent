@@ -691,6 +691,18 @@
   <data name="LogsView_Requests_NextButton" xml:space="preserve">
     <value>Weiter -&gt;</value>
   </data>
+  <data name="LogsView_Requests_FirstPageTooltip" xml:space="preserve">
+    <value>First page</value>
+  </data>
+  <data name="LogsView_Requests_PrevPageTooltip" xml:space="preserve">
+    <value>Previous page</value>
+  </data>
+  <data name="LogsView_Requests_NextPageTooltip" xml:space="preserve">
+    <value>Next page</value>
+  </data>
+  <data name="LogsView_Requests_LastPageTooltip" xml:space="preserve">
+    <value>Last page</value>
+  </data>
 
   <data name="LogsView_ProxyLogs_SearchPlaceholder" xml:space="preserve">
     <value>Protokolle suchen...</value>
