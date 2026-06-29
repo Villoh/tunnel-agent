@@ -229,7 +229,7 @@ Foreground="{DynamicResource AccentBrush}" />
 
                 <!-- Column headers -->
                 <Grid Margin="16,10,16,8"
-                      ColumnDefinitions="2*,1.2*,1*,1*,1*,1.2*,1.2*,1.6*">
+                      ColumnDefinitions="3*,0.8*,0.8*,0.8*,0.9*,1*,1*,1.4*">
                     <Panel Grid.Column="0">
                         <TextBlock Classes="section-label" Text="{l:Loc DashboardView_Summary_Provider}"
                                    IsVisible="{Binding !Dashboard.IsModelSummary}" />
@@ -251,9 +251,10 @@ Foreground="{DynamicResource AccentBrush}" />
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="vm:UsageSummaryRow">
                             <StackPanel>
-                                <Grid Margin="16,11" ColumnDefinitions="2*,1.2*,1*,1*,1*,1.2*,1.2*,1.6*">
+                                <Grid Margin="16,11" ColumnDefinitions="3*,0.8*,0.8*,0.8*,0.9*,1*,1*,1.4*">
                                     <TextBlock Grid.Column="0" Text="{Binding Label}" FontWeight="SemiBold"
-                                               Foreground="{DynamicResource FgBrush}" VerticalAlignment="Center" />
+                                               Foreground="{DynamicResource FgBrush}" VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Label}" />
                                     <TextBlock Grid.Column="1" Text="{Binding TotalCalls}" HorizontalAlignment="Right"
                                                Foreground="{DynamicResource FgBrush}" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="2" Text="{Binding SuccessCount}" HorizontalAlignment="Right"
