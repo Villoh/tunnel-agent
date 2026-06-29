@@ -758,10 +758,15 @@
     <Style Selector="Button.icon-btn:disabled">
         <Setter Property="RenderTransform" Value="scale(1)" />
     </Style>
+    <Style Selector="Button.icon-btn.page">
+        <Setter Property="Foreground" Value="{DynamicResource FgMutedBrush}" />
+    </Style>
     <Style Selector="Button.icon-btn.page:pointerover">
+        <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
         <Setter Property="RenderTransform" Value="scale(1)" />
     </Style>
     <Style Selector="Button.icon-btn.page:pressed">
+        <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
         <Setter Property="RenderTransform" Value="scale(1)" />
     </Style>
     <Style Selector="Button.icon-btn.page.current /template/ ContentPresenter">
