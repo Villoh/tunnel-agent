@@ -295,18 +295,20 @@
     <Style Selector="Button.side:pointerover /template/ ContentPresenter">
         <Setter Property="Background" Value="#0F000000" />
     </Style>
+    <!-- Selected background is provided by the sliding pill behind the buttons
+         (see MainWindow SidebarPill), so the item itself stays transparent. -->
     <Style Selector="Button.side.selected /template/ ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="Background" Value="Transparent" />
         <Setter Property="TextElement.Foreground" Value="White" />
     </Style>
     <Style Selector="Button.side.selected:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="Background" Value="Transparent" />
     </Style>
     <Style Selector="Button.side:pressed /template/ ContentPresenter">
         <Setter Property="Background" Value="#16000000" />
     </Style>
     <Style Selector="Button.side.selected:pressed /template/ ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="Background" Value="Transparent" />
     </Style>
     <Style Selector="Button.side lucide|PackIconLucide">
         <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />

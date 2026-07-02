@@ -134,6 +134,26 @@
                                 </Button>
                             </Grid>
 
+                            <Panel x:Name="SidebarNav">
+                            <Border x:Name="SidebarPill"
+                                    Background="{DynamicResource AccentBrush}"
+                                    CornerRadius="6"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    IsHitTestVisible="False"
+                                    Width="0" Height="0">
+                                <Border.RenderTransform>
+                                    <TranslateTransform>
+                                        <TranslateTransform.Transitions>
+                                            <Transitions>
+                                                <DoubleTransition Property="Y" Duration="0:0:0.22" Easing="CubicEaseInOut" />
+                                            </Transitions>
+                                        </TranslateTransform.Transitions>
+                                    </TranslateTransform>
+                                </Border.RenderTransform>
+                            </Border>
+                            <StackPanel x:Name="SidebarNavItems" Spacing="2">
+
                             <Button Classes="side" Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Home}"
                                     Command="{Binding SelectHomeCommand}">
                                 <Grid ColumnDefinitions="20,*">
@@ -280,6 +300,8 @@
                                     </Panel>
                                 </Grid>
                             </Button>
+                            </StackPanel>
+                            </Panel>
                         </StackPanel>
 
                         <StackPanel Grid.Row="2" Margin="8,0,8,10" Spacing="6">
@@ -419,9 +441,19 @@
                 <!-- Content area -->
                 <ScrollViewer Grid.Column="1"
                               HorizontalScrollBarVisibility="Disabled">
-                    <ContentControl x:Name="SectionHost"
-                                    HorizontalContentAlignment="Stretch"
-                                    Padding="18,16,18,44" />
+                    <TransitioningContentControl x:Name="SectionHost"
+                                                 HorizontalContentAlignment="Stretch"
+                                                 Padding="18,16,18,44">
+                        <TransitioningContentControl.PageTransition>
+                            <CompositePageTransition>
+                                <CompositePageTransition.PageTransitions>
+                                    <PageSlide Duration="0:0:0.22" Orientation="Horizontal"
+                                               SlideInEasing="CubicEaseInOut" SlideOutEasing="CubicEaseInOut" />
+                                    <CrossFade Duration="0:0:0.22" />
+                                </CompositePageTransition.PageTransitions>
+                            </CompositePageTransition>
+                        </TransitioningContentControl.PageTransition>
+                    </TransitioningContentControl>
                 </ScrollViewer>
             </Grid>
         </Grid>

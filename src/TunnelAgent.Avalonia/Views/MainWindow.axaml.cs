@@ -35,6 +35,45 @@ public partial class MainWindow : Window
         DataContextChanged += OnDataContextChanged;
         Opened += OnOpened;
         Activated += (_, _) => ApplyNativeBorderColor();
+
+        // Keep the sliding sidebar pill sized to the selected item and following
+        // layout changes (e.g. sidebar collapse/expand width animation).
+        SidebarNavItems.SizeChanged += (_, _) => MovePill(animate: false);
+    }
+
+    /// <summary>
+    /// Moves the accent "pill" behind the sidebar nav buttons to the currently
+    /// selected item, mirroring the SlidingTab pill animation. When <paramref name="animate"/>
+    /// is false the pill is placed instantly (used for layout/size updates).
+    /// </summary>
+    private void MovePill(bool animate)
+    {
+        if (SidebarPill.RenderTransform is not Avalonia.Media.TranslateTransform translate) return;
+
+        var selected = SidebarNavItems.Children
+            .OfType<Button>()
+            .FirstOrDefault(b => b.Classes.Contains("selected"));
+        if (selected is null) return;
+
+        var bounds = selected.Bounds;
+        if (bounds.Height <= 0) return;
+
+        SidebarPill.Width = bounds.Width;
+        SidebarPill.Height = bounds.Height;
+        translate.X = bounds.X;
+
+        if (animate)
+        {
+            translate.Y = bounds.Y;
+        }
+        else
+        {
+            // Place instantly by suspending the Y transition for this update.
+            var transitions = translate.Transitions;
+            translate.Transitions = null;
+            translate.Y = bounds.Y;
+            translate.Transitions = transitions;
+        }
     }
 
     private void OnOpened(object? sender, EventArgs e)
@@ -66,6 +105,7 @@ public partial class MainWindow : Window
         _currentViewModel.PropertyChanged += OnViewModelPropertyChanged;
         UpdateSectionContent(_currentViewModel);
         EnsureVisibleOverlays(_currentViewModel);
+        Dispatcher.UIThread.Post(() => MovePill(animate: false), DispatcherPriority.Loaded);
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
@@ -80,6 +120,7 @@ public partial class MainWindow : Window
         else if (args.PropertyName == nameof(MainWindowViewModel.SelectedSection))
         {
             UpdateSectionContent(vm);
+            Dispatcher.UIThread.Post(() => MovePill(animate: true), DispatcherPriority.Render);
         }
         else if (args.PropertyName == nameof(MainWindowViewModel.ShowApiKeysDialog) && vm.ShowApiKeysDialog)
             Dispatcher.UIThread.Post(() => EnsureApiKeysOverlay(vm).FocusOverlay(), DispatcherPriority.Input);

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Sliding sidebar selection indicator** (`MainWindow.axaml`, `MainWindow.axaml.cs`, `Controls.axaml`): the accent highlight behind the sidebar navigation items is now a single "pill" that slides between options (220ms `CubicEaseInOut` `TranslateTransform`) instead of jumping instantly, mirroring the SlidingTab pill. The pill tracks the selected item's bounds and follows the sidebar collapse/expand width animation; the per-item selected background was made transparent so the moving pill provides the highlight.
+- **Smooth animated section switching** (`MainWindow.axaml`): the main content host is now a `TransitioningContentControl` with a `CompositePageTransition` (220ms horizontal `PageSlide` with `CubicEaseInOut` easing plus a `CrossFade`), so navigating between sidebar sections fades/slides between views instead of swapping instantly. Note: switching to a heavy section (e.g. Providers) can still briefly stall while that view lays out for the first time; a follow-up will prewarm/lighten section layout so the transition always plays smoothly.
+
 ### Fixed
 
 - **Missing translations for the dashboard Custom range** (`Resources/Strings*.resx`): the Home/Dashboard range selector's `DashboardView_Range_Custom` and `DashboardView_Range_SelectRange` strings were only present in the base (English) and Spanish resources, so the **Custom** tab and its range-picker watermark fell back to English in the other twelve languages. Added both keys to all remaining supported languages.
