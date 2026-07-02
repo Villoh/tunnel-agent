@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-07-02
+
 ### Changed
 
 - **Sliding sidebar selection indicator** (`MainWindow.axaml`, `MainWindow.axaml.cs`, `Controls.axaml`): the accent highlight behind the sidebar navigation items is now a single "pill" that slides between options (220ms `CubicEaseInOut` `TranslateTransform`) instead of jumping instantly, mirroring the SlidingTab pill. The pill tracks the selected item's bounds and follows the sidebar collapse/expand width animation; the per-item selected background was made transparent so the moving pill provides the highlight.
@@ -942,7 +944,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/Villoh/tunnel-agent/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/Villoh/tunnel-agent/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/Villoh/tunnel-agent/compare/v0.9.2...v1.0.0
 [0.9.2]: https://github.com/Villoh/tunnel-agent/compare/v0.9.1...v0.9.2
