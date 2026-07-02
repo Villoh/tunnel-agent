@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-07-02
+
 ### Added
 
 - **Custom date range on the dashboard** (`DateRangePicker`, `DashboardViewModel`, `DashboardView.axaml`, `Controls.axaml`, `Resources/Strings*.resx`): the Home/Dashboard range selector gains a **Custom** tab backed by a new single-control `DateRangePicker`. It mirrors the Fluent `CalendarDatePicker` look (editable text box plus a calendar icon button) but selects an inclusive **start – end** span via a range `Calendar` popup, so arbitrary windows such as "yesterday" or a specific week can be inspected. The calendar icon button has a hover/press scale animation and the box clips its hover fill to its rounded corners.
@@ -14,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Logs pagination controls** (`LogsView.axaml`, `LogsViewModel`, `Controls.axaml`, `Resources/Strings*.resx`): request-log pagination now uses icon-only first/previous/next/last controls with localized tooltips, hides unavailable navigation actions instead of disabling them, and shows a compact Google-style page range with ellipses. Number buttons keep stable sizing to avoid hover/selection repaint artifacts while the icon buttons retain the existing scale animation.
+
+### Fixed
+
+- **Dashboard summary provider/model labels clipped** (`DashboardView.axaml`): the summary table columns were re-proportioned (wider first column) and the label cell now trims overflow with `CharacterEllipsis` and exposes the full text via a tooltip, so long provider/model names no longer clip or push the numeric columns.
+- **Custom (OpenAI-compatible) provider labels normalized** (`DashboardViewModel`, `RequestLogEntry`): provider names are now stripped of the internal `OpenAI-compatible-` prefix before being displayed and grouped, so custom providers show their chosen name in the dashboard summary and request logs (and distinct-provider counts group correctly).
+- **Logs pagination number contrast** (`Controls.axaml`): non-current page-number buttons now render with the muted foreground and switch to the full foreground on hover/press, improving contrast and making the current page stand out.
 
 ## [1.0.0] - 2026-06-28
 
@@ -924,7 +932,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/Villoh/tunnel-agent/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/Villoh/tunnel-agent/compare/v0.9.2...v1.0.0
 [0.9.2]: https://github.com/Villoh/tunnel-agent/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/Villoh/tunnel-agent/compare/v0.9.0...v0.9.1
