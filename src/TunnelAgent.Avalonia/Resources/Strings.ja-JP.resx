@@ -359,6 +359,12 @@
   <data name="ProvidersView_Provider_EditModelsTooltip" xml:space="preserve">
     <value>モデルを編集</value>
   </data>
+  <data name="Dialog_EditCustomProvider_Title" xml:space="preserve">
+    <value>カスタムプロバイダーを編集</value>
+  </data>
+  <data name="Dialog_EditCustomProvider_Save" xml:space="preserve">
+    <value>変更を保存</value>
+  </data>
   <data name="Dialog_AddCustomProvider_Title" xml:space="preserve">
     <value>カスタムプロバイダーを追加</value>
   </data>
@@ -1344,6 +1350,12 @@
   </data>
   <data name="DashboardView_Range_All" xml:space="preserve">
     <value>すべて</value>
+  </data>
+  <data name="DashboardView_Range_Custom" xml:space="preserve">
+    <value>カスタム</value>
+  </data>
+  <data name="DashboardView_Range_SelectRange" xml:space="preserve">
+    <value>範囲を選択</value>
   </data>
   <data name="DashboardView_Refresh" xml:space="preserve">
     <value>更新</value>

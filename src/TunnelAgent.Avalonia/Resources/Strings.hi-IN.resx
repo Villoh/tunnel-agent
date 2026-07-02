@@ -359,6 +359,12 @@
   <data name="ProvidersView_Provider_EditModelsTooltip" xml:space="preserve">
     <value>मॉडल संपादित करें</value>
   </data>
+  <data name="Dialog_EditCustomProvider_Title" xml:space="preserve">
+    <value>कस्टम प्रदाता संपादित करें</value>
+  </data>
+  <data name="Dialog_EditCustomProvider_Save" xml:space="preserve">
+    <value>परिवर्तन सहेजें</value>
+  </data>
   <data name="Dialog_AddCustomProvider_Title" xml:space="preserve">
     <value>कस्टम प्रदाता जोड़ें</value>
   </data>
@@ -1344,6 +1350,12 @@
   </data>
   <data name="DashboardView_Range_All" xml:space="preserve">
     <value>सभी</value>
+  </data>
+  <data name="DashboardView_Range_Custom" xml:space="preserve">
+    <value>कस्टम</value>
+  </data>
+  <data name="DashboardView_Range_SelectRange" xml:space="preserve">
+    <value>श्रेणी चुनें</value>
   </data>
   <data name="DashboardView_Refresh" xml:space="preserve">
     <value>रीफ़्रेश</value>

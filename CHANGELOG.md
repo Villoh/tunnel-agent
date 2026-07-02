@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Missing translations for the dashboard Custom range** (`Resources/Strings*.resx`): the Home/Dashboard range selector's `DashboardView_Range_Custom` and `DashboardView_Range_SelectRange` strings were only present in the base (English) and Spanish resources, so the **Custom** tab and its range-picker watermark fell back to English in the other twelve languages. Added both keys to all remaining supported languages.
+- **Untranslated "Save changes" in the edit provider dialog** (`Resources/Strings*.resx`): the edit custom provider dialog's `Dialog_EditCustomProvider_Title` and `Dialog_EditCustomProvider_Save` strings existed only in the base resource, so the dialog title and the **Save changes** button rendered in English for every localized language. Added both keys across all fourteen supported languages.
+
 ## [1.0.1] - 2026-07-02
 
 ### Added

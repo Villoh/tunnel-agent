@@ -359,6 +359,12 @@
   <data name="ProvidersView_Provider_EditModelsTooltip" xml:space="preserve">
     <value>تعديل النماذج</value>
   </data>
+  <data name="Dialog_EditCustomProvider_Title" xml:space="preserve">
+    <value>تعديل مزود مخصص</value>
+  </data>
+  <data name="Dialog_EditCustomProvider_Save" xml:space="preserve">
+    <value>حفظ التغييرات</value>
+  </data>
   <data name="Dialog_AddCustomProvider_Title" xml:space="preserve">
     <value>إضافة مزود مخصص</value>
   </data>
@@ -1344,6 +1350,12 @@
   </data>
   <data name="DashboardView_Range_All" xml:space="preserve">
     <value>الكل</value>
+  </data>
+  <data name="DashboardView_Range_Custom" xml:space="preserve">
+    <value>مخصص</value>
+  </data>
+  <data name="DashboardView_Range_SelectRange" xml:space="preserve">
+    <value>اختر النطاق</value>
   </data>
   <data name="DashboardView_Refresh" xml:space="preserve">
     <value>تحديث</value>

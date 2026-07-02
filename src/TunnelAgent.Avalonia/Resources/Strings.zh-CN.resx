@@ -359,6 +359,12 @@
   <data name="ProvidersView_Provider_EditModelsTooltip" xml:space="preserve">
     <value>编辑模型</value>
   </data>
+  <data name="Dialog_EditCustomProvider_Title" xml:space="preserve">
+    <value>编辑自定义提供商</value>
+  </data>
+  <data name="Dialog_EditCustomProvider_Save" xml:space="preserve">
+    <value>保存更改</value>
+  </data>
   <data name="Dialog_AddCustomProvider_Title" xml:space="preserve">
     <value>添加自定义提供商</value>
   </data>
@@ -1344,6 +1350,12 @@
   </data>
   <data name="DashboardView_Range_All" xml:space="preserve">
     <value>全部</value>
+  </data>
+  <data name="DashboardView_Range_Custom" xml:space="preserve">
+    <value>自定义</value>
+  </data>
+  <data name="DashboardView_Range_SelectRange" xml:space="preserve">
+    <value>选择范围</value>
   </data>
   <data name="DashboardView_Refresh" xml:space="preserve">
     <value>刷新</value>

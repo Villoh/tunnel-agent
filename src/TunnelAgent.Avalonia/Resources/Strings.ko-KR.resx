@@ -359,6 +359,12 @@
   <data name="ProvidersView_Provider_EditModelsTooltip" xml:space="preserve">
     <value>모델 편집</value>
   </data>
+  <data name="Dialog_EditCustomProvider_Title" xml:space="preserve">
+    <value>사용자 지정 공급자 편집</value>
+  </data>
+  <data name="Dialog_EditCustomProvider_Save" xml:space="preserve">
+    <value>변경 사항 저장</value>
+  </data>
   <data name="Dialog_AddCustomProvider_Title" xml:space="preserve">
     <value>사용자 지정 공급자 추가</value>
   </data>
@@ -1344,6 +1350,12 @@
   </data>
   <data name="DashboardView_Range_All" xml:space="preserve">
     <value>전체</value>
+  </data>
+  <data name="DashboardView_Range_Custom" xml:space="preserve">
+    <value>사용자 지정</value>
+  </data>
+  <data name="DashboardView_Range_SelectRange" xml:space="preserve">
+    <value>범위 선택</value>
   </data>
   <data name="DashboardView_Refresh" xml:space="preserve">
     <value>새로 고침</value>

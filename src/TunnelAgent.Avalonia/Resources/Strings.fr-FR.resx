@@ -359,6 +359,12 @@
   <data name="ProvidersView_Provider_EditModelsTooltip" xml:space="preserve">
     <value>Modifier les modèles</value>
   </data>
+  <data name="Dialog_EditCustomProvider_Title" xml:space="preserve">
+    <value>Modifier le fournisseur personnalisé</value>
+  </data>
+  <data name="Dialog_EditCustomProvider_Save" xml:space="preserve">
+    <value>Enregistrer les modifications</value>
+  </data>
   <data name="Dialog_AddCustomProvider_Title" xml:space="preserve">
     <value>Ajouter un fournisseur personnalisé</value>
   </data>
@@ -1344,6 +1350,12 @@
   </data>
   <data name="DashboardView_Range_All" xml:space="preserve">
     <value>Tout</value>
+  </data>
+  <data name="DashboardView_Range_Custom" xml:space="preserve">
+    <value>Personnalisé</value>
+  </data>
+  <data name="DashboardView_Range_SelectRange" xml:space="preserve">
+    <value>Sélectionner une plage</value>
   </data>
   <data name="DashboardView_Refresh" xml:space="preserve">
     <value>Actualiser</value>
