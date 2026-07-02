@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Custom date range on the dashboard** (`DateRangePicker`, `DashboardViewModel`, `DashboardView.axaml`, `Controls.axaml`, `Resources/Strings*.resx`): the Home/Dashboard range selector gains a **Custom** tab backed by a new single-control `DateRangePicker`. It mirrors the Fluent `CalendarDatePicker` look (editable text box plus a calendar icon button) but selects an inclusive **start – end** span via a range `Calendar` popup, so arbitrary windows such as "yesterday" or a specific week can be inspected. The calendar icon button has a hover/press scale animation and the box clips its hover fill to its rounded corners.
+
 ### Changed
 
 - **Logs pagination controls** (`LogsView.axaml`, `LogsViewModel`, `Controls.axaml`, `Resources/Strings*.resx`): request-log pagination now uses icon-only first/previous/next/last controls with localized tooltips, hides unavailable navigation actions instead of disabling them, and shows a compact Google-style page range with ellipses. Number buttons keep stable sizing to avoid hover/selection repaint artifacts while the icon buttons retain the existing scale animation.

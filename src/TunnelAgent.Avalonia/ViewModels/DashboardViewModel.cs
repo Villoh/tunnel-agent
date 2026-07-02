@@ -10,7 +10,7 @@ using TunnelAgent.Services;
 namespace TunnelAgent.ViewModels;
 
 /// <summary>Time window applied to the dashboard metrics.</summary>
-public enum DashboardRange { Today, Last7Days, Last14Days, Last30Days, All }
+public enum DashboardRange { Today, Last7Days, Last14Days, Last30Days, All, Custom }
 
 /// <summary>Which series the usage chart shows.</summary>
 public enum DashboardChartMetric { Calls, Tokens, Cost }
@@ -39,12 +39,40 @@ public partial class DashboardViewModel : ViewModelBase
     partial void OnRangeChanged(DashboardRange value)
     {
         OnPropertyChanged(nameof(RangeIndex));
+        OnPropertyChanged(nameof(IsCustomRange));
+        if (value == DashboardRange.Custom)
+        {
+            // Seed sensible defaults the first time the custom range is opened.
+            CustomEnd ??= DateTime.Now.Date;
+            CustomStart ??= DateTime.Now.Date;
+        }
         Recompute();
     }
 
     [RelayCommand] private void SelectRange(string range)
     {
         if (Enum.TryParse<DashboardRange>(range, out var r)) Range = r;
+    }
+
+    // ── Custom date range ───────────────────────────────────────────────
+    public bool IsCustomRange => Range == DashboardRange.Custom;
+
+    /// <summary>Inclusive first day of the custom range (bound to a date picker).</summary>
+    [ObservableProperty] private DateTime? _customStart;
+    /// <summary>Inclusive last day of the custom range (bound to a date picker).</summary>
+    [ObservableProperty] private DateTime? _customEnd;
+
+    partial void OnCustomStartChanged(DateTime? value)
+    {
+        // Keep start <= end to avoid an empty window.
+        if (value is { } s && CustomEnd is { } e && s > e) CustomEnd = s;
+        if (Range == DashboardRange.Custom) Recompute();
+    }
+
+    partial void OnCustomEndChanged(DateTime? value)
+    {
+        if (value is { } e && CustomStart is { } s && e < s) CustomStart = e;
+        if (Range == DashboardRange.Custom) Recompute();
     }
 
     // ── Chart metric tabs ───────────────────────────────────────────────
@@ -168,15 +196,23 @@ public partial class DashboardViewModel : ViewModelBase
         DashboardRange.Last7Days  => now.Date.AddDays(-6),
         DashboardRange.Last14Days => now.Date.AddDays(-13),
         DashboardRange.Last30Days => now.Date.AddDays(-29),
+        DashboardRange.Custom     => (CustomStart ?? now.Date).Date,
         _                         => DateTime.MinValue
     };
 
+    /// <summary>Exclusive upper bound of the current range.</summary>
+    private DateTime RangeEnd(DateTime now) => Range == DashboardRange.Custom
+        ? (CustomEnd ?? now.Date).Date.AddDays(1)
+        : now;
+
     private List<UsageEvent> EventsInRange()
     {
-        var start = RangeStart(DateTime.Now);
+        var now = DateTime.Now;
+        var start = RangeStart(now);
+        var end = RangeEnd(now);
         return _events
             .Where(e => e.Timestamp.Year >= 2000) // ignore bad/epoch timestamps
-            .Where(e => e.Timestamp >= start)
+            .Where(e => e.Timestamp >= start && e.Timestamp < end)
             .ToList();
     }
 
@@ -305,7 +341,12 @@ public partial class DashboardViewModel : ViewModelBase
 
         var now = DateTime.Now;
         var start = Range == DashboardRange.All ? source.Min(time) : RangeStart(now);
-        var end = Range == DashboardRange.All ? source.Max(time) : now;
+        var end = Range switch
+        {
+            DashboardRange.All    => source.Max(time),
+            DashboardRange.Custom => RangeEnd(now),
+            _                     => now,
+        };
         var span = end - start;
         if (span <= TimeSpan.Zero)
         {

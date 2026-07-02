@@ -1,5 +1,6 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ctrl="using:TunnelAgent.Controls"
         xmlns:lucide="using:IconPacks.Avalonia.Lucide">
 
     <!-- Global cursor: Hand on all interactive controls -->
@@ -836,4 +837,48 @@
     <Style Selector="Button.tab-item.active">
         <Setter Property="Foreground" Value="White" />
     </Style>
+
+    <!-- DateRangePicker: single Fluent-style box (editable text + calendar icon
+         button that opens a range Calendar popup). -->
+    <Style Selector="ctrl|DateRangePicker">
+        <Setter Property="Background" Value="{DynamicResource BtnBgBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BtnBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="7" />
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="MinWidth" Value="190" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        ClipToBounds="True">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Name="PART_TextBox" Grid.Column="0"
+                                 Background="Transparent" BorderThickness="0"
+                                 CornerRadius="6,0,0,6"
+                                 Padding="9,3" FontSize="12"
+                                 VerticalContentAlignment="Center"
+                                 Watermark="{TemplateBinding Watermark}" />
+                        <Button Name="PART_Button" Grid.Column="1" Classes="icon-btn"
+                                Width="28" Focusable="False"
+                                Foreground="{DynamicResource FgMutedBrush}">
+                            <lucide:PackIconLucide Kind="Calendar" Width="14" Height="14" />
+                        </Button>
+                        <Popup Name="PART_Popup" PlacementTarget="{TemplateBinding}"
+                               Placement="BottomEdgeAlignedLeft" IsLightDismissEnabled="True">
+                            <Border Classes="card" Padding="4" Margin="0,4,0,0">
+                                <Calendar Name="PART_Calendar" SelectionMode="SingleRange" />
+                            </Border>
+                        </Popup>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
 </Styles>

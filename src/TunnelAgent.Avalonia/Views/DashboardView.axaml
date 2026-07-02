@@ -34,38 +34,48 @@
 
         <!-- Toolbar: range tabs + refresh -->
         <Border Classes="card" Padding="14">
-            <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
-                <ctrl:SlidingTabBar Grid.Column="0" HorizontalAlignment="Left"
-                                    MinWidth="360"
-                                    SelectedIndex="{Binding Dashboard.RangeIndex}">
-                    <ctrl:SlidingTabBar.Tabs>
-                        <ctrl:SlidingTab Header="{l:Loc DashboardView_Range_Today}"
-                                         Command="{Binding Dashboard.SelectRangeCommand}" CommandParameter="Today" />
-                        <ctrl:SlidingTab Header="{l:Loc DashboardView_Range_7d}"
-                                         Command="{Binding Dashboard.SelectRangeCommand}" CommandParameter="Last7Days" />
-                        <ctrl:SlidingTab Header="{l:Loc DashboardView_Range_14d}"
-                                         Command="{Binding Dashboard.SelectRangeCommand}" CommandParameter="Last14Days" />
-                        <ctrl:SlidingTab Header="{l:Loc DashboardView_Range_30d}"
-                                         Command="{Binding Dashboard.SelectRangeCommand}" CommandParameter="Last30Days" />
-                        <ctrl:SlidingTab Header="{l:Loc DashboardView_Range_All}"
-                                         Command="{Binding Dashboard.SelectRangeCommand}" CommandParameter="All" />
-                    </ctrl:SlidingTabBar.Tabs>
-                </ctrl:SlidingTabBar>
+            <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                    <ctrl:SlidingTabBar Grid.Column="0" HorizontalAlignment="Left"
+                                        MinWidth="420"
+                                        SelectedIndex="{Binding Dashboard.RangeIndex}">
+                        <ctrl:SlidingTabBar.Tabs>
+                            <ctrl:SlidingTab Header="{l:Loc DashboardView_Range_Today}"
+                                             Command="{Binding Dashboard.SelectRangeCommand}" CommandParameter="Today" />
+                            <ctrl:SlidingTab Header="{l:Loc DashboardView_Range_7d}"
+                                             Command="{Binding Dashboard.SelectRangeCommand}" CommandParameter="Last7Days" />
+                            <ctrl:SlidingTab Header="{l:Loc DashboardView_Range_14d}"
+                                             Command="{Binding Dashboard.SelectRangeCommand}" CommandParameter="Last14Days" />
+                            <ctrl:SlidingTab Header="{l:Loc DashboardView_Range_30d}"
+                                             Command="{Binding Dashboard.SelectRangeCommand}" CommandParameter="Last30Days" />
+                            <ctrl:SlidingTab Header="{l:Loc DashboardView_Range_All}"
+                                             Command="{Binding Dashboard.SelectRangeCommand}" CommandParameter="All" />
+                            <ctrl:SlidingTab Header="{l:Loc DashboardView_Range_Custom}"
+                                             Command="{Binding Dashboard.SelectRangeCommand}" CommandParameter="Custom" />
+                        </ctrl:SlidingTabBar.Tabs>
+                    </ctrl:SlidingTabBar>
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                    <Button Classes="icon"
-                            ToolTip.Tip="{l:Loc DashboardView_Refresh}"
-                            Command="{Binding Dashboard.RefreshCommand}">
-                        <lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14"
-                                               Classes.spin="{Binding Dashboard.IsRefreshing}" />
-                    </Button>
-                    <Button Classes="icon"
-                            ToolTip.Tip="{l:Loc Common_ClearUsageHistoryTooltip}"
-                            Command="{Binding ShowClearUsageConfirmCommand}">
-                        <lucide:PackIconLucide Kind="Trash2" Width="14" Height="14" Foreground="#D46A6A" />
-                    </Button>
-                </StackPanel>
-            </Grid>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                        <Button Classes="icon"
+                                ToolTip.Tip="{l:Loc DashboardView_Refresh}"
+                                Command="{Binding Dashboard.RefreshCommand}">
+                            <lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14"
+                                                   Classes.spin="{Binding Dashboard.IsRefreshing}" />
+                        </Button>
+                        <Button Classes="icon"
+                                ToolTip.Tip="{l:Loc Common_ClearUsageHistoryTooltip}"
+                                Command="{Binding ShowClearUsageConfirmCommand}">
+                            <lucide:PackIconLucide Kind="Trash2" Width="14" Height="14" Foreground="#D46A6A" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Custom date range: single Fluent-style range picker, shown only in Custom mode -->
+                <ctrl:DateRangePicker IsVisible="{Binding Dashboard.IsCustomRange}"
+                                      Start="{Binding Dashboard.CustomStart}"
+                                      End="{Binding Dashboard.CustomEnd}"
+                                      Watermark="{l:Loc DashboardView_Range_SelectRange}" />
+            </StackPanel>
         </Border>
 
         <!-- Stat cards row 1 -->

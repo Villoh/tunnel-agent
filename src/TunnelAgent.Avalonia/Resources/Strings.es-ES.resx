@@ -1319,6 +1319,12 @@
   <data name="DashboardView_Range_All" xml:space="preserve">
     <value>Todo</value>
   </data>
+  <data name="DashboardView_Range_Custom" xml:space="preserve">
+    <value>Personalizado</value>
+  </data>
+  <data name="DashboardView_Range_SelectRange" xml:space="preserve">
+    <value>Seleccionar rango</value>
+  </data>
   <data name="DashboardView_Refresh" xml:space="preserve">
     <value>Actualizar</value>
   </data>
