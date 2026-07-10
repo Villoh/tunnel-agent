@@ -35,6 +35,7 @@ public class SlidingTabBar : Panel
     private readonly TranslateTransform _pillTranslate;
     private readonly Grid _buttonGrid;
     private readonly List<IDisposable> _resourceSubscriptions = new();
+    private readonly List<IDisposable> _headerSubscriptions = new();
     private bool _initialised;
     private bool _isSizeChangedSubscribed;
 
@@ -149,8 +150,20 @@ public class SlidingTabBar : Panel
         _buttonGrid.Children.Clear();
         _buttonGrid.ColumnDefinitions.Clear();
 
+        // Equal-width columns (they fill the bar when it stretches), but with a
+        // MinWidth big enough to fit the widest tab's content so labels are never
+        // trimmed when the bar is left-aligned / space-constrained (e.g. Home).
+        var minColumnWidth = MeasureMaxTabWidth();
         for (var i = 0; i < Tabs.Count; i++)
-            _buttonGrid.ColumnDefinitions.Add(new ColumnDefinition(1, GridUnitType.Star));
+            _buttonGrid.ColumnDefinitions.Add(new ColumnDefinition(1, GridUnitType.Star) { MinWidth = minColumnWidth });
+
+        // Headers are localized bindings, so recompute the min width when the
+        // language (and therefore the tab text) changes.
+        foreach (var subscription in _headerSubscriptions)
+            subscription.Dispose();
+        _headerSubscriptions.Clear();
+        foreach (var tab in Tabs)
+            _headerSubscriptions.Add(tab.GetObservable(SlidingTab.HeaderProperty).Subscribe(new ResourceObserver(_ => UpdateColumnWidths())));
 
         for (var i = 0; i < Tabs.Count; i++)
         {
@@ -235,6 +248,41 @@ public class SlidingTabBar : Panel
 
             _buttonGrid.Children.Add(btn);
         }
+    }
+
+    private void UpdateColumnWidths()
+    {
+        var minColumnWidth = MeasureMaxTabWidth();
+        foreach (var column in _buttonGrid.ColumnDefinitions)
+            column.MinWidth = minColumnWidth;
+    }
+
+    private double MeasureMaxTabWidth()
+    {
+        const double buttonPadding = 16; // Padding(8,5) left + right
+        var max = 0d;
+        foreach (var tab in Tabs)
+        {
+            double content;
+            if (tab.HasIcon)
+            {
+                content = 18; // icon-only tabs render an 18px glyph
+            }
+            else
+            {
+                var text = new FormattedText(
+                    tab.Header ?? string.Empty,
+                    System.Globalization.CultureInfo.CurrentUICulture,
+                    FlowDirection.LeftToRight,
+                    Typeface.Default,
+                    13,
+                    Brushes.Black);
+                content = text.Width;
+            }
+
+            max = Math.Max(max, content + buttonPadding);
+        }
+        return Math.Ceiling(max);
     }
 
     private void MovePill(bool animate)
