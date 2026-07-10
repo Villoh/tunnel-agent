@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Redundant tooltips on text tab bars** (`Controls/SlidingTabBar.cs`): the `SlidingTabBar` added a tooltip to every tab bound to its header, so text tabs (Home, Providers, Logs, Configuration) showed a tooltip that merely repeated the visible label. Tooltips are now only attached to icon-only tabs (e.g. the Quota provider tabs), where the header text isn't otherwise visible.
 - **Claude quota showed a fabricated reset countdown when unused** (`QuotaFetchService.cs`, `Resources/Strings*.resx`): when a Claude rate-limit window (Primary 5h / Weekly) had no usage, the Anthropic API returns `resets_at = null` because the window hasn't started counting yet. The client was inventing a reset time (`now + 5h` / `now + 7d`), so a 0%-used quota falsely displayed "Resets in 4h 59m". The client no longer fabricates a timestamp; instead it shows a new `Quota_ResetPendingSession` label ("Timer starts once you use this quota") across all fourteen supported languages, making clear the countdown only begins once the current session consumes quota.
 
 ## [1.0.2] - 2026-07-02

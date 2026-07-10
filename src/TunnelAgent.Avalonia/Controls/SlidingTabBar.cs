@@ -202,8 +202,12 @@ public class SlidingTabBar : Panel
                 FontSize = 13,
                 Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand),
                 [Grid.ColumnProperty] = idx,
-                [!ToolTip.TipProperty] = new Binding(nameof(SlidingTab.Header)) { Source = tab },
             };
+
+            // Only add a tooltip for icon-only tabs, where the header text isn't
+            // visible. For text tabs the tooltip would just repeat the label.
+            if (tab.HasIcon)
+                btn[!ToolTip.TipProperty] = new Binding(nameof(SlidingTab.Header)) { Source = tab };
 
             // Subtle hover/press — same feel as sidebar buttons
             btn.Styles.Add(new Style(x => x.OfType<Button>().Class(":pointerover").Template().OfType<ContentPresenter>())
