@@ -1290,6 +1290,9 @@
   <data name="Quota_ResetInMinutes" xml:space="preserve">
     <value>{0}分後にリセット</value>
   </data>
+  <data name="Quota_ResetPendingSession" xml:space="preserve">
+    <value>このクォータを使い始めるとタイマーが開始します</value>
+  </data>
   <data name="AgentConfigOverlay_ModelsSelectedLabel" xml:space="preserve">
     <value>{1} 個中 {0} 個のモデルを選択済み</value>
   </data>

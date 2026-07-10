@@ -1290,6 +1290,9 @@
   <data name="Quota_ResetInMinutes" xml:space="preserve">
     <value>{0}dk içinde sıfırlanır</value>
   </data>
+  <data name="Quota_ResetPendingSession" xml:space="preserve">
+    <value>Bu kotayı kullandığında sayaç başlar</value>
+  </data>
   <data name="AgentConfigOverlay_ModelsSelectedLabel" xml:space="preserve">
     <value>{1} modelden {0} tanesi seçildi</value>
   </data>

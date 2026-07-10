@@ -1290,6 +1290,9 @@
   <data name="Quota_ResetInMinutes" xml:space="preserve">
     <value>Repõe em {0}m</value>
   </data>
+  <data name="Quota_ResetPendingSession" xml:space="preserve">
+    <value>O temporizador começa ao usar esta quota</value>
+  </data>
   <data name="AgentConfigOverlay_ModelsSelectedLabel" xml:space="preserve">
     <value>Modelos {0} de {1} selecionados</value>
   </data>

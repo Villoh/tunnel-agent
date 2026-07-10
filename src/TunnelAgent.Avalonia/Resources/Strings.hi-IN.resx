@@ -1290,6 +1290,9 @@
   <data name="Quota_ResetInMinutes" xml:space="preserve">
     <value>{0}मि में रीसेट होता है</value>
   </data>
+  <data name="Quota_ResetPendingSession" xml:space="preserve">
+    <value>इस कोटा का उपयोग करने पर टाइमर शुरू होता है</value>
+  </data>
   <data name="AgentConfigOverlay_ModelsSelectedLabel" xml:space="preserve">
     <value>{1} में से {0} मॉडल चुने गए</value>
   </data>

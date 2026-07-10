@@ -1290,6 +1290,9 @@
   <data name="Quota_ResetInMinutes" xml:space="preserve">
     <value>{0}분 후 초기화</value>
   </data>
+  <data name="Quota_ResetPendingSession" xml:space="preserve">
+    <value>이 할당량을 사용하면 타이머가 시작됩니다</value>
+  </data>
   <data name="AgentConfigOverlay_ModelsSelectedLabel" xml:space="preserve">
     <value>모델 {1}개 중 {0}개 선택됨</value>
   </data>

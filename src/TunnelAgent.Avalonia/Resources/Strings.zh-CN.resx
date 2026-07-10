@@ -1290,6 +1290,9 @@
   <data name="Quota_ResetInMinutes" xml:space="preserve">
     <value>{0}分钟后重置</value>
   </data>
+  <data name="Quota_ResetPendingSession" xml:space="preserve">
+    <value>使用此配额后计时器开始</value>
+  </data>
   <data name="AgentConfigOverlay_ModelsSelectedLabel" xml:space="preserve">
     <value>已选择 {0}/{1} 个模型</value>
   </data>

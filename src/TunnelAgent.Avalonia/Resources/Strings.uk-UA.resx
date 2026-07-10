@@ -1290,6 +1290,9 @@
   <data name="Quota_ResetInMinutes" xml:space="preserve">
     <value>Скидається через {0}хв</value>
   </data>
+  <data name="Quota_ResetPendingSession" xml:space="preserve">
+    <value>Таймер запускається під час використання цієї квоти</value>
+  </data>
   <data name="AgentConfigOverlay_ModelsSelectedLabel" xml:space="preserve">
     <value>Вибрано моделей: {0} з {1}</value>
   </data>

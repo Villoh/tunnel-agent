@@ -1290,6 +1290,9 @@
   <data name="Quota_ResetInMinutes" xml:space="preserve">
     <value>Réinitialisation dans {0} min</value>
   </data>
+  <data name="Quota_ResetPendingSession" xml:space="preserve">
+    <value>Le minuteur démarre dès l'utilisation de ce quota</value>
+  </data>
   <data name="AgentConfigOverlay_ModelsSelectedLabel" xml:space="preserve">
     <value>{0} modèles sur {1} sélectionnés</value>
   </data>

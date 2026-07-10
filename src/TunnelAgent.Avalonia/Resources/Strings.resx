@@ -1292,6 +1292,9 @@
   <data name="Quota_ResetInMinutes" xml:space="preserve">
     <value>Resets in {0}m</value>
   </data>
+  <data name="Quota_ResetPendingSession" xml:space="preserve">
+    <value>Timer starts once you use this quota</value>
+  </data>
   <data name="AgentConfigOverlay_ModelsSelectedLabel" xml:space="preserve">
     <value>Models {0} of {1} selected</value>
   </data>

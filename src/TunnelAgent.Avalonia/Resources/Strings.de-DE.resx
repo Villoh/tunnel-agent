@@ -1290,6 +1290,9 @@
   <data name="Quota_ResetInMinutes" xml:space="preserve">
     <value>Zurücksetzen in {0} Min.</value>
   </data>
+  <data name="Quota_ResetPendingSession" xml:space="preserve">
+    <value>Timer startet, sobald du dieses Kontingent nutzt</value>
+  </data>
   <data name="AgentConfigOverlay_ModelsSelectedLabel" xml:space="preserve">
     <value>{0} von {1} Modellen ausgewählt</value>
   </data>

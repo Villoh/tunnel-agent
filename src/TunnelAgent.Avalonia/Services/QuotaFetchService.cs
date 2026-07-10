@@ -177,12 +177,10 @@ public sealed class QuotaFetchService
             // when zero with no reset date, as those indicate the plan doesn't include them.
             var isSubWindow = key.StartsWith("seven_day_");
             if (isSubWindow && util == 0 && string.IsNullOrEmpty(resetsAt)) continue;
-            // five_hour / seven_day with zero usage and no reset date means the window
-            // just reset and the session hasn't started yet — the next reset is in 5h / 7d.
-            if (key == "five_hour" && util == 0 && string.IsNullOrEmpty(resetsAt))
-                resetsAt = DateTimeOffset.UtcNow.AddHours(5).ToString("o");
-            else if (key == "seven_day" && util == 0 && string.IsNullOrEmpty(resetsAt))
-                resetsAt = DateTimeOffset.UtcNow.AddDays(7).ToString("o");
+            // When a primary window (five_hour / seven_day) has no usage, the API returns
+            // resets_at = null because the window hasn't started counting yet. Leave it
+            // null so the UI shows no reset time — fabricating one (e.g. "in 5h") would be
+            // a lie: the reset only begins once quota is actually consumed.
             bars.Add((label, util, resetsAt));
         }
 
@@ -1520,7 +1518,11 @@ public sealed class QuotaFetchService
                 {
                     Title   = title,
                     Used    = Math.Clamp(utilization / 100.0, 0, 1),
-                    ResetIn = FormatResetAtIso(resetsAt),
+                    // A null/empty reset means the window hasn't started counting yet:
+                    // the countdown only begins once the current session consumes quota.
+                    ResetIn = string.IsNullOrEmpty(resetsAt)
+                        ? "loc:Quota_ResetPendingSession"
+                        : FormatResetAtIso(resetsAt),
                 });
             }
         });
