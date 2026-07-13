@@ -39,6 +39,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>TunnelAgent.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\TunnelAgent.Abstractions\TunnelAgent.Abstractions.csproj" />
     <ProjectReference Include="..\TunnelAgent.Core\TunnelAgent.Core.csproj" />
     <ProjectReference Include="..\TunnelAgent.Infrastructure\TunnelAgent.Infrastructure.csproj" />

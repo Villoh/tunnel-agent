@@ -1227,6 +1227,9 @@
   <data name="Agent_factory-droid_Description" xml:space="preserve">
     <value>Агент кодування AI від Factory.</value>
   </data>
+  <data name="Agent_grok-build_Description" xml:space="preserve">
+    <value>Агент кодування Grok CLI від xAI.</value>
+  </data>
   <data name="AgentsView_Agent_ConfigureButton" xml:space="preserve">
     <value>Налаштувати</value>
   </data>

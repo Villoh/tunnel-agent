@@ -76,5 +76,15 @@ public static class AgentCatalog
             "#238636",
             AssetsBase + "factory-droid.svg",
             IconNeedsDarkBg: true),
+
+        new AgentDefinition(
+            "grok-build", "Grok Build",
+            "xAI's Grok CLI coding agent.",
+            new[] { "grok", "grok.cmd", "grok.exe" },
+            new[] { "~/.grok/config.toml" },
+            "https://docs.x.ai/build/settings",
+            "#000000",
+            AssetsBase + "grok.svg",
+            IconNeedsDarkBg: true),
     };
 }

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Grok Build agent support** (`AgentCatalog.cs`, `AgentConfigurationService.cs`): the Agents window detects `grok` and writes Tunnel Agent models to `~/.grok/config.toml`. Anthropic models use `api_backend = "messages"` (needed for reasoning), the rest use `chat_completions`, and reasoning-capable models get `supports_reasoning_effort = true` so `/effort` works. Config is merged as TOML tables (single `[models]`, one de-duplicated `[model."<id>"]` per model, preserving user tables like `[ui]`) instead of a comment-delimited block, avoiding the duplicate-key TOML that Grok's own rewrites caused.
+
 ### Fixed
 
 - **Tab labels trimmed with an ellipsis on the Home range bar** (`Controls/SlidingTabBar.cs`): the `SlidingTabBar` used equal `Star` columns, so on the left-aligned Home/Dashboard range bar the longest tab (e.g. Spanish **Personalizado**) didn't fit its share and rendered as "Personali…". Each column now gets a `MinWidth` sized to the widest tab's content, so tabs still fill the bar evenly when it stretches (Logs, Providers, Configuration) but never truncate when space is tight. The min width is recomputed on language change since the headers are localized bindings.

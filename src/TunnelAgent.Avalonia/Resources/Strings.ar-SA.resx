@@ -1227,6 +1227,9 @@
   <data name="Agent_factory-droid_Description" xml:space="preserve">
     <value>وكيل ترميز AI من Factory.</value>
   </data>
+  <data name="Agent_grok-build_Description" xml:space="preserve">
+    <value>وكيل ترميز Grok CLI من xAI.</value>
+  </data>
   <data name="AgentsView_Agent_ConfigureButton" xml:space="preserve">
     <value>تكوين</value>
   </data>

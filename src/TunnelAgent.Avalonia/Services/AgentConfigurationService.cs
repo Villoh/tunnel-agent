@@ -77,6 +77,15 @@ public sealed class AgentConfigurationService
             };
             return new[] { new RawConfigPreview("opencode.json", configPath, preview.ToJsonString(new JsonSerializerOptions { WriteIndented = true })) };
         }
+        if (agent.Id == "grok-build" && modelEntries is { Count: > 0 })
+        {
+            var entries = GrokEntries(modelEntries);
+            var modelInfoMap = await BuildModelInfoMapAsync(entries.Select(m => m.Id), ct).ConfigureAwait(false);
+            var configPath = ExpandPath(GrokConfigPath);
+            var existing = File.Exists(configPath) ? File.ReadAllText(configPath) : string.Empty;
+            var content = MergeGrokConfig(existing, entries, modelInfoMap, apiKey, proxyBaseUrl, remove: false);
+            return new[] { new RawConfigPreview("config.toml", configPath, content) };
+        }
         return GenerateRaw(agent, proxyBaseUrl, apiKey, models, modelEntries);
     }
 
@@ -89,6 +98,8 @@ public sealed class AgentConfigurationService
                 return await ApplyPiAsync(remove: false, modelEntries, ct).ConfigureAwait(false);
             if (agent.Id == "opencode")
                 return await ApplyOpenCodeAsync(proxyBaseUrl, apiKey, remove: false, modelEntries, ct).ConfigureAwait(false);
+            if (agent.Id == "grok-build")
+                return await ApplyGrokBuildAsync(proxyBaseUrl, apiKey, remove: false, modelEntries, ct).ConfigureAwait(false);
             return WriteConfigSync(agent, proxyBaseUrl, apiKey, remove: false, models, modelEntries);
         }
         catch (Exception ex)
@@ -112,6 +123,7 @@ public sealed class AgentConfigurationService
             "opencode"       => new[] { OpenCodeRaw(proxyBaseUrl, apiKey, models) },
             "pi"             => new[] { PiRaw(proxyBaseUrl, apiKey, models) },
             "factory-droid"  => new[] { FactoryDroidRaw(proxyBaseUrl, apiKey, modelEntries) },
+            "grok-build"     => new[] { GrokBuildRaw(proxyBaseUrl, apiKey, modelEntries) },
             _                => Array.Empty<RawConfigPreview>()
         };
 
@@ -129,6 +141,7 @@ public sealed class AgentConfigurationService
                 "amp"          => ApplyAmp(proxyBaseUrl, apiKey, remove),
                 "opencode"     => AgentConfigApplyResult.Failure("OpenCode requires async apply."),
                 "factory-droid"=> ApplyFactoryDroid(proxyBaseUrl, apiKey, remove, modelEntries),
+                "grok-build"   => ApplyGrokBuild(proxyBaseUrl, apiKey, remove, modelEntries),
                 _              => AgentConfigApplyResult.Failure("Unknown agent.")
             };
         }
@@ -710,6 +723,303 @@ public sealed class AgentConfigurationService
         var content    = new JsonObject { ["customModels"] = entries }
             .ToJsonString(new JsonSerializerOptions { WriteIndented = true });
         return new RawConfigPreview("config.json", configPath, content);
+    }
+
+    // ── Grok Build ──────────────────────────────────────────────────────────
+    //
+    // Grok rewrites ~/.grok/config.toml itself (e.g. when it persists [ui] or
+    // reasoning settings) and drops comment lines when it does, so a comment
+    // "managed block" cannot survive. Instead we treat the file as TOML tables
+    // and merge in place: a single [models] table plus one [model."<id>"] table
+    // per model. Our own model tables (identified by the "(Tunnel Agent)" name
+    // suffix or a localhost base_url) are replaced on every run, while the
+    // user's own tables (e.g. [ui]) and [models] keys are preserved.
+
+    private const string GrokConfigPath = "~/.grok/config.toml";
+
+    // Synchronous entry point used only for revert (remove) — no model info needed.
+    private AgentConfigApplyResult ApplyGrokBuild(string proxyBaseUrl, string apiKey, bool remove, IReadOnlyList<ModelEntry>? models)
+        => WriteGrokConfig(GrokEntries(models), null, apiKey, proxyBaseUrl, remove);
+
+    private async Task<AgentConfigApplyResult> ApplyGrokBuildAsync(
+        string proxyBaseUrl, string apiKey, bool remove, IReadOnlyList<ModelEntry>? models, CancellationToken ct)
+    {
+        var entries = GrokEntries(models);
+        var modelInfoMap = !remove
+            ? await BuildModelInfoMapAsync(entries.Select(m => m.Id), ct).ConfigureAwait(false)
+            : null;
+        return WriteGrokConfig(entries, modelInfoMap, apiKey, proxyBaseUrl, remove);
+    }
+
+    private static IReadOnlyList<ModelEntry> GrokEntries(IReadOnlyList<ModelEntry>? models)
+    {
+        if (models is not { Count: > 0 }) return System.Array.Empty<ModelEntry>();
+        // De-duplicate by model id to avoid duplicate [model."<id>"] tables.
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        return models.Where(m => seen.Add(m.Id)).ToList();
+    }
+
+    private AgentConfigApplyResult WriteGrokConfig(
+        IReadOnlyList<ModelEntry> entries,
+        Dictionary<string, OpenRouterContextService.ModelInfo>? modelInfoMap,
+        string apiKey, string proxyBaseUrl, bool remove)
+    {
+        var configPath = ExpandPath(GrokConfigPath);
+        var dir        = Path.GetDirectoryName(configPath)!;
+        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+
+        var existing = File.Exists(configPath) ? File.ReadAllText(configPath) : string.Empty;
+        string? backupPath = null;
+        if (File.Exists(configPath))
+        {
+            backupPath = $"{configPath}.backup.{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+            File.WriteAllText(backupPath, existing, Utf8NoBom);
+        }
+
+        var content = MergeGrokConfig(existing, entries, modelInfoMap, apiKey, proxyBaseUrl, remove);
+        File.WriteAllText(configPath, content, Utf8NoBom);
+
+        if (remove)
+            return AgentConfigApplyResult.Ok($"Removed Tunnel Agent models from {configPath}.", configPath, backupPath);
+
+        var modelCount = entries.Count;
+        return AgentConfigApplyResult.Ok(
+            $"Configuration written to {configPath}. {(modelCount > 0 ? $"{modelCount} model(s) registered. " : "")}Restart Grok for changes to take effect.",
+            configPath, backupPath);
+    }
+
+    private static RawConfigPreview GrokBuildRaw(string proxyBaseUrl, string apiKey, IReadOnlyList<ModelEntry>? models)
+    {
+        var configPath = ExpandPath(GrokConfigPath);
+        var existing = File.Exists(configPath) ? File.ReadAllText(configPath) : string.Empty;
+        var content  = MergeGrokConfig(existing, GrokEntries(models), null, apiKey, proxyBaseUrl, remove: false);
+        return new RawConfigPreview("config.toml", configPath, content);
+    }
+
+    // ── Grok TOML merge ───────────────────────────────────────────────────────
+
+    private sealed class TomlSection
+    {
+        public string? Header;             // trimmed header, e.g. [models] or [model."x"]; null = preamble
+        public readonly List<string> Lines = new();
+    }
+
+    internal static string MergeGrokConfig(
+        string existing,
+        IReadOnlyList<ModelEntry> entries,
+        Dictionary<string, OpenRouterContextService.ModelInfo>? modelInfoMap,
+        string apiKey, string proxyBaseUrl, bool remove)
+    {
+        // Nothing selected and not reverting: leave the file untouched rather
+        // than writing a placeholder model or wiping existing configuration.
+        if (!remove && entries.Count == 0) return existing;
+
+        var newIds  = entries.Select(e => e.Id).ToList();
+        var newIdSet = new HashSet<string>(newIds, StringComparer.Ordinal);
+
+        var sections   = SplitTomlSections(existing);
+        var preamble   = new List<string>();
+        var kept       = new List<List<string>>();
+        List<string>? modelsBody = null;   // preserved [models] keys, excluding default
+        string? oldDefault = null;
+        var removedIds = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var s in sections)
+        {
+            if (s.Header is null)
+            {
+                preamble.AddRange(s.Lines.Where(l => !IsGrokMarker(l)));
+                continue;
+            }
+            if (s.Header == "[models]")
+            {
+                if (modelsBody is null)
+                {
+                    modelsBody = new List<string>();
+                    foreach (var l in s.Lines.Skip(1))
+                    {
+                        var t = l.TrimStart();
+                        if (t.StartsWith("default") && TomlKey(t) == "default")
+                        {
+                            oldDefault = TomlValue(t);
+                            continue;
+                        }
+                        if (!IsGrokMarker(l)) modelsBody.Add(l);
+                    }
+                }
+                continue; // re-emitted below as a single table
+            }
+            if (s.Header.StartsWith("[model."))
+            {
+                var id = ExtractGrokModelId(s.Header);
+                var isReplacing = id != null && newIdSet.Contains(id);
+                if (isReplacing || IsManagedGrokModel(s.Lines))
+                {
+                    if (id != null) removedIds.Add(id);
+                    continue; // drop (replaced or Tunnel Agent-managed)
+                }
+            }
+            kept.Add(s.Lines.Where(l => !IsGrokMarker(l)).ToList());
+        }
+
+        var outp = new List<string>();
+        TrimTrailingBlanks(preamble);
+        if (preamble.Count > 0) { outp.AddRange(preamble); outp.Add(string.Empty); }
+
+        foreach (var sec in kept)
+        {
+            TrimTrailingBlanks(sec);
+            if (sec.Count == 0) continue;
+            outp.AddRange(sec);
+            outp.Add(string.Empty);
+        }
+
+        // [models] table — keep a single one, preserving user keys.
+        var modelsLines = new List<string>();
+        if (!remove)
+        {
+            modelsLines.Add($"default = \"{EscapeToml(newIds[0])}\"");
+        }
+        else if (oldDefault != null && !removedIds.Contains(oldDefault))
+        {
+            modelsLines.Add($"default = \"{EscapeToml(oldDefault)}\"");
+        }
+        if (modelsBody != null)
+            foreach (var l in modelsBody)
+                if (!string.IsNullOrWhiteSpace(l)) modelsLines.Add(l);
+        if (modelsLines.Count > 0)
+        {
+            outp.Add("[models]");
+            outp.AddRange(modelsLines);
+            outp.Add(string.Empty);
+        }
+
+        if (!remove)
+        {
+            foreach (var m in entries)
+            {
+                outp.AddRange(BuildGrokModelTable(m, modelInfoMap, apiKey, proxyBaseUrl));
+                outp.Add(string.Empty);
+            }
+        }
+
+        return string.Join(Environment.NewLine, outp).TrimEnd() + Environment.NewLine;
+    }
+
+    private static IEnumerable<string> BuildGrokModelTable(
+        ModelEntry m,
+        Dictionary<string, OpenRouterContextService.ModelInfo>? modelInfoMap,
+        string apiKey, string proxyBaseUrl)
+    {
+        // Anthropic models only expose reasoning/thinking through their native
+        // Messages API, so route them via api_backend = "messages". Everything
+        // else goes through the OpenAI-compatible chat_completions endpoint.
+        // In both cases base_url keeps its "/v1" suffix: Grok appends "/messages"
+        // or "/chat/completions", yielding "{base}/v1/messages" and
+        // "{base}/v1/chat/completions" respectively (both served by CLIProxyAPI).
+        var isAnthropic = m.OwnedBy.Equals("anthropic", StringComparison.OrdinalIgnoreCase);
+        var baseUrl = !string.IsNullOrEmpty(m.EngineBaseUrl) ? m.EngineBaseUrl : proxyBaseUrl;
+        var lines = new List<string>
+        {
+            $"[model.\"{EscapeToml(m.Id)}\"]",
+            $"model = \"{EscapeToml(m.Id)}\""
+        };
+        if (!string.IsNullOrEmpty(m.DisplayName))
+            lines.Add($"name = \"{EscapeToml(m.DisplayName)}\"");
+        lines.Add($"base_url = \"{EscapeToml(baseUrl)}\"");
+        if (HasResolvedApiKey(m.ApiKey))
+            lines.Add($"env_key = \"{EscapeToml(m.ApiKey)}\"");
+        else if (string.IsNullOrEmpty(m.ApiKey) || m.ApiKey == "TUNNEL_AGENT_CLIPROXY_API_KEY")
+            lines.Add($"api_key = \"{(HasApiKey(apiKey) ? EscapeToml(apiKey) : "no-key")}\"");
+        else
+            lines.Add("api_key = \"no-key\"");
+        lines.Add(isAnthropic ? "api_backend = \"messages\"" : "api_backend = \"chat_completions\"");
+
+        // Enable Grok's /effort command for models that report reasoning support
+        // (resolved from OpenRouter), mirroring Pi's reasoning flag. We only
+        // declare support and let the user pick the level per session via /effort.
+        if (modelInfoMap is not null && modelInfoMap.TryGetValue(m.Id, out var info) && info.SupportsReasoning)
+            lines.Add("supports_reasoning_effort = true");
+        return lines;
+    }
+
+    private static List<TomlSection> SplitTomlSections(string text)
+    {
+        var result = new List<TomlSection>();
+        var current = new TomlSection();
+        foreach (var raw in text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n'))
+        {
+            if (raw.TrimStart().StartsWith("[", StringComparison.Ordinal))
+            {
+                result.Add(current);
+                current = new TomlSection { Header = raw.Trim() };
+            }
+            current.Lines.Add(raw);
+        }
+        result.Add(current);
+        return result;
+    }
+
+    // Legacy files written with the old comment-marker approach may still contain
+    // these lines after Grok rewrote them; strip them so they don't linger.
+    private static bool IsGrokMarker(string line) =>
+        line.Contains("Managed by Tunnel Agent", StringComparison.Ordinal) ||
+        line.Contains("End Tunnel Agent block", StringComparison.Ordinal);
+
+    private static bool IsManagedGrokModel(IEnumerable<string> lines)
+    {
+        var name    = ExtractTomlString(lines, "name");
+        var baseUrl = ExtractTomlString(lines, "base_url");
+        if (name != null && name.Contains("(Tunnel Agent", StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (baseUrl != null && (baseUrl.Contains("127.0.0.1", StringComparison.Ordinal) ||
+                                baseUrl.Contains("localhost", StringComparison.OrdinalIgnoreCase)))
+            return true;
+        return false;
+    }
+
+    private static string? ExtractGrokModelId(string header)
+    {
+        var h = header.Trim();
+        if (!h.StartsWith("[model.", StringComparison.Ordinal) || !h.EndsWith("]", StringComparison.Ordinal))
+            return null;
+        var inner = h["[model.".Length..^1].Trim();
+        if (inner.Length >= 2 && inner[0] == '"' && inner[^1] == '"')
+            inner = inner[1..^1];
+        return inner;
+    }
+
+    private static string? ExtractTomlString(IEnumerable<string> lines, string key)
+    {
+        foreach (var l in lines)
+        {
+            var t = l.TrimStart();
+            if (TomlKey(t) == key)
+                return TomlValue(t);
+        }
+        return null;
+    }
+
+    private static string? TomlKey(string trimmedLine)
+    {
+        var eq = trimmedLine.IndexOf('=');
+        if (eq < 0) return null;
+        return trimmedLine[..eq].Trim();
+    }
+
+    private static string? TomlValue(string trimmedLine)
+    {
+        var eq = trimmedLine.IndexOf('=');
+        if (eq < 0) return null;
+        var v = trimmedLine[(eq + 1)..].Trim();
+        if (v.Length >= 2 && v[0] == '"' && v[^1] == '"') return v[1..^1];
+        return v.Trim('"');
+    }
+
+    private static void TrimTrailingBlanks(List<string> lines)
+    {
+        while (lines.Count > 0 && string.IsNullOrWhiteSpace(lines[^1]))
+            lines.RemoveAt(lines.Count - 1);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

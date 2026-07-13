@@ -1202,6 +1202,9 @@
   <data name="Agent_factory-droid_Description" xml:space="preserve">
     <value>Agente de programación con IA de Factory.</value>
   </data>
+  <data name="Agent_grok-build_Description" xml:space="preserve">
+    <value>Agente de programación CLI Grok de xAI.</value>
+  </data>
   <data name="AgentsView_Agent_ConfigureButton" xml:space="preserve">
     <value>Configurar</value>
   </data>
