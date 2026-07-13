@@ -130,6 +130,7 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 | OpenCode      | `~/.config/opencode/opencode.json`                                |
 | Pi            | `~/.pi/agent/models.json`                                         |
 | Factory Droid | `~/.factory/settings.json`                                        |
+| Grok Build    | `~/.grok/config.toml`                                             |
 
 ### Languages
 
