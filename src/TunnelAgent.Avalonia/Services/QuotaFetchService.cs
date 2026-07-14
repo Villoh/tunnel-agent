@@ -349,12 +349,12 @@ public sealed class QuotaFetchService
         var bars = new List<(string title, double usedPct, long? resetAt)>();
 
         if (primary is not null)
-            bars.Add(("Primary (5h)",
+            bars.Add((CodexWindowTitle(primary, "Primary"),
                 primary["used_percent"]?.GetValue<double>() ?? 0,
                 primary["reset_at"]?.GetValue<long>()));
 
         if (secondary is not null)
-            bars.Add(("Weekly",
+            bars.Add((CodexWindowTitle(secondary, "Weekly"),
                 secondary["used_percent"]?.GetValue<double>() ?? 0,
                 secondary["reset_at"]?.GetValue<long>()));
 
@@ -376,6 +376,17 @@ public sealed class QuotaFetchService
         }
 
         ApplyBarsFromPercent(account, bars);
+    }
+
+    private static string CodexWindowTitle(JsonNode window, string fallback)
+    {
+        var seconds = window["limit_window_seconds"]?.GetValue<long>();
+        return seconds switch
+        {
+            18_000  => "Primary (5h)",
+            604_800 => "Weekly",
+            _       => fallback,
+        };
     }
 
     private (string? token, string? accountId, DateTimeOffset lastRefresh) ReadCodexToken(string email)
