@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Grok Build agent support** (`AgentCatalog.cs`, `AgentConfigurationService.cs`): the Agents window detects `grok` and writes Tunnel Agent models to `~/.grok/config.toml`. Anthropic models use `api_backend = "messages"` (needed for reasoning), the rest use `chat_completions`, and reasoning-capable models get `supports_reasoning_effort = true` so `/effort` works. Config is merged as TOML tables (single `[models]`, one de-duplicated `[model."<id>"]` per model, preserving user tables like `[ui]`) instead of a comment-delimited block, avoiding the duplicate-key TOML that Grok's own rewrites caused.
+- **Oh My Pi (OMP) agent support** (`AgentCatalog.cs`, `AgentConfigurationService.cs`): the Agents window detects `omp` and safely merges selected Tunnel Agent models into `~/.omp/agent/models.yml`. OpenAI-compatible and Anthropic models use separate OMP providers, OpenRouter metadata supplies context/image/reasoning capabilities, unrelated YAML providers are preserved, and revert removes only Tunnel Agent-managed entries.
 
 ### Fixed
 

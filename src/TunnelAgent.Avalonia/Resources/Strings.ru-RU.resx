@@ -1224,6 +1224,9 @@
   <data name="Agent_pi_Description" xml:space="preserve">
     <value>Агент для написания кода Pi от pi.dev.</value>
   </data>
+  <data name="Agent_omp_Description" xml:space="preserve">
+    <value>Агент для написания кода Oh My Pi.</value>
+  </data>
   <data name="Agent_factory-droid_Description" xml:space="preserve">
     <value>ИИ-агент для написания кода от Factory.</value>
   </data>

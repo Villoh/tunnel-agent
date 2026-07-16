@@ -121,16 +121,16 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 
 ### Agents
 
-| Agent         | Config method                                                     |
-| ------------- | ----------------------------------------------------------------- |
-| Claude Code   | `~/.claude/settings.json`                                         |
-| Codex CLI     | `~/.codex/config.toml` + `auth.json`                              |
-| Gemini CLI    | Environment variables                                             |
-| Amp           | `~/.config/amp/settings.json` + `~/.local/share/amp/secrets.json` |
-| OpenCode      | `~/.config/opencode/opencode.json`                                |
-| Pi            | `~/.pi/agent/models.json`                                         |
-| Factory Droid | `~/.factory/settings.json`                                        |
-| Grok Build    | `~/.grok/config.toml`                                             |
+| Agent          | Config method                                                     |
+| -------------- | ----------------------------------------------------------------- |
+| Claude Code    | `~/.claude/settings.json`                                         |
+| Codex CLI      | `~/.codex/config.toml` + `auth.json`                              |
+| Amp CLI        | `~/.config/amp/settings.json` + `~/.local/share/amp/secrets.json` |
+| OpenCode       | `~/.config/opencode/opencode.json`                                |
+| Pi             | `~/.pi/agent/models.json`                                         |
+| Oh My Pi (OMP) | `~/.omp/agent/models.yml`                                         |
+| Factory Droid  | `~/.factory/settings.json`                                        |
+| Grok Build     | `~/.grok/config.toml`                                             |
 
 ### Languages
 
