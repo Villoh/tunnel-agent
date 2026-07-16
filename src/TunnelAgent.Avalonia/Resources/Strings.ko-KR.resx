@@ -1224,6 +1224,9 @@
   <data name="Agent_pi_Description" xml:space="preserve">
     <value>pi.dev의 Pi 코딩 에이전트입니다.</value>
   </data>
+  <data name="Agent_omp_Description" xml:space="preserve">
+    <value>Oh My Pi 코딩 에이전트입니다.</value>
+  </data>
   <data name="Agent_factory-droid_Description" xml:space="preserve">
     <value>Factory의 AI 코딩 에이전트입니다.</value>
   </data>

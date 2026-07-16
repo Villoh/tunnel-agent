@@ -1224,6 +1224,9 @@
   <data name="Agent_pi_Description" xml:space="preserve">
     <value>وكيل ترميز Pi من pi.dev.</value>
   </data>
+  <data name="Agent_omp_Description" xml:space="preserve">
+    <value>وكيل البرمجة Oh My Pi.</value>
+  </data>
   <data name="Agent_factory-droid_Description" xml:space="preserve">
     <value>وكيل ترميز AI من Factory.</value>
   </data>

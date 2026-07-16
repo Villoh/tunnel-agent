@@ -107,6 +107,124 @@ yolo = true
         Assert.Contains("[ui]", content);
     }
 
+    [Fact]
+    public void AgentCatalog_ContainsOhMyPiDefinition()
+    {
+        var omp = Assert.Single(AgentCatalog.All, agent => agent.Id == "omp");
+
+        Assert.Equal("Oh My Pi (OMP)", omp.DisplayName);
+        Assert.Contains("omp", omp.BinaryNames);
+        Assert.Contains("omp.cmd", omp.BinaryNames);
+        Assert.Contains("omp.exe", omp.BinaryNames);
+        Assert.Contains("~/.omp/agent/models.yml", omp.ConfigPaths);
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task PreviewAsync_Omp_ReturnsModelsYaml()
+    {
+        var agent = new AgentDefinition(
+            "omp", "Oh My Pi (OMP)", "", new[] { "omp" },
+            new[] { "~/.omp/agent/models.yml" }, "https://omp.sh", "#FF7A00");
+        var service = new AgentConfigurationService();
+
+        var previews = await service.PreviewAsync(
+            agent, Proxy, "", modelEntries: new[] { Model("gpt-5.6-sol", "GPT-5.6 Sol") });
+
+        var preview = Assert.Single(previews);
+        Assert.Equal("models.yml", preview.Filename);
+        Assert.EndsWith(System.IO.Path.Combine(".omp", "agent", "models.yml"), preview.TargetPath);
+        Assert.Contains("tunnel-agent-cliproxy:", preview.Content);
+    }
+
+    [Fact]
+    public void MergeOmpModelsYaml_FreshFile_WritesOpenAiAndAnthropicProviders()
+    {
+        var entries = new[]
+        {
+            Model("gpt-5.6-sol", "GPT-5.6 Sol"),
+            new ModelEntry("claude-sonnet-5", "anthropic", Proxy, "", "Claude Sonnet 5")
+        };
+        var metadata = new System.Collections.Generic.Dictionary<string, OpenRouterContextService.ModelInfo>(System.StringComparer.OrdinalIgnoreCase)
+        {
+            ["gpt-5.6-sol"] = new(1_050_000, true, true),
+            ["claude-sonnet-5"] = new(1_000_000, true, true)
+        };
+
+        var content = AgentConfigurationService.MergeOmpModelsYaml("", entries, metadata, remove: false);
+
+        Assert.Contains("tunnel-agent-cliproxy:", content);
+        Assert.Contains("baseUrl: http://127.0.0.1:8317/v1", content);
+        Assert.Contains("api: openai-completions", content);
+        Assert.Contains("authHeader: true", content);
+        Assert.Contains("tunnel-agent-cliproxy-anthropic:", content);
+        Assert.Contains("baseUrl: http://127.0.0.1:8317", content);
+        Assert.Contains("api: anthropic-messages", content);
+        Assert.Contains("disableStrictTools: true", content);
+        Assert.Contains("contextWindow: 1050000", content);
+        Assert.Contains("reasoning: true", content);
+        Assert.Contains("- image", content);
+    }
+
+    [Fact]
+    public void MergeOmpModelsYaml_ExistingConfig_PreservesUserDataAndReplacesManagedProviders()
+    {
+        var existing = """
+theme: dark
+providers:
+  custom:
+    baseUrl: https://example.test/v1
+  tunnel-agent-cliproxy:
+    baseUrl: http://old.test/v1
+    models:
+      - id: old-model
+""";
+
+        var content = AgentConfigurationService.MergeOmpModelsYaml(
+            existing,
+            new[] { Model("gpt-5.6-sol", "GPT-5.6 Sol") },
+            modelInfoMap: null,
+            remove: false);
+
+        Assert.Contains("theme: dark", content);
+        Assert.Contains("custom:", content);
+        Assert.Contains("https://example.test/v1", content);
+        Assert.DoesNotContain("old-model", content);
+        Assert.Equal(1, CountOccurrences(content, "tunnel-agent-cliproxy:"));
+    }
+
+    [Fact]
+    public void MergeOmpModelsYaml_Remove_DropsOnlyManagedProviders()
+    {
+        var existing = """
+providers:
+  custom:
+    baseUrl: https://example.test/v1
+  tunnel-agent-cliproxy:
+    models:
+      - id: gpt-5.6-sol
+  tunnel-agent-cliproxy-anthropic:
+    models:
+      - id: claude-sonnet-5
+""";
+
+        var content = AgentConfigurationService.MergeOmpModelsYaml(
+            existing, System.Array.Empty<ModelEntry>(), modelInfoMap: null, remove: true);
+
+        Assert.Contains("custom:", content);
+        Assert.DoesNotContain("tunnel-agent-cliproxy:", content);
+        Assert.DoesNotContain("tunnel-agent-cliproxy-anthropic:", content);
+    }
+
+    [Theory]
+    [InlineData("providers: [")]
+    [InlineData("- item")]
+    public void MergeOmpModelsYaml_InvalidDocument_Throws(string existing)
+    {
+        Assert.Throws<System.IO.InvalidDataException>(() =>
+            AgentConfigurationService.MergeOmpModelsYaml(
+                existing, System.Array.Empty<ModelEntry>(), modelInfoMap: null, remove: true));
+    }
+
     private static int CountOccurrences(string haystack, string needle)
     {
         int count = 0, i = 0;

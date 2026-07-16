@@ -68,6 +68,15 @@ public static class AgentCatalog
             IconNeedsDarkBg: true),
 
         new AgentDefinition(
+            "omp", "Oh My Pi (OMP)",
+            "Oh My Pi coding agent.",
+            new[] { "omp", "omp.cmd", "omp.exe" },
+            new[] { "~/.omp/agent/models.yml" },
+            "https://omp.sh",
+            "#9362F4",
+            AssetsBase + "omp.svg"),
+
+        new AgentDefinition(
             "factory-droid", "Factory Droid",
             "Factory's AI coding agent.",
             new[] { "droid", "factory-droid" },

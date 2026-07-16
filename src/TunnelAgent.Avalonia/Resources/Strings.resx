@@ -1226,6 +1226,9 @@
   <data name="Agent_pi_Description" xml:space="preserve">
     <value>Pi coding agent by pi.dev.</value>
   </data>
+  <data name="Agent_omp_Description" xml:space="preserve">
+    <value>Oh My Pi coding agent.</value>
+  </data>
   <data name="Agent_factory-droid_Description" xml:space="preserve">
     <value>Factory's AI coding agent.</value>
   </data>

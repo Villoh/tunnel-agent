@@ -7,6 +7,8 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
+using YamlDotNet.Core;
+using YamlDotNet.RepresentationModel;
 
 namespace TunnelAgent.Services;
 
@@ -66,6 +68,14 @@ public sealed class AgentConfigurationService
             };
             return new[] { new RawConfigPreview("models.json", configPath, preview.ToJsonString(new JsonSerializerOptions { WriteIndented = true })) };
         }
+        if (agent.Id == "omp" && modelEntries is { Count: > 0 })
+        {
+            var modelInfoMap = await BuildModelInfoMapAsync(modelEntries.Select(m => m.Id), ct).ConfigureAwait(false);
+            var configPath = ExpandPath("~/.omp/agent/models.yml");
+            var existing = File.Exists(configPath) ? await File.ReadAllTextAsync(configPath, ct).ConfigureAwait(false) : string.Empty;
+            var content = MergeOmpModelsYaml(existing, modelEntries, modelInfoMap, remove: false);
+            return new[] { new RawConfigPreview("models.yml", configPath, content) };
+        }
         if (agent.Id == "opencode" && modelEntries is { Count: > 0 })
         {
             var modelInfoMap = await BuildModelInfoMapAsync(modelEntries.Select(m => m.Id).ToList(), ct).ConfigureAwait(false);
@@ -96,6 +106,8 @@ public sealed class AgentConfigurationService
         {
             if (agent.Id == "pi")
                 return await ApplyPiAsync(remove: false, modelEntries, ct).ConfigureAwait(false);
+            if (agent.Id == "omp")
+                return await ApplyOmpAsync(remove: false, modelEntries, ct).ConfigureAwait(false);
             if (agent.Id == "opencode")
                 return await ApplyOpenCodeAsync(proxyBaseUrl, apiKey, remove: false, modelEntries, ct).ConfigureAwait(false);
             if (agent.Id == "grok-build")
@@ -109,8 +121,12 @@ public sealed class AgentConfigurationService
     }
 
     /// <summary>Remove proxy configuration (restore to default).</summary>
-    public AgentConfigApplyResult Revert(AgentDefinition agent) =>
-        WriteConfigSync(agent, string.Empty, string.Empty, remove: true, null, null);
+    public AgentConfigApplyResult Revert(AgentDefinition agent)
+    {
+        if (agent.Id == "omp")
+            return ApplyOmpAsync(remove: true, modelEntries: null, CancellationToken.None).GetAwaiter().GetResult();
+        return WriteConfigSync(agent, string.Empty, string.Empty, remove: true, null, null);
+    }
 
     // ── Config generation ────────────────────────────────────────────────────
 
@@ -122,6 +138,7 @@ public sealed class AgentConfigurationService
             "amp"            => AmpRaw(proxyBaseUrl, apiKey),
             "opencode"       => new[] { OpenCodeRaw(proxyBaseUrl, apiKey, models) },
             "pi"             => new[] { PiRaw(proxyBaseUrl, apiKey, models) },
+            "omp"            => new[] { OmpRaw(proxyBaseUrl, apiKey, models) },
             "factory-droid"  => new[] { FactoryDroidRaw(proxyBaseUrl, apiKey, modelEntries) },
             "grok-build"     => new[] { GrokBuildRaw(proxyBaseUrl, apiKey, modelEntries) },
             _                => Array.Empty<RawConfigPreview>()
@@ -140,6 +157,7 @@ public sealed class AgentConfigurationService
                 "codex"        => ApplyCodex(proxyBaseUrl, apiKey, remove),
                 "amp"          => ApplyAmp(proxyBaseUrl, apiKey, remove),
                 "opencode"     => AgentConfigApplyResult.Failure("OpenCode requires async apply."),
+                "omp"          => AgentConfigApplyResult.Failure("Oh My Pi requires async apply."),
                 "factory-droid"=> ApplyFactoryDroid(proxyBaseUrl, apiKey, remove, modelEntries),
                 "grok-build"   => ApplyGrokBuild(proxyBaseUrl, apiKey, remove, modelEntries),
                 _              => AgentConfigApplyResult.Failure("Unknown agent.")
@@ -496,8 +514,10 @@ public sealed class AgentConfigurationService
 
     // ── Pi ──────────────────────────────────────────────────────────────
 
-    private const string PiCliProxyProviderKey   = "tunnel-agent-cliproxy";
-    private const string PiCliProxyAnthropicProviderKey = "tunnel-agent-cliproxy-anthropic";
+    private const string CliProxyProviderKey = "tunnel-agent-cliproxy";
+    private const string CliProxyAnthropicProviderKey = "tunnel-agent-cliproxy-anthropic";
+    private const string PiCliProxyProviderKey = CliProxyProviderKey;
+    private const string PiCliProxyAnthropicProviderKey = CliProxyAnthropicProviderKey;
     private const string PiPerplexityProviderKey = "tunnel-agent-perplexity";
 
     private static bool IsPerplexityEntry(ModelEntry m) =>
@@ -569,6 +589,166 @@ public sealed class AgentConfigurationService
                 return (JsonNode?)entry;
             }).ToArray());
         return provider;
+    }
+
+    internal static string MergeOmpModelsYaml(
+        string existing,
+        IReadOnlyList<ModelEntry> entries,
+        Dictionary<string, OpenRouterContextService.ModelInfo>? modelInfoMap,
+        bool remove)
+    {
+        var stream = new YamlStream();
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(existing))
+            {
+                using var reader = new StringReader(existing);
+                stream.Load(reader);
+            }
+        }
+        catch (YamlException ex)
+        {
+            throw new InvalidDataException("OMP models.yml is not valid YAML.", ex);
+        }
+
+        if (stream.Documents.Count > 1)
+            throw new InvalidDataException("OMP models.yml must contain a single YAML document.");
+
+        YamlMappingNode root;
+        if (stream.Documents.Count == 0)
+        {
+            root = new YamlMappingNode();
+            stream.Add(new YamlDocument(root));
+        }
+        else if (stream.Documents[0].RootNode is YamlMappingNode mapping)
+        {
+            root = mapping;
+        }
+        else
+        {
+            throw new InvalidDataException("OMP models.yml root must be a mapping.");
+        }
+
+        var providersKey = new YamlScalarNode("providers");
+        YamlMappingNode providers;
+        if (root.Children.TryGetValue(providersKey, out var providersNode))
+        {
+            providers = providersNode as YamlMappingNode
+                ?? throw new InvalidDataException("OMP models.yml providers must be a mapping.");
+        }
+        else
+        {
+            providers = new YamlMappingNode();
+            root.Add(providersKey, providers);
+        }
+
+        providers.Children.Remove(new YamlScalarNode(CliProxyProviderKey));
+        providers.Children.Remove(new YamlScalarNode(CliProxyAnthropicProviderKey));
+
+        if (!remove)
+        {
+            var metadata = modelInfoMap ?? new Dictionary<string, OpenRouterContextService.ModelInfo>(StringComparer.OrdinalIgnoreCase);
+            var openAi = entries.Where(m => !IsAnthropicEntry(m) && !IsPerplexityEntry(m)).ToList();
+            var anthropic = entries.Where(IsAnthropicEntry).ToList();
+            if (openAi.Count > 0)
+                providers.Add(CliProxyProviderKey, BuildOmpProviderBlock(openAi, metadata, "openai-completions"));
+            if (anthropic.Count > 0)
+                providers.Add(CliProxyAnthropicProviderKey, BuildOmpProviderBlock(anthropic, metadata, "anthropic-messages"));
+        }
+
+        if (providers.Children.Count == 0)
+            root.Children.Remove(providersKey);
+
+        using var writer = new StringWriter(System.Globalization.CultureInfo.InvariantCulture);
+        stream.Save(writer, assignAnchors: false);
+        return writer.ToString();
+    }
+
+    private static YamlMappingNode BuildOmpProviderBlock(
+        IReadOnlyList<ModelEntry> entries,
+        IReadOnlyDictionary<string, OpenRouterContextService.ModelInfo> modelInfoMap,
+        string api)
+    {
+        var first = entries[0];
+        var baseUrl = first.EngineBaseUrl;
+        if (api == "anthropic-messages")
+            baseUrl = StripV1(baseUrl);
+
+        var provider = new YamlMappingNode
+        {
+            { "baseUrl", baseUrl },
+            { "apiKey", HasResolvedApiKey(first.ApiKey) ? first.ApiKey : "no-key" },
+            { "api", api }
+        };
+        if (api == "openai-completions")
+            provider.Add("authHeader", "true");
+        else
+            provider.Add("disableStrictTools", "true");
+
+        var models = new YamlSequenceNode();
+        foreach (var model in entries)
+        {
+            var node = new YamlMappingNode { { "id", model.Id } };
+            if (!string.IsNullOrWhiteSpace(model.DisplayName))
+                node.Add("name", model.DisplayName);
+            if (modelInfoMap.TryGetValue(model.Id, out var info))
+            {
+                if (info.SupportsReasoning)
+                    node.Add("reasoning", "true");
+                node.Add("input", new YamlSequenceNode(info.SupportsImage ? new[] { "text", "image" } : new[] { "text" }));
+                if (info.ContextLength > 0)
+                    node.Add("contextWindow", info.ContextLength.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            }
+            models.Add(node);
+        }
+        provider.Add("models", models);
+        return provider;
+    }
+
+    private static async Task<AgentConfigApplyResult> ApplyOmpAsync(
+        bool remove,
+        IReadOnlyList<ModelEntry>? modelEntries,
+        CancellationToken ct)
+    {
+        var configPath = ExpandPath("~/.omp/agent/models.yml");
+        var directory = Path.GetDirectoryName(configPath)!;
+        Directory.CreateDirectory(directory);
+
+        var existing = File.Exists(configPath)
+            ? await File.ReadAllTextAsync(configPath, ct).ConfigureAwait(false)
+            : string.Empty;
+        var metadata = remove || modelEntries is not { Count: > 0 }
+            ? new Dictionary<string, OpenRouterContextService.ModelInfo>(StringComparer.OrdinalIgnoreCase)
+            : await BuildModelInfoMapAsync(modelEntries.Select(m => m.Id), ct).ConfigureAwait(false);
+        var content = MergeOmpModelsYaml(
+            existing,
+            modelEntries ?? Array.Empty<ModelEntry>(),
+            metadata,
+            remove);
+
+        string? backupPath = null;
+        if (File.Exists(configPath))
+        {
+            backupPath = $"{configPath}.backup.{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+            File.Copy(configPath, backupPath, overwrite: false);
+        }
+
+        await File.WriteAllTextAsync(configPath, content, Utf8NoBom, ct).ConfigureAwait(false);
+        var modelCount = modelEntries?.Count ?? 0;
+        var message = remove
+            ? "Removed Tunnel Agent providers from Oh My Pi models.yml."
+            : $"Configuration written to {configPath}.{(modelCount > 0 ? $" {modelCount} model(s) registered." : "")} Restart Oh My Pi for changes to take effect.";
+        return AgentConfigApplyResult.Ok(message, configPath, backupPath);
+    }
+
+    private static RawConfigPreview OmpRaw(string proxyBaseUrl, string apiKey, IReadOnlyList<string>? models)
+    {
+        var configPath = ExpandPath("~/.omp/agent/models.yml");
+        var entries = (models ?? Array.Empty<string>())
+            .Select(model => new ModelEntry(model, string.Empty, proxyBaseUrl, apiKey, model))
+            .ToArray();
+        var content = MergeOmpModelsYaml(string.Empty, entries, modelInfoMap: null, remove: false);
+        return new RawConfigPreview("models.yml", configPath, content);
     }
 
     private static async Task<AgentConfigApplyResult> ApplyPiAsync(bool remove, IReadOnlyList<ModelEntry>? modelEntries, CancellationToken ct)

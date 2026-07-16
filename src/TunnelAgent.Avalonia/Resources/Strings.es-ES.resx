@@ -1199,6 +1199,9 @@
   <data name="Agent_pi_Description" xml:space="preserve">
     <value>Agente de programación Pi de pi.dev.</value>
   </data>
+  <data name="Agent_omp_Description" xml:space="preserve">
+    <value>Agente de programación Oh My Pi.</value>
+  </data>
   <data name="Agent_factory-droid_Description" xml:space="preserve">
     <value>Agente de programación con IA de Factory.</value>
   </data>
