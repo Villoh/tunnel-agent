@@ -31,5 +31,6 @@ autoresearch.ideas.md
 # Superpowers AI specs and plans (local dev artifacts)
 docs/superpowers/
 openspec/
+.worktrees/
 # Local Pi runtime state
 .atl/
