@@ -125,7 +125,6 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 | -------------- | ----------------------------------------------------------------- |
 | Claude Code    | `~/.claude/settings.json`                                         |
 | Codex CLI      | `~/.codex/config.toml` + `auth.json`                              |
-| Amp CLI        | `~/.config/amp/settings.json` + `~/.local/share/amp/secrets.json` |
 | OpenCode       | `~/.config/opencode/opencode.json`                                |
 | Pi             | `~/.pi/agent/models.json`                                         |
 | Oh My Pi (OMP) | `~/.omp/agent/models.yml`                                         |

@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **Amp CLI agent removed** (`AgentCatalog.cs`, `README.md`): Amp is no longer offered for agent configuration because CLIProxyAPI removed its Amp integration, management endpoints, and provider routing. Existing Amp files are left untouched.
 - **Agent model configuration reset button** (`AgentsView`, `MainWindowViewModel`, `AgentConfigurationService`, `Resources/Strings*.resx`): configured agents now show a reset action that opens the existing configuration overlay in reset mode and removes only Tunnel Agent-managed model/provider entries. Pi and OpenCode revert now use their async JSON merge paths instead of failing through the synchronous dispatcher.
 
 ### Added
