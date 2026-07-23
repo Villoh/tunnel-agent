@@ -123,8 +123,12 @@ public sealed class AgentConfigurationService
     /// <summary>Remove proxy configuration (restore to default).</summary>
     public AgentConfigApplyResult Revert(AgentDefinition agent)
     {
+        if (agent.Id == "pi")
+            return ApplyPiAsync(remove: true, modelEntries: null, CancellationToken.None).GetAwaiter().GetResult();
         if (agent.Id == "omp")
             return ApplyOmpAsync(remove: true, modelEntries: null, CancellationToken.None).GetAwaiter().GetResult();
+        if (agent.Id == "opencode")
+            return ApplyOpenCodeAsync(string.Empty, string.Empty, remove: true, modelEntries: null, CancellationToken.None).GetAwaiter().GetResult();
         return WriteConfigSync(agent, string.Empty, string.Empty, remove: true, null, null);
     }
 

@@ -32,4 +32,5 @@ public partial class AgentsView : UserControl
             mvm.OpenAgentConfigCommand.Execute(vm);
         }
     }
+
 }
