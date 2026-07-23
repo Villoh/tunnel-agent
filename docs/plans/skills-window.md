@@ -36,7 +36,7 @@ TunnelAgent will **not** maintain a fork, packaging repository, Node runtime, or
 global npm installation. It will:
 
 1. Detect `node` and `npm` from the user's `PATH` when the Skills section opens.
-2. Validate Node `>=18 <23` and npm `>=9`.
+2. Validate Node `>=18` and npm `>=9`.
 3. If missing or incompatible, show the exact requirement, a link to the Node.js
    download page, and a **Recheck** action. Skills commands remain disabled.
 4. If compatible but `asm` is absent, offer **Install ASM**.
@@ -113,7 +113,7 @@ Small wrapper around system Node/npm and the local npm prefix:
 - `CheckPrerequisitesAsync(ct)` runs `node --version` and `npm --version`, then
   returns structured status: found paths, versions, compatibility, and a
   user-facing failure reason.
-- Validate Node `>=18 <23` and npm `>=9`; command existence alone is insufficient.
+- Validate Node `>=18` and npm `>=9`; command existence alone is insufficient.
 - `IsAsmInstalled()` checks the local entry point and package metadata. Ignore
   global `asm` installations to keep behavior deterministic.
 - `GetInstalledVersionAsync(ct)` reads the exact local package version via npm or
@@ -247,7 +247,7 @@ per-row commands.
 Follow the visual language of `AgentsView`/`ProvidersView`. Sections:
 
 - Prerequisite state: when Node/npm is missing or incompatible, show
-  "Skills requires Node.js 18–22 and npm 9 or newer", detected versions when
+  "Skills requires Node.js 18 or newer and npm 9 or newer", detected versions when
   available, **Open Node.js download page**, and **Recheck**. Hide/disable all
   skill operations.
 - ASM state: when prerequisites pass but local `asm` is absent, explain that it

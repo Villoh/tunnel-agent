@@ -9,7 +9,7 @@ public sealed class AsmSkillsTests
 {
     [Theory]
     [InlineData("v18.0.0", 18)]
-    [InlineData("22.12.1", 22)]
+    [InlineData("24.18.0", 24)]
     [InlineData("11.16.0\r\n", 11)]
     public void ParseVersion_HandlesCliOutput(string value, int major) =>
         Assert.Equal(major, AsmProvisionService.ParseVersion(value)!.Major);

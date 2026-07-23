@@ -33,7 +33,7 @@ public sealed class AsmProvisionService
 
         var nodeVersion = ParseVersion(node.Output);
         var npmVersion = ParseVersion(npm.Output);
-        var compatible = nodeVersion is { Major: >= 18 and < 23 } && npmVersion is { Major: >= 9 };
+        var compatible = nodeVersion is { Major: >= 18 } && npmVersion is { Major: >= 9 };
         var reason = compatible ? "" : BuildFailureReason(node.Path, nodeVersion, npm.Path, npmVersion);
         return new(node.Path, nodeVersion?.ToString(), npm.Path, npmVersion?.ToString(), compatible, reason);
     }
@@ -80,8 +80,8 @@ public sealed class AsmProvisionService
 
     private static string BuildFailureReason(string? nodePath, Version? node, string? npmPath, Version? npm)
     {
-        if (nodePath is null) return "Node.js was not found. Skills requires Node.js 18–22 and npm 9 or newer.";
-        if (node is null || node.Major is < 18 or >= 23) return $"Node.js {node?.ToString() ?? "version unknown"} is incompatible. Skills requires Node.js 18–22.";
+        if (nodePath is null) return "Node.js was not found. Skills requires Node.js 18 or newer and npm 9 or newer.";
+        if (node is null || node.Major < 18) return $"Node.js {node?.ToString() ?? "version unknown"} is incompatible. Skills requires Node.js 18 or newer.";
         if (npmPath is null) return "npm was not found. Skills requires npm 9 or newer.";
         return $"npm {npm?.ToString() ?? "version unknown"} is incompatible. Skills requires npm 9 or newer.";
     }
