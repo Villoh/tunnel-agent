@@ -232,6 +232,59 @@ providers:
         Assert.Equal(string.Empty, content);
     }
 
+    [Fact]
+    public void MergeFactoryDroidSettings_Remove_DropsManagedModelsAndKeepsUserSettings()
+    {
+        var existing = """
+{
+  "theme": "dark",
+  "customModels": [
+    {
+      "model": "gpt-5.6-sol",
+      "displayName": "GPT-5.6 Sol (Tunnel Agent)",
+      "baseUrl": "http://127.0.0.1:8317/v1",
+      "apiKey": "${TUNNEL_AGENT_CLIPROXY_API_KEY}"
+    },
+    {
+      "model": "local-model",
+      "displayName": "Local model",
+      "baseUrl": "http://localhost:1234/v1",
+      "apiKey": "local-key"
+    }
+  ]
+}
+""";
+
+        var content = AgentConfigurationService.MergeFactoryDroidSettings(
+            existing, proxyBaseUrl: "", apiKey: "", remove: true, models: null);
+
+        Assert.DoesNotContain("gpt-5.6-sol", content);
+        Assert.Contains("local-model", content);
+        Assert.Contains("\"theme\": \"dark\"", content);
+    }
+
+    [Fact]
+    public void MergeFactoryDroidSettings_RemoveLastModel_DropsCustomModelsProperty()
+    {
+        var existing = """
+{
+  "customModels": [
+    {
+      "model": "claude-sonnet",
+      "displayName": "Claude Sonnet (Tunnel Agent - Perplexity)",
+      "baseUrl": "http://127.0.0.1:8318/v1",
+      "apiKey": "${PERPLEXITY_API_KEY}"
+    }
+  ]
+}
+""";
+
+        var content = AgentConfigurationService.MergeFactoryDroidSettings(
+            existing, proxyBaseUrl: "", apiKey: "", remove: true, models: null);
+
+        Assert.Equal("{}", content);
+    }
+
     [Theory]
     [InlineData("providers: [")]
     [InlineData("- item")]

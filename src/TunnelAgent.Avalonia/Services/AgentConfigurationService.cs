@@ -829,9 +829,9 @@ public sealed class AgentConfigurationService
         var dir = Path.GetDirectoryName(configPath)!;
         if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
-        var root = File.Exists(configPath)
-            ? JsonNode.Parse(File.ReadAllText(configPath))?.AsObject() ?? new JsonObject()
-            : new JsonObject();
+        var content = MergeFactoryDroidSettings(
+            File.Exists(configPath) ? File.ReadAllText(configPath) : string.Empty,
+            proxyBaseUrl, apiKey, remove, models);
 
         string? backupPath = null;
         if (File.Exists(configPath))
@@ -840,38 +840,51 @@ public sealed class AgentConfigurationService
             File.Copy(configPath, backupPath, overwrite: false);
         }
 
-        if (root["customModels"] is not JsonArray existing)
-        {
-            existing = new JsonArray();
-            root["customModels"] = existing;
-        }
-
-        // Remove only entries managed for the current Tunnel Agent proxy URL.
-        // Do not delete unrelated local Factory Droid models that also use localhost.
-        for (int i = existing.Count - 1; i >= 0; i--)
-        {
-            var url = existing[i]?["baseUrl"]?.GetValue<string>() ?? "";
-            if (string.Equals(url.TrimEnd('/'), proxyBaseUrl.TrimEnd('/'), StringComparison.OrdinalIgnoreCase))
-                existing.RemoveAt(i);
-        }
-
-        if (!remove)
-        {
-            var modelEntries2 = models?.Count > 0
-                ? models
-                : (IEnumerable<ModelEntry>)new[] { new ModelEntry("tunnel-agent", "", "", "TUNNEL_AGENT_CLIPROXY_API_KEY") };
-            foreach (var m in modelEntries2)
-                existing.Add(BuildFactoryDroidEntry(m, proxyBaseUrl, apiKey));
-        }
-
-        File.WriteAllText(configPath,
-            root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Utf8NoBom);
+        File.WriteAllText(configPath, content, Utf8NoBom);
 
         var modelCount = models?.Count ?? 0;
         var msg = remove
             ? "Removed proxy models from Factory Droid config."
             : $"Configuration written to {configPath}. {(modelCount > 0 ? $"{modelCount} model(s) registered. " : "")}Restart Factory Droid for changes to take effect.";
         return AgentConfigApplyResult.Ok(msg, configPath, backupPath);
+    }
+
+    internal static string MergeFactoryDroidSettings(
+        string existingContent, string proxyBaseUrl, string apiKey, bool remove, IReadOnlyList<ModelEntry>? models)
+    {
+        var root = string.IsNullOrWhiteSpace(existingContent)
+            ? new JsonObject()
+            : JsonNode.Parse(existingContent)?.AsObject() ?? new JsonObject();
+        if (root["customModels"] is not JsonArray customModels)
+        {
+            customModels = new JsonArray();
+            root["customModels"] = customModels;
+        }
+
+        for (int i = customModels.Count - 1; i >= 0; i--)
+        {
+            var model = customModels[i];
+            var url = model?["baseUrl"]?.GetValue<string>() ?? "";
+            var displayName = model?["displayName"]?.GetValue<string>() ?? "";
+            var key = model?["apiKey"]?.GetValue<string>() ?? "";
+            var managed = displayName.Contains("(Tunnel Agent", StringComparison.Ordinal) ||
+                          key.Contains("TUNNEL_AGENT_", StringComparison.Ordinal);
+            if (remove ? managed : string.Equals(url.TrimEnd('/'), proxyBaseUrl.TrimEnd('/'), StringComparison.OrdinalIgnoreCase))
+                customModels.RemoveAt(i);
+        }
+
+        if (!remove)
+        {
+            var entries = models?.Count > 0
+                ? models
+                : (IEnumerable<ModelEntry>)new[] { new ModelEntry("tunnel-agent", "", "", "TUNNEL_AGENT_CLIPROXY_API_KEY") };
+            foreach (var model in entries)
+                customModels.Add(BuildFactoryDroidEntry(model, proxyBaseUrl, apiKey));
+        }
+
+        if (customModels.Count == 0)
+            root.Remove("customModels");
+        return root.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
     }
 
     private static (string provider, string baseUrl) InferFactoryDroidProvider(ModelEntry model, string proxyBaseUrl)
