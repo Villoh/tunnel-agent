@@ -665,7 +665,10 @@ public sealed class AgentConfigurationService
 
         using var writer = new StringWriter(System.Globalization.CultureInfo.InvariantCulture);
         stream.Save(writer, assignAnchors: false);
-        return writer.ToString();
+        var content = writer.ToString().TrimEnd();
+        if (content.EndsWith("\n...", StringComparison.Ordinal))
+            content = content[..^4].TrimEnd();
+        return content == "{}" ? string.Empty : content + Environment.NewLine;
     }
 
     private static YamlMappingNode BuildOmpProviderBlock(

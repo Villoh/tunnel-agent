@@ -213,6 +213,23 @@ providers:
         Assert.Contains("custom:", content);
         Assert.DoesNotContain("tunnel-agent-cliproxy:", content);
         Assert.DoesNotContain("tunnel-agent-cliproxy-anthropic:", content);
+        Assert.DoesNotContain("...", content);
+    }
+
+    [Fact]
+    public void MergeOmpModelsYaml_RemoveLastProviders_ReturnsEmptyFile()
+    {
+        var existing = """
+providers:
+  tunnel-agent-cliproxy:
+    models:
+      - id: gpt-5.6-sol
+""";
+
+        var content = AgentConfigurationService.MergeOmpModelsYaml(
+            existing, System.Array.Empty<ModelEntry>(), modelInfoMap: null, remove: true);
+
+        Assert.Equal(string.Empty, content);
     }
 
     [Theory]
