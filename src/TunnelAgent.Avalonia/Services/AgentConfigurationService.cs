@@ -121,10 +121,16 @@ public sealed class AgentConfigurationService
     }
 
     /// <summary>Remove proxy configuration (restore to default).</summary>
-    public AgentConfigApplyResult Revert(AgentDefinition agent)
+    public AgentConfigApplyResult Revert(AgentDefinition agent, IReadOnlyCollection<int>? managedPorts = null)
     {
+        if (agent.Id == "pi")
+            return ApplyPiAsync(remove: true, modelEntries: null, CancellationToken.None).GetAwaiter().GetResult();
         if (agent.Id == "omp")
             return ApplyOmpAsync(remove: true, modelEntries: null, CancellationToken.None).GetAwaiter().GetResult();
+        if (agent.Id == "opencode")
+            return ApplyOpenCodeAsync(string.Empty, string.Empty, remove: true, modelEntries: null, CancellationToken.None).GetAwaiter().GetResult();
+        if (agent.Id == "grok-build")
+            return WriteGrokConfig(Array.Empty<ModelEntry>(), null, string.Empty, string.Empty, remove: true, managedPorts);
         return WriteConfigSync(agent, string.Empty, string.Empty, remove: true, null, null);
     }
 
@@ -330,9 +336,10 @@ public sealed class AgentConfigurationService
         foreach (var dir in new[] { Path.GetDirectoryName(settingsPath)!, Path.GetDirectoryName(secretsPath)! })
             if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
-        var settings = File.Exists(settingsPath)
-            ? JsonNode.Parse(File.ReadAllText(settingsPath))?.AsObject() ?? new JsonObject()
-            : new JsonObject();
+        var (settingsContent, secretsContent) = MergeAmpConfig(
+            File.Exists(settingsPath) ? File.ReadAllText(settingsPath) : string.Empty,
+            File.Exists(secretsPath) ? File.ReadAllText(secretsPath) : string.Empty,
+            baseUrl, apiKey, remove);
 
         string? backupPath = null;
         if (File.Exists(settingsPath))
@@ -341,30 +348,41 @@ public sealed class AgentConfigurationService
             File.Copy(settingsPath, backupPath, overwrite: false);
         }
 
-        if (remove)
-        {
-            settings.Remove("amp.url");
-        }
-        else
-        {
-            settings["amp.url"] = baseUrl;
-
-            var secrets = File.Exists(secretsPath)
-                ? JsonNode.Parse(File.ReadAllText(secretsPath))?.AsObject() ?? new JsonObject()
-                : new JsonObject();
-            secrets[$"apiKey@{baseUrl}"] = HasApiKey(apiKey) ? apiKey : "no-key";
-            File.WriteAllText(secretsPath,
-                secrets.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Utf8NoBom);
-        }
-
-        File.WriteAllText(settingsPath,
-            settings.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Utf8NoBom);
+        File.WriteAllText(settingsPath, settingsContent, Utf8NoBom);
+        File.WriteAllText(secretsPath, secretsContent, Utf8NoBom);
 
         var msg = remove
             ? "Removed proxy config from Amp CLI settings."
             : $"Written {settingsPath} and {secretsPath}. Restart Amp CLI for changes to take effect.";
         var raw = remove ? Array.Empty<RawConfigPreview>() : new[] { new RawConfigPreview("secrets.json", secretsPath, "") };
         return AgentConfigApplyResult.Ok(msg, settingsPath, backupPath, raw);
+    }
+
+    internal static (string Settings, string Secrets) MergeAmpConfig(
+        string settingsContent, string secretsContent, string baseUrl, string apiKey, bool remove)
+    {
+        var settings = string.IsNullOrWhiteSpace(settingsContent)
+            ? new JsonObject()
+            : JsonNode.Parse(settingsContent)?.AsObject() ?? new JsonObject();
+        var secrets = string.IsNullOrWhiteSpace(secretsContent)
+            ? new JsonObject()
+            : JsonNode.Parse(secretsContent)?.AsObject() ?? new JsonObject();
+
+        if (remove)
+        {
+            var configuredUrl = settings["amp.url"]?.GetValue<string>();
+            settings.Remove("amp.url");
+            if (!string.IsNullOrEmpty(configuredUrl))
+                secrets.Remove($"apiKey@{configuredUrl}");
+        }
+        else
+        {
+            settings["amp.url"] = baseUrl;
+            secrets[$"apiKey@{baseUrl}"] = HasApiKey(apiKey) ? apiKey : "no-key";
+        }
+
+        var options = new JsonSerializerOptions { WriteIndented = true };
+        return (settings.ToJsonString(options), secrets.ToJsonString(options));
     }
 
     private static RawConfigPreview[] AmpRaw(string proxyBaseUrl, string apiKey)
@@ -661,7 +679,10 @@ public sealed class AgentConfigurationService
 
         using var writer = new StringWriter(System.Globalization.CultureInfo.InvariantCulture);
         stream.Save(writer, assignAnchors: false);
-        return writer.ToString();
+        var content = writer.ToString().TrimEnd();
+        if (content.EndsWith("\n...", StringComparison.Ordinal))
+            content = content[..^4].TrimEnd();
+        return content == "{}" ? string.Empty : content + Environment.NewLine;
     }
 
     private static YamlMappingNode BuildOmpProviderBlock(
@@ -822,9 +843,9 @@ public sealed class AgentConfigurationService
         var dir = Path.GetDirectoryName(configPath)!;
         if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
-        var root = File.Exists(configPath)
-            ? JsonNode.Parse(File.ReadAllText(configPath))?.AsObject() ?? new JsonObject()
-            : new JsonObject();
+        var content = MergeFactoryDroidSettings(
+            File.Exists(configPath) ? File.ReadAllText(configPath) : string.Empty,
+            proxyBaseUrl, apiKey, remove, models);
 
         string? backupPath = null;
         if (File.Exists(configPath))
@@ -833,38 +854,51 @@ public sealed class AgentConfigurationService
             File.Copy(configPath, backupPath, overwrite: false);
         }
 
-        if (root["customModels"] is not JsonArray existing)
-        {
-            existing = new JsonArray();
-            root["customModels"] = existing;
-        }
-
-        // Remove only entries managed for the current Tunnel Agent proxy URL.
-        // Do not delete unrelated local Factory Droid models that also use localhost.
-        for (int i = existing.Count - 1; i >= 0; i--)
-        {
-            var url = existing[i]?["baseUrl"]?.GetValue<string>() ?? "";
-            if (string.Equals(url.TrimEnd('/'), proxyBaseUrl.TrimEnd('/'), StringComparison.OrdinalIgnoreCase))
-                existing.RemoveAt(i);
-        }
-
-        if (!remove)
-        {
-            var modelEntries2 = models?.Count > 0
-                ? models
-                : (IEnumerable<ModelEntry>)new[] { new ModelEntry("tunnel-agent", "", "", "TUNNEL_AGENT_CLIPROXY_API_KEY") };
-            foreach (var m in modelEntries2)
-                existing.Add(BuildFactoryDroidEntry(m, proxyBaseUrl, apiKey));
-        }
-
-        File.WriteAllText(configPath,
-            root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Utf8NoBom);
+        File.WriteAllText(configPath, content, Utf8NoBom);
 
         var modelCount = models?.Count ?? 0;
         var msg = remove
             ? "Removed proxy models from Factory Droid config."
             : $"Configuration written to {configPath}. {(modelCount > 0 ? $"{modelCount} model(s) registered. " : "")}Restart Factory Droid for changes to take effect.";
         return AgentConfigApplyResult.Ok(msg, configPath, backupPath);
+    }
+
+    internal static string MergeFactoryDroidSettings(
+        string existingContent, string proxyBaseUrl, string apiKey, bool remove, IReadOnlyList<ModelEntry>? models)
+    {
+        var root = string.IsNullOrWhiteSpace(existingContent)
+            ? new JsonObject()
+            : JsonNode.Parse(existingContent)?.AsObject() ?? new JsonObject();
+        if (root["customModels"] is not JsonArray customModels)
+        {
+            customModels = new JsonArray();
+            root["customModels"] = customModels;
+        }
+
+        for (int i = customModels.Count - 1; i >= 0; i--)
+        {
+            var model = customModels[i];
+            var url = model?["baseUrl"]?.GetValue<string>() ?? "";
+            var displayName = model?["displayName"]?.GetValue<string>() ?? "";
+            var key = model?["apiKey"]?.GetValue<string>() ?? "";
+            var managed = displayName.Contains("(Tunnel Agent", StringComparison.Ordinal) ||
+                          key.Contains("TUNNEL_AGENT_", StringComparison.Ordinal);
+            if (remove ? managed : string.Equals(url.TrimEnd('/'), proxyBaseUrl.TrimEnd('/'), StringComparison.OrdinalIgnoreCase))
+                customModels.RemoveAt(i);
+        }
+
+        if (!remove)
+        {
+            var entries = models?.Count > 0
+                ? models
+                : (IEnumerable<ModelEntry>)new[] { new ModelEntry("tunnel-agent", "", "", "TUNNEL_AGENT_CLIPROXY_API_KEY") };
+            foreach (var model in entries)
+                customModels.Add(BuildFactoryDroidEntry(model, proxyBaseUrl, apiKey));
+        }
+
+        if (customModels.Count == 0)
+            root.Remove("customModels");
+        return root.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
     }
 
     private static (string provider, string baseUrl) InferFactoryDroidProvider(ModelEntry model, string proxyBaseUrl)
@@ -942,7 +976,7 @@ public sealed class AgentConfigurationService
     private AgentConfigApplyResult WriteGrokConfig(
         IReadOnlyList<ModelEntry> entries,
         Dictionary<string, OpenRouterContextService.ModelInfo>? modelInfoMap,
-        string apiKey, string proxyBaseUrl, bool remove)
+        string apiKey, string proxyBaseUrl, bool remove, IReadOnlyCollection<int>? managedPorts = null)
     {
         var configPath = ExpandPath(GrokConfigPath);
         var dir        = Path.GetDirectoryName(configPath)!;
@@ -956,7 +990,7 @@ public sealed class AgentConfigurationService
             File.WriteAllText(backupPath, existing, Utf8NoBom);
         }
 
-        var content = MergeGrokConfig(existing, entries, modelInfoMap, apiKey, proxyBaseUrl, remove);
+        var content = MergeGrokConfig(existing, entries, modelInfoMap, apiKey, proxyBaseUrl, remove, managedPorts);
         File.WriteAllText(configPath, content, Utf8NoBom);
 
         if (remove)
@@ -988,7 +1022,7 @@ public sealed class AgentConfigurationService
         string existing,
         IReadOnlyList<ModelEntry> entries,
         Dictionary<string, OpenRouterContextService.ModelInfo>? modelInfoMap,
-        string apiKey, string proxyBaseUrl, bool remove)
+        string apiKey, string proxyBaseUrl, bool remove, IReadOnlyCollection<int>? managedPorts = null)
     {
         // Nothing selected and not reverting: leave the file untouched rather
         // than writing a placeholder model or wiping existing configuration.
@@ -1033,7 +1067,7 @@ public sealed class AgentConfigurationService
             {
                 var id = ExtractGrokModelId(s.Header);
                 var isReplacing = id != null && newIdSet.Contains(id);
-                if (isReplacing || IsManagedGrokModel(s.Lines))
+                if (isReplacing || IsManagedGrokModel(s.Lines, managedPorts))
                 {
                     if (id != null) removedIds.Add(id);
                     continue; // drop (replaced or Tunnel Agent-managed)
@@ -1146,16 +1180,18 @@ public sealed class AgentConfigurationService
         line.Contains("Managed by Tunnel Agent", StringComparison.Ordinal) ||
         line.Contains("End Tunnel Agent block", StringComparison.Ordinal);
 
-    private static bool IsManagedGrokModel(IEnumerable<string> lines)
+    private static bool IsManagedGrokModel(IEnumerable<string> lines, IReadOnlyCollection<int>? managedPorts)
     {
-        var name    = ExtractTomlString(lines, "name");
-        var baseUrl = ExtractTomlString(lines, "base_url");
+        var name = ExtractTomlString(lines, "name");
         if (name != null && name.Contains("(Tunnel Agent", StringComparison.OrdinalIgnoreCase))
             return true;
-        if (baseUrl != null && (baseUrl.Contains("127.0.0.1", StringComparison.Ordinal) ||
-                                baseUrl.Contains("localhost", StringComparison.OrdinalIgnoreCase)))
-            return true;
-        return false;
+
+        var baseUrl = ExtractTomlString(lines, "base_url");
+        if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri) ||
+            uri.Host is not ("127.0.0.1" or "localhost"))
+            return false;
+
+        return uri.Port is 8317 or 8327 || managedPorts?.Contains(uri.Port) == true;
     }
 
     private static string? ExtractGrokModelId(string header)

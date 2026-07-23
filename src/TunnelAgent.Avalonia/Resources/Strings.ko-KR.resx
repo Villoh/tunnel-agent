@@ -1233,6 +1233,9 @@
   <data name="Agent_grok-build_Description" xml:space="preserve">
     <value>xAI의 Grok CLI 코딩 에이전트입니다.</value>
   </data>
+  <data name="AgentsView_Agent_ResetTooltip" xml:space="preserve">
+    <value>Reset configuration</value>
+  </data>
   <data name="AgentsView_Agent_ConfigureButton" xml:space="preserve">
     <value>구성</value>
   </data>
@@ -1266,6 +1269,9 @@
 <data name="Dialog_AddAccount_DuplicateApiKey" xml:space="preserve">
   <value>API 키가 이미 있습니다.</value>
 </data>
+<data name="AgentConfigOverlay_ResetButton" xml:space="preserve">
+    <value>Reset</value>
+  </data>
 <data name="AgentConfigOverlay_BulkTitle" xml:space="preserve">
     <value>에이전트 구성</value>
   </data>

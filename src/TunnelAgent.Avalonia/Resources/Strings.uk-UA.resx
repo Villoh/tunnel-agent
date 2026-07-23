@@ -1233,6 +1233,9 @@
   <data name="Agent_grok-build_Description" xml:space="preserve">
     <value>Агент кодування Grok CLI від xAI.</value>
   </data>
+  <data name="AgentsView_Agent_ResetTooltip" xml:space="preserve">
+    <value>Reset configuration</value>
+  </data>
   <data name="AgentsView_Agent_ConfigureButton" xml:space="preserve">
     <value>Налаштувати</value>
   </data>
@@ -1266,6 +1269,9 @@
 <data name="Dialog_AddAccount_DuplicateApiKey" xml:space="preserve">
   <value>API-ключ уже існує.</value>
 </data>
+<data name="AgentConfigOverlay_ResetButton" xml:space="preserve">
+    <value>Reset</value>
+  </data>
 <data name="AgentConfigOverlay_BulkTitle" xml:space="preserve">
     <value>Налаштувати агентів</value>
   </data>

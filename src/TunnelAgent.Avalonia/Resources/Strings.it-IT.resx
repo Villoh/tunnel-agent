@@ -1233,6 +1233,9 @@
   <data name="Agent_grok-build_Description" xml:space="preserve">
     <value>Agente di codifica CLI Grok di xAI.</value>
   </data>
+  <data name="AgentsView_Agent_ResetTooltip" xml:space="preserve">
+    <value>Reset configuration</value>
+  </data>
   <data name="AgentsView_Agent_ConfigureButton" xml:space="preserve">
     <value>Configura</value>
   </data>
@@ -1266,6 +1269,9 @@
 <data name="Dialog_AddAccount_DuplicateApiKey" xml:space="preserve">
   <value>La API Key esiste già.</value>
 </data>
+<data name="AgentConfigOverlay_ResetButton" xml:space="preserve">
+    <value>Reset</value>
+  </data>
 <data name="AgentConfigOverlay_BulkTitle" xml:space="preserve">
     <value>Configura agenti</value>
   </data>

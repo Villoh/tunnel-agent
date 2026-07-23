@@ -108,6 +108,48 @@ yolo = true
     }
 
     [Fact]
+    public void MergeGrokConfig_Remove_KeepsUnmanagedLocalhostModel()
+    {
+        var existing = """
+[models]
+default = "local-model"
+
+[model."local-model"]
+model = "local-model"
+name = "My local model"
+base_url = "http://localhost:11434/v1"
+api_backend = "chat_completions"
+""";
+
+        var content = AgentConfigurationService.MergeGrokConfig(
+            existing, entries: System.Array.Empty<ModelEntry>(),
+            modelInfoMap: null, apiKey: "", proxyBaseUrl: "", remove: true,
+            managedPorts: new[] { 9000, 9001 });
+
+        Assert.Contains("[model.\"local-model\"]", content);
+        Assert.Contains("default = \"local-model\"", content);
+    }
+
+    [Fact]
+    public void MergeGrokConfig_Remove_DropsLegacyModelOnManagedPort()
+    {
+        var existing = """
+[model."legacy-model"]
+model = "legacy-model"
+name = "Legacy model"
+base_url = "http://127.0.0.1:9000/v1"
+api_backend = "chat_completions"
+""";
+
+        var content = AgentConfigurationService.MergeGrokConfig(
+            existing, entries: System.Array.Empty<ModelEntry>(),
+            modelInfoMap: null, apiKey: "", proxyBaseUrl: "", remove: true,
+            managedPorts: new[] { 9000, 9001 });
+
+        Assert.DoesNotContain("legacy-model", content);
+    }
+
+    [Fact]
     public void AgentCatalog_ContainsOhMyPiDefinition()
     {
         var omp = Assert.Single(AgentCatalog.All, agent => agent.Id == "omp");
@@ -213,6 +255,112 @@ providers:
         Assert.Contains("custom:", content);
         Assert.DoesNotContain("tunnel-agent-cliproxy:", content);
         Assert.DoesNotContain("tunnel-agent-cliproxy-anthropic:", content);
+        Assert.DoesNotContain("...", content);
+    }
+
+    [Fact]
+    public void MergeOmpModelsYaml_RemoveLastProviders_ReturnsEmptyFile()
+    {
+        var existing = """
+providers:
+  tunnel-agent-cliproxy:
+    models:
+      - id: gpt-5.6-sol
+""";
+
+        var content = AgentConfigurationService.MergeOmpModelsYaml(
+            existing, System.Array.Empty<ModelEntry>(), modelInfoMap: null, remove: true);
+
+        Assert.Equal(string.Empty, content);
+    }
+
+    [Fact]
+    public void MergeAmpConfig_Remove_DropsManagedUrlAndMatchingSecretOnly()
+    {
+        var settings = """
+{
+  "amp.url": "http://127.0.0.1:8317",
+  "theme": "dark"
+}
+""";
+        var secrets = """
+{
+  "apiKey@http://127.0.0.1:8317": "managed-key",
+  "apiKey@https://api.example.com": "user-key"
+}
+""";
+
+        var result = AgentConfigurationService.MergeAmpConfig(
+            settings, secrets, baseUrl: "", apiKey: "", remove: true);
+
+        Assert.DoesNotContain("amp.url", result.Settings);
+        Assert.Contains("\"theme\": \"dark\"", result.Settings);
+        Assert.DoesNotContain("managed-key", result.Secrets);
+        Assert.Contains("user-key", result.Secrets);
+    }
+
+    [Fact]
+    public void MergeAmpConfig_RemoveWithoutConfiguredUrl_KeepsSecrets()
+    {
+        var result = AgentConfigurationService.MergeAmpConfig(
+            "{ \"theme\": \"dark\" }",
+            "{ \"apiKey@https://api.example.com\": \"user-key\" }",
+            baseUrl: "", apiKey: "", remove: true);
+
+        Assert.Contains("user-key", result.Secrets);
+    }
+
+    [Fact]
+    public void MergeFactoryDroidSettings_Remove_DropsManagedModelsAndKeepsUserSettings()
+    {
+        var existing = """
+{
+  "theme": "dark",
+  "customModels": [
+    {
+      "model": "gpt-5.6-sol",
+      "displayName": "GPT-5.6 Sol (Tunnel Agent)",
+      "baseUrl": "http://127.0.0.1:8317/v1",
+      "apiKey": "${TUNNEL_AGENT_CLIPROXY_API_KEY}"
+    },
+    {
+      "model": "local-model",
+      "displayName": "Local model",
+      "baseUrl": "http://localhost:1234/v1",
+      "apiKey": "local-key"
+    }
+  ]
+}
+""";
+
+        var content = AgentConfigurationService.MergeFactoryDroidSettings(
+            existing, proxyBaseUrl: "", apiKey: "", remove: true, models: null);
+
+        Assert.DoesNotContain("gpt-5.6-sol", content);
+        Assert.Contains("local-model", content);
+        Assert.Contains("\"theme\": \"dark\"", content);
+    }
+
+    [Fact]
+    public void MergeFactoryDroidSettings_RemoveLastModel_DropsCustomModelsProperty()
+    {
+        var existing = """
+{
+  "customModels": [
+    {
+      "model": "claude-sonnet",
+      "displayName": "Claude Sonnet (Tunnel Agent - Perplexity)",
+      "baseUrl": "http://127.0.0.1:8318/v1",
+      "apiKey": "${PERPLEXITY_API_KEY}"
+    }
+  ]
+}
+""";
+
+        var content = AgentConfigurationService.MergeFactoryDroidSettings(
+            existing, proxyBaseUrl: "", apiKey: "", remove: true, models: null);
+
+        Assert.Equal("{}", content);
     }
 
     [Theory]

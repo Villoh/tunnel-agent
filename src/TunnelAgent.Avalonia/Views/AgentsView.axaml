@@ -115,6 +115,13 @@
                                         <lucide:PackIconLucide Kind="ExternalLink" Width="13" Height="13" />
                                     </Button>
                                     <Button Classes="icon"
+                                            ToolTip.Tip="{l:Loc AgentsView_Agent_ResetTooltip}"
+                                            IsVisible="{Binding Configured}"
+                                            Command="{Binding $parent[UserControl].DataContext.OpenAgentResetCommand}"
+                                            CommandParameter="{Binding}">
+                                        <lucide:PackIconLucide Kind="RotateCcw" Width="14" Height="14" />
+                                    </Button>
+                                    <Button Classes="icon"
                                             ToolTip.Tip="{Binding ConfigureButtonLabel}"
                                             Click="OnConfigureClick">
                                         <lucide:PackIconLucide Kind="Settings" Width="14" Height="14" />

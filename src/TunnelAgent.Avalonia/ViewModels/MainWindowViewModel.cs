@@ -515,9 +515,8 @@ SelectedSection is SectionKey.Logs;
     public bool ShowAgentConfigCopyButton     => !AgentConfigHasResult && IsAgentConfigManualMode;
     public bool ShowAgentConfigAgentPicker    => IsAgentConfigBulkMode;
     public bool ShowSingleAgentSummary        => !IsAgentConfigBulkMode && AgentConfigTarget != null;
-    public bool AgentConfigSupportsModelSelection =>
-        IsAgentConfigBulkMode ||
-        AgentConfigTarget?.Id is not ("codex" or "claude-code" or "amp");
+    public bool AgentConfigSupportsModelSelection => !IsAgentConfigDefaultMode &&
+        (IsAgentConfigBulkMode || AgentConfigTarget?.Id is not ("codex" or "claude-code" or "amp"));
     public bool HasSelectableModels           => SelectableModels.Count > 0;
     public int VisibleSelectableModelCount    => SelectableModels.Count(m => m.IsVisible);
     public bool HasVisibleSelectableModels    => VisibleSelectableModelCount > 0;
@@ -559,9 +558,11 @@ SelectedSection is SectionKey.Logs;
     public int AgentConfigSelectedCount       => IsAgentConfigBulkMode
         ? Agents.Count(a => a.IsSelectedForConfig && a.Installed)
         : AgentConfigTarget?.Installed == true ? 1 : 0;
-    public string AgentConfigApplyLabel => IsAgentConfigBulkMode
-        ? _localization.GetString("AgentConfigOverlay_ApplySelectedButton", AgentConfigSelectedCount)
-        : _localization.GetString("AgentConfigOverlay_ApplyButton");
+    public string AgentConfigApplyLabel => IsAgentConfigDefaultMode
+        ? _localization.GetString("AgentConfigOverlay_ResetButton")
+        : IsAgentConfigBulkMode
+            ? _localization.GetString("AgentConfigOverlay_ApplySelectedButton", AgentConfigSelectedCount)
+            : _localization.GetString("AgentConfigOverlay_ApplyButton");
     public string AgentConfigDialogTitle => IsAgentConfigBulkMode
         ? _localization.GetString("AgentConfigOverlay_BulkTitle")
         : AgentConfigTarget is { } target
@@ -2661,6 +2662,13 @@ SelectedSection is SectionKey.Logs;
     }
 
     [RelayCommand]
+    private async Task OpenAgentResetAsync(AgentViewModel vm)
+    {
+        await OpenAgentConfigAsync(vm);
+        SetAgentDefaultMode();
+    }
+
+    [RelayCommand]
     private void OpenBulkAgentConfig()
     {
         foreach (var a in Agents) a.IsSelectedForConfig = false;
@@ -2726,8 +2734,14 @@ SelectedSection is SectionKey.Logs;
         IsAgentConfigManualMode = true;
         _ = RefreshManualPreviewAsync();
     }
-    [RelayCommand] private void SetAgentProxyMode()   => IsAgentConfigDefaultMode = false;
-    [RelayCommand] private void SetAgentDefaultMode() => IsAgentConfigDefaultMode = true;
+    [RelayCommand]
+    private void SetAgentDefaultMode()
+    {
+        IsAgentConfigDefaultMode = true;
+        OnPropertyChanged(nameof(AgentConfigSupportsModelSelection));
+        OnPropertyChanged(nameof(AgentConfigApplyLabel));
+        OnPropertyChanged(nameof(ShowAmpUpstreamApiKeyField));
+    }
 
     [RelayCommand(CanExecute = nameof(CanApplyAgentConfig))]
     private async Task ApplyAgentConfigAsync()
@@ -2752,7 +2766,7 @@ SelectedSection is SectionKey.Logs;
             {
                 var def = FindDef(target.Id);
                 var r = IsAgentConfigDefaultMode
-                    ? await Task.Run(() => _agentConfiguration.Revert(def)).ConfigureAwait(false)
+                    ? await Task.Run(() => _agentConfiguration.Revert(def, new[] { CliProxyPort, PerplexityPort })).ConfigureAwait(false)
                     : await _agentConfiguration.ApplyAsync(def, AgentProxyBaseUrl, CurrentAgentApiKey, models, modelEntries).ConfigureAwait(false);
                 var displayPath = r.ConfigPath;
                 if (r.RawPreviews.Count > 0)

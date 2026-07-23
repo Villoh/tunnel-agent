@@ -39,15 +39,6 @@ public static class AgentCatalog
             AssetsBase + "codex.svg"),
 
         new AgentDefinition(
-            "amp", "Amp CLI",
-            "Sourcegraph's Amp coding assistant.",
-            new[] { "amp", "amp.cmd", "amp.exe" },
-            new[] { "~/.config/amp/settings.json", "~/.local/share/amp/secrets.json" },
-            "https://ampcode.com",
-            "#FF5543",
-            AssetsBase + "amp.svg"),
-
-        new AgentDefinition(
             "opencode", "OpenCode",
             "Open-source AI coding agent.",
             new[] { "opencode", "oc", "opencode.exe", "oc.exe" },
