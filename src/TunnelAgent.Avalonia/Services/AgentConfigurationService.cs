@@ -121,7 +121,7 @@ public sealed class AgentConfigurationService
     }
 
     /// <summary>Remove proxy configuration (restore to default).</summary>
-    public AgentConfigApplyResult Revert(AgentDefinition agent)
+    public AgentConfigApplyResult Revert(AgentDefinition agent, IReadOnlyCollection<int>? managedPorts = null)
     {
         if (agent.Id == "pi")
             return ApplyPiAsync(remove: true, modelEntries: null, CancellationToken.None).GetAwaiter().GetResult();
@@ -129,6 +129,8 @@ public sealed class AgentConfigurationService
             return ApplyOmpAsync(remove: true, modelEntries: null, CancellationToken.None).GetAwaiter().GetResult();
         if (agent.Id == "opencode")
             return ApplyOpenCodeAsync(string.Empty, string.Empty, remove: true, modelEntries: null, CancellationToken.None).GetAwaiter().GetResult();
+        if (agent.Id == "grok-build")
+            return WriteGrokConfig(Array.Empty<ModelEntry>(), null, string.Empty, string.Empty, remove: true, managedPorts);
         return WriteConfigSync(agent, string.Empty, string.Empty, remove: true, null, null);
     }
 
@@ -974,7 +976,7 @@ public sealed class AgentConfigurationService
     private AgentConfigApplyResult WriteGrokConfig(
         IReadOnlyList<ModelEntry> entries,
         Dictionary<string, OpenRouterContextService.ModelInfo>? modelInfoMap,
-        string apiKey, string proxyBaseUrl, bool remove)
+        string apiKey, string proxyBaseUrl, bool remove, IReadOnlyCollection<int>? managedPorts = null)
     {
         var configPath = ExpandPath(GrokConfigPath);
         var dir        = Path.GetDirectoryName(configPath)!;
@@ -988,7 +990,7 @@ public sealed class AgentConfigurationService
             File.WriteAllText(backupPath, existing, Utf8NoBom);
         }
 
-        var content = MergeGrokConfig(existing, entries, modelInfoMap, apiKey, proxyBaseUrl, remove);
+        var content = MergeGrokConfig(existing, entries, modelInfoMap, apiKey, proxyBaseUrl, remove, managedPorts);
         File.WriteAllText(configPath, content, Utf8NoBom);
 
         if (remove)
@@ -1020,7 +1022,7 @@ public sealed class AgentConfigurationService
         string existing,
         IReadOnlyList<ModelEntry> entries,
         Dictionary<string, OpenRouterContextService.ModelInfo>? modelInfoMap,
-        string apiKey, string proxyBaseUrl, bool remove)
+        string apiKey, string proxyBaseUrl, bool remove, IReadOnlyCollection<int>? managedPorts = null)
     {
         // Nothing selected and not reverting: leave the file untouched rather
         // than writing a placeholder model or wiping existing configuration.
@@ -1065,7 +1067,7 @@ public sealed class AgentConfigurationService
             {
                 var id = ExtractGrokModelId(s.Header);
                 var isReplacing = id != null && newIdSet.Contains(id);
-                if (isReplacing || IsManagedGrokModel(s.Lines))
+                if (isReplacing || IsManagedGrokModel(s.Lines, managedPorts))
                 {
                     if (id != null) removedIds.Add(id);
                     continue; // drop (replaced or Tunnel Agent-managed)
@@ -1178,16 +1180,18 @@ public sealed class AgentConfigurationService
         line.Contains("Managed by Tunnel Agent", StringComparison.Ordinal) ||
         line.Contains("End Tunnel Agent block", StringComparison.Ordinal);
 
-    private static bool IsManagedGrokModel(IEnumerable<string> lines)
+    private static bool IsManagedGrokModel(IEnumerable<string> lines, IReadOnlyCollection<int>? managedPorts)
     {
-        var name    = ExtractTomlString(lines, "name");
-        var baseUrl = ExtractTomlString(lines, "base_url");
+        var name = ExtractTomlString(lines, "name");
         if (name != null && name.Contains("(Tunnel Agent", StringComparison.OrdinalIgnoreCase))
             return true;
-        if (baseUrl != null && (baseUrl.Contains("127.0.0.1", StringComparison.Ordinal) ||
-                                baseUrl.Contains("localhost", StringComparison.OrdinalIgnoreCase)))
-            return true;
-        return false;
+
+        var baseUrl = ExtractTomlString(lines, "base_url");
+        if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri) ||
+            uri.Host is not ("127.0.0.1" or "localhost"))
+            return false;
+
+        return uri.Port is 8317 or 8327 || managedPorts?.Contains(uri.Port) == true;
     }
 
     private static string? ExtractGrokModelId(string header)

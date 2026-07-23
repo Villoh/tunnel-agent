@@ -2766,7 +2766,7 @@ SelectedSection is SectionKey.Logs;
             {
                 var def = FindDef(target.Id);
                 var r = IsAgentConfigDefaultMode
-                    ? await Task.Run(() => _agentConfiguration.Revert(def)).ConfigureAwait(false)
+                    ? await Task.Run(() => _agentConfiguration.Revert(def, new[] { CliProxyPort, PerplexityPort })).ConfigureAwait(false)
                     : await _agentConfiguration.ApplyAsync(def, AgentProxyBaseUrl, CurrentAgentApiKey, models, modelEntries).ConfigureAwait(false);
                 var displayPath = r.ConfigPath;
                 if (r.RawPreviews.Count > 0)

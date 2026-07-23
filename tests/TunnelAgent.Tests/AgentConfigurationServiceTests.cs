@@ -108,6 +108,48 @@ yolo = true
     }
 
     [Fact]
+    public void MergeGrokConfig_Remove_KeepsUnmanagedLocalhostModel()
+    {
+        var existing = """
+[models]
+default = "local-model"
+
+[model."local-model"]
+model = "local-model"
+name = "My local model"
+base_url = "http://localhost:11434/v1"
+api_backend = "chat_completions"
+""";
+
+        var content = AgentConfigurationService.MergeGrokConfig(
+            existing, entries: System.Array.Empty<ModelEntry>(),
+            modelInfoMap: null, apiKey: "", proxyBaseUrl: "", remove: true,
+            managedPorts: new[] { 9000, 9001 });
+
+        Assert.Contains("[model.\"local-model\"]", content);
+        Assert.Contains("default = \"local-model\"", content);
+    }
+
+    [Fact]
+    public void MergeGrokConfig_Remove_DropsLegacyModelOnManagedPort()
+    {
+        var existing = """
+[model."legacy-model"]
+model = "legacy-model"
+name = "Legacy model"
+base_url = "http://127.0.0.1:9000/v1"
+api_backend = "chat_completions"
+""";
+
+        var content = AgentConfigurationService.MergeGrokConfig(
+            existing, entries: System.Array.Empty<ModelEntry>(),
+            modelInfoMap: null, apiKey: "", proxyBaseUrl: "", remove: true,
+            managedPorts: new[] { 9000, 9001 });
+
+        Assert.DoesNotContain("legacy-model", content);
+    }
+
+    [Fact]
     public void AgentCatalog_ContainsOhMyPiDefinition()
     {
         var omp = Assert.Single(AgentCatalog.All, agent => agent.Id == "omp");
