@@ -233,6 +233,42 @@ providers:
     }
 
     [Fact]
+    public void MergeAmpConfig_Remove_DropsManagedUrlAndMatchingSecretOnly()
+    {
+        var settings = """
+{
+  "amp.url": "http://127.0.0.1:8317",
+  "theme": "dark"
+}
+""";
+        var secrets = """
+{
+  "apiKey@http://127.0.0.1:8317": "managed-key",
+  "apiKey@https://api.example.com": "user-key"
+}
+""";
+
+        var result = AgentConfigurationService.MergeAmpConfig(
+            settings, secrets, baseUrl: "", apiKey: "", remove: true);
+
+        Assert.DoesNotContain("amp.url", result.Settings);
+        Assert.Contains("\"theme\": \"dark\"", result.Settings);
+        Assert.DoesNotContain("managed-key", result.Secrets);
+        Assert.Contains("user-key", result.Secrets);
+    }
+
+    [Fact]
+    public void MergeAmpConfig_RemoveWithoutConfiguredUrl_KeepsSecrets()
+    {
+        var result = AgentConfigurationService.MergeAmpConfig(
+            "{ \"theme\": \"dark\" }",
+            "{ \"apiKey@https://api.example.com\": \"user-key\" }",
+            baseUrl: "", apiKey: "", remove: true);
+
+        Assert.Contains("user-key", result.Secrets);
+    }
+
+    [Fact]
     public void MergeFactoryDroidSettings_Remove_DropsManagedModelsAndKeepsUserSettings()
     {
         var existing = """

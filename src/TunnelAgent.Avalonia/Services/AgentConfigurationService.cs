@@ -334,9 +334,10 @@ public sealed class AgentConfigurationService
         foreach (var dir in new[] { Path.GetDirectoryName(settingsPath)!, Path.GetDirectoryName(secretsPath)! })
             if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
-        var settings = File.Exists(settingsPath)
-            ? JsonNode.Parse(File.ReadAllText(settingsPath))?.AsObject() ?? new JsonObject()
-            : new JsonObject();
+        var (settingsContent, secretsContent) = MergeAmpConfig(
+            File.Exists(settingsPath) ? File.ReadAllText(settingsPath) : string.Empty,
+            File.Exists(secretsPath) ? File.ReadAllText(secretsPath) : string.Empty,
+            baseUrl, apiKey, remove);
 
         string? backupPath = null;
         if (File.Exists(settingsPath))
@@ -345,30 +346,41 @@ public sealed class AgentConfigurationService
             File.Copy(settingsPath, backupPath, overwrite: false);
         }
 
-        if (remove)
-        {
-            settings.Remove("amp.url");
-        }
-        else
-        {
-            settings["amp.url"] = baseUrl;
-
-            var secrets = File.Exists(secretsPath)
-                ? JsonNode.Parse(File.ReadAllText(secretsPath))?.AsObject() ?? new JsonObject()
-                : new JsonObject();
-            secrets[$"apiKey@{baseUrl}"] = HasApiKey(apiKey) ? apiKey : "no-key";
-            File.WriteAllText(secretsPath,
-                secrets.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Utf8NoBom);
-        }
-
-        File.WriteAllText(settingsPath,
-            settings.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), Utf8NoBom);
+        File.WriteAllText(settingsPath, settingsContent, Utf8NoBom);
+        File.WriteAllText(secretsPath, secretsContent, Utf8NoBom);
 
         var msg = remove
             ? "Removed proxy config from Amp CLI settings."
             : $"Written {settingsPath} and {secretsPath}. Restart Amp CLI for changes to take effect.";
         var raw = remove ? Array.Empty<RawConfigPreview>() : new[] { new RawConfigPreview("secrets.json", secretsPath, "") };
         return AgentConfigApplyResult.Ok(msg, settingsPath, backupPath, raw);
+    }
+
+    internal static (string Settings, string Secrets) MergeAmpConfig(
+        string settingsContent, string secretsContent, string baseUrl, string apiKey, bool remove)
+    {
+        var settings = string.IsNullOrWhiteSpace(settingsContent)
+            ? new JsonObject()
+            : JsonNode.Parse(settingsContent)?.AsObject() ?? new JsonObject();
+        var secrets = string.IsNullOrWhiteSpace(secretsContent)
+            ? new JsonObject()
+            : JsonNode.Parse(secretsContent)?.AsObject() ?? new JsonObject();
+
+        if (remove)
+        {
+            var configuredUrl = settings["amp.url"]?.GetValue<string>();
+            settings.Remove("amp.url");
+            if (!string.IsNullOrEmpty(configuredUrl))
+                secrets.Remove($"apiKey@{configuredUrl}");
+        }
+        else
+        {
+            settings["amp.url"] = baseUrl;
+            secrets[$"apiKey@{baseUrl}"] = HasApiKey(apiKey) ? apiKey : "no-key";
+        }
+
+        var options = new JsonSerializerOptions { WriteIndented = true };
+        return (settings.ToJsonString(options), secrets.ToJsonString(options));
     }
 
     private static RawConfigPreview[] AmpRaw(string proxyBaseUrl, string apiKey)
