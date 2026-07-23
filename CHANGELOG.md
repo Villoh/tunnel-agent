@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.3] - 2026-07-23
 
 - **Amp CLI agent removed** (`AgentCatalog.cs`, `README.md`): Amp is no longer offered for agent configuration because CLIProxyAPI removed its Amp integration, management endpoints, and provider routing. Existing Amp files are left untouched.
 - **Agent model configuration reset button** (`AgentsView`, `MainWindowViewModel`, `AgentConfigurationService`, `Resources/Strings*.resx`): configured agents now show a reset action that opens the existing configuration overlay in reset mode and removes only Tunnel Agent-managed model/provider entries. Pi and OpenCode revert now use their async JSON merge paths instead of failing through the synchronous dispatcher.
@@ -959,7 +959,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
-[Unreleased]: https://github.com/Villoh/tunnel-agent/compare/v1.0.2...HEAD
+[1.0.3]: https://github.com/Villoh/tunnel-agent/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/Villoh/tunnel-agent/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/Villoh/tunnel-agent/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/Villoh/tunnel-agent/compare/v0.9.2...v1.0.0
