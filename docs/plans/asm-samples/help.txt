@@ -1,0 +1,54 @@
+agent-skill-manager (asm) v2.14.0 (479c3dd)
+
+Interactive TUI and CLI for managing installed skills for AI coding agents.
+
+Usage:
+  asm                        Launch interactive TUI
+  asm <command> [options]     Run a CLI command
+
+Commands:
+  list                   List all discovered skills
+  search <query>         Search skills by name/description/tool
+  inspect <skill-name>   Show detailed info for a skill
+  uninstall <skill-name> Remove a skill (with confirmation)
+  disable <target>       Disable skill(s) without uninstalling
+  enable <target>        Re-enable disabled skill(s)
+  install <source>       Install a skill from GitHub or local path
+  activate <skill>       Link a library skill into a provider
+  deactivate <skill>     Remove a library activation from a provider
+  library                Manage centrally installed library skills
+  audit                  Detect duplicate skills across tools
+  audit security <name>  Run security audit on a skill (or GitHub source)
+  export                 Export skill inventory as JSON manifest
+  import <file>          Import skills from a previously exported manifest
+  init <name>            Scaffold a new skill with SKILL.md template
+  stats                  Show aggregate skill metrics dashboard
+  stats repo <repo>      Show per-repo stats (indexed skills)
+  stats author <owner>   Show per-author stats (indexed skills)
+  stats index            Show index-wide statistics
+  link <path>            Symlink a local skill directory into an agent
+  outdated               Show which installed skills have newer versions
+  update [name...]       Update outdated skills with security re-audit
+  publish [path]         Validate, audit, and submit a skill to the registry
+  eval <skill-path>      Evaluate a skill against best practices and score it
+  eval-providers list    List registered eval providers (id, version, schema, …)
+  bundle                 Manage skill bundles (create, install, list, show, remove)
+  index                  Manage skill index (ingest, search, list)
+  doctor                 Run environment health checks and diagnostics
+  config show            Print current config
+  config path            Print config file path
+  config reset           Reset config to defaults
+  config edit            Open config in $EDITOR
+
+Global Options:
+  -h, --help             Show help for any command
+  -v, --version          Print version and exit
+  --json                 Output as JSON (list, search, inspect)
+  --machine              Stable machine-readable JSON envelope (v1)
+  -s, --scope <scope>    Filter: global, project, or both (default: both)
+  -p, --tool <name>      Filter by tool (list, search)
+  --no-color             Disable ANSI colors
+  --sort <field>         Sort by: name, version, or location (default: name)
+  --flat                 Show one row per tool instance (list, search)
+  -y, --yes              Skip confirmation prompts
+  -V, --verbose          Show debug output

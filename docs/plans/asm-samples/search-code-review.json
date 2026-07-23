@@ -1,0 +1,170 @@
+[
+  {
+    "name": "caveman-review",
+    "description": "Ultra-compressed code review comments. Cuts noise from PR feedback while preserving the actionable signal. Each comment is one line: location, problem, fix. Use when user says \"review this PR\", \"code review\", \"review the diff\", \"/review\", or invokes /caveman-review. Auto-triggers when reviewing pull requests.",
+    "version": "0.0.0",
+    "scope": "global",
+    "provider": "opencode",
+    "status": "installed"
+  },
+  {
+    "name": "code-review-and-quality",
+    "description": "Conducts multi-axis code review. Use before merging any change. Use when reviewing code written by yourself, another agent, or a human. Use when you need to assess code quality across multiple dimensions before it enters the main branch.",
+    "version": "0.0.0",
+    "repo": "addyosmani/agent-skills",
+    "installCommand": "asm install github:addyosmani/agent-skills:skills/code-review-and-quality",
+    "status": "available"
+  },
+  {
+    "name": "flutter-dart-code-review",
+    "description": "Library-agnostic Flutter/Dart code review checklist covering widget best practices, state management patterns (BLoC, Riverpod, Provider, GetX, MobX, Signals), Dart idioms, performance, accessibility, security, and clean architecture.",
+    "version": "0.0.0",
+    "repo": "affaan-m/everything-claude-code",
+    "installCommand": "asm install github:affaan-m/everything-claude-code:skills/flutter-dart-code-review",
+    "status": "available"
+  },
+  {
+    "name": "code-review-excellence",
+    "description": "This skill should be used when the user asks to review a diff or pull request, write review comments, audit code quality, establish review standards, or improve how a team performs code review.",
+    "version": "0.1.0",
+    "repo": "Galaxy-Dawn/claude-scholar",
+    "installCommand": "asm install github:Galaxy-Dawn/claude-scholar:skills/code-review-excellence",
+    "status": "available"
+  },
+  {
+    "name": "postgresql-code-review",
+    "description": "PostgreSQL-specific code review assistant focusing on PostgreSQL best practices, anti-patterns, and unique quality standards. Covers JSONB operations, array usage, custom types, schema design, function optimization, and PostgreSQL-exclusive security features like Row Level Security (RLS).",
+    "version": "0.0.0",
+    "repo": "github/awesome-copilot",
+    "installCommand": "asm install github:github/awesome-copilot:skills/postgresql-code-review",
+    "status": "available"
+  },
+  {
+    "name": "sql-code-review",
+    "description": "Universal SQL code review assistant that performs comprehensive security, maintainability, and code quality analysis across all SQL databases (MySQL, PostgreSQL, SQL Server, Oracle). Focuses on SQL injection prevention, access control, code standards, and anti-pattern detection. Complements SQL optimization prompt for complete development coverage.",
+    "version": "0.0.0",
+    "repo": "github/awesome-copilot",
+    "installCommand": "asm install github:github/awesome-copilot:skills/sql-code-review",
+    "status": "available"
+  },
+  {
+    "name": "code-review",
+    "description": "Review code changes for bugs, security vulnerabilities, and code quality issues — producing prioritized findings with specific fix suggestions. Don't use for performance tuning, writing new features from scratch, or generating test cases.",
+    "version": "1.2.0",
+    "repo": "luongnv89/skills",
+    "installCommand": "asm install github:luongnv89/skills:skills/code-review",
+    "status": "available"
+  },
+  {
+    "name": "code-review",
+    "description": "Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes — Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/PRD asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to \"review since X\".",
+    "version": "0.0.0",
+    "repo": "mattpocock/skills",
+    "installCommand": "asm install github:mattpocock/skills:skills/engineering/code-review",
+    "status": "available"
+  },
+  {
+    "name": "receiving-code-review",
+    "description": "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation",
+    "version": "0.0.0",
+    "repo": "obra/superpowers",
+    "installCommand": "asm install github:obra/superpowers:skills/receiving-code-review",
+    "status": "available"
+  },
+  {
+    "name": "code-review-ai-ai-review",
+    "description": "You are an expert AI-powered code review specialist combining automated static analysis, intelligent pattern recognition, and modern DevOps practices. Leverage AI tools (GitHub Copilot, Qodo, GPT-5, C",
+    "version": "0.0.0",
+    "repo": "sickn33/antigravity-awesome-skills",
+    "installCommand": "asm install github:sickn33/antigravity-awesome-skills:skills/code-review-ai-ai-review",
+    "status": "available"
+  },
+  {
+    "name": "code-review-and-quality",
+    "description": "Conducts multi-axis code review. Use before merging any change. Use when reviewing code written by yourself, another agent, or a human. Use when you need to assess code quality across multiple dimensions before it enters the main branch.",
+    "version": "0.0.0",
+    "repo": "sickn33/antigravity-awesome-skills",
+    "installCommand": "asm install github:sickn33/antigravity-awesome-skills:skills/code-review-and-quality",
+    "status": "available"
+  },
+  {
+    "name": "receiving-code-review",
+    "description": "Code review requires technical evaluation, not emotional performance.",
+    "version": "0.0.0",
+    "repo": "sickn33/antigravity-awesome-skills",
+    "installCommand": "asm install github:sickn33/antigravity-awesome-skills:skills/receiving-code-review",
+    "status": "available"
+  },
+  {
+    "name": "code-review-checklist",
+    "description": "Comprehensive checklist for conducting thorough code reviews covering functionality, security, performance, and maintainability",
+    "version": "0.0.0",
+    "repo": "sickn33/antigravity-awesome-skills",
+    "installCommand": "asm install github:sickn33/antigravity-awesome-skills:skills/code-review-checklist",
+    "status": "available"
+  },
+  {
+    "name": "code-review-excellence",
+    "description": "Transform code reviews from gatekeeping to knowledge sharing through constructive feedback, systematic analysis, and collaborative improvement.",
+    "version": "0.0.0",
+    "repo": "sickn33/antigravity-awesome-skills",
+    "installCommand": "asm install github:sickn33/antigravity-awesome-skills:skills/code-review-excellence",
+    "status": "available"
+  },
+  {
+    "name": "vibers-code-review",
+    "description": "Human review workflow for AI-generated GitHub projects with spec-based feedback, security review, and follow-up PRs from the Vibers service.",
+    "version": "0.0.0",
+    "repo": "sickn33/antigravity-awesome-skills",
+    "installCommand": "asm install github:sickn33/antigravity-awesome-skills:skills/vibers-code-review",
+    "status": "available"
+  },
+  {
+    "name": "requesting-code-review",
+    "description": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements",
+    "version": "0.0.0",
+    "repo": "obra/superpowers",
+    "installCommand": "asm install github:obra/superpowers:skills/requesting-code-review",
+    "status": "available"
+  },
+  {
+    "name": "requesting-code-review",
+    "description": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements",
+    "version": "0.0.0",
+    "repo": "sickn33/antigravity-awesome-skills",
+    "installCommand": "asm install github:sickn33/antigravity-awesome-skills:skills/requesting-code-review",
+    "status": "available"
+  },
+  {
+    "name": "code-reviewer",
+    "description": "Code review automation for TypeScript, JavaScript, Python, Go, Swift, Kotlin, C#, .NET, Java, C, C++, Rust, Ruby, PHP, and Dart/Flutter. Analyzes PRs for complexity and risk, checks code quality for SOLID violations and code smells, generates review reports. Use when reviewing pull requests, analyzing code quality, identifying issues, generating review checklists.",
+    "version": "0.0.0",
+    "repo": "alirezarezvani/claude-skills",
+    "installCommand": "asm install github:alirezarezvani/claude-skills:.codex/skills/code-reviewer",
+    "status": "available"
+  },
+  {
+    "name": "code-reviewer",
+    "description": "Elite code review expert specializing in modern AI-powered code",
+    "version": "0.0.0",
+    "repo": "sickn33/antigravity-awesome-skills",
+    "installCommand": "asm install github:sickn33/antigravity-awesome-skills:skills/code-reviewer",
+    "status": "available"
+  },
+  {
+    "name": "codex-review",
+    "description": "Professional code review with auto CHANGELOG generation, integrated with Codex AI. Use when you want professional code review before commits, you need automatic CHANGELOG generation, or reviewing large-scale refactoring.",
+    "version": "0.0.0",
+    "repo": "sickn33/antigravity-awesome-skills",
+    "installCommand": "asm install github:sickn33/antigravity-awesome-skills:skills/codex-review",
+    "status": "available"
+  },
+  {
+    "name": "code-tour",
+    "description": "Use when the user asks to create a CodeTour .tour file — persona-targeted, step-by-step walkthroughs that link to real files and line numbers. Trigger for: create a tour, onboarding tour, architecture tour, PR review tour, explain how X works, vibe check, RCA tour, contributor guide, or any structured code walkthrough request.",
+    "version": "0.0.0",
+    "repo": "alirezarezvani/claude-skills",
+    "installCommand": "asm install github:alirezarezvani/claude-skills:.codex/skills/code-tour",
+    "status": "available"
+  }
+]

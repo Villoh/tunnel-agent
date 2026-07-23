@@ -1,0 +1,61 @@
+
+[Step 1/8] Parsing source
+  github:luongnv89/skills#main:skills/code-review
+
+[Step 2/8] Selecting provider
+
+[Step 3/8] Selecting scope
+  scope: global (~/.agents/skills)
+
+[Step 4/8] Cloning repository
+  https://github.com/luongnv89/skills.git (auto) (ref: main) (path: skills/code-review)
+
+[Step 5/8] Scanning for skills
+  Found skill at skills/code-review
+
+[Step 6/8] Inspecting skills
+  code-review v2.1.0 [NEW]
+
+  Install preview:
+    Name:        code-review
+    Version:     2.1.0
+    Description: Review or improve code — one skill, four modes: bug/security review (default), performance, clean-code audit, slop cleanup. Pass mode:review|perf|clean|cleanup or infer. Don't use for writing features or generating tests (use test-coverage).
+    Effort:      high
+    Source:      github:luongnv89/skills#main:skills/code-review
+    Tool:    Agents (agents)
+    Scope:       Global
+    Target:      C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.agents\skills\code-review
+    Status:      [NEW]
+    Risk:        [!] High Risk
+
+  Security warnings:
+
+    [Shell commands] (13 matches)
+      docs/README.md:50 -- ```bash
+      docs/README.md:56 -- ```bash
+      references/clean-mode.md:30 -- ```bash
+      references/clean-mode.md:38 -- ```bash
+      references/cleanup-mode.md:12 -- ```bash
+      ... and 8 more
+
+    [External URLs] (3 matches)
+      docs/README.md:51 -- npx skills add https://github.com/luongnv89/skills --skill code-review
+      docs/README.md:54 -- Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):
+      references/report-template.html:43 -- background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' heigh…
+
+    [Credentials] (2 matches)
+      references/review-mode.md:267 -- const API_KEY = "sk-prod-abc123xyz";
+      references/review-mode.md:272 -- const API_KEY = process.env.API_KEY;
+
+[Step 7/8] Installing
+  Installing code-review...
+  ✓ code-review installed to C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.agents\skills\code-review
+{
+  "success": true,
+  "path": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.tmp\\asm-home\\.agents\\skills\\code-review",
+  "name": "code-review",
+  "version": "2.1.0",
+  "provider": "Agents",
+  "source": "github:luongnv89/skills#main:skills/code-review",
+  "resolutionSource": "github"
+}

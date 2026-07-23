@@ -9,6 +9,7 @@ using TunnelAgent.ViewModels;
 using TunnelAgent.Views;
 using TunnelAgent.Infrastructure.Engine;
 using TunnelAgent.Infrastructure.Engine.CliProxy;
+using TunnelAgent.Infrastructure.Skills;
 
 namespace TunnelAgent;
 
@@ -39,7 +40,9 @@ public partial class App : Application
             var perplexityAccounts = new PerplexityAccountCatalogService();
             var launchAtLogin = new LaunchAtLoginService();
             var folderOpen = new FolderOpenService();
-            var vm = new MainWindowViewModel(settings, engineRegistry, catalog, perplexityAccounts, launchAtLogin, folderOpen);
+            var asmProvision = new AsmProvisionService();
+            var asmCli = new AsmCliService(asmProvision);
+            var vm = new MainWindowViewModel(settings, engineRegistry, catalog, perplexityAccounts, launchAtLogin, folderOpen, asmProvision, asmCli);
 
             var mainWindow = new MainWindow { DataContext = vm };
             var startInTray = Array.Exists(desktop.Args ?? [], arg => string.Equals(arg, "--start-in-tray", StringComparison.OrdinalIgnoreCase));

@@ -1,0 +1,15 @@
+Usage: asm inspect <skill-name> [options]
+
+Show detailed information for a skill. The <skill-name> is the directory name.
+Shows version, description, file count, and all provider installations.
+
+Options:
+  -s, --scope <s>    Filter: global, project, or both (default: both)
+  --json             Output as JSON object
+  --no-color         Disable ANSI colors
+  -V, --verbose      Show debug output
+
+Examples:
+  asm inspect code-review           Show details for code-review
+  asm inspect code-review --json    Output as JSON
+  asm inspect code-review -s global Global installations only

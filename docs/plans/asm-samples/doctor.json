@@ -1,0 +1,75 @@
+{
+  "checks": [
+    {
+      "name": "Git available",
+      "status": "pass",
+      "message": "2.55.0.windows.3"
+    },
+    {
+      "name": "Git version",
+      "status": "pass",
+      "message": "2.55 (>= 2.20)"
+    },
+    {
+      "name": "GitHub CLI available",
+      "status": "pass",
+      "message": "2.96.0"
+    },
+    {
+      "name": "GitHub CLI authenticated",
+      "status": "pass",
+      "message": "Villoh"
+    },
+    {
+      "name": "Node.js version",
+      "status": "pass",
+      "message": "24.18.0"
+    },
+    {
+      "name": "Agent directories writable",
+      "status": "pass",
+      "message": "19/19 providers"
+    },
+    {
+      "name": "Config file valid",
+      "status": "pass",
+      "message": "OK"
+    },
+    {
+      "name": "Lock file integrity",
+      "status": "pass",
+      "message": "No lock file (first-time user)"
+    },
+    {
+      "name": "Registry reachable",
+      "status": "pass",
+      "message": "OK"
+    },
+    {
+      "name": "Installed skills intact",
+      "status": "pass",
+      "message": "No skills in lock file"
+    },
+    {
+      "name": "No orphaned skills",
+      "status": "warn",
+      "message": "25 skill(s) without lock entries",
+      "fix": "Run: asm list to review"
+    },
+    {
+      "name": "Disk space",
+      "status": "pass",
+      "message": "OK (420.5 GB free)"
+    },
+    {
+      "name": "No PATH shadowing",
+      "status": "pass",
+      "message": "single install at C:\\Users\\mikel\\.local\\pnpm\\bin\\asm"
+    }
+  ],
+  "summary": {
+    "passed": 12,
+    "warnings": 1,
+    "failures": 0
+  }
+}

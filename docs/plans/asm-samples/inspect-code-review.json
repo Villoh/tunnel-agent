@@ -1,0 +1,22 @@
+{
+  "name": "code-review",
+  "version": "2.1.0",
+  "description": "Review or improve code — one skill, four modes: bug/security review (default), performance, clean-code audit, slop cleanup. Pass mode:review|perf|clean|cleanup or infer. Don't use for writing features or generating tests (use test-coverage).",
+  "creator": "",
+  "license": "MIT",
+  "compatibility": "",
+  "allowedTools": [],
+  "effort": "high",
+  "dirName": "code-review",
+  "path": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.tmp\\asm-home\\.agents\\skills\\code-review",
+  "originalPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.tmp\\asm-home\\.agents\\skills\\code-review",
+  "location": "global-agents",
+  "scope": "global",
+  "provider": "agents",
+  "providerLabel": "Agents",
+  "isSymlink": false,
+  "symlinkTarget": null,
+  "realPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.tmp\\asm-home\\.agents\\skills\\code-review",
+  "tokenCount": 1868,
+  "warnings": []
+}

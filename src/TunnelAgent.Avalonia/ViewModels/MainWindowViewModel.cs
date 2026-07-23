@@ -14,6 +14,7 @@ using TunnelAgent.Core.Engine;
 using TunnelAgent.Infrastructure.Engine;
 using TunnelAgent.Infrastructure.Engine.CliProxy;
 using TunnelAgent.Infrastructure.Engine.Perplexity;
+using TunnelAgent.Infrastructure.Skills;
 
 namespace TunnelAgent.ViewModels;
 
@@ -71,6 +72,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     private readonly IAgentDetectionService _agentDetection = new AgentDetectionService();
     private readonly AgentConfigurationService _agentConfiguration = new AgentConfigurationService();
     private bool _agentsDetectedOnce;
+    private bool _skillsLoadedOnce;
     private bool _quotaScannedOnce;
     private bool _quotaScanInProgress;
 
@@ -87,6 +89,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     public LogsViewModel Logs { get; } = new();
     public DashboardViewModel Dashboard { get; } = new();
     public FallbackViewModel Fallback { get; }
+    public SkillsViewModel Skills { get; }
     private bool _logsInitialLoadPending;
     private bool _isWindowVisibleForLogs = true;
     private bool _managementKeyRepairAttempted;
@@ -353,7 +356,7 @@ SelectedSection is SectionKey.Logs;
     public ObservableCollection<SelectableModelViewModel> CustomProviderModels { get; } = new();
     private bool _suppressCustomProviderModelState;
 
-    public MainWindowViewModel() : this(new SettingsService(), null!, null!, null!, null!, null!) { }
+    public MainWindowViewModel() : this(new SettingsService(), null!, null!, null!, null!, null!, null, null) { }
 
     public MainWindowViewModel(
         SettingsService settings,
@@ -361,7 +364,9 @@ SelectedSection is SectionKey.Logs;
         ProviderCatalogService catalog,
         PerplexityAccountCatalogService perplexityAccounts,
         ILaunchAtLoginService? launchAtLogin = null,
-        IFolderOpenService? folderOpen = null)
+        IFolderOpenService? folderOpen = null,
+        AsmProvisionService? asmProvision = null,
+        AsmCliService? asmCli = null)
     {
         _localization = LocalizationService.Instance;
         _settings = settings;
@@ -380,6 +385,8 @@ SelectedSection is SectionKey.Logs;
         _perplexityAccounts = perplexityAccounts ?? new PerplexityAccountCatalogService();
         _launchAtLogin = launchAtLogin ?? new LaunchAtLoginService();
         _folderOpen = folderOpen ?? new FolderOpenService();
+        var provision = asmProvision ?? new AsmProvisionService();
+        Skills = new SkillsViewModel(_settings, provision, asmCli ?? new AsmCliService(provision), _folderOpen);
 
         CliProxyModelGroups = new ObservableCollection<AvailableModelGroupViewModel>();
         PerplexityModelGroups = new ObservableCollection<AvailableModelGroupViewModel>();
@@ -878,6 +885,11 @@ SelectedSection is SectionKey.Logs;
         else if (value == SectionKey.Agents && !_agentsDetectedOnce)
         {
             _ = DetectAgentsAsync();
+        }
+        else if (value == SectionKey.Skills && !_skillsLoadedOnce)
+        {
+            _skillsLoadedOnce = true;
+            _ = Skills.EnsureLoadedAsync();
         }
 
         // Drive FocusedConfigEngineId from config tab so engine commands/properties resolve correctly.
@@ -2565,6 +2577,9 @@ SelectedSection is SectionKey.Logs;
 
     [RelayCommand]
     private void SelectAgents() => SelectedSection = SectionKey.Agents;
+
+    [RelayCommand]
+    private void SelectSkills() => SelectedSection = SectionKey.Skills;
 
     [RelayCommand]
     private void SelectFallback() => SelectedSection = SectionKey.Fallback;

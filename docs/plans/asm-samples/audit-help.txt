@@ -1,0 +1,27 @@
+Usage: asm audit [subcommand] [options]
+
+Detect duplicate skills or run security audits on installed/remote skills.
+
+Subcommands:
+  duplicates             Find duplicate skills (default)
+  security <name|source> Run security audit on an installed skill or GitHub source
+
+Options:
+  --json             Output as JSON
+  --machine          Output in stable machine-readable v1 envelope format
+  -y, --yes          Auto-remove duplicates, keeping one instance per group
+  -s, --scope <s>    Filter: global, project, or both (default: both)
+  --no-color         Disable ANSI colors
+  -V, --verbose      Show debug output
+
+Examples:
+  asm audit                                    Find duplicates
+  asm audit -y                                 Auto-remove duplicates
+  asm audit --json                             Output as JSON
+  asm audit security code-review               Audit an installed skill
+  asm audit security github:user/repo          Audit a remote skill before installing
+  asm audit security --all                     Audit all installed skills
+  asm audit security code-review --json        Output audit as JSON
+  asm audit security code-review --machine     Machine-readable v1 envelope output
+  asm audit security https://github.com/user/skills/tree/main/skills/agent-config
+                                               Audit a skill from a subfolder URL

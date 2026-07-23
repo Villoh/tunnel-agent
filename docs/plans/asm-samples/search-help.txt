@@ -1,0 +1,24 @@
+Usage: asm search <query> [options]
+
+Search both installed skills and the skill index. Results show installation
+status and include copy-paste install commands for available skills.
+
+Options:
+  --sort <field>       Sort by: name, version, or location (default: name)
+  -s, --scope <s>      Filter: global, project, or both (default: both)
+  -p, --tool <p>       Filter by tool (claude, codex, openclaw, agents)
+  --installed          Show only installed skills
+  --available          Show only available (not installed) skills
+  --flat               Show one row per tool instance (ungrouped)
+  --json               Output as JSON array
+  --machine            Output in stable machine-readable v1 envelope format
+  --no-color           Disable ANSI colors
+  -V, --verbose        Show debug output
+
+Examples:
+  asm search code                   Search installed and available skills
+  asm search review -p claude       Search within Claude Code only
+  asm search "test" --installed     Search installed skills only
+  asm search "test" --available     Search available skills only
+  asm search openspec --json        Output matches as JSON
+  asm search openspec --machine     Machine-readable v1 envelope output

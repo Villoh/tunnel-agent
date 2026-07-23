@@ -1,0 +1,27 @@
+{
+  "name": "ponytail",
+  "version": "0.0.0",
+  "description": "Lazy senior dev mode for any coding task (write, refactor, fix, review): YAGNI, stdlib first, no unrequested abstractions. Not for non-coding requests.",
+  "creator": "",
+  "license": "MIT",
+  "compatibility": "",
+  "allowedTools": [],
+  "dirName": "ponytail",
+  "path": "C:\\Users\\mikel\\.claude\\plugins\\marketplaces\\ponytail\\.openclaw\\skills\\ponytail",
+  "originalPath": "C:\\Users\\mikel\\.claude\\plugins\\marketplaces\\ponytail\\.openclaw\\skills\\ponytail",
+  "location": "global-plugin-ponytail",
+  "scope": "global",
+  "provider": "plugin",
+  "providerLabel": "Plugin (ponytail)",
+  "isSymlink": false,
+  "symlinkTarget": null,
+  "realPath": "C:\\Users\\mikel\\.claude\\plugins\\marketplaces\\ponytail\\.openclaw\\skills\\ponytail",
+  "marketplace": "ponytail",
+  "tokenCount": 1891,
+  "warnings": [
+    {
+      "category": "missing-version",
+      "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+    }
+  ]
+}

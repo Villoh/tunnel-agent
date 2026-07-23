@@ -1,0 +1,81 @@
+Usage: asm install <source> [options]
+
+Install a skill from a GitHub repository, the curated registry, or a local path.
+
+Cross-tool linking (issue #322):
+  If the skill is already installed in another tool, ASM offers two options:
+    1. Reinstall — download fresh from the index (gets latest version)
+    2. Link — symlink from the existing install (no download, shares files)
+  Skills installed from a local folder always reinstall (link does not apply).
+
+Source Format:
+  code-review                    Install by name from the curated registry
+  author/code-review             Install a scoped name (author/name) from registry
+  github:owner/repo              Install from default branch
+  github:owner/repo#ref          Install from specific branch or tag
+  github:owner/repo#ref:path     Install from a subfolder on a specific branch
+  https://github.com/owner/repo  Install via HTTPS URL
+  https://github.com/owner/repo/tree/branch/path/to/skill
+                                 Install from a subfolder URL (auto-detects branch)
+  /absolute/path/to/skill        Install from a local folder (absolute path)
+  ./relative/path/to/skill       Install from a local folder (relative path)
+  ~/path/to/skill                Install from a local folder (home-relative path)
+
+Options:
+  -p, --tool <name>      Target tool (claude, codex, openclaw, agents, all)
+                         Use "all" to install to all tools (shared + symlinks)
+  -s, --scope <scope>    Installation scope: global or project (default: prompt)
+                         global installs to ~/.claude/skills/ (available everywhere)
+                         project installs to .claude/skills/ (this project only)
+  --name <name>          Override skill directory name
+  --path <subdir>        Install skill from a subdirectory of the repo
+  --skill <name>         Alias for --path (Vercel skills CLI compatibility)
+  --all                  Install all skills found in the repo
+  --library              Install into asm's neutral local library
+  -m, --method <method>  Install method: default or vercel (default: default)
+                         vercel delegates to npx skills add for tracking
+  -t, --transport <mode> Transport: https, ssh, or auto (default: auto)
+                         auto tries HTTPS first, falls back to SSH on auth error
+  --no-cache             Force fresh registry fetch (bypass 1-hour TTL cache)
+  -f, --force            Overwrite if skill already exists
+  -y, --yes              Skip confirmation prompt
+  --json                 Output result as JSON
+  --machine              Machine-readable output (includes resolution source)
+  --no-color             Disable ANSI colors
+  -V, --verbose          Show debug output
+
+Registry (bare name):
+  asm install code-review                  (resolve from registry)
+  asm install luongnv89/code-review        (scoped name, no ambiguity)
+  asm install code-review --no-cache       (force fresh registry fetch)
+
+Local folder:
+  asm install ./my-skill                   (relative path)
+  asm install /home/user/skills/my-skill   (absolute path)
+  asm install ~/skills/my-skill            (home-relative path)
+  asm install ../other-project/skill       (parent-relative path)
+  asm install ./skills-dir --all           (all skills in directory)
+  asm install ./skills-dir --library --all -y (install to local library)
+
+Single-skill repo:
+  asm install github:user/my-skill
+  asm install github:user/my-skill#v1.0.0 -p claude
+  asm install https://github.com/user/my-skill
+  asm install github:user/my-skill -p all    (install to all tools)
+  asm install github:user/private-skill -t ssh  (clone via SSH)
+
+Multi-skill repo:
+  asm install github:user/skills --path skills/code-review
+  asm install github:user/skills --all -p claude -y
+  asm install github:user/skills --all -p all -y  (all skills, all tools)
+  asm install https://github.com/user/skills --all
+  asm install github:user/skills              (interactive picker)
+
+Subfolder URL:
+  asm install https://github.com/user/skills/tree/main/skills/agent-config
+  asm install github:user/skills#main:skills/agent-config
+
+Vercel skills CLI:
+  asm install github:user/skills --method vercel --skill my-skill
+  asm install https://github.com/user/skills -m vercel --skill my-skill -y
+  Delegates to npx skills add for Vercel tracking, then registers in asm

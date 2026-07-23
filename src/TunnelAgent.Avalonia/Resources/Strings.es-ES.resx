@@ -1537,4 +1537,97 @@ Completa el inicio de sesión en el navegador. La app detectará automáticament
   <data name="OAuth_Status_CopyUrl" xml:space="preserve">
     <value>Copiar URL</value>
   </data>
+  <data name="Sidebar_Skills" xml:space="preserve">
+    <value>Habilidades</value>
+  </data>
+  <data name="Skills_Title" xml:space="preserve">
+    <value>Habilidades</value>
+  </data>
+  <data name="Skills_Subtitle" xml:space="preserve">
+    <value>Busca, audita, instala y elimina habilidades de agente para Pi.</value>
+  </data>
+  <data name="Skills_OpenFolder" xml:space="preserve">
+    <value>Abrir carpeta de habilidades</value>
+  </data>
+  <data name="Skills_PrerequisitesTitle" xml:space="preserve">
+    <value>Se requieren Node.js y npm</value>
+  </data>
+  <data name="Skills_DownloadNode" xml:space="preserve">
+    <value>Abrir descarga de Node.js</value>
+  </data>
+  <data name="Skills_Recheck" xml:space="preserve">
+    <value>Volver a comprobar</value>
+  </data>
+  <data name="Skills_AsmRequiredTitle" xml:space="preserve">
+    <value>Instalar motor de habilidades</value>
+  </data>
+  <data name="Skills_AsmRequiredBody" xml:space="preserve">
+    <value>ASM se instalará solo en los datos locales de Tunnel Agent. No se modifican paquetes npm globales.</value>
+  </data>
+  <data name="Skills_InstallAsm" xml:space="preserve">
+    <value>Instalar ASM</value>
+  </data>
+  <data name="Skills_Refresh" xml:space="preserve">
+    <value>Actualizar</value>
+  </data>
+  <data name="Skills_UpdateAvailable" xml:space="preserve">
+    <value>Actualización disponible:</value>
+  </data>
+  <data name="Skills_UpdateAsm" xml:space="preserve">
+    <value>Actualizar ASM</value>
+  </data>
+  <data name="Skills_SearchPlaceholder" xml:space="preserve">
+    <value>Buscar habilidades</value>
+  </data>
+  <data name="Skills_Search" xml:space="preserve">
+    <value>Buscar</value>
+  </data>
+  <data name="Skills_SearchResults" xml:space="preserve">
+    <value>Resultados de búsqueda</value>
+  </data>
+  <data name="Skills_Inspect" xml:space="preserve">
+    <value>Inspeccionar</value>
+  </data>
+  <data name="Skills_Install" xml:space="preserve">
+    <value>Instalar</value>
+  </data>
+  <data name="Skills_Installed" xml:space="preserve">
+    <value>Habilidades instaladas</value>
+  </data>
+  <data name="Skills_NoneInstalled" xml:space="preserve">
+    <value>No hay habilidades instaladas en este ámbito.</value>
+  </data>
+  <data name="Skills_Audit" xml:space="preserve">
+    <value>Auditoría de seguridad</value>
+  </data>
+  <data name="Skills_Remove" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="Skills_AuditTitle" xml:space="preserve">
+    <value>Auditoría de seguridad antes de instalar</value>
+  </data>
+  <data name="Skills_AuditWarning" xml:space="preserve">
+    <value>Las habilidades pueden indicar a los agentes que ejecuten código. Revisa la fuente y la auditoría, y confirma explícitamente.</value>
+  </data>
+  <data name="Skills_Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="Skills_ConfirmInstall" xml:space="preserve">
+    <value>Instalar habilidad</value>
+  </data>
+  <data name="Skills_Files" xml:space="preserve">
+    <value>Archivos</value>
+  </data>
+  <data name="Skills_BundlePlaceholder" xml:space="preserve">
+    <value>Bundle name</value>
+  </data>
+  <data name="Skills_InstallBundle" xml:space="preserve">
+    <value>Install bundle</value>
+  </data>
+  <data name="Skills_RemoveDuplicates" xml:space="preserve">
+    <value>Remove duplicates</value>
+  </data>
+  <data name="Skills_DetailLabel" xml:space="preserve">
+    <value>SKILL.md / audit</value>
+  </data>
 </root>

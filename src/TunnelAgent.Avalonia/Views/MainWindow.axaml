@@ -259,6 +259,22 @@
                             </Button>
 
                             <Button Classes="side"
+                                    Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Skills}"
+                                    Command="{Binding SelectSkillsCommand}">
+                                <Grid ColumnDefinitions="20,*,Auto">
+                                    <lucide:PackIconLucide Grid.Column="0" Kind="Sparkles" Width="15" Height="15"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    <Panel Grid.Column="1" Grid.ColumnSpan="2" Opacity="{Binding SidebarContentOpacity}">
+                                        <Panel.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="0:0:0.18" Easing="CubicEaseInOut" /></Transitions></Panel.Transitions>
+                                        <TextBlock Text="{l:Loc Sidebar_Skills}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0" IsVisible="{Binding !IsSidebarCollapsed}"/>
+                                        <Border HorizontalAlignment="Right" CornerRadius="999" Background="#14000000" Padding="6,1" IsVisible="{Binding !IsSidebarCollapsed}">
+                                            <TextBlock Text="{Binding Skills.InstalledCount}" FontSize="11" />
+                                        </Border>
+                                    </Panel>
+                                </Grid>
+                            </Button>
+
+                            <Button Classes="side"
                                     Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Logs}"
                                     Command="{Binding SelectLogsCommand}">
                                 <Grid ColumnDefinitions="20,*">

@@ -1,0 +1,121 @@
+{
+  "scannedAt": "2026-07-23T16:11:06.145Z",
+  "skillName": "code-review",
+  "skillPath": "C:\\Users\\mikel\\AppData\\Local\\Temp\\asm-install-MEC1op\\skills\\code-review",
+  "source": {
+    "owner": "luongnv89",
+    "repo": "skills",
+    "profileUrl": "https://github.com/luongnv89",
+    "reposUrl": "https://github.com/luongnv89?tab=repositories",
+    "isOrganization": false,
+    "publicRepos": 136,
+    "accountAge": "13y 6m",
+    "fetchError": null
+  },
+  "codeScans": [
+    {
+      "category": "Embedded credentials",
+      "description": "Hardcoded secrets, API keys, tokens, or passwords",
+      "matches": [
+        {
+          "file": "references/review-mode.md",
+          "line": 267,
+          "match": "const API_KEY = \"sk-prod-abc123xyz\";",
+          "severity": "critical"
+        },
+        {
+          "file": "references/review-mode.md",
+          "line": 272,
+          "match": "const API_KEY = process.env.API_KEY;",
+          "severity": "critical"
+        }
+      ]
+    },
+    {
+      "category": "Dynamic code execution",
+      "description": "Patterns that execute dynamically constructed code at runtime",
+      "matches": [
+        {
+          "file": "agents/unused-code-killer.md",
+          "line": 40,
+          "match": "- TS/JS: `require(variable)`, `import(variable)`, property access on a dynamic string, `Object.keys(module)`",
+          "severity": "warning"
+        }
+      ]
+    },
+    {
+      "category": "External URLs",
+      "description": "Hardcoded URLs that may indicate data exfiltration or remote payload loading",
+      "matches": [
+        {
+          "file": "docs/README.md",
+          "line": 54,
+          "match": "Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):",
+          "severity": "warning"
+        },
+        {
+          "file": "references/report-template.html",
+          "line": 43,
+          "match": "background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter ...",
+          "severity": "warning"
+        }
+      ]
+    },
+    {
+      "category": "Environment variable access",
+      "description": "Reading environment variables which may contain secrets or configuration",
+      "matches": [
+        {
+          "file": "references/review-mode.md",
+          "line": 272,
+          "match": "const API_KEY = process.env.API_KEY;",
+          "severity": "info"
+        }
+      ]
+    }
+  ],
+  "permissions": [
+    {
+      "type": "code-execution",
+      "evidence": [
+        {
+          "file": "agents/unused-code-killer.md",
+          "line": 40,
+          "match": "- TS/JS: `require(variable)`, `import(variable)`, property access on a dynamic string, `Object.keys(module)`"
+        }
+      ],
+      "reason": "Skill dynamically constructs and executes code. This can bypass static analysis."
+    },
+    {
+      "type": "network",
+      "evidence": [
+        {
+          "file": "docs/README.md",
+          "line": 54,
+          "match": "Or via [agent-skill-manager (asm)](https://www.npmjs.com/package/agent-skill-manager):"
+        },
+        {
+          "file": "references/report-template.html",
+          "line": 43,
+          "match": "background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter ..."
+        }
+      ],
+      "reason": "Skill makes network requests or downloads external content. Data may be sent to remote servers."
+    },
+    {
+      "type": "environment",
+      "evidence": [
+        {
+          "file": "references/review-mode.md",
+          "line": 272,
+          "match": "const API_KEY = process.env.API_KEY;"
+        }
+      ],
+      "reason": "Skill reads environment variables, which may contain secrets or API keys."
+    }
+  ],
+  "totalFiles": 24,
+  "totalLines": 3855,
+  "verdict": "dangerous",
+  "verdictReason": "Skill has dynamic code execution and network access -- potential remote code execution risk."
+}

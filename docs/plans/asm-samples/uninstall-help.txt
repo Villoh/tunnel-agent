@@ -1,0 +1,17 @@
+Usage: asm uninstall <skill-name> [options]
+
+Remove a skill and its associated rule files. Shows a removal plan
+before proceeding and asks for confirmation.
+
+Options:
+  -y, --yes          Skip confirmation prompt
+  -s, --scope <s>    Filter: global, project, or both (default: both)
+  -p, --tool <name>  Filter by tool/provider (e.g., claude, codex)
+  --no-color         Disable ANSI colors
+  -V, --verbose      Show debug output
+
+Examples:
+  asm uninstall code-review              Remove with confirmation
+  asm uninstall code-review -y           Remove without confirmation
+  asm uninstall code-review -s project   Remove project copy only
+  asm uninstall code-review -p claude    Remove from Claude only

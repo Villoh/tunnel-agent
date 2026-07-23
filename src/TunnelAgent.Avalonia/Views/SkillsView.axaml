@@ -1,0 +1,103 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TunnelAgent.ViewModels"
+             xmlns:cv="using:TunnelAgent.Converters"
+             xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+             xmlns:l="using:TunnelAgent.Services"
+             x:Class="TunnelAgent.Views.SkillsView"
+             x:DataType="vm:MainWindowViewModel">
+  <UserControl.Resources>
+    <cv:StringNotEmptyConverter x:Key="StringNotEmpty" />
+    <cv:InvertBoolConverter x:Key="InvertBool" />
+  </UserControl.Resources>
+  <Grid>
+    <StackPanel Spacing="14" DataContext="{Binding Skills}">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel>
+          <TextBlock Classes="page-title" Text="{l:Loc Skills_Title}" />
+          <TextBlock Classes="page-sub" Text="{l:Loc Skills_Subtitle}" />
+        </StackPanel>
+        <Button Grid.Column="1" Classes="icon" Command="{Binding OpenSkillsFolderCommand}" ToolTip.Tip="{l:Loc Skills_OpenFolder}">
+          <lucide:PackIconLucide Kind="FolderOpen" Width="15" Height="15" />
+        </Button>
+      </Grid>
+
+      <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+
+      <Border Classes="card" IsVisible="{Binding PrerequisitesAvailable, Converter={StaticResource InvertBool}}">
+        <StackPanel Margin="16" Spacing="10">
+          <TextBlock FontWeight="SemiBold" Text="{l:Loc Skills_PrerequisitesTitle}" />
+          <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" />
+          <TextBlock Foreground="{DynamicResource FgMutedBrush}"><Run Text="Node: "/><Run Text="{Binding NodeVersion}"/><Run Text=" · npm: "/><Run Text="{Binding NpmVersion}"/></TextBlock>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Classes="primary" Command="{Binding OpenNodeDownloadCommand}" Content="{l:Loc Skills_DownloadNode}" />
+            <Button Command="{Binding RecheckPrerequisitesCommand}" Content="{l:Loc Skills_Recheck}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card" IsVisible="{Binding CanInstallAsm}">
+        <StackPanel Margin="16" Spacing="10">
+          <TextBlock FontWeight="SemiBold" Text="{l:Loc Skills_AsmRequiredTitle}" />
+          <TextBlock Text="{l:Loc Skills_AsmRequiredBody}" TextWrapping="Wrap" />
+          <Button Classes="primary" HorizontalAlignment="Left" Command="{Binding InstallAsmCommand}" Content="{l:Loc Skills_InstallAsm}" />
+        </StackPanel>
+      </Border>
+
+      <StackPanel IsVisible="{Binding IsAsmReady}" Spacing="14">
+        <Border Classes="card">
+          <Grid Margin="14" ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto">
+            <TextBlock FontWeight="SemiBold"><Run Text="ASM "/><Run Text="{Binding AsmInstalledVersion}"/></TextBlock>
+            <ComboBox Grid.Column="1" Width="110" ItemsSource="{Binding Scopes}" SelectedItem="{Binding SelectedScope}" />
+            <Button Grid.Column="2" Margin="8,0,0,0" Classes="icon" Command="{Binding RefreshCommand}" ToolTip.Tip="{l:Loc Skills_Refresh}"><lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14" /></Button>
+            <StackPanel Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="8" Margin="0,10,0,0" IsVisible="{Binding UpdateAvailable}">
+              <TextBlock VerticalAlignment="Center"><Run Text="{l:Loc Skills_UpdateAvailable}"/><Run Text=" "/><Run Text="{Binding AsmLatestVersion}"/></TextBlock>
+              <Button Command="{Binding UpdateAsmCommand}" Content="{l:Loc Skills_UpdateAsm}" />
+            </StackPanel>
+          </Grid>
+        </Border>
+
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBox Watermark="{l:Loc Skills_SearchPlaceholder}" Text="{Binding SearchText}" KeyDown="OnSearchKeyDown" />
+          <Button Grid.Column="1" Margin="8,0,0,0" Classes="primary" Command="{Binding SearchCommand}" Content="{l:Loc Skills_Search}" />
+        </Grid>
+        <Button HorizontalAlignment="Left" Command="{Binding RemoveDuplicatesCommand}" Content="{l:Loc Skills_RemoveDuplicates}" />
+
+        <TextBlock Classes="section-label" Text="{l:Loc Skills_SearchResults}" IsVisible="{Binding HasSearchResults}" />
+        <ItemsControl ItemsSource="{Binding SearchResults}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:SkillViewModel">
+              <Border Classes="card" Margin="0,0,0,6"><Grid Margin="14,10" ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="2"><StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="row-label" Text="{Binding Name}"/><TextBlock Foreground="{DynamicResource FgMutedBrush}" Text="{Binding Version}"/></StackPanel><TextBlock Classes="row-desc" Text="{Binding Description}" TextWrapping="Wrap" MaxLines="2"/><TextBlock FontFamily="Cascadia Mono,Consolas,monospace" FontSize="10" Foreground="{DynamicResource FgMutedBrush}" Text="{Binding Source}"/></StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center"><Button Command="{Binding $parent[ItemsControl].DataContext.InspectCommand}" CommandParameter="{Binding}" Content="{l:Loc Skills_Inspect}"/><Button Classes="primary" Command="{Binding $parent[ItemsControl].DataContext.RequestInstallCommand}" CommandParameter="{Binding}" Content="{l:Loc Skills_Install}" IsVisible="{Binding Installed, Converter={StaticResource InvertBool}}"/></StackPanel>
+              </Grid></Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <TextBlock Classes="section-label" Text="{l:Loc Skills_Installed}" />
+        <TextBlock Text="{l:Loc Skills_NoneInstalled}" Foreground="{DynamicResource FgMutedBrush}" IsVisible="{Binding HasInstalled, Converter={StaticResource InvertBool}}" />
+        <ItemsControl ItemsSource="{Binding Installed}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:SkillViewModel">
+              <Border Classes="card" Margin="0,0,0,6"><Grid Margin="14,10" ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="2"><StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Classes="row-label" Text="{Binding Name}"/><TextBlock Foreground="{DynamicResource FgMutedBrush}" Text="{Binding Version}"/><TextBlock Foreground="#E2A52E" Text="{Binding AuditVerdict}"/></StackPanel><TextBlock Classes="row-desc" Text="{Binding Description}" TextWrapping="Wrap" MaxLines="2"/><TextBlock FontFamily="Cascadia Mono,Consolas,monospace" FontSize="10" Foreground="{DynamicResource FgMutedBrush}" Text="{Binding Path}"/></StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center"><Button Classes="icon" Command="{Binding $parent[ItemsControl].DataContext.OpenSkillFolderCommand}" CommandParameter="{Binding}" ToolTip.Tip="{l:Loc Skills_OpenFolder}"><lucide:PackIconLucide Kind="FolderOpen" Width="13" Height="13"/></Button><Button Command="{Binding $parent[ItemsControl].DataContext.InspectCommand}" CommandParameter="{Binding}" Content="{l:Loc Skills_Inspect}"/><Button Command="{Binding $parent[ItemsControl].DataContext.AuditCommand}" CommandParameter="{Binding}" Content="{l:Loc Skills_Audit}"/><Button Command="{Binding $parent[ItemsControl].DataContext.UninstallCommand}" CommandParameter="{Binding}" Content="{l:Loc Skills_Remove}"/></StackPanel>
+              </Grid></Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Border Classes="card" IsVisible="{Binding SelectedSkill}"><StackPanel Margin="14" Spacing="8"><TextBlock FontSize="16" FontWeight="SemiBold" Text="{Binding SelectedSkill.Name}"/><TextBlock Classes="section-label" Text="{l:Loc Skills_DetailLabel}"/><TextBox Text="{Binding SkillDetailText}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" MaxHeight="360"/></StackPanel></Border>
+      </StackPanel>
+
+      <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" IsVisible="{Binding StatusMessage, Converter={StaticResource StringNotEmpty}}" />
+    </StackPanel>
+
+    <Border Background="#A0000000" DataContext="{Binding Skills}" IsVisible="{Binding ShowAuditConfirmation}" ZIndex="50">
+      <Border Classes="card" Width="560" MaxHeight="500" Padding="20" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel Spacing="12"><TextBlock FontSize="18" FontWeight="SemiBold" Text="{l:Loc Skills_AuditTitle}"/><TextBlock FontWeight="SemiBold" Text="{Binding AuditVerdict}"/><TextBlock Text="{Binding AuditSummary}" TextWrapping="Wrap"/><TextBlock Text="{l:Loc Skills_AuditWarning}" TextWrapping="Wrap"/><StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8"><Button Command="{Binding CancelInstallCommand}" Content="{l:Loc Skills_Cancel}"/><Button Classes="primary" Command="{Binding ConfirmInstallCommand}" Content="{l:Loc Skills_ConfirmInstall}"/></StackPanel></StackPanel>
+      </Border>
+    </Border>
+  </Grid>
+</UserControl>

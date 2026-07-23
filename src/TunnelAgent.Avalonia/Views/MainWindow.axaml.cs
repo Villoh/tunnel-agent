@@ -195,6 +195,7 @@ public partial class MainWindow : Window
         SectionKey.Quota => new QuotaView(),
         SectionKey.Fallback => new FallbackView(),
         SectionKey.Agents => new AgentsView(),
+        SectionKey.Skills => new SkillsView(),
         SectionKey.Logs => new LogsView(),
         SectionKey.Configuration => new ConfigurationView(),
         _ => new ProvidersView()

@@ -1,0 +1,28 @@
+Removal plan:
+  Scope: global
+  Tool: agents
+
+  • ~\.agents\skills\code-review (directory)
+Removed directory: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.agents\skills\code-review
+Removed empty parent directory: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.agents\skills
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.claude\AGENTS.md
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.codex\AGENTS.md
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.config\opencode\AGENTS.md
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.pi\AGENTS.md
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.hermes\AGENTS.md
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.openclaw\AGENTS.md
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.agents\AGENTS.md
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.cursor\AGENTS.md
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.github\AGENTS.md
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.windsurf\AGENTS.md
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.antigravity\AGENTS.md
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.gemini\AGENTS.md
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\Documents\Cline\AGENTS.md
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.roo\AGENTS.md
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.continue\AGENTS.md
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.aider\AGENTS.md
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.config\zed\AGENTS.md
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.augment\AGENTS.md
+Cleaned AGENTS.md block in: C:\Users\mikel\development\personal\projects\tunnel-agent\repositories\tunnel-agent\.tmp\asm-home\.amp\AGENTS.md
+
+Done.

@@ -60,6 +60,13 @@ public sealed class PerplexityAccountSettings
     public bool IsDefault { get; set; }
 }
 
+public sealed class SkillsSettings
+{
+    public bool AutoCheckForUpdates { get; set; } = true;
+    public string PreferredVersion { get; set; } = "2.14.0";
+    public string Scope { get; set; } = "global";
+}
+
 public sealed class AppSettings
 {
     public int Port { get; set; }
@@ -82,6 +89,7 @@ public sealed class AppSettings
     public int LogsRefreshIntervalSeconds { get; set; } = 5;
     public List<EngineRuntimeSettings> Engines { get; set; } = [];
     public List<PerplexityAccountSettings> PerplexityAccounts { get; set; } = [];
+    public SkillsSettings Skills { get; set; } = new();
 
 
     /// <summary>

@@ -1,0 +1,616 @@
+[
+  {
+    "name": "archify",
+    "version": "2.11",
+    "description": "Create professional architecture, workflow, sequence, data-flow, and lifecycle/state diagrams as standalone HTML files with SVG graphics, a built-in dark/light theme toggle, and one-click export to PNG / JPEG / WebP / SVG. Accepts plain-language descriptions or pasted Mermaid code (flowchart, sequenceDiagram, stateDiagram) and lays the diagram out from scratch in archify style. Use when the user asks for system architecture diagrams, infrastructure diagrams, cloud architecture visualizations, security diagrams, network topology, technical workflows, approval flows, runbooks, CI/CD flows, process diagrams, API call sequences, request lifecycles, data pipelines, ETL/ELT maps, PII boundaries, data lineage, state machines, lifecycle diagrams, status transitions, or asks to convert/beautify a Mermaid diagram.",
+    "creator": "",
+    "license": "MIT",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "archify",
+    "path": "C:\\Users\\mikel\\.agents\\skills\\archify",
+    "originalPath": "C:\\Users\\mikel\\.agents\\skills\\archify",
+    "location": "global-agents",
+    "scope": "global",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\.local\\share\\chezmoi\\dot_agents\\skills\\archify",
+    "tokenCount": 5707,
+    "warnings": []
+  },
+  {
+    "name": "avalonia",
+    "version": "2.0",
+    "description": "Expert guidance for developing cross-platform desktop applications with Avalonia UI framework. Use when building, debugging, or optimizing Avalonia apps including MVVM architecture, XAML design, data binding, styling, theming, custom controls, and cross-platform deployment for Windows, macOS, Linux, iOS, Android, and WebAssembly.",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "avalonia",
+    "path": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\avalonia",
+    "originalPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\avalonia",
+    "location": "project-agents",
+    "scope": "project",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\avalonia",
+    "tokenCount": 2500,
+    "warnings": []
+  },
+  {
+    "name": "csharp-async",
+    "version": "0.0.0",
+    "description": "Get best practices for C# async programming",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "csharp-async",
+    "path": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\csharp-async",
+    "originalPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\csharp-async",
+    "location": "project-agents",
+    "scope": "project",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\csharp-async",
+    "tokenCount": 492,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "csharp-docs",
+    "version": "0.0.0",
+    "description": "Ensure that C# types are documented with XML comments and follow best practices for documentation.",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "csharp-docs",
+    "path": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\csharp-docs",
+    "originalPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\csharp-docs",
+    "location": "project-agents",
+    "scope": "project",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\csharp-docs",
+    "tokenCount": 1274,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "csharp-mstest",
+    "version": "0.0.0",
+    "description": "Get best practices for MSTest 3.x/4.x unit testing, including modern assertion APIs and data-driven tests",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "csharp-mstest",
+    "path": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\csharp-mstest",
+    "originalPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\csharp-mstest",
+    "location": "project-agents",
+    "scope": "project",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\csharp-mstest",
+    "tokenCount": 2934,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "csharp-nunit",
+    "version": "0.0.0",
+    "description": "Get best practices for NUnit unit testing, including data-driven tests",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "csharp-nunit",
+    "path": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\csharp-nunit",
+    "originalPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\csharp-nunit",
+    "location": "project-agents",
+    "scope": "project",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\csharp-nunit",
+    "tokenCount": 747,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "csharp-tunit",
+    "version": "0.0.0",
+    "description": "Get best practices for TUnit unit testing, including data-driven tests",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "csharp-tunit",
+    "path": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\csharp-tunit",
+    "originalPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\csharp-tunit",
+    "location": "project-agents",
+    "scope": "project",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\csharp-tunit",
+    "tokenCount": 1220,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "csharp-xunit",
+    "version": "0.0.0",
+    "description": "Get best practices for XUnit unit testing, including data-driven tests",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "csharp-xunit",
+    "path": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\csharp-xunit",
+    "originalPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\csharp-xunit",
+    "location": "project-agents",
+    "scope": "project",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\csharp-xunit",
+    "tokenCount": 706,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "defuddle",
+    "version": "0.0.0",
+    "description": "Extract clean markdown content from web pages using Defuddle CLI, removing clutter and navigation to save tokens. Use instead of WebFetch when the user provides a URL to read or analyze, for online documentation, articles, blog posts, or any standard web page. Do NOT use for URLs ending in .md — those are already markdown, use WebFetch directly.",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "defuddle",
+    "path": "C:\\Users\\mikel\\.agents\\skills\\defuddle",
+    "originalPath": "C:\\Users\\mikel\\.agents\\skills\\defuddle",
+    "location": "global-agents",
+    "scope": "global",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\.local\\share\\chezmoi\\dot_agents\\skills\\defuddle",
+    "tokenCount": 339,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "dotnet-backend-patterns",
+    "version": "0.0.0",
+    "description": "Master C#/.NET backend development patterns for building robust APIs, MCP servers, and enterprise applications. Covers async/await, dependency injection, Entity Framework Core, Dapper, configuration, caching, and testing with xUnit. Use when developing .NET backends, reviewing C# code, or designing API architectures.",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "dotnet-backend-patterns",
+    "path": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\dotnet-backend-patterns",
+    "originalPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\dotnet-backend-patterns",
+    "location": "project-agents",
+    "scope": "project",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\dotnet-backend-patterns",
+    "tokenCount": 8081,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "dotnet-best-practices",
+    "version": "0.0.0",
+    "description": "Ensure .NET/C# code meets best practices for the solution/project.",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "dotnet-best-practices",
+    "path": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\dotnet-best-practices",
+    "originalPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\dotnet-best-practices",
+    "location": "project-agents",
+    "scope": "project",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\dotnet-best-practices",
+    "tokenCount": 791,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "dotnet-design-pattern-review",
+    "version": "0.0.0",
+    "description": "Review the C#/.NET code for design pattern implementation and suggest improvements.",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "dotnet-design-pattern-review",
+    "path": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\dotnet-design-pattern-review",
+    "originalPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\dotnet-design-pattern-review",
+    "location": "project-agents",
+    "scope": "project",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\dotnet-design-pattern-review",
+    "tokenCount": 685,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "dotnet-upgrade",
+    "version": "0.0.0",
+    "description": "Ready-to-use prompts for comprehensive .NET framework upgrade analysis and execution",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "dotnet-upgrade",
+    "path": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\dotnet-upgrade",
+    "originalPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\dotnet-upgrade",
+    "location": "project-agents",
+    "scope": "project",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\development\\personal\\projects\\tunnel-agent\\repositories\\tunnel-agent\\.agents\\skills\\dotnet-upgrade",
+    "tokenCount": 1862,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "find-docs",
+    "version": "0.0.0",
+    "description": "Retrieves up-to-date documentation, API references, and code examples for any developer technology. Use this skill whenever the user asks about a specific library, framework, SDK, CLI tool, or cloud service -- even for well-known ones like React, Next.js, Prisma, Express, Tailwind, Django, or Spring Boot. Your training data may not reflect recent API changes or version updates. Always use for: API syntax questions, configuration options, version migration issues, \"how do I\" questions mentioning a library name, debugging that involves library-specific behavior, setup instructions, and CLI tool usage. Use even when you think you know the answer -- do not rely on training data for API details, signatures, or configuration options as they are frequently outdated. Always verify against current docs. Prefer this over web search for library documentation and API details.",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "find-docs",
+    "path": "C:\\Users\\mikel\\.agents\\skills\\find-docs",
+    "originalPath": "C:\\Users\\mikel\\.agents\\skills\\find-docs",
+    "location": "global-agents",
+    "scope": "global",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\.local\\share\\chezmoi\\dot_agents\\skills\\find-docs",
+    "tokenCount": 1844,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "find-skills",
+    "version": "0.0.0",
+    "description": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "find-skills",
+    "path": "C:\\Users\\mikel\\.agents\\skills\\find-skills",
+    "originalPath": "C:\\Users\\mikel\\.agents\\skills\\find-skills",
+    "location": "global-agents",
+    "scope": "global",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\.local\\share\\chezmoi\\dot_agents\\skills\\find-skills",
+    "tokenCount": 1706,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "jira-scrum-cards-acli",
+    "version": "0.0.0",
+    "description": "Este skill proporciona las plantillas y mejores prácticas para crear y modificar tarjetas SCRUM en JIRA siguiendo los estándares del equipo Wannme. Usa esta skill siempre que el usuario te solicite realizar acciones sobre atlassian, tanto para Jira como par Confluence, lectura y escritura.",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "jira-scrum-cards-acli",
+    "path": "C:\\Users\\mikel\\.agents\\skills\\jira-scrum-cards-acli",
+    "originalPath": "C:\\Users\\mikel\\.agents\\skills\\jira-scrum-cards-acli",
+    "location": "global-agents",
+    "scope": "global",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\.local\\share\\chezmoi\\dot_agents\\skills\\jira-scrum-cards-acli",
+    "tokenCount": 1031,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "jira-scrum-cards-mcp",
+    "version": "0.0.0",
+    "description": "Este skill proporciona las plantillas y mejores prácticas para crear y modificar tarjetas SCRUM en JIRA siguiendo los estándares del equipo Wannme. Usa esta skill siempre que el usuario te solicite explicitamente realizar acciones sobre atlassian con MCP, solo con MCP.",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "jira-scrum-cards-mcp",
+    "path": "C:\\Users\\mikel\\.agents\\skills\\jira-scrum-cards-mcp",
+    "originalPath": "C:\\Users\\mikel\\.agents\\skills\\jira-scrum-cards-mcp",
+    "location": "global-agents",
+    "scope": "global",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\.local\\share\\chezmoi\\dot_agents\\skills\\jira-scrum-cards-mcp",
+    "tokenCount": 377,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "json-canvas",
+    "version": "0.0.0",
+    "description": "Create and edit JSON Canvas files (.canvas) with nodes, edges, groups, and connections. Use when working with .canvas files, creating visual canvases, mind maps, flowcharts, or when the user mentions Canvas files in Obsidian.",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "json-canvas",
+    "path": "C:\\Users\\mikel\\.agents\\skills\\json-canvas",
+    "originalPath": "C:\\Users\\mikel\\.agents\\skills\\json-canvas",
+    "location": "global-agents",
+    "scope": "global",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\.local\\share\\chezmoi\\dot_agents\\skills\\json-canvas",
+    "tokenCount": 2344,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "obsidian-bases",
+    "version": "0.0.0",
+    "description": "Create and edit Obsidian Bases (.base files) with views, filters, formulas, and summaries. Use when working with .base files, creating database-like views of notes, or when the user mentions Bases, table views, card views, filters, or formulas in Obsidian.",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "obsidian-bases",
+    "path": "C:\\Users\\mikel\\.agents\\skills\\obsidian-bases",
+    "originalPath": "C:\\Users\\mikel\\.agents\\skills\\obsidian-bases",
+    "location": "global-agents",
+    "scope": "global",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\.local\\share\\chezmoi\\dot_agents\\skills\\obsidian-bases",
+    "tokenCount": 4036,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "obsidian-cli",
+    "version": "0.0.0",
+    "description": "Interact with Obsidian vaults using the Obsidian CLI to read, create, search, and manage notes, tasks, properties, and more. Also supports plugin and theme development with commands to reload plugins, run JavaScript, capture errors, take screenshots, and inspect the DOM. Use when the user asks to interact with their Obsidian vault, manage notes, search vault content, perform vault operations from the command line, or develop and debug Obsidian plugins and themes.",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "obsidian-cli",
+    "path": "C:\\Users\\mikel\\.agents\\skills\\obsidian-cli",
+    "originalPath": "C:\\Users\\mikel\\.agents\\skills\\obsidian-cli",
+    "location": "global-agents",
+    "scope": "global",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\.local\\share\\chezmoi\\dot_agents\\skills\\obsidian-cli",
+    "tokenCount": 848,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "obsidian-markdown",
+    "version": "0.0.0",
+    "description": "Create and edit Obsidian Flavored Markdown with wikilinks, embeds, callouts, properties, and other Obsidian-specific syntax. Use when working with .md files in Obsidian, or when the user mentions wikilinks, callouts, frontmatter, tags, embeds, or Obsidian notes.",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "obsidian-markdown",
+    "path": "C:\\Users\\mikel\\.agents\\skills\\obsidian-markdown",
+    "originalPath": "C:\\Users\\mikel\\.agents\\skills\\obsidian-markdown",
+    "location": "global-agents",
+    "scope": "global",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\.local\\share\\chezmoi\\dot_agents\\skills\\obsidian-markdown",
+    "tokenCount": 1472,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "obsidian-vault",
+    "version": "0.0.0",
+    "description": "Search, create, and manage notes in the Obsidian vault with wikilinks and index notes. Use when user wants to find, create, or organize notes in Obsidian.",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "obsidian-vault",
+    "path": "C:\\Users\\mikel\\.agents\\skills\\obsidian-vault",
+    "originalPath": "C:\\Users\\mikel\\.agents\\skills\\obsidian-vault",
+    "location": "global-agents",
+    "scope": "global",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\.local\\share\\chezmoi\\dot_agents\\skills\\obsidian-vault",
+    "tokenCount": 415,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "orca-cli",
+    "version": "0.0.0",
+    "description": "Use the public `orca` CLI to operate Orca-managed worktrees, folder contexts,\r terminals, repos, automations, worktree comments, and the browser embedded\r inside the Orca app. Use when the user says \"$orca-cli\", \"use orca cli\",\r \"Orca worktree\", \"child worktree\", \"cardStatus\", \"spawn codex/claude in a worktree\",\r \"read/wait/send Orca terminal\", \"terminal send\", \"full handoff\", \"handover\",\r \"give this to another agent\", \"another worktree\", \"Orca browser\", or\r \"control the browser inside Orca\". Prefer this over raw `git worktree`, ad hoc\r PTYs, Playwright, or Computer Use when the task touches Orca-managed state.\r Use Computer Use for browser windows, webviews, or desktop UI outside Orca's\r embedded browser.",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "orca-cli",
+    "path": "C:\\Users\\mikel\\.agents\\skills\\orca-cli",
+    "originalPath": "C:\\Users\\mikel\\.agents\\skills\\orca-cli",
+    "location": "global-agents",
+    "scope": "global",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\.local\\share\\chezmoi\\dot_agents\\skills\\orca-cli",
+    "tokenCount": 4545,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  },
+  {
+    "name": "orchestration",
+    "version": "0.0.0",
+    "description": "Use Orca orchestration for structured multi-agent coordination: threaded\r messages, blocking ask/reply flows, task dispatch, worker_done/escalation\r waits, task DAGs, decision gates, coordinator loops, or decomposing work\r across agents. Use `orca-cli` instead for full ownership handoffs, including\r requests phrased as \"hand off\", \"handoff\", \"handover\", \"give this to another\r agent\", or \"another worktree\" when the user did not explicitly ask to\r supervise, monitor, wait for results, or coordinate a DAG. Use `orca-cli` for\r ordinary terminal control, lightweight terminal prompts, shell commands, Orca\r worktree management, reading or waiting on terminals, and automation of the\r browser embedded inside Orca. Use Computer Use for browser windows, webviews,\r Orca app UI, or desktop UI outside Orca's embedded browser.",
+    "creator": "",
+    "license": "",
+    "compatibility": "",
+    "allowedTools": [],
+    "dirName": "orchestration",
+    "path": "C:\\Users\\mikel\\.agents\\skills\\orchestration",
+    "originalPath": "C:\\Users\\mikel\\.agents\\skills\\orchestration",
+    "location": "global-agents",
+    "scope": "global",
+    "provider": "agents",
+    "providerLabel": "Agents",
+    "isSymlink": false,
+    "symlinkTarget": null,
+    "realPath": "C:\\Users\\mikel\\.local\\share\\chezmoi\\dot_agents\\skills\\orchestration",
+    "tokenCount": 5277,
+    "warnings": [
+      {
+        "category": "missing-version",
+        "message": "Skill has no version (or default 0.0.0) in SKILL.md frontmatter"
+      }
+    ]
+  }
+]

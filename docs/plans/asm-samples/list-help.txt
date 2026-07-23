@@ -1,0 +1,35 @@
+Usage: asm list [options]
+
+List all discovered skills. By default, skills installed across multiple
+tools are grouped into a single row with tool badges. When more than
+50 skills are present, a compact summary is
+automatically prepended above the table.
+
+Options:
+  --sort <field>       Sort by: name, version, or location (default: name)
+  -s, --scope <s>      Filter: global, project, or both (default: both)
+  -p, --tool <p>       Filter by tool (claude, codex, openclaw, agents)
+  --flat               Show one row per tool instance (ungrouped)
+  --compact            One-line-per-skill dense view
+  --summary            Print only the summary (counts by tool/scope/effort)
+  --group-by <axis>    Group rows under headers (axis: tool | scope | effort)
+  --limit <N>          Limit rendered rows (0 = no limit)
+  --json               Output as JSON array
+  --machine            Output in stable machine-readable v1 envelope format
+  --no-color           Disable ANSI colors
+  -V, --verbose        Show debug output
+
+Examples:
+  asm list                          List all skills (grouped)
+  asm list --flat                   One row per tool instance
+  asm list --compact                One line per skill (dense)
+  asm list --summary                Counts by tool/scope/effort only
+  asm list --group-by tool          Group rows under tool headers
+  asm list --group-by scope         Group rows under scope headers
+  asm list --group-by effort        Group rows under effort headers
+  asm list --limit 20               Show first 20 rows only
+  asm list -p claude                Only Claude Code skills
+  asm list -s project               Only project-scoped skills
+  asm list --sort version           Sort by version
+  asm list --json                   Output as JSON
+  asm list --machine                Machine-readable v1 envelope output
