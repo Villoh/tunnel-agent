@@ -800,7 +800,6 @@ public sealed class AgentConfigurationService
             providers.Remove(PiCliProxyProviderKey);
             providers.Remove(PiCliProxyAnthropicProviderKey);
             providers.Remove(PiPerplexityProviderKey);
-            if (providers.Count == 0) root.Remove("providers");
         }
         else if (modelEntries is { Count: > 0 })
         {
