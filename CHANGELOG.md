@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **Pi reset produced an invalid empty configuration** (`AgentConfigurationService.cs`): resetting Pi after removing its last managed provider now preserves the required `"providers": {}` root instead of writing `{}`, preventing Pi from rejecting `~/.pi/agent/models.json`.
+
 ## [1.0.3] - 2026-07-23
 
 - **Amp CLI agent removed** (`AgentCatalog.cs`, `README.md`): Amp is no longer offered for agent configuration because CLIProxyAPI removed its Amp integration, management endpoints, and provider routing. Existing Amp files are left untouched.
