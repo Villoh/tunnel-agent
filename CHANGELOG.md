@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **Model Fallback broke CLIProxyAPI's /backend-api/ Codex traffic** (`FallbackProxyService.cs`): CLIProxyAPI's `/backend-api/` Codex routes upgrade to a WebSocket connection, but the Fallback proxy was a plain HttpListener/HttpClient reverse proxy with no WebSocket handling, so upgrades silently fell through to the HTTP forwarder and failed. Any virtual model reachable via that path only worked with Fallback disabled. The proxy now detects `IsWebSocketRequest`, accepts the client socket, opens a `ClientWebSocket` to the same upstream path, and relays frames in both directions.
+
 ## [1.0.4] - 2026-07-25
 
 ### Fixed
