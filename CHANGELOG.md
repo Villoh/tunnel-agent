@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Pi reset produced an invalid empty configuration** (`AgentConfigurationService.cs`): resetting Pi after removing its last managed provider now preserves the required `"providers": {}` root instead of writing `{}`, preventing Pi from rejecting `~/.pi/agent/models.json`.
+- **CLIProxyAPI requests through the pi-cliproxyapi-provider extension missing from logs/stats** (`RequestLogEntry.cs`): the official [pi-cliproxyapi-provider](https://github.com/router-for-me/pi-cliproxyapi-provider) extension registers inference at `{root}/backend-api/` and sends Codex-style traffic to `/backend-api/codex/responses` instead of the standard `/v1/chat/completions` or `/v1/messages` paths. `IsAiPath`/`InferProvider` only recognized `/v1/*`, `/v1beta/models/`, and `/api/provider/*`, so these requests were silently dropped. `/backend-api/*` paths are now recognized, with `/backend-api/codex/*` tagged as **Codex** and other `/backend-api/*` paths as **OpenAI Completions**.
 
 ## [1.0.3] - 2026-07-23
 

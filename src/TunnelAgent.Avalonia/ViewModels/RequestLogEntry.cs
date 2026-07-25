@@ -91,7 +91,8 @@ public sealed partial class RequestLogEntry
         path.StartsWith("/v1/completions",      StringComparison.OrdinalIgnoreCase) ||
         path.StartsWith("/v1beta/models/",      StringComparison.OrdinalIgnoreCase) ||
         path.StartsWith("/v1/responses",        StringComparison.OrdinalIgnoreCase) ||
-        path.StartsWith("/api/provider/",       StringComparison.OrdinalIgnoreCase);
+        path.StartsWith("/api/provider/",       StringComparison.OrdinalIgnoreCase) ||
+        path.StartsWith("/backend-api/",        StringComparison.OrdinalIgnoreCase);
 
     private static string InferProvider(string path)
     {
@@ -104,6 +105,16 @@ public sealed partial class RequestLogEntry
         {
             var seg = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
             return seg.Length >= 2 ? Titlecase(seg[1]) : "Custom";
+        }
+        // pi-cliproxyapi-provider extension: registers inference at
+        // "{root}/backend-api/" and sends Codex-style traffic to
+        // "/backend-api/codex/responses".
+        if (path.StartsWith("/backend-api/",         StringComparison.OrdinalIgnoreCase))
+        {
+            var seg = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            return seg.Length >= 2 && seg[1].Equals("codex", StringComparison.OrdinalIgnoreCase)
+                ? "Codex"
+                : "OpenAI Completions";
         }
         return "OpenAI Completions";
     }
