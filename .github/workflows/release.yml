@@ -453,7 +453,7 @@ jobs:
           tag_name: ${{ env.TAG }}
           name: Tunnel Agent ${{ env.VERSION }}
           prerelease: ${{ needs.prepare.outputs.is_prerelease == 'true' }}
-          generate_release_notes: false
+          generate_release_notes: true
           body_path: release_body.md
           files: |
             artifacts/velopack/release-win-x64/*
