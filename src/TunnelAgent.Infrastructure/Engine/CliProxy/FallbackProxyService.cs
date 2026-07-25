@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json.Nodes;
 using System.Threading;
@@ -165,6 +166,15 @@ public sealed class FallbackProxyService
     {
         try
         {
+            // Some CLIProxyAPI routes (e.g. /backend-api/ Codex traffic) upgrade to a
+            // WebSocket instead of plain request/response, which the HttpClient-based
+            // forwarding below cannot tunnel. Relay these as raw duplex socket frames.
+            if (context.Request.IsWebSocketRequest)
+            {
+                await HandleWebSocketAsync(context, ct);
+                return;
+            }
+
             if (IsModelsListRequest(context.Request))
             {
                 await HandleModelsListAsync(context, ct);
@@ -191,6 +201,89 @@ public sealed class FallbackProxyService
         {
             try { context.Response.Close(); } catch { /* ignore */ }
         }
+    }
+
+    private static readonly HashSet<string> WebSocketHandshakeHeaders = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Host", "Connection", "Upgrade",
+        "Sec-WebSocket-Key", "Sec-WebSocket-Version", "Sec-WebSocket-Extensions", "Sec-WebSocket-Protocol"
+    };
+
+    private async Task HandleWebSocketAsync(HttpListenerContext context, CancellationToken ct)
+    {
+        HttpListenerWebSocketContext clientWsContext;
+        try
+        {
+            clientWsContext = await context.AcceptWebSocketAsync(subProtocol: null);
+        }
+        catch (Exception ex)
+        {
+            _log?.Invoke($"Fallback bridge WebSocket accept error: {ex.Message}");
+            return;
+        }
+
+        var clientSocket = clientWsContext.WebSocket;
+        using var upstreamSocket = new ClientWebSocket();
+
+        foreach (string? key in context.Request.Headers.AllKeys)
+        {
+            if (key is null || WebSocketHandshakeHeaders.Contains(key)) continue;
+            var value = context.Request.Headers[key];
+            if (value is null) continue;
+            try { upstreamSocket.Options.SetRequestHeader(key, value); } catch { /* header not forwardable, skip */ }
+        }
+
+        var targetUri = new UriBuilder(_targetBaseUrl) { Scheme = "ws" };
+        var upstreamUrl = $"ws://{targetUri.Host}:{targetUri.Port}{context.Request.RawUrl}";
+
+        try
+        {
+            await upstreamSocket.ConnectAsync(new Uri(upstreamUrl), ct);
+        }
+        catch (Exception ex)
+        {
+            _log?.Invoke($"Fallback bridge WebSocket upstream connect error: {ex.Message}");
+            await CloseQuietlyAsync(clientSocket, WebSocketCloseStatus.EndpointUnavailable, "Upstream unavailable");
+            return;
+        }
+
+        var clientToUpstream = RelayWebSocketAsync(clientSocket, upstreamSocket, ct);
+        var upstreamToClient = RelayWebSocketAsync(upstreamSocket, clientSocket, ct);
+        await Task.WhenAny(clientToUpstream, upstreamToClient);
+
+        await CloseQuietlyAsync(upstreamSocket, WebSocketCloseStatus.NormalClosure, "Peer closed");
+        await CloseQuietlyAsync(clientSocket, WebSocketCloseStatus.NormalClosure, "Peer closed");
+    }
+
+    private static async Task RelayWebSocketAsync(WebSocket source, WebSocket destination, CancellationToken ct)
+    {
+        var buffer = new byte[16 * 1024];
+        try
+        {
+            while (source.State == WebSocketState.Open && destination.State == WebSocketState.Open)
+            {
+                var result = await source.ReceiveAsync(buffer, ct);
+                if (result.MessageType == WebSocketMessageType.Close)
+                {
+                    await destination.CloseOutputAsync(source.CloseStatus ?? WebSocketCloseStatus.NormalClosure,
+                        source.CloseStatusDescription, ct);
+                    return;
+                }
+
+                await destination.SendAsync(buffer.AsMemory(0, result.Count), result.MessageType, result.EndOfMessage, ct);
+            }
+        }
+        catch (Exception) { /* peer closed or transport error; other relay direction will unwind */ }
+    }
+
+    private static async Task CloseQuietlyAsync(WebSocket socket, WebSocketCloseStatus status, string description)
+    {
+        try
+        {
+            if (socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
+                await socket.CloseAsync(status, description, CancellationToken.None);
+        }
+        catch { /* already closed/aborted */ }
     }
 
     private static bool IsModelsListRequest(HttpListenerRequest request) =>
