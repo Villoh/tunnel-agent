@@ -9,10 +9,11 @@
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-146CF9?style=for-the-badge&labelColor=ffffff&logoColor=000000&logo=opensourceinitiative"></a>
-  <img alt="Platform" src="https://img.shields.io/badge/Platform-Windows-146CF9?style=for-the-badge&labelColor=ffffff&logoColor=000000&logo=windows">
-  <img alt=".NET" src="https://img.shields.io/badge/.NET-10-146CF9?style=for-the-badge&labelColor=ffffff&logoColor=000000&logo=dotnet">
-  <img alt="Version" src="https://img.shields.io/github/v/tag/Villoh/tunnel-agent?label=Version&style=for-the-badge&color=146CF9&labelColor=ffffff">
+  <img alt="Version" src="https://img.shields.io/github/v/tag/Villoh/tunnel-agent?label=Version&style=for-the-badge&color=146CF9&labelColor=000000&logo=semanticrelease&logoColor=146CF9">
+  <img alt=".NET" src="https://img.shields.io/badge/.NET-10-146CF9?style=for-the-badge&labelColor=000000&logoColor=146CF9&logo=dotnet">
+  <img alt="Platform" src="https://img.shields.io/badge/Platform-Windows-146CF9?style=for-the-badge&labelColor=000000&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzE0NkNGOSIgZD0iTTIxIDJIM2MtMS4xIDAtMiAuOS0yIDJ2MTJjMCAxLjEuOSAyIDIgMmg2bC0xIDJ2MWg4di0xbC0xLTJoNmMxLjEgMCAyLS45IDItMlY0YzAtMS4xLS45LTItMi0yem0wIDE0SDNWNGgxOHYxMnoiLz48L3N2Zz4%3D">
+  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-146CF9?style=for-the-badge&labelColor=000000&logoColor=146CF9&logo=opensourceinitiative"></a>
+  <a href="https://github.com/Villoh/tunnel-agent/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Villoh/tunnel-agent/ci.yml?branch=main&label=BUILD&style=for-the-badge&logo=githubactions&labelColor=000000&logoColor=146CF9" alt="Build"></a>
 </p>
 
 <p align="center">
