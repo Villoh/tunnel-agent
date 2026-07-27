@@ -186,7 +186,7 @@ api_backend = "chat_completions"
             Model("gpt-5.6-sol", "GPT-5.6 Sol"),
             new ModelEntry("claude-sonnet-5", "anthropic", Proxy, "", "Claude Sonnet 5")
         };
-        var metadata = new System.Collections.Generic.Dictionary<string, OpenRouterContextService.ModelInfo>(System.StringComparer.OrdinalIgnoreCase)
+        var metadata = new System.Collections.Generic.Dictionary<string, ModelsDevService.ModelInfo>(System.StringComparer.OrdinalIgnoreCase)
         {
             ["gpt-5.6-sol"] = new(1_050_000, true, true),
             ["claude-sonnet-5"] = new(1_000_000, true, true)
