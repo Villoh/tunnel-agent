@@ -413,7 +413,7 @@ public sealed class AgentConfigurationService
 
     private static JsonObject BuildOpenCodeProvidersBlock(
         IReadOnlyList<ModelEntry> entries,
-        Dictionary<string, OpenRouterContextService.ModelInfo> modelInfoMap)
+        Dictionary<string, ModelsDevService.ModelInfo> modelInfoMap)
     {
         var cliproxy   = entries.Where(m => !IsPerplexityEntry(m)).ToList();
         var perplexity = entries.Where(IsPerplexityEntry).ToList();
@@ -427,7 +427,7 @@ public sealed class AgentConfigurationService
 
     private static JsonObject BuildOpenCodeProviderBlock(
         IReadOnlyList<ModelEntry> entries,
-        Dictionary<string, OpenRouterContextService.ModelInfo> modelInfoMap)
+        Dictionary<string, ModelsDevService.ModelInfo> modelInfoMap)
     {
         var first   = entries[0];
         var options = new JsonObject
@@ -544,13 +544,13 @@ public sealed class AgentConfigurationService
     private static bool IsAnthropicEntry(ModelEntry m) =>
         !string.IsNullOrEmpty(m.OwnedBy) && m.OwnedBy.Equals("anthropic", StringComparison.OrdinalIgnoreCase);
 
-    private static async Task<Dictionary<string, OpenRouterContextService.ModelInfo>> BuildModelInfoMapAsync(
+    private static async Task<Dictionary<string, ModelsDevService.ModelInfo>> BuildModelInfoMapAsync(
         IEnumerable<string> modelIds, CancellationToken ct)
     {
-        var map = new Dictionary<string, OpenRouterContextService.ModelInfo>(StringComparer.OrdinalIgnoreCase);
+        var map = new Dictionary<string, ModelsDevService.ModelInfo>(StringComparer.OrdinalIgnoreCase);
         foreach (var id in modelIds)
         {
-            var info = await OpenRouterContextService.Instance.GetModelInfoAsync(id, ct).ConfigureAwait(false);
+            var info = await ModelsDevService.Instance.GetModelInfoAsync(id, ct).ConfigureAwait(false);
             if (info is not null) map[id] = info;
         }
         return map;
@@ -558,7 +558,7 @@ public sealed class AgentConfigurationService
 
     private static JsonObject BuildPiProvidersBlock(
         IReadOnlyList<ModelEntry> entries,
-        Dictionary<string, OpenRouterContextService.ModelInfo> modelInfoMap)
+        Dictionary<string, ModelsDevService.ModelInfo> modelInfoMap)
     {
         var cliproxy   = entries.Where(m => !IsAnthropicEntry(m) && !IsPerplexityEntry(m)).ToList();
         var cliproxyAnthropic = entries.Where(IsAnthropicEntry).ToList();
@@ -575,7 +575,7 @@ public sealed class AgentConfigurationService
 
     private static JsonObject BuildPiProviderBlock(
         IReadOnlyList<ModelEntry> entries,
-        Dictionary<string, OpenRouterContextService.ModelInfo> modelInfoMap,
+        Dictionary<string, ModelsDevService.ModelInfo> modelInfoMap,
         string api = "openai-completions")
     {
         var first    = entries[0];
@@ -612,7 +612,7 @@ public sealed class AgentConfigurationService
     internal static string MergeOmpModelsYaml(
         string existing,
         IReadOnlyList<ModelEntry> entries,
-        Dictionary<string, OpenRouterContextService.ModelInfo>? modelInfoMap,
+        Dictionary<string, ModelsDevService.ModelInfo>? modelInfoMap,
         bool remove)
     {
         var stream = new YamlStream();
@@ -665,7 +665,7 @@ public sealed class AgentConfigurationService
 
         if (!remove)
         {
-            var metadata = modelInfoMap ?? new Dictionary<string, OpenRouterContextService.ModelInfo>(StringComparer.OrdinalIgnoreCase);
+            var metadata = modelInfoMap ?? new Dictionary<string, ModelsDevService.ModelInfo>(StringComparer.OrdinalIgnoreCase);
             var openAi = entries.Where(m => !IsAnthropicEntry(m) && !IsPerplexityEntry(m)).ToList();
             var anthropic = entries.Where(IsAnthropicEntry).ToList();
             if (openAi.Count > 0)
@@ -687,7 +687,7 @@ public sealed class AgentConfigurationService
 
     private static YamlMappingNode BuildOmpProviderBlock(
         IReadOnlyList<ModelEntry> entries,
-        IReadOnlyDictionary<string, OpenRouterContextService.ModelInfo> modelInfoMap,
+        IReadOnlyDictionary<string, ModelsDevService.ModelInfo> modelInfoMap,
         string api)
     {
         var first = entries[0];
@@ -739,7 +739,7 @@ public sealed class AgentConfigurationService
             ? await File.ReadAllTextAsync(configPath, ct).ConfigureAwait(false)
             : string.Empty;
         var metadata = remove || modelEntries is not { Count: > 0 }
-            ? new Dictionary<string, OpenRouterContextService.ModelInfo>(StringComparer.OrdinalIgnoreCase)
+            ? new Dictionary<string, ModelsDevService.ModelInfo>(StringComparer.OrdinalIgnoreCase)
             : await BuildModelInfoMapAsync(modelEntries.Select(m => m.Id), ct).ConfigureAwait(false);
         var content = MergeOmpModelsYaml(
             existing,
@@ -974,7 +974,7 @@ public sealed class AgentConfigurationService
 
     private AgentConfigApplyResult WriteGrokConfig(
         IReadOnlyList<ModelEntry> entries,
-        Dictionary<string, OpenRouterContextService.ModelInfo>? modelInfoMap,
+        Dictionary<string, ModelsDevService.ModelInfo>? modelInfoMap,
         string apiKey, string proxyBaseUrl, bool remove, IReadOnlyCollection<int>? managedPorts = null)
     {
         var configPath = ExpandPath(GrokConfigPath);
@@ -1020,7 +1020,7 @@ public sealed class AgentConfigurationService
     internal static string MergeGrokConfig(
         string existing,
         IReadOnlyList<ModelEntry> entries,
-        Dictionary<string, OpenRouterContextService.ModelInfo>? modelInfoMap,
+        Dictionary<string, ModelsDevService.ModelInfo>? modelInfoMap,
         string apiKey, string proxyBaseUrl, bool remove, IReadOnlyCollection<int>? managedPorts = null)
     {
         // Nothing selected and not reverting: leave the file untouched rather
@@ -1121,7 +1121,7 @@ public sealed class AgentConfigurationService
 
     private static IEnumerable<string> BuildGrokModelTable(
         ModelEntry m,
-        Dictionary<string, OpenRouterContextService.ModelInfo>? modelInfoMap,
+        Dictionary<string, ModelsDevService.ModelInfo>? modelInfoMap,
         string apiKey, string proxyBaseUrl)
     {
         // Anthropic models only expose reasoning/thinking through their native
@@ -1149,7 +1149,7 @@ public sealed class AgentConfigurationService
         lines.Add(isAnthropic ? "api_backend = \"messages\"" : "api_backend = \"chat_completions\"");
 
         // Enable Grok's /effort command for models that report reasoning support
-        // (resolved from OpenRouter), mirroring Pi's reasoning flag. We only
+        // (resolved from models.dev), mirroring Pi's reasoning flag. We only
         // declare support and let the user pick the level per session via /effort.
         if (modelInfoMap is not null && modelInfoMap.TryGetValue(m.Id, out var info) && info.SupportsReasoning)
             lines.Add("supports_reasoning_effort = true");

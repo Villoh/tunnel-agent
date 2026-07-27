@@ -25,8 +25,8 @@ public readonly record struct ModelPrice(
 /// <item>OpenAI-style (only an aggregate cached count, input includes it):
 /// <c>max(input-cached,0)*prompt + cached*cacheRead + output*completion</c>.</item>
 /// </list>
-/// Prices come from OpenRouter's live list (cached on disk via
-/// <see cref="OpenRouterContextService"/>) when available, falling back to the
+/// Prices come from models.dev's live catalog (cached on disk via
+/// <see cref="ModelsDevService"/>) when available, falling back to the
 /// built-in table below; unknown models cost 0 (like the proxy's LEFT JOIN with
 /// COALESCE), so the cost figure is a best-effort estimate.
 /// </summary>
@@ -64,7 +64,7 @@ public static class ModelPricing
 
     public static double CostFor(UsageEvent e)
     {
-        if (!TryResolvePrice(e.Model, out var p)) return 0;
+        if (!TryResolvePrice(e.Provider, e.Model, out var p)) return 0;
 
         var cost = e.OutputTokens * p.CompletionPer1M / 1_000_000.0;
 
@@ -90,11 +90,11 @@ public static class ModelPricing
 
     /// <summary>True when at least one event maps to a known price (drives whether cost is shown).</summary>
     public static bool HasKnownPrice(IEnumerable<UsageEvent> events) =>
-        events.Any(e => TryResolvePrice(e.Model, out _));
+        events.Any(e => TryResolvePrice(e.Provider, e.Model, out _));
 
-    /// <summary>OpenRouter live/cached pricing first, then the built-in table.</summary>
-    private static bool TryResolvePrice(string model, out ModelPrice price) =>
-        OpenRouterContextService.Instance.TryGetPrice(model, out price) || TryGetPrice(model, out price);
+    /// <summary>models.dev live/cached pricing first, then the built-in table.</summary>
+    private static bool TryResolvePrice(string? provider, string model, out ModelPrice price) =>
+        ModelsDevService.Instance.TryGetPrice(provider, model, out price) || TryGetPrice(model, out price);
 
     private static bool TryGetPrice(string model, out ModelPrice price)
     {

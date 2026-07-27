@@ -406,9 +406,9 @@ SelectedSection is SectionKey.Logs;
         };
         _modelFetch = new TunnelAgent.Services.ModelFetchService(settings);
         _usage = new UsageService(_usageStore);
-        // Seed OpenRouter prices from the on-disk JSON first so the initial cost figures
+        // Seed models.dev prices from the on-disk JSON first so the initial cost figures
         // use real pricing instead of momentarily falling back to the built-in table.
-        TunnelAgent.Services.OpenRouterContextService.Instance.SeedFromDisk();
+        TunnelAgent.Services.ModelsDevService.Instance.SeedFromDisk();
         // Seed telemetry-backed views before logs load, so request_id → provider
         // overrides are available when log entries are parsed.
         var persistedUsage = _usageStore.LoadRecent(50_000);
@@ -2343,12 +2343,12 @@ SelectedSection is SectionKey.Logs;
         await RefreshAllQuotaProvidersAsync();
     }
 
-    // Warm model pricing from disk (instant, offline) then refresh from OpenRouter when
+    // Warm model pricing from disk (instant, offline) then refresh from models.dev when
     // stale, refreshing dashboard cost figures after each step.
     private async Task WarmModelPricingAsync()
     {
         void Refresh() => Dispatcher.UIThread.Post(Dashboard.OnPricingUpdated);
-        await TunnelAgent.Services.OpenRouterContextService.Instance.WarmAsync(Refresh);
+        await TunnelAgent.Services.ModelsDevService.Instance.WarmAsync(Refresh);
     }
 
     private async Task ScanAndRefreshQuotaOnceAsync()
@@ -2830,7 +2830,7 @@ SelectedSection is SectionKey.Logs;
 
     private static async Task<string> ResolveDisplayNameAsync(string modelId, bool isPerplexity)
     {
-        var info = await TunnelAgent.Services.OpenRouterContextService.Instance
+        var info = await TunnelAgent.Services.ModelsDevService.Instance
             .GetModelInfoAsync(modelId).ConfigureAwait(false);
         var name = info?.Name is string n ? StripProviderPrefix(n) : FormatModelId(modelId);
         return isPerplexity ? $"{name} (Tunnel Agent - Perplexity)" : $"{name} (Tunnel Agent)";
