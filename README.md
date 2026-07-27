@@ -49,7 +49,7 @@
 - 🎚️ **Model Visibility**: browse available models grouped by connected provider or engine source, including Perplexity-backed model listings
 - 🔁 **Model Fallback**: create virtual models backed by ordered provider/model chains, automatically fail over when quota is exhausted, expose the virtual models through `/v1/models`, and cache the last working route for a configurable duration
 - 📈 **Usage Dashboard**: Home view with live usage telemetry (calls, tokens, success rate) over selectable time ranges, an interactive usage chart, and a summary table that groups by provider or model — backed by SQLite history that persists across restarts
-- 💰 **Cost Estimation**: per-request cost estimates using live models.dev pricing (input/output/cache read & write rates) cached on disk for offline use, with a built-in price table fallback
+- 💰 **Cost Estimation**: per-request cost estimates using live [models.dev](https://models.dev) pricing (input/output/cache read & write rates) cached on disk for offline use, with a built-in price table fallback
 - 📊 **Live Status**: see sidebar engine health plus focused engine state, endpoint, and release info
 - ⚙️ **Configuration**: control startup behaviour, per-engine ports, updates, release selection, routing strategy, and credential actions
 
