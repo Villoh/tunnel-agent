@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2026-07-27
+
+### Changed
+
+- **Model metadata now comes from models.dev** (`ModelsDevService`, `ModelPricing`, `AgentConfigurationService`): OpenRouter's model metadata and pricing cache was replaced with models.dev's public catalog, including provider-specific pricing, context window, image, reasoning, display-name metadata, and cleanup of the legacy `openrouter-models.json` cache after the new cache loads or writes.
+
 ## [1.0.5] - 2026-07-25
 
 ### Fixed
@@ -972,6 +978,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
+[1.0.6]: https://github.com/Villoh/tunnel-agent/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/Villoh/tunnel-agent/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/Villoh/tunnel-agent/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/Villoh/tunnel-agent/compare/v1.0.2...v1.0.3
