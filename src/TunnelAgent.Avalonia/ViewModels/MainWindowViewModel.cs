@@ -1618,6 +1618,7 @@ SelectedSection is SectionKey.Logs;
         IsRefreshingAllQuotaProviders = true;
         try
         {
+            await ScanQuotaProvidersAsync();
             foreach (var account in QuotaProviders.SelectMany(QuotaAccountsFor).ToList())
                 await RefreshQuotaAsync(account);
         }
@@ -2339,7 +2340,6 @@ SelectedSection is SectionKey.Logs;
 
     private async Task ScanAndRefreshQuotaAsync()
     {
-        await ScanQuotaProvidersAsync();
         await RefreshAllQuotaProvidersAsync();
     }
 

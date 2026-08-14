@@ -78,6 +78,7 @@ public partial class ProviderAccountViewModel : ViewModelBase
 
     /// <summary>Email or username shown in the expanded account row.</summary>
     [ObservableProperty] private string _email = "";
+    partial void OnEmailChanged(string value) => OnPropertyChanged(nameof(DisplayName));
 
     /// <summary>Plan badge text, e.g. "PLUS", "PRO", "FREE". Empty = hide badge.</summary>
     [ObservableProperty] private string _planBadge = "";
