@@ -474,12 +474,12 @@ SelectedSection is SectionKey.Logs;
 
     // Tab indices for SlidingTabBar
     public int ProvidersTabIndex =>
-        IsPerplexityEngineSelected ? 1 : IsNineRouterEngineSelected ? 2 : 0;
+        IsNineRouterEngineSelected ? 1 : IsPerplexityEngineSelected ? 2 : 0;
     public int ConfigTabIndex => SelectedSection switch
     {
         SectionKey.ConfigCliProxy => 1,
-        SectionKey.ConfigPerplexity => 2,
-        SectionKey.ConfigNineRouter => 3,
+        SectionKey.ConfigNineRouter => 2,
+        SectionKey.ConfigPerplexity => 3,
         _ => 0
     };
     public int QuotaTabIndex =>
@@ -1454,6 +1454,14 @@ SelectedSection is SectionKey.Logs;
         try
         {
             using var client = new ApiClient(engine.Port);
+            var connections = await client.ListProvidersAsync(token);
+            await Dispatcher.UIThread.InvokeAsync(() => ApplyNineRouterConnections(connections));
+            if (connections.Count == 0)
+            {
+                await Dispatcher.UIThread.InvokeAsync(NineRouterModelGroups.Clear);
+                return;
+            }
+
             await _nineRouterClientKey.EnsureUserApiKeyAsync(client, token);
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested)
@@ -1462,7 +1470,8 @@ SelectedSection is SectionKey.Logs;
         }
         catch (Exception ex)
         {
-            TraceStartupWarning("Failed to sync 9Router API key", ex);
+            TraceStartupWarning("Failed to load 9Router connections or API key", ex);
+            return;
         }
 
         if (token.IsCancellationRequested) return;
