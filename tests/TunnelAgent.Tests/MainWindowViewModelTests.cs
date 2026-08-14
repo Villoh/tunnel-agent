@@ -33,6 +33,25 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
+    public async Task SelectConfigNineRouter_SetsTabIndexAndFocusedEngine()
+    {
+        using var temp = new TestTempDirectory();
+        var settings = new SettingsService(temp.File("settings.json"));
+        await settings.LoadAsync();
+        var registry = new EngineRegistryService(settings);
+        var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
+
+        vm.SelectConfigNineRouterCommand.Execute(null);
+
+        Assert.Equal(SectionKey.ConfigNineRouter, vm.SelectedSection);
+        Assert.Equal(3, vm.ConfigTabIndex);
+        Assert.True(vm.IsConfigSection);
+        Assert.Equal(EngineCatalog.NineRouter.Id, vm.FocusedConfigEngineId);
+        Assert.Equal(EngineCatalog.NineRouter.DefaultPort, vm.NineRouterPort);
+        Assert.Equal($"http://127.0.0.1:{EngineCatalog.NineRouter.DefaultPort}/dashboard", vm.NineRouterDashboardUrl);
+    }
+
+    [Fact]
     public async Task EngineService_InitialServerState_IsStopped()
     {
         using var temp = new TestTempDirectory();
