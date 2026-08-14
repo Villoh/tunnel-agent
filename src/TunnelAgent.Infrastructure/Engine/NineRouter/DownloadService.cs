@@ -140,6 +140,12 @@ public sealed class DownloadService
     /// <summary>Gets whether this instance's engine directory contains a 9Router server entry file.</summary>
     public bool IsInstalled => FindServerEntry(EngineDir) is not null;
 
+    /// <summary>
+    /// Gets the extracted standalone server path (<c>app/custom-server.js</c> or <c>app/server.js</c>)
+    /// in <see cref="EngineDir"/>, or <see langword="null"/> when the engine is not installed.
+    /// </summary>
+    public string? ServerEntryPath => FindServerEntry(EngineDir);
+
     /// <summary>Loads install metadata from disk and sets <see cref="State"/> to stopped or not installed.</summary>
     public async Task InitializeAsync()
     {

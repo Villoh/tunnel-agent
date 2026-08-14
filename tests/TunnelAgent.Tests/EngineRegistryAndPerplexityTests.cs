@@ -24,7 +24,7 @@ public sealed class EngineRegistryAndPerplexityTests
     }
 
     [Fact]
-    public async Task EngineRegistryService_ExposesBothManagedEngines()
+    public async Task EngineRegistryService_ExposesAllManagedEngines()
     {
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
@@ -32,9 +32,10 @@ public sealed class EngineRegistryAndPerplexityTests
 
         var registry = new EngineRegistryService(settings);
 
-        Assert.Equal(2, registry.Engines.Count);
+        Assert.Equal(3, registry.Engines.Count);
         Assert.IsType<TunnelAgent.Infrastructure.Engine.CliProxy.EngineService>(registry.Get("cliproxyapi"));
         Assert.IsType<TunnelAgent.Infrastructure.Engine.Perplexity.EngineService>(registry.Get("perplexity-webui-scraper"));
+        Assert.IsType<TunnelAgent.Infrastructure.Engine.NineRouter.EngineService>(registry.Get("9router"));
     }
 
     [Fact]
