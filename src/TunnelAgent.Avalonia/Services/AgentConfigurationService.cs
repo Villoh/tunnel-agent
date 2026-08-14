@@ -410,18 +410,22 @@ public sealed class AgentConfigurationService
 
     private const string OpenCodeCliProxyProviderKey   = "tunnel-agent-cliproxy";
     private const string OpenCodePerplexityProviderKey = "tunnel-agent-perplexity";
+    private const string OpenCodeNineRouterProviderKey = "tunnel-agent-9router";
 
     private static JsonObject BuildOpenCodeProvidersBlock(
         IReadOnlyList<ModelEntry> entries,
         Dictionary<string, ModelsDevService.ModelInfo> modelInfoMap)
     {
-        var cliproxy   = entries.Where(m => !IsPerplexityEntry(m)).ToList();
-        var perplexity = entries.Where(IsPerplexityEntry).ToList();
-        var providers  = new JsonObject();
+        var cliproxy    = entries.Where(m => !IsPerplexityEntry(m) && !IsNineRouterEntry(m)).ToList();
+        var perplexity  = entries.Where(IsPerplexityEntry).ToList();
+        var nineRouter  = entries.Where(IsNineRouterEntry).ToList();
+        var providers   = new JsonObject();
         if (cliproxy.Count > 0)
             providers[OpenCodeCliProxyProviderKey]   = BuildOpenCodeProviderBlock(cliproxy, modelInfoMap);
         if (perplexity.Count > 0)
             providers[OpenCodePerplexityProviderKey] = BuildOpenCodeProviderBlock(perplexity, modelInfoMap);
+        if (nineRouter.Count > 0)
+            providers[OpenCodeNineRouterProviderKey] = BuildOpenCodeProviderBlock(nineRouter, modelInfoMap);
         return providers;
     }
 
@@ -486,6 +490,7 @@ public sealed class AgentConfigurationService
         {
             providers.Remove(OpenCodeCliProxyProviderKey);
             providers.Remove(OpenCodePerplexityProviderKey);
+            providers.Remove(OpenCodeNineRouterProviderKey);
             if (providers.Count == 0) root.Remove("provider");
         }
         else if (modelEntries is { Count: > 0 })
@@ -537,9 +542,15 @@ public sealed class AgentConfigurationService
     private const string PiCliProxyProviderKey = CliProxyProviderKey;
     private const string PiCliProxyAnthropicProviderKey = CliProxyAnthropicProviderKey;
     private const string PiPerplexityProviderKey = "tunnel-agent-perplexity";
+    private const string PiNineRouterProviderKey = "tunnel-agent-9router";
 
     private static bool IsPerplexityEntry(ModelEntry m) =>
-        !string.IsNullOrEmpty(m.EngineBaseUrl) && m.EngineBaseUrl.Contains(":8327", StringComparison.Ordinal);
+        string.Equals(m.ApiKey, PerplexityAccountCatalogService.EnvVarName, StringComparison.Ordinal) ||
+        (!string.IsNullOrEmpty(m.EngineBaseUrl) && m.EngineBaseUrl.Contains(":8327", StringComparison.Ordinal));
+
+    private static bool IsNineRouterEntry(ModelEntry m) =>
+        string.Equals(m.ApiKey, NineRouterClientKeyService.EnvVarName, StringComparison.Ordinal) ||
+        (!string.IsNullOrEmpty(m.EngineBaseUrl) && m.EngineBaseUrl.Contains(":20128", StringComparison.Ordinal));
 
     private static bool IsAnthropicEntry(ModelEntry m) =>
         !string.IsNullOrEmpty(m.OwnedBy) && m.OwnedBy.Equals("anthropic", StringComparison.OrdinalIgnoreCase);
@@ -560,9 +571,10 @@ public sealed class AgentConfigurationService
         IReadOnlyList<ModelEntry> entries,
         Dictionary<string, ModelsDevService.ModelInfo> modelInfoMap)
     {
-        var cliproxy   = entries.Where(m => !IsAnthropicEntry(m) && !IsPerplexityEntry(m)).ToList();
-        var cliproxyAnthropic = entries.Where(IsAnthropicEntry).ToList();
+        var cliproxy   = entries.Where(m => !IsAnthropicEntry(m) && !IsPerplexityEntry(m) && !IsNineRouterEntry(m)).ToList();
+        var cliproxyAnthropic = entries.Where(m => IsAnthropicEntry(m) && !IsPerplexityEntry(m) && !IsNineRouterEntry(m)).ToList();
         var perplexity = entries.Where(IsPerplexityEntry).ToList();
+        var nineRouter = entries.Where(IsNineRouterEntry).ToList();
         var providers  = new JsonObject();
         if (cliproxy.Count > 0)
             providers[PiCliProxyProviderKey]   = BuildPiProviderBlock(cliproxy, modelInfoMap, "openai-completions");
@@ -570,6 +582,8 @@ public sealed class AgentConfigurationService
             providers[PiCliProxyAnthropicProviderKey] = BuildPiProviderBlock(cliproxyAnthropic, modelInfoMap, "anthropic-messages");
         if (perplexity.Count > 0)
             providers[PiPerplexityProviderKey] = BuildPiProviderBlock(perplexity, modelInfoMap);
+        if (nineRouter.Count > 0)
+            providers[PiNineRouterProviderKey] = BuildPiProviderBlock(nineRouter, modelInfoMap);
         return providers;
     }
 
@@ -662,16 +676,20 @@ public sealed class AgentConfigurationService
 
         providers.Children.Remove(new YamlScalarNode(CliProxyProviderKey));
         providers.Children.Remove(new YamlScalarNode(CliProxyAnthropicProviderKey));
+        providers.Children.Remove(new YamlScalarNode(PiNineRouterProviderKey));
 
         if (!remove)
         {
             var metadata = modelInfoMap ?? new Dictionary<string, ModelsDevService.ModelInfo>(StringComparer.OrdinalIgnoreCase);
-            var openAi = entries.Where(m => !IsAnthropicEntry(m) && !IsPerplexityEntry(m)).ToList();
-            var anthropic = entries.Where(IsAnthropicEntry).ToList();
+            var openAi = entries.Where(m => !IsAnthropicEntry(m) && !IsPerplexityEntry(m) && !IsNineRouterEntry(m)).ToList();
+            var anthropic = entries.Where(m => IsAnthropicEntry(m) && !IsPerplexityEntry(m) && !IsNineRouterEntry(m)).ToList();
+            var nineRouter = entries.Where(IsNineRouterEntry).ToList();
             if (openAi.Count > 0)
                 providers.Add(CliProxyProviderKey, BuildOmpProviderBlock(openAi, metadata, "openai-completions"));
             if (anthropic.Count > 0)
                 providers.Add(CliProxyAnthropicProviderKey, BuildOmpProviderBlock(anthropic, metadata, "anthropic-messages"));
+            if (nineRouter.Count > 0)
+                providers.Add(PiNineRouterProviderKey, BuildOmpProviderBlock(nineRouter, metadata, "openai-completions"));
         }
 
         if (providers.Children.Count == 0)
@@ -800,6 +818,7 @@ public sealed class AgentConfigurationService
             providers.Remove(PiCliProxyProviderKey);
             providers.Remove(PiCliProxyAnthropicProviderKey);
             providers.Remove(PiPerplexityProviderKey);
+            providers.Remove(PiNineRouterProviderKey);
         }
         else if (modelEntries is { Count: > 0 })
         {
@@ -1190,7 +1209,7 @@ public sealed class AgentConfigurationService
             uri.Host is not ("127.0.0.1" or "localhost"))
             return false;
 
-        return uri.Port is 8317 or 8327 || managedPorts?.Contains(uri.Port) == true;
+        return uri.Port is 8317 or 8327 or 20128 || managedPorts?.Contains(uri.Port) == true;
     }
 
     private static string? ExtractGrokModelId(string header)

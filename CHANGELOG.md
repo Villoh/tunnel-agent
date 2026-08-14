@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **9Router managed engine** (`EngineCatalog`, `NineRouter/*`, `AgentConfigurationService`, `README.md`): install 9Router from npm (Node.js 18+), start and stop it alongside CLIProxyAPI and Perplexity, manage Providers connections, sign in Claude / Gemini / Copilot over OAuth, and point coding agents at `http://127.0.0.1:20128/v1` with `TUNNEL_AGENT_9ROUTER_API_KEY`.
+
 ### Fixed
 
 - **Cursor quota showed the old single spend bar** (`CursorQuotaParser`, `QuotaFetchService`): Cursor Settings now reports **Auto + Composer** and **API** as separate percent buckets (`autoPercentUsed` / `apiPercentUsed`). Quota uses those bars instead of `includedSpend/limit`, keeps on-demand spend when present, and falls back to `/auth/usage` or usage-summary when `planUsage` is missing (Team/Enterprise). Token refresh retries both dashboard calls; parse/network failures surface as a quota error instead of an empty "not loaded" state.

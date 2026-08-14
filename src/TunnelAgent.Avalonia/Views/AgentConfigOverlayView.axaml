@@ -262,6 +262,29 @@
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
                                 </StackPanel>
+                                <!-- 9Router models -->
+                                <StackPanel IsVisible="{Binding HasNineRouterSelectableModels}" Spacing="4">
+                                    <TextBlock Classes="section-label" Text="9ROUTER" Margin="2,4,2,2" />
+                                    <ItemsControl ItemsSource="{Binding NineRouterSelectableModels}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:SelectableModelViewModel">
+                                                <Grid ColumnDefinitions="Auto,*,Auto" Margin="2,3"
+                                                      IsVisible="{Binding IsVisible}">
+                                                    <CheckBox Grid.Column="0"
+                                                              IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                              VerticalAlignment="Center" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding Name}"
+                                                               FontSize="12" VerticalAlignment="Center"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Grid.Column="2" Text="{Binding Provider}"
+                                                               FontSize="10" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource FgFaintBrush}"
+                                                               Margin="8,0,0,0" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
                             </StackPanel>
                         </StackPanel>
 
