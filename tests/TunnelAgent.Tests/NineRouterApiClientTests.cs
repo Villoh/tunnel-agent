@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using TunnelAgent.Infrastructure.Engine.NineRouter;
@@ -260,6 +259,27 @@ public sealed class NineRouterApiClientTests
 
         Assert.Equal("GET", handler.Requests[2].Method);
         Assert.Equal("/api/providers", handler.Requests[2].Path);
+        Assert.Equal("auth_token=jwt-from-login", handler.Requests[2].Cookie);
+    }
+
+    [Fact]
+    public async Task ListProvidersAsync_401ThenDefaultLogin_Succeeds()
+    {
+        using var handler = new FakeApiHandler();
+        handler.EnqueueJson(HttpStatusCode.Unauthorized, """{ "error": "Unauthorized" }""");
+        handler.EnqueueJson(
+            HttpStatusCode.OK,
+            """{ "success": true, "mustChangePassword": false }""",
+            setCookie: "auth_token=jwt-from-login; HttpOnly; Path=/; SameSite=Lax");
+        handler.EnqueueJson(HttpStatusCode.OK, """{ "connections": [] }""");
+        using var client = new ApiClient(Port, handler);
+
+        var providers = await client.ListProvidersAsync();
+
+        Assert.Empty(providers);
+        Assert.Equal(3, handler.Requests.Count);
+        using var loginBody = JsonDocument.Parse(handler.Requests[1].Body!);
+        Assert.Equal("123456", loginBody.RootElement.GetProperty("password").GetString());
         Assert.Equal("auth_token=jwt-from-login", handler.Requests[2].Cookie);
     }
 

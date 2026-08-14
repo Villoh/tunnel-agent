@@ -28,6 +28,9 @@ public sealed class ApiClient : IDisposable
     /// <summary>Cookie name issued by <c>POST /api/auth/login</c>.</summary>
     public const string AuthCookieName = "auth_token";
 
+    /// <summary>9Router's password before the user changes it in the dashboard.</summary>
+    public const string DefaultDashboardPassword = "123456";
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -46,10 +49,10 @@ public sealed class ApiClient : IDisposable
     /// </summary>
     /// <param name="port">Loopback port of the running 9Router process.</param>
     /// <param name="dashboardPassword">
-    /// Optional dashboard password. Null or empty means try anonymous access and
-    /// skip login on 401.
+    /// Defaults to 9Router's initial password. Null or empty means try anonymous
+    /// access and skip login on 401.
     /// </param>
-    public ApiClient(int port, string? dashboardPassword = null)
+    public ApiClient(int port, string? dashboardPassword = DefaultDashboardPassword)
         : this(port, new HttpClientHandler { UseCookies = false }, dashboardPassword, disposeHandler: true)
     {
     }
@@ -61,10 +64,10 @@ public sealed class ApiClient : IDisposable
     /// <param name="port">Loopback port used to build the base address.</param>
     /// <param name="handler">Transport used by the inner <see cref="HttpClient"/>.</param>
     /// <param name="dashboardPassword">
-    /// Optional dashboard password. Null or empty means try anonymous access and
-    /// skip login on 401.
+    /// Defaults to 9Router's initial password. Null or empty means try anonymous
+    /// access and skip login on 401.
     /// </param>
-    public ApiClient(int port, HttpMessageHandler handler, string? dashboardPassword = null)
+    public ApiClient(int port, HttpMessageHandler handler, string? dashboardPassword = DefaultDashboardPassword)
         : this(port, handler, dashboardPassword, disposeHandler: false)
     {
     }
