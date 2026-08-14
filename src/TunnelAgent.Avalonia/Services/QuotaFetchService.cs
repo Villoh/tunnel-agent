@@ -797,25 +797,25 @@ public sealed class QuotaFetchService
     {
         try
         {
-            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var dbPath  = Path.Combine(appData, "Cursor", "User", "globalStorage", "state.vscdb");
-            if (!File.Exists(dbPath))
+            var dbPath = CursorStateStore.ResolveStateDbPath();
+            if (dbPath is null)
             {
                 SetQuotaError(account, QuotaErrorLocalAuthMissing("Cursor"));
                 return;
             }
 
-            string? accessToken = null, refreshToken = null;
-            using (var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={dbPath};Mode=ReadOnly"))
+            string? accessToken = null, refreshToken = null, email = null;
+            await using (var conn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={dbPath};Mode=ReadOnly"))
             {
-                conn.Open();
+                await conn.OpenAsync(ct);
                 using var cmd = conn.CreateCommand();
-                cmd.CommandText = "SELECT key, value FROM ItemTable WHERE key IN ('cursorAuth/accessToken','cursorAuth/refreshToken')";
-                using var reader = cmd.ExecuteReader();
-                while (reader.Read())
+                cmd.CommandText = "SELECT key, value FROM ItemTable WHERE key IN ('cursorAuth/accessToken','cursorAuth/refreshToken','cursorAuth/cachedEmail')";
+                await using var reader = await cmd.ExecuteReaderAsync(ct);
+                while (await reader.ReadAsync(ct))
                 {
                     if (reader.GetString(0) == "cursorAuth/accessToken")  accessToken  = reader.GetString(1);
                     if (reader.GetString(0) == "cursorAuth/refreshToken") refreshToken = reader.GetString(1);
+                    if (reader.GetString(0) == "cursorAuth/cachedEmail")  email        = reader.GetString(1);
                 }
             }
 
@@ -825,17 +825,8 @@ public sealed class QuotaFetchService
                 return;
             }
 
-            // Try fetch; if unauthorized, refresh token and retry once
-            var planBody = await CallCursorApiAsync("GetPlanInfo", accessToken, ct);
-            if (planBody is not null)
-            {
-                var planName = JsonNode.Parse(planBody)?["planInfo"]?["planName"]?.GetValue<string>();
-                if (!string.IsNullOrEmpty(planName))
-                    Avalonia.Threading.Dispatcher.UIThread.Post(() => account.PlanBadge = planName);
-            }
-
-            var body = await CallCursorPeriodUsageAsync(accessToken, ct);
-            if (body is null && !string.IsNullOrEmpty(refreshToken))
+            var (planBody, usageBody) = await FetchCursorDashboardAsync(accessToken, ct);
+            if (usageBody is null && !string.IsNullOrEmpty(refreshToken))
             {
                 accessToken = await RefreshCursorTokenAsync(refreshToken, ct);
                 if (string.IsNullOrEmpty(accessToken))
@@ -843,52 +834,89 @@ public sealed class QuotaFetchService
                     SetQuotaError(account, QuotaErrorAuthExpired("Cursor"));
                     return;
                 }
-                body = await CallCursorPeriodUsageAsync(accessToken, ct);
+                (planBody, usageBody) = await FetchCursorDashboardAsync(accessToken, ct);
             }
-            if (body is null)
+            if (usageBody is null)
             {
                 SetQuotaError(account, QuotaErrorRequestFailed("Cursor"));
                 return;
             }
 
-            var doc  = JsonNode.Parse(body);
-            var bars = new List<(string title, double fraction, string resetIn)>();
+            var planName = CursorQuotaParser.ParsePlanName(planBody);
+            var bars = CursorQuotaParser.ParsePeriodUsage(usageBody).ToList();
+            if (bars.Count == 0)
+                bars.AddRange(await FetchCursorUsageFallbacksAsync(accessToken, ct));
 
-            // billingCycleEnd is unix ms as string
-            var cycleEndMs = doc?["billingCycleEnd"]?.GetValue<string>();
-            var resetIn    = cycleEndMs is not null && long.TryParse(cycleEndMs, out var ms)
-                ? FormatResetAtUnix(ms / 1000)
-                : "";
-
-            // planUsage.{includedSpend, limit, totalPercentUsed}
-            var planUsage = doc?["planUsage"];
-            var used      = planUsage?["includedSpend"]?.GetValue<double>() ?? 0;
-            var limit     = planUsage?["limit"]?.GetValue<double>()         ?? 0;
-            if (limit > 0)
-                bars.Add(("Plan usage", Math.Clamp(used / limit, 0, 1), resetIn));
-            else if (planUsage?["totalPercentUsed"]?.GetValue<double>() is double pct && double.IsFinite(pct))
-                bars.Add(("Plan usage", Math.Clamp(pct / 100.0, 0, 1), resetIn));
-
-            // spendLimitUsage — on-demand budget
-            var spend = doc?["spendLimitUsage"];
-            var indLimit = spend?["individualLimit"]?.GetValue<double>() ?? 0;
-            var indUsed  = spend?["individualUsed"]?.GetValue<double>()  ?? 0;
-            if (indLimit > 0)
-                bars.Add(($"On-demand (${indUsed / 100:0.00}/${indLimit / 100:0.00})",
-                    Math.Clamp(indUsed / indLimit, 0, 1), ""));
-
-            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-            {
-                account.QuotaBars.Clear();
-                foreach (var (title, fraction, ri) in bars)
-                    account.QuotaBars.Add(new QuotaBarViewModel { Title = title, Used = fraction, ResetIn = ri });
-            });
+            ApplyCursorBars(account, planName, email, bars);
         }
-        catch { }
+        catch (OperationCanceledException) { throw; }
+        catch
+        {
+            SetQuotaError(account, QuotaErrorRequestFailed("Cursor"));
+        }
     }
 
-    private static async Task<string?> CallCursorPeriodUsageAsync(string token, CancellationToken ct)
-        => await CallCursorApiAsync("GetCurrentPeriodUsage", token, ct);
+    private static async Task<(string? planBody, string? usageBody)> FetchCursorDashboardAsync(
+        string token, CancellationToken ct)
+    {
+        var planTask  = CallCursorApiAsync("GetPlanInfo", token, ct);
+        var usageTask = CallCursorApiAsync("GetCurrentPeriodUsage", token, ct);
+        return (await planTask, await usageTask);
+    }
+
+    private static async Task<IReadOnlyList<CursorQuotaBarSpec>> FetchCursorUsageFallbacksAsync(
+        string token, CancellationToken ct)
+    {
+        var authUsage = await CallCursorGetAsync("https://api2.cursor.sh/auth/usage", token, ct);
+        if (authUsage is not null)
+        {
+            var bars = CursorQuotaParser.ParseAuthUsage(authUsage);
+            if (bars.Count > 0) return bars;
+        }
+
+        foreach (var url in new[]
+                 {
+                     "https://api2.cursor.sh/api/usage-summary",
+                     "https://api2.cursor.sh/api/usage/summary",
+                     "https://cursor.com/api/usage-summary",
+                 })
+        {
+            var summary = await CallCursorGetAsync(url, token, ct);
+            if (summary is null) continue;
+            var bars = CursorQuotaParser.ParseUsageSummary(summary);
+            if (bars.Count > 0) return bars;
+        }
+
+        return [];
+    }
+
+    private static void ApplyCursorBars(
+        ProviderAccountViewModel account, string? planName, string? email, IReadOnlyList<CursorQuotaBarSpec> bars)
+    {
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            if (!string.IsNullOrEmpty(planName))
+                account.PlanBadge = planName;
+            if (!string.IsNullOrEmpty(email))
+            {
+                account.Email = email;
+                account.Label = email;
+            }
+
+            account.QuotaError = "";
+            account.QuotaBars.Clear();
+            foreach (var bar in bars)
+            {
+                account.QuotaBars.Add(new QuotaBarViewModel
+                {
+                    Title   = bar.Title,
+                    Used    = bar.UsedFraction,
+                    ResetIn = FormatResetAt(bar.ResetsAt),
+                });
+            }
+            account.QuotaFetchedEmpty = bars.Count == 0;
+        });
+    }
 
     private static async Task<string?> CallCursorApiAsync(string method, string token, CancellationToken ct)
     {
@@ -900,6 +928,20 @@ public sealed class QuotaFetchService
         using var resp = await Http.SendAsync(req, ct);
         if (!resp.IsSuccessStatusCode) return null;
         return await resp.Content.ReadAsStringAsync(ct);
+    }
+
+    private static async Task<string?> CallCursorGetAsync(string url, string token, CancellationToken ct)
+    {
+        try
+        {
+            using var req = new HttpRequestMessage(HttpMethod.Get, url);
+            req.Headers.Add("Authorization", $"Bearer {token}");
+            using var resp = await Http.SendAsync(req, ct);
+            if (!resp.IsSuccessStatusCode) return null;
+            return await resp.Content.ReadAsStringAsync(ct);
+        }
+        catch (OperationCanceledException) { throw; }
+        catch { return null; }
     }
 
     private static async Task<string?> RefreshCursorTokenAsync(string refreshToken, CancellationToken ct)
@@ -1635,6 +1677,12 @@ public sealed class QuotaFetchService
         if (string.IsNullOrWhiteSpace(raw)) return raw;
         return string.Join(" ", raw.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries)
             .Select(w => char.ToUpperInvariant(w[0]) + w[1..].ToLowerInvariant()));
+    }
+
+    private static string FormatResetAt(DateTimeOffset? at)
+    {
+        if (at is null) return "";
+        return FormatDiff(at.Value - DateTimeOffset.UtcNow);
     }
 
     private static string FormatResetAtUnix(long? unixSeconds)

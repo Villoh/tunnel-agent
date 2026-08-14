@@ -40,9 +40,8 @@ public sealed class QuotaProviderService
     {
         try
         {
-            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var dbPath  = Path.Combine(appData, "Cursor", "User", "globalStorage", "state.vscdb");
-            if (!File.Exists(dbPath)) return NotDetected;
+            var dbPath = CursorStateStore.ResolveStateDbPath();
+            if (dbPath is null) return NotDetected;
 
             string? accessToken = null, refreshToken = null, email = null, planType = null;
             await using var conn = new SqliteConnection($"Data Source={dbPath};Mode=ReadOnly");

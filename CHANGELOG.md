@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **Cursor quota showed the old single spend bar** (`CursorQuotaParser`, `QuotaFetchService`): Cursor Settings now reports **Auto + Composer** and **API** as separate percent buckets (`autoPercentUsed` / `apiPercentUsed`). Quota uses those bars instead of `includedSpend/limit`, keeps on-demand spend when present, and falls back to `/auth/usage` or usage-summary when `planUsage` is missing (Team/Enterprise). Token refresh retries both dashboard calls; parse/network failures surface as a quota error instead of an empty "not loaded" state.
+- **Cursor quota read a stale AppData account** (`CursorStateStore`): Scoop/portable Cursor keeps `state.vscdb` under `data/user-data`, while an older `%APPDATA%\Cursor` install can still contain an expired login. Scan and fetch now pick the newest existing database among AppData, LocalAppData, and Scoop paths.
+
 ## [1.0.6] - 2026-07-27
 
 ### Changed
