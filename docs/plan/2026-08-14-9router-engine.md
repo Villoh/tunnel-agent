@@ -374,3 +374,38 @@ New `NineRouter/ApiClient.cs`:
 - Tests: xUnit `[Fact]`, `Method_Scenario_Expected` (`.agents/skills/csharp-xunit/SKILL.md`). Templates: [`PerplexityEngineServiceTests.cs`](../../tests/TunnelAgent.Tests/PerplexityEngineServiceTests.cs), [`PerplexityDownloadServiceTests.cs`](../../tests/TunnelAgent.Tests/PerplexityDownloadServiceTests.cs), [`PerplexityProcessServiceTests.cs`](../../tests/TunnelAgent.Tests/PerplexityProcessServiceTests.cs), [`EngineRegistryAndPerplexityTests.cs`](../../tests/TunnelAgent.Tests/EngineRegistryAndPerplexityTests.cs).
 - One phase per chat, one worktree, one stacked PR layer.
 - If a phase still overflows context, split UI vs tests vs resx **as extra stacked layers**, not as a second stack.
+
+---
+
+## Phase 7 API contract
+
+Captured from [decolua/9router](https://github.com/decolua/9router) `master` (`src/app/api/providers/route.js`, `[id]/route.js`, `validate/route.js`, `[id]/test/route.js`, `auth/login/route.js`, `keys/route.js`, `src/lib/auth/dashboardSession.js`). JSON property names are camelCase.
+
+Base URL: `http://127.0.0.1:{port}/` (default port `20128`).
+
+### Auth
+
+- Anonymous localhost may still work on older builds. Recent builds 401 `/api/providers/*` (and other `/api/*` outside `/v1`) unless the `auth_token` cookie is set.
+- `POST /api/auth/login` body: `{ "password": "..." }`. Success `200` `{ "success": true }` plus `Set-Cookie: auth_token=<JWT>; HttpOnly; Path=/; SameSite=Lax`. Failure `401` `{ "error": "Invalid password..." }`.
+- `ApiClient` retries once: on 401, login with the ctor password, store the cookie, replay the original request. Empty password skips login.
+
+### Providers
+
+| Method | Path | Request | Success |
+| --- | --- | --- | --- |
+| GET | `/api/providers` | — | `200` `{ "connections": [ { id, provider, authType, name, priority, isActive, testStatus, lastError, providerSpecificData, ... } ] }` (secrets stripped) |
+| POST | `/api/providers` | `{ "provider", "authType": "apikey", "name", "apiKey" }` plus optional `priority`, `defaultModel`, `providerSpecificData` | `201` `{ "connection": { ... } }` |
+| GET | `/api/providers/{id}` | — | `200` `{ "connection": { ... } }` |
+| PUT | `/api/providers/{id}` | `{ "name"?, "isActive"?, "apiKey"?, "priority"?, "defaultModel"?, "testStatus"? }` | `200` `{ "connection": { ... } }` |
+| DELETE | `/api/providers/{id}` | — | `200` `{ "message": "Connection deleted successfully" }` |
+| POST | `/api/providers/validate` | `{ "provider", "apiKey" }` | `200` `{ "valid": true/false, "error": null\|string }` |
+| POST | `/api/providers/{id}/test` | — | `200` `{ "valid", "error", "refreshed" }` |
+
+Enabled/disabled is `isActive`, not `enabled`/`disabled`. 9Router sets `authType` server-side (`apikey` vs `cookie`); sending `authType` on create is still accepted by the JSON body and matches public advisories.
+
+### Client API keys (`/v1` callers, not upstream provider keys)
+
+| Method | Path | Request | Success |
+| --- | --- | --- | --- |
+| GET | `/api/keys` | — | `200` `{ "keys": [ { id, name, key, machineId, isActive, createdAt } ] }` |
+| POST | `/api/keys` | `{ "name": "..." }` | `201` `{ "id", "name", "key", "machineId" }` |
