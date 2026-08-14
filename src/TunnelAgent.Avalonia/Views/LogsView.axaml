@@ -128,11 +128,28 @@
             </ctrl:SlidingTabBar.Tabs>
         </ctrl:SlidingTabBar>
 
+        <TransitioningContentControl Content="{Binding Logs.IsRequestsTab}"
+                                     HorizontalContentAlignment="Stretch">
+            <TransitioningContentControl.PageTransition>
+                <CompositePageTransition>
+                    <CompositePageTransition.PageTransitions>
+                        <PageSlide Duration="0:0:0.22" Orientation="Horizontal"
+                                   SlideInEasing="CubicEaseInOut" SlideOutEasing="CubicEaseInOut" />
+                        <CrossFade Duration="0:0:0.22" />
+                    </CompositePageTransition.PageTransitions>
+                </CompositePageTransition>
+            </TransitioningContentControl.PageTransition>
+            <TransitioningContentControl.ContentTemplate>
+                <DataTemplate>
+                    <StackPanel x:Name="LogsTabContent" Tag="{Binding}" Spacing="0">
+                        <StackPanel DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    Spacing="0">
+
         <!-- ══════════════════════════════════════════════
              REQUESTS TAB
              ══════════════════════════════════════════════ -->
         <StackPanel Spacing="0"
-                    IsVisible="{Binding Logs.IsRequestsTab}">
+                    IsVisible="{Binding Tag, ElementName=LogsTabContent}">
 
             <!-- Stats bar + Provider dropdown -->
             <Grid Margin="0,0,0,10" ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto">
@@ -351,7 +368,7 @@
              PROXY LOGS TAB
              ══════════════════════════════════════════════ -->
         <StackPanel Spacing="0"
-                    IsVisible="{Binding Logs.IsProxyLogsTab}">
+                    IsVisible="{Binding Tag, ElementName=LogsTabContent, Converter={StaticResource InvertBool}}">
 
             <!-- Search bar -->
             <Border Margin="0,0,0,10"
@@ -410,5 +427,10 @@
                 </Panel>
             </Border>
         </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </DataTemplate>
+            </TransitioningContentControl.ContentTemplate>
+        </TransitioningContentControl>
     </StackPanel>
 </UserControl>
