@@ -408,6 +408,68 @@
                             </StackPanel>
                         </Border>
 
+                        <!-- 9Router -->
+                        <Border Classes="card">
+                            <StackPanel Margin="16,12" Spacing="10">
+                                <Grid ColumnDefinitions="22,*,Auto">
+                                    <Grid Classes="status-indicator">
+                                        <Ellipse Classes="status-pulse"
+                                                 Fill="{Binding NineRouterServerState, Converter={StaticResource StateToBrush}}"
+                                                 IsVisible="{Binding NineRouterServerState, Converter={StaticResource StateIsRunning}}" />
+                                        <Ellipse Classes="status-dot"
+                                                 Fill="{Binding NineRouterServerState, Converter={StaticResource StateToBrush}}" />
+                                    </Grid>
+                                    <StackPanel Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Classes="row-label" Text="9Router" />
+                                        <TextBlock Classes="row-desc">
+                                            <Run Text="{l:Loc TrayUsagePopup_ListeningOnPort}" />
+                                            <Run Text="{Binding NineRouterPort}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                        <Panel Width="26" Height="26">
+                                            <Button Classes="icon-btn engine-action start" Tag="9router" Click="OnEngineStart"
+                                                    ToolTip.Tip="{l:Loc TrayUsagePopup_StartTooltip}"
+                                                    Opacity="{Binding NineRouterServerState, Converter={StaticResource StateToOpacity}, ConverterParameter=Invert}"
+                                                    IsHitTestVisible="{Binding NineRouterServerState, Converter={StaticResource StateIsRunning}, ConverterParameter=Invert}">
+                                                <lucide:PackIconLucide Kind="Play" Width="12" Height="12" Margin="1,0,0,0" />
+                                            </Button>
+                                            <Button Classes="icon-btn engine-action stop" Tag="9router" Click="OnEngineStop"
+                                                    ToolTip.Tip="{l:Loc TrayUsagePopup_StopTooltip}"
+                                                    Opacity="{Binding NineRouterServerState, Converter={StaticResource StateToOpacity}}"
+                                                    IsHitTestVisible="{Binding NineRouterServerState, Converter={StaticResource StateIsRunning}}">
+                                                <lucide:PackIconLucide Kind="Square" Width="10" Height="10" />
+                                            </Button>
+                                        </Panel>
+                                        <Button Classes="icon engine-restart" Tag="9router" Click="OnEngineRestart"
+                                                ToolTip.Tip="{l:Loc TrayUsagePopup_RestartTooltip}"
+                                                IsEnabled="{Binding NineRouterServerState, Converter={StaticResource StateIsRunning}}">
+                                            <lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14" />
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Border Classes="endpoint" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding NineRouterEndpointUrl}"
+                                                   FontFamily="Cascadia Mono,Consolas,monospace"
+                                                   FontSize="11.5"
+                                                   Foreground="{DynamicResource FgBrush}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center" />
+                                    </Border>
+                                    <Button Classes="icon-btn copy-endpoint"
+                                            Tag="{Binding NineRouterEndpointUrl}"
+                                            ToolTip.Tip="{l:Loc TrayUsagePopup_CopyEndpointTooltip}"
+                                            Click="OnCopyEndpoint">
+                                        <Panel>
+                                            <lucide:PackIconLucide Classes="copy" Kind="Copy" Width="13" Height="13" />
+                                            <lucide:PackIconLucide Classes="check" Kind="Check" Width="13" Height="13" />
+                                        </Panel>
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
                         <!-- Usage section -->
                         <Grid ColumnDefinitions="*,Auto" Margin="2,8,0,0">
                             <TextBlock Text="{l:Loc TrayUsagePopup_Usage}" Classes="section-label" Margin="0"

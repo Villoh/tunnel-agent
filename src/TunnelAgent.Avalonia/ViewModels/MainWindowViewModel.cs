@@ -2929,6 +2929,13 @@ SelectedSection is SectionKey.Logs;
     }
 
     [RelayCommand]
+    private void SelectNineRouterProviders()
+    {
+        FocusNineRouter();
+        SelectedSection = SectionKey.Providers;
+    }
+
+    [RelayCommand]
     private void SelectQuota()
     {
         SelectedSection = SectionKey.Quota;
