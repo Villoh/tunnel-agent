@@ -106,6 +106,15 @@ public sealed class SettingsService
             changed = true;
         }
 
+        var nineRouter = settings.GetOrAddEngine(
+            EngineCatalog.NineRouter.Id,
+            EngineCatalog.NineRouter.DefaultPort);
+        if (nineRouter.Port == 0)
+        {
+            nineRouter.Port = EngineCatalog.NineRouter.DefaultPort;
+            changed = true;
+        }
+
         return changed;
     }
 

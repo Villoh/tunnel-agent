@@ -17,8 +17,10 @@ public sealed class EngineRegistryAndPerplexityTests
 
         var cli = settings.Current.GetOrAddEngine(EngineCatalog.CliProxyApi.Id, 0);
         var perplexity = settings.Current.GetOrAddEngine(EngineCatalog.PerplexityWebUiScraper.Id, 0);
+        var nineRouter = settings.Current.GetOrAddEngine(EngineCatalog.NineRouter.Id, 0);
         Assert.Equal(8317, cli.Port);
         Assert.Equal(8327, perplexity.Port);
+        Assert.Equal(20128, nineRouter.Port);
     }
 
     [Fact]
