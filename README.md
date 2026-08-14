@@ -5,7 +5,7 @@
 <h1 align="center">Tunnel Agent</h1>
 
 <p align="center">
-  Desktop UI for <a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a> and <a href="https://github.com/henrique-coder/perplexity-webui-scraper">Perplexity WebUI Scraper</a>. Manage OAuth providers, API keys, and Perplexity session accounts, then point any coding agent at the local endpoint.<br><br>One click to connect. Works with whatever you already have.
+  Desktop UI for <a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a>, <a href="https://github.com/henrique-coder/perplexity-webui-scraper">Perplexity WebUI Scraper</a>, and <a href="https://github.com/decolua/9router">9Router</a>. Manage OAuth providers, API keys, and Perplexity session accounts, then point any coding agent at the local endpoint.<br><br>One click to connect. Works with whatever you already have.
 </p>
 
 <p align="center">
@@ -41,7 +41,7 @@
 
 - 🖥️ **Native Windows Experience**: clean Avalonia UI that respects your system theme and keeps local engine management in one place
 - 🌍 **Multi-Language UI (i18n)**: fully localized interface with runtime language switching across 14 languages, auto-detecting your system language on first launch
-- 🔀 **Multi-Engine Control**: run and manage both CLIProxyAPI and Perplexity from the same desktop app, with per-engine configuration, endpoint controls, and status
+- 🔀 **Multi-Engine Control**: run and manage CLIProxyAPI, Perplexity, and 9Router from the same desktop app, with per-engine configuration, endpoint controls, and status
 - 🚀 **One-Click Server Management**: start and stop each local engine directly from the Providers view
 - 🔐 **Credential Storage**: secure handling for OAuth tokens, custom provider API keys, and file-based Perplexity session accounts stored under Tunnel Agent settings
 - 👥 **Provider Management**: connect Claude Code, OpenAI Codex, Gemini CLI, Kimi, Antigravity, xAI (Grok), and custom OpenAI-compatible providers
@@ -93,6 +93,15 @@ Tunnel Agent now includes first-class support for the Perplexity WebUI Scraper e
 - edit account labels in-place from the account list
 - view Perplexity endpoint status and available models from the Perplexity server
 - keep Perplexity on a selected release instead of being forced to latest
+
+### [9Router](https://github.com/decolua/9router)
+
+9Router is a third OpenAI-compatible local engine. Tunnel Agent installs it from the npm registry (a tarball, not GitHub release binaries) and requires **Node.js 18+** on the machine. You can:
+
+- install, start, and stop 9Router from the same UI
+- add API-key provider connections and OAuth for Claude, Gemini, and GitHub Copilot
+- point coding agents at `http://127.0.0.1:20128/v1` using `TUNNEL_AGENT_9ROUTER_API_KEY`
+- open 9Router’s own dashboard for combos, routing, and other advanced features the desktop app does not replicate
 
 ## Supported Ecosystem
 
@@ -170,13 +179,13 @@ scoop bucket add villoh https://github.com/Villoh/scoop-bucket
 scoop install tunnel-agent
 ```
 
-**Requirements:** Windows 10 or later.
+**Requirements:** Windows 10 or later. 9Router also needs [Node.js 18+](https://nodejs.org/) on PATH.
 
 ## Usage
 
 1. **Start the engine**: click the play button next to the endpoint. The status indicator turns green when the engine is running.
 2. **Connect providers**: open the Providers tab for CLIProxyAPI, connect OAuth providers (Claude, Gemini CLI, Kimi…) or add custom API key accounts.
-3. **Configure your agents**: open the Agents tab to auto-write or manually copy the proxy config for each agent. For unsupported clients, copy the endpoint (e.g. `http://127.0.0.1:8317/v1`) from the Providers header and configure it manually.
+3. **Configure your agents**: open the Agents tab to auto-write or manually copy the proxy config for each agent. For unsupported clients, copy the endpoint from the Providers header (`http://127.0.0.1:8317/v1` for CLIProxyAPI, `http://127.0.0.1:8327/v1` for Perplexity, `http://127.0.0.1:20128/v1` for 9Router) and configure it manually.
 4. **Track quota**: open the Quota tab to see remaining quota for connected CLIProxyAPI providers and standalone IDE accounts (Kiro, Trae).
 
 ## Development
@@ -199,6 +208,7 @@ dotnet run --project src/TunnelAgent.Avalonia/TunnelAgent.Avalonia.csproj
 - [VibeProxy](https://github.com/automazeio/vibeproxy): original concept and inspiration
 - [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI): the unified proxy that powers multi-provider support
 - [perplexity-webui-scraper](https://github.com/henrique-coder/perplexity-webui-scraper): Perplexity engine and session token CLI
+- [9Router](https://github.com/decolua/9router): OpenAI-compatible local router installed from npm
 - [Quotio](https://github.com/nguyenphutrong/quotio): reference implementation for quota tracking and IDE account detection
 - [OpenUsage](https://github.com/robinebers/openusage): provider API documentation and reference implementations for Claude, Codex, Kiro, and more quota endpoints
 

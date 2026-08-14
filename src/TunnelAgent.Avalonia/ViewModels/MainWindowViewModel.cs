@@ -410,6 +410,7 @@ SelectedSection is SectionKey.Logs;
             OnPropertyChanged(nameof(TotalAvailableModelCount));
             OnPropertyChanged(nameof(HasCliProxySelectableModels));
             OnPropertyChanged(nameof(HasPerplexitySelectableModels));
+            OnPropertyChanged(nameof(HasNineRouterSelectableModels));
             RefreshFallbackModelOptions();
         }
         CliProxyModelGroups.CollectionChanged += OnEngineModelsChanged;
@@ -3278,7 +3279,7 @@ SelectedSection is SectionKey.Logs;
             {
                 var def = FindDef(target.Id);
                 var r = IsAgentConfigDefaultMode
-                    ? await Task.Run(() => _agentConfiguration.Revert(def, new[] { CliProxyPort, PerplexityPort })).ConfigureAwait(false)
+                    ? await Task.Run(() => _agentConfiguration.Revert(def, new[] { CliProxyPort, PerplexityPort, NineRouterPort })).ConfigureAwait(false)
                     : await _agentConfiguration.ApplyAsync(def, AgentProxyBaseUrl, CurrentAgentApiKey, models, modelEntries).ConfigureAwait(false);
                 var displayPath = r.ConfigPath;
                 if (r.RawPreviews.Count > 0)
@@ -3330,21 +3331,25 @@ SelectedSection is SectionKey.Logs;
         foreach (var m in selected)
         {
             var isPerplexity = string.Equals(m.EngineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase);
-            var engineBaseUrl = isPerplexity ? PerplexityEndpointUrl + "/v1" : CliProxyEndpointUrl + "/v1";
-            var apiKey = isPerplexity
-                ? TunnelAgent.Services.PerplexityAccountCatalogService.EnvVarName
+            var isNineRouter = string.Equals(m.EngineId, EngineCatalog.NineRouter.Id, StringComparison.OrdinalIgnoreCase);
+            var engineBaseUrl = isNineRouter ? NineRouterEndpointUrl + "/v1"
+                : isPerplexity ? PerplexityEndpointUrl + "/v1"
+                : CliProxyEndpointUrl + "/v1";
+            var apiKey = isNineRouter ? NineRouterClientKeyService.EnvVarName
+                : isPerplexity ? PerplexityAccountCatalogService.EnvVarName
                 : "TUNNEL_AGENT_CLIPROXY_API_KEY";
-            var displayName = await ResolveDisplayNameAsync(m.Name, isPerplexity);
+            var displayName = await ResolveDisplayNameAsync(m.Name, isPerplexity, isNineRouter);
             entries.Add(new TunnelAgent.Services.ModelEntry(m.Name, m.Provider, engineBaseUrl, apiKey, displayName));
         }
         return entries;
     }
 
-    private static async Task<string> ResolveDisplayNameAsync(string modelId, bool isPerplexity)
+    private static async Task<string> ResolveDisplayNameAsync(string modelId, bool isPerplexity, bool isNineRouter)
     {
         var info = await TunnelAgent.Services.ModelsDevService.Instance
             .GetModelInfoAsync(modelId).ConfigureAwait(false);
         var name = info?.Name is string n ? StripProviderPrefix(n) : FormatModelId(modelId);
+        if (isNineRouter) return $"{name} (Tunnel Agent - 9Router)";
         return isPerplexity ? $"{name} (Tunnel Agent - Perplexity)" : $"{name} (Tunnel Agent)";
     }
 
@@ -3373,8 +3378,10 @@ SelectedSection is SectionKey.Logs;
 
     public IEnumerable<SelectableModelViewModel> CliProxySelectableModels  => SelectableModels.Where(m => m.EngineId == EngineCatalog.CliProxyApi.Id);
     public IEnumerable<SelectableModelViewModel> PerplexitySelectableModels => SelectableModels.Where(m => m.EngineId == EngineCatalog.PerplexityWebUiScraper.Id);
+    public IEnumerable<SelectableModelViewModel> NineRouterSelectableModels => SelectableModels.Where(m => m.EngineId == EngineCatalog.NineRouter.Id);
     public bool HasCliProxySelectableModels  => CliProxySelectableModels.Any();
     public bool HasPerplexitySelectableModels => PerplexitySelectableModels.Any();
+    public bool HasNineRouterSelectableModels => NineRouterSelectableModels.Any();
 
     private void PopulateSelectableModels()
     {
@@ -3393,12 +3400,21 @@ SelectedSection is SectionKey.Logs;
                 vm.PropertyChanged += OnSelectableModelPropertyChanged;
                 SelectableModels.Add(vm);
             }
+        foreach (var group in NineRouterModelGroups)
+            foreach (var model in group.Models)
+            {
+                var vm = new SelectableModelViewModel(model.Name, group.ProviderName, EngineCatalog.NineRouter.Id);
+                vm.PropertyChanged += OnSelectableModelPropertyChanged;
+                SelectableModels.Add(vm);
+            }
         ApplyModelFilter();
         OnPropertyChanged(nameof(HasSelectableModels));
         OnPropertyChanged(nameof(HasCliProxySelectableModels));
         OnPropertyChanged(nameof(HasPerplexitySelectableModels));
+        OnPropertyChanged(nameof(HasNineRouterSelectableModels));
         OnPropertyChanged(nameof(CliProxySelectableModels));
         OnPropertyChanged(nameof(PerplexitySelectableModels));
+        OnPropertyChanged(nameof(NineRouterSelectableModels));
         OnPropertyChanged(nameof(ModelsExpanderLabel));
         OnPropertyChanged(nameof(AllVisibleModelsSelected));
         if (IsAgentConfigManualMode && ShowAgentConfigDialog && !AgentConfigHasResult)
