@@ -19,6 +19,7 @@
         <cv:StringNotEmptyConverter     x:Key="StringNotEmpty" />
         <cv:InvertBoolConverter         x:Key="InvertBool" />
         <cv:BoolToEnableDisableTextConverter x:Key="BoolToEnableDisableText" />
+        <cv:StringEqualsConverter x:Key="StringEq" />
     </UserControl.Resources>
 
     <Panel>
@@ -34,6 +35,23 @@
                         <ctrl:SlidingTab Header="{l:Loc ProvidersView_TabNineRouter}"  Command="{Binding FocusNineRouterCommand}" />
                     </ctrl:SlidingTabBar.Tabs>
                 </ctrl:SlidingTabBar>
+
+                <TransitioningContentControl Content="{Binding ProvidersEngineId}"
+                                             HorizontalContentAlignment="Stretch">
+                    <TransitioningContentControl.PageTransition>
+                        <CompositePageTransition>
+                            <CompositePageTransition.PageTransitions>
+                                <PageSlide Duration="0:0:0.22" Orientation="Horizontal"
+                                           SlideInEasing="CubicEaseInOut" SlideOutEasing="CubicEaseInOut" />
+                                <CrossFade Duration="0:0:0.22" />
+                            </CompositePageTransition.PageTransitions>
+                        </CompositePageTransition>
+                    </TransitioningContentControl.PageTransition>
+                    <TransitioningContentControl.ContentTemplate>
+                        <DataTemplate>
+                            <StackPanel x:Name="ProviderTabContent" Tag="{Binding}" Spacing="0">
+                                <StackPanel DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            Spacing="0">
 
                 <Grid Margin="0,0,0,14">
                     <Grid.ColumnDefinitions>
@@ -106,7 +124,7 @@
                     </Grid>
                 </Border>
 
-                <Border Classes="card" IsVisible="{Binding IsPerplexityEngineSelected}" Margin="0,0,0,12">
+                <Border Classes="card" IsVisible="{Binding Tag, ElementName=ProviderTabContent, Converter={StaticResource StringEq}, ConverterParameter=perplexity-webui-scraper}" Margin="0,0,0,12">
                     <StackPanel Margin="16,14" Spacing="12">
                         <Grid ColumnDefinitions="*,Auto">
                             <StackPanel>
@@ -172,7 +190,7 @@
                     </StackPanel>
                 </Border>
 
-                <Border Classes="card" IsVisible="{Binding IsNineRouterEngineSelected}" Margin="0,0,0,12">
+                <Border Classes="card" IsVisible="{Binding Tag, ElementName=ProviderTabContent, Converter={StaticResource StringEq}, ConverterParameter=9router}" Margin="0,0,0,12">
                     <StackPanel Margin="16,14" Spacing="12">
                         <Grid ColumnDefinitions="*,Auto">
                             <StackPanel>
@@ -255,7 +273,7 @@
                     </StackPanel>
                 </Border>
 
-                <StackPanel IsVisible="{Binding IsCliProxyEngineSelected}">
+                <StackPanel IsVisible="{Binding Tag, ElementName=ProviderTabContent, Converter={StaticResource StringEq}, ConverterParameter=cliproxyapi}">
                     <Border Classes="card">
                       <StackPanel>
                         <ItemsControl ItemsSource="{Binding Providers}">
@@ -538,6 +556,11 @@
 
                     </StackPanel>
                 </Border>
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </TransitioningContentControl.ContentTemplate>
+                </TransitioningContentControl>
             </StackPanel>
         </ScrollViewer>
     </Panel>

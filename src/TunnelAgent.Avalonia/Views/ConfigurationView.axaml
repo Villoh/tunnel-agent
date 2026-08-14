@@ -30,8 +30,25 @@
                     </ctrl:SlidingTabBar.Tabs>
                 </ctrl:SlidingTabBar>
 
+                <TransitioningContentControl Content="{Binding SelectedSection}"
+                                             HorizontalContentAlignment="Stretch">
+                    <TransitioningContentControl.PageTransition>
+                        <CompositePageTransition>
+                            <CompositePageTransition.PageTransitions>
+                                <PageSlide Duration="0:0:0.22" Orientation="Horizontal"
+                                           SlideInEasing="CubicEaseInOut" SlideOutEasing="CubicEaseInOut" />
+                                <CrossFade Duration="0:0:0.22" />
+                            </CompositePageTransition.PageTransitions>
+                        </CompositePageTransition>
+                    </TransitioningContentControl.PageTransition>
+                    <TransitioningContentControl.ContentTemplate>
+                        <DataTemplate>
+                            <StackPanel x:Name="ConfigTabContent" Tag="{Binding}" Spacing="0">
+                                <StackPanel DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            Spacing="0">
+
                 <!-- ══ GENERAL ══════════════════════════════════════════ -->
-                <StackPanel IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=ConfigGeneral}">
+                <StackPanel IsVisible="{Binding Tag, ElementName=ConfigTabContent, Converter={StaticResource SectionEq}, ConverterParameter=ConfigGeneral}">
                     <StackPanel Margin="0,0,0,14">
                         <TextBlock Classes="page-title" Text="{l:Loc ConfigView_General_Title}" />
                         <TextBlock Classes="page-sub" Text="{l:Loc ConfigView_General_Subtitle}" />
@@ -134,7 +151,7 @@
                 </StackPanel>
 
                 <!-- ══ CLIPROXY ══════════════════════════════════════════ -->
-                <StackPanel IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=ConfigCliProxy}">
+                <StackPanel IsVisible="{Binding Tag, ElementName=ConfigTabContent, Converter={StaticResource SectionEq}, ConverterParameter=ConfigCliProxy}">
                     <StackPanel Margin="0,0,0,14">
                         <TextBlock Classes="page-title" Text="{l:Loc ConfigView_CLIProxy_Title}" />
                         <TextBlock Classes="page-sub" Text="{l:Loc ConfigView_CLIProxy_Subtitle}" />
@@ -435,7 +452,7 @@
                 </StackPanel>
 
                 <!-- ══ PERPLEXITY ══════════════════════════════════════════ -->
-                <StackPanel IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=ConfigPerplexity}">
+                <StackPanel IsVisible="{Binding Tag, ElementName=ConfigTabContent, Converter={StaticResource SectionEq}, ConverterParameter=ConfigPerplexity}">
                     <StackPanel Margin="0,0,0,14">
                         <TextBlock Classes="page-title" Text="{l:Loc ConfigView_Perplexity_Title}" />
                         <TextBlock Classes="page-sub" Text="{l:Loc ConfigView_Perplexity_Subtitle}" />
@@ -605,7 +622,7 @@
                 </StackPanel>
 
                 <!-- ══ 9ROUTER ══════════════════════════════════════════ -->
-                <StackPanel IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=ConfigNineRouter}">
+                <StackPanel IsVisible="{Binding Tag, ElementName=ConfigTabContent, Converter={StaticResource SectionEq}, ConverterParameter=ConfigNineRouter}">
                     <StackPanel Margin="0,0,0,14">
                         <TextBlock Classes="page-title" Text="{l:Loc ConfigView_NineRouter_Title}" />
                         <TextBlock Classes="page-sub" Text="{l:Loc ConfigView_NineRouter_Subtitle}" />
@@ -778,6 +795,11 @@
                         </StackPanel>
                     </Border>
                 </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </TransitioningContentControl.ContentTemplate>
+                </TransitioningContentControl>
 
             </StackPanel>
         </ScrollViewer>

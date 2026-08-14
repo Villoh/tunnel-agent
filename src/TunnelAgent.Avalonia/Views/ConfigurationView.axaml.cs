@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -53,11 +54,16 @@ public partial class ConfigurationView : UserControl
                 return;
             }
 
-            if (LocalProxySectionLabel.GetVisualRoot() is null ||
-                LocalProxySectionLabel.Bounds.Height <= 0)
+            var label = this.GetVisualDescendants()
+                .OfType<Control>()
+                .FirstOrDefault(control => control.Name == "LocalProxySectionLabel");
+            var card = this.GetVisualDescendants()
+                .OfType<Control>()
+                .FirstOrDefault(control => control.Name == "LocalProxySectionCard");
+            if (label?.GetVisualRoot() is null || label.Bounds.Height <= 0 || card is null)
                 return;
 
-            LocalProxySectionCard.BringIntoView();
+            card.BringIntoView();
             _scrollTimer?.Stop();
         };
         _scrollTimer.Start();
