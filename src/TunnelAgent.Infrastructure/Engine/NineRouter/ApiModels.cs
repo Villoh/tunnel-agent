@@ -189,3 +189,71 @@ public sealed record NineRouterCreatedApiKey
     /// <summary>Gets the machine id the key is bound to.</summary>
     public string? MachineId { get; init; }
 }
+
+/// <summary>
+/// Curated 9Router OAuth provider ids used by Tunnel Agent
+/// (Claude, Gemini CLI, GitHub Copilot).
+/// </summary>
+public static class NineRouterOAuthProviders
+{
+    /// <summary>Claude Code OAuth (<c>authorization_code_pkce</c>).</summary>
+    public const string Claude = "claude";
+
+    /// <summary>Gemini CLI OAuth (<c>authorization_code</c>).</summary>
+    public const string GeminiCli = "gemini-cli";
+
+    /// <summary>GitHub Copilot OAuth (<c>device_code</c>). Stored as provider id <c>github</c>.</summary>
+    public const string GitHub = "github";
+
+    /// <summary>Default wait for the user to finish browser sign-in.</summary>
+    public static readonly TimeSpan DefaultTimeout = TimeSpan.FromMinutes(2.5);
+
+    /// <summary>Whether <paramref name="providerId"/> uses GitHub device-code instead of a redirect.</summary>
+    public static bool IsDeviceCode(string providerId) =>
+        string.Equals(providerId, GitHub, StringComparison.OrdinalIgnoreCase);
+}
+
+/// <summary>
+/// Result of starting a 9Router OAuth flow
+/// (<c>GET /api/oauth/{provider}/authorize</c> or <c>.../device-code</c>).
+/// </summary>
+public sealed record NineRouterOAuthStartResult
+{
+    /// <summary>Gets the 9Router provider id used in the request path.</summary>
+    public required string Provider { get; init; }
+
+    /// <summary>Gets the flow type when 9Router included it (<c>authorization_code_pkce</c>, <c>device_code</c>, …).</summary>
+    public string? FlowType { get; init; }
+
+    /// <summary>
+    /// Gets the URL to open in the system browser: <c>authUrl</c> for authorize
+    /// flows, or <c>verification_uri_complete</c> / <c>verification_uri</c> for device code.
+    /// </summary>
+    public string? BrowserUrl { get; init; }
+
+    /// <summary>Gets the PKCE/OAuth state to send back on exchange.</summary>
+    public string? State { get; init; }
+
+    /// <summary>Gets the PKCE verifier. Never logged by <see cref="ApiClient"/>.</summary>
+    public string? CodeVerifier { get; init; }
+
+    /// <summary>Gets the redirect URI registered for this authorize request.</summary>
+    public string? RedirectUri { get; init; }
+
+    /// <summary>Gets the device code for <c>POST .../poll</c>. Never logged by <see cref="ApiClient"/>.</summary>
+    public string? DeviceCode { get; init; }
+
+    /// <summary>Gets the suggested poll interval in seconds (GitHub default is 5).</summary>
+    public int IntervalSeconds { get; init; } = 5;
+}
+
+/// <summary>Result of one <c>POST /api/oauth/{provider}/poll</c> attempt.</summary>
+/// <param name="Success">Whether 9Router stored a connection.</param>
+/// <param name="Pending">Whether the user has not finished authorizing yet.</param>
+/// <param name="Error">Failure or pending error code/description from 9Router.</param>
+/// <param name="Connection">The new connection when <paramref name="Success"/> is true.</param>
+public sealed record NineRouterOAuthPollResult(
+    bool Success,
+    bool Pending,
+    string? Error,
+    NineRouterProvider? Connection);

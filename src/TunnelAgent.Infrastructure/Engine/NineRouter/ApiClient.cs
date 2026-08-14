@@ -13,8 +13,8 @@ namespace TunnelAgent.Infrastructure.Engine.NineRouter;
 
 /// <summary>
 /// HTTP client for 9Router's local dashboard management API
-/// (<c>http://127.0.0.1:{port}/api/...</c>). Talks to <c>/api/providers</c> and
-/// <c>/api/keys</c> instead of writing SQLite.
+/// (<c>http://127.0.0.1:{port}/api/...</c>). Talks to <c>/api/providers</c>,
+/// <c>/api/keys</c>, and <c>/api/oauth/{provider}/{action}</c> instead of writing SQLite.
 /// </summary>
 /// <remarks>
 /// Recent 9Router builds require an <c>auth_token</c> cookie on
@@ -183,6 +183,168 @@ public sealed class ApiClient : IDisposable
             .ConfigureAwait(false);
         var payload = await ReadJsonAsync<KeyListResponse>(response, ct).ConfigureAwait(false);
         return payload.Keys ?? [];
+    }
+
+    /// <summary>
+    /// Starts a curated OAuth flow via <c>GET /api/oauth/{provider}/authorize</c>
+    /// (Claude, Gemini CLI) or <c>GET /api/oauth/{provider}/device-code</c>
+    /// (GitHub Copilot).
+    /// </summary>
+    /// <param name="providerId">9Router provider id (<c>claude</c>, <c>gemini-cli</c>, or <c>github</c>).</param>
+    /// <param name="redirectUri">
+    /// Loopback callback URI for authorize flows. Ignored for GitHub device-code.
+    /// Defaults to <c>http://127.0.0.1:{port}/callback</c>.
+    /// </param>
+    /// <param name="ct">Token used to cancel the request.</param>
+    /// <returns>Browser URL plus PKCE/device fields needed to finish the flow.</returns>
+    public async Task<NineRouterOAuthStartResult> StartOAuthAsync(
+        string providerId,
+        string? redirectUri = null,
+        CancellationToken ct = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(providerId);
+        var path = NineRouterOAuthProviders.IsDeviceCode(providerId)
+            ? OAuthPath(providerId, "device-code")
+            : OAuthPath(providerId, "authorize") + "?redirect_uri=" +
+              Uri.EscapeDataString(string.IsNullOrWhiteSpace(redirectUri)
+                  ? $"http://127.0.0.1:{Port}/callback"
+                  : redirectUri);
+
+        using var response = await SendWithAuthRetryAsync(HttpMethod.Get, path, body: null, ct)
+            .ConfigureAwait(false);
+        var root = await ReadJsonAsync<JsonElement>(response, ct).ConfigureAwait(false);
+        var browserUrl = JsonString(root, "authUrl", "verification_uri_complete", "verification_uri");
+        if (string.IsNullOrWhiteSpace(browserUrl))
+        {
+            throw new NineRouterApiException(
+                response.StatusCode,
+                "OAuth start did not return a browser URL.");
+        }
+
+        return new NineRouterOAuthStartResult
+        {
+            Provider = providerId,
+            FlowType = JsonString(root, "flowType"),
+            BrowserUrl = browserUrl,
+            State = JsonString(root, "state"),
+            CodeVerifier = JsonString(root, "codeVerifier"),
+            RedirectUri = JsonString(root, "redirectUri") ?? redirectUri,
+            DeviceCode = JsonString(root, "device_code", "deviceCode"),
+            IntervalSeconds = JsonInt(root, "interval") is { } interval and > 0 ? interval : 5
+        };
+    }
+
+    /// <summary>
+    /// One device-code poll via <c>POST /api/oauth/{provider}/poll</c>.
+    /// Pending authorization returns <see cref="NineRouterOAuthPollResult.Pending"/> instead of throwing.
+    /// </summary>
+    /// <param name="providerId">9Router provider id (typically <c>github</c>).</param>
+    /// <param name="deviceCode">Device code from <see cref="StartOAuthAsync"/>.</param>
+    /// <param name="codeVerifier">PKCE verifier when the provider uses one.</param>
+    /// <param name="ct">Token used to cancel the request.</param>
+    public async Task<NineRouterOAuthPollResult> PollOAuthAsync(
+        string providerId,
+        string deviceCode,
+        string? codeVerifier = null,
+        CancellationToken ct = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(providerId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(deviceCode);
+        using var response = await SendWithAuthRetryAsync(
+                HttpMethod.Post,
+                OAuthPath(providerId, "poll"),
+                new OAuthPollRequest(deviceCode, codeVerifier),
+                ct)
+            .ConfigureAwait(false);
+        var payload = await ReadJsonAsync<OAuthPollResponse>(response, ct).ConfigureAwait(false);
+        var pending = payload.Pending
+            || string.Equals(payload.Error, "authorization_pending", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(payload.Error, "slow_down", StringComparison.OrdinalIgnoreCase);
+        var error = string.IsNullOrWhiteSpace(payload.ErrorDescription) ? payload.Error : payload.ErrorDescription;
+        return new NineRouterOAuthPollResult(payload.Success, pending, error, payload.Connection);
+    }
+
+    /// <summary>
+    /// Polls <c>POST /api/oauth/{provider}/poll</c> until 9Router stores a connection or
+    /// <paramref name="timeout"/> elapses.
+    /// </summary>
+    /// <param name="providerId">9Router provider id (typically <c>github</c>).</param>
+    /// <param name="deviceCode">Device code from <see cref="StartOAuthAsync"/>.</param>
+    /// <param name="codeVerifier">PKCE verifier when the provider uses one.</param>
+    /// <param name="timeout">Maximum time to wait (about 2–3 minutes from the UI).</param>
+    /// <param name="pollInterval">Delay between polls. Defaults to 5 seconds.</param>
+    /// <param name="ct">Token used to cancel the wait.</param>
+    public async Task<NineRouterProvider> PollOAuthUntilConnectedAsync(
+        string providerId,
+        string deviceCode,
+        string? codeVerifier,
+        TimeSpan timeout,
+        TimeSpan? pollInterval = null,
+        CancellationToken ct = default)
+    {
+        var deadline = DateTime.UtcNow + timeout;
+        var interval = pollInterval ?? TimeSpan.FromSeconds(5);
+
+        while (true)
+        {
+            ct.ThrowIfCancellationRequested();
+            var result = await PollOAuthAsync(providerId, deviceCode, codeVerifier, ct).ConfigureAwait(false);
+            if (result.Success)
+            {
+                return result.Connection
+                    ?? throw new NineRouterApiException(
+                        HttpStatusCode.OK,
+                        "OAuth succeeded but the response did not include a connection.");
+            }
+
+            if (!result.Pending)
+            {
+                throw new NineRouterApiException(
+                    HttpStatusCode.BadRequest,
+                    result.Error ?? "OAuth poll failed.");
+            }
+
+            if (DateTime.UtcNow + interval >= deadline)
+            {
+                throw new NineRouterApiException(
+                    HttpStatusCode.RequestTimeout,
+                    "OAuth timed out before the connection was saved.");
+            }
+
+            await Task.Delay(interval, ct).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Exchanges an authorization code via <c>POST /api/oauth/{provider}/exchange</c>
+    /// and stores the connection. Request bodies are never logged.
+    /// </summary>
+    /// <param name="providerId">9Router provider id (<c>claude</c> or <c>gemini-cli</c>).</param>
+    /// <param name="code">Authorization code from the loopback redirect.</param>
+    /// <param name="redirectUri">The same redirect URI passed to <see cref="StartOAuthAsync"/>.</param>
+    /// <param name="codeVerifier">PKCE verifier from start (required for Claude).</param>
+    /// <param name="state">OAuth state from start, when present.</param>
+    /// <param name="ct">Token used to cancel the request.</param>
+    public async Task<NineRouterProvider> ExchangeOAuthAsync(
+        string providerId,
+        string code,
+        string redirectUri,
+        string? codeVerifier,
+        string? state,
+        CancellationToken ct = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(providerId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(code);
+        ArgumentException.ThrowIfNullOrWhiteSpace(redirectUri);
+        using var response = await SendWithAuthRetryAsync(
+                HttpMethod.Post,
+                OAuthPath(providerId, "exchange"),
+                new OAuthExchangeRequest(code, redirectUri, codeVerifier, state),
+                ct)
+            .ConfigureAwait(false);
+        var payload = await ReadJsonAsync<OAuthExchangeResponse>(response, ct).ConfigureAwait(false);
+        return payload.Connection
+            ?? throw new NineRouterApiException(response.StatusCode, "OAuth exchange did not include a connection.");
     }
 
     /// <summary>Creates a client API key via <c>POST /api/keys</c> with <c>{"name":"..."}</c>.</summary>
@@ -380,6 +542,37 @@ public sealed class ApiClient : IDisposable
     private static string ProviderPath(string id) =>
         "api/providers/" + Uri.EscapeDataString(id);
 
+    private static string OAuthPath(string providerId, string action) =>
+        "api/oauth/" + Uri.EscapeDataString(providerId) + "/" + action;
+
+    private static string? JsonString(JsonElement root, params string[] names)
+    {
+        foreach (var name in names)
+        {
+            if (!root.TryGetProperty(name, out var property))
+                continue;
+            if (property.ValueKind == JsonValueKind.String)
+                return property.GetString();
+        }
+
+        return null;
+    }
+
+    private static int? JsonInt(JsonElement root, params string[] names)
+    {
+        foreach (var name in names)
+        {
+            if (!root.TryGetProperty(name, out var property))
+                continue;
+            if (property.ValueKind == JsonValueKind.Number && property.TryGetInt32(out var value))
+                return value;
+            if (property.ValueKind == JsonValueKind.String && int.TryParse(property.GetString(), out var parsed))
+                return parsed;
+        }
+
+        return null;
+    }
+
     private sealed record ProviderListResponse(List<NineRouterProvider>? Connections, string? Error);
 
     private sealed record ProviderEnvelope(NineRouterProvider? Connection, string? Error);
@@ -397,4 +590,17 @@ public sealed class ApiClient : IDisposable
     private sealed record LoginResponse(bool Success, string? Error);
 
     private sealed record ErrorResponse(string? Error);
+
+    private sealed record OAuthPollRequest(string DeviceCode, string? CodeVerifier);
+
+    private sealed record OAuthPollResponse(
+        bool Success,
+        bool Pending,
+        string? Error,
+        string? ErrorDescription,
+        NineRouterProvider? Connection);
+
+    private sealed record OAuthExchangeRequest(string Code, string RedirectUri, string? CodeVerifier, string? State);
+
+    private sealed record OAuthExchangeResponse(bool Success, NineRouterProvider? Connection, string? Error);
 }

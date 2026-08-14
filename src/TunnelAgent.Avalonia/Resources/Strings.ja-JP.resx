@@ -582,6 +582,27 @@
   <data name="ProvidersView_NineRouterSection_ConnectOpenCode" xml:space="preserve">
     <value>OpenCode Free を接続</value>
   </data>
+  <data name="ProvidersView_NineRouterSection_ConnectClaude" xml:space="preserve">
+    <value>Claude を接続</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectGemini" xml:space="preserve">
+    <value>Gemini を接続</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectCopilot" xml:space="preserve">
+    <value>Copilot を接続</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthWaiting" xml:space="preserve">
+    <value>ブラウザで {0} のサインインを完了してください。</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthConnected" xml:space="preserve">
+    <value>{0} を接続しました。</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthFailed" xml:space="preserve">
+    <value>{0} を接続できませんでした: {1}</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthTimeout" xml:space="preserve">
+    <value>{0} のサインインがタイムアウトしました。ブラウザで完了してから再試行してください。</value>
+  </data>
   <data name="ProvidersView_NineRouterConnection_DeleteTooltip" xml:space="preserve">
     <value>接続を削除</value>
   </data>

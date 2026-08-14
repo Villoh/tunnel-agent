@@ -582,6 +582,27 @@
   <data name="ProvidersView_NineRouterSection_ConnectOpenCode" xml:space="preserve">
     <value>OpenCode Free कनेक्ट करें</value>
   </data>
+  <data name="ProvidersView_NineRouterSection_ConnectClaude" xml:space="preserve">
+    <value>Claude कनेक्ट करें</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectGemini" xml:space="preserve">
+    <value>Gemini कनेक्ट करें</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectCopilot" xml:space="preserve">
+    <value>Copilot कनेक्ट करें</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthWaiting" xml:space="preserve">
+    <value>ब्राउज़र में {0} साइन-इन पूरा करें।</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthConnected" xml:space="preserve">
+    <value>{0} कनेक्ट हो गया है।</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthFailed" xml:space="preserve">
+    <value>{0} कनेक्ट नहीं हो सका: {1}</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthTimeout" xml:space="preserve">
+    <value>{0} साइन-इन समय समाप्त। ब्राउज़र में पूरा करने के बाद फिर कोशिश करें।</value>
+  </data>
   <data name="ProvidersView_NineRouterConnection_DeleteTooltip" xml:space="preserve">
     <value>कनेक्शन हटाएँ</value>
   </data>

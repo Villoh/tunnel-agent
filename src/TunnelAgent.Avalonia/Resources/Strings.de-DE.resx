@@ -582,6 +582,27 @@
   <data name="ProvidersView_NineRouterSection_ConnectOpenCode" xml:space="preserve">
     <value>OpenCode Free verbinden</value>
   </data>
+  <data name="ProvidersView_NineRouterSection_ConnectClaude" xml:space="preserve">
+    <value>Claude verbinden</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectGemini" xml:space="preserve">
+    <value>Gemini verbinden</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectCopilot" xml:space="preserve">
+    <value>Copilot verbinden</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthWaiting" xml:space="preserve">
+    <value>Melden Sie sich im Browser bei {0} an.</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthConnected" xml:space="preserve">
+    <value>{0} ist verbunden.</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthFailed" xml:space="preserve">
+    <value>{0} konnte nicht verbunden werden: {1}</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthTimeout" xml:space="preserve">
+    <value>Die Anmeldung bei {0} ist abgelaufen. Nach dem Abschluss im Browser erneut versuchen.</value>
+  </data>
   <data name="ProvidersView_NineRouterConnection_DeleteTooltip" xml:space="preserve">
     <value>Verbindung löschen</value>
   </data>

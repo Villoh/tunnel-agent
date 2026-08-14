@@ -582,6 +582,27 @@
   <data name="ProvidersView_NineRouterSection_ConnectOpenCode" xml:space="preserve">
     <value>توصيل OpenCode Free</value>
   </data>
+  <data name="ProvidersView_NineRouterSection_ConnectClaude" xml:space="preserve">
+    <value>توصيل Claude</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectGemini" xml:space="preserve">
+    <value>توصيل Gemini</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectCopilot" xml:space="preserve">
+    <value>توصيل Copilot</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthWaiting" xml:space="preserve">
+    <value>أكمل تسجيل الدخول إلى {0} في المتصفح.</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthConnected" xml:space="preserve">
+    <value>تم توصيل {0}.</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthFailed" xml:space="preserve">
+    <value>تعذر توصيل {0}: {1}</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthTimeout" xml:space="preserve">
+    <value>انتهت مهلة تسجيل الدخول إلى {0}. أعد المحاولة بعد الإكمال في المتصفح.</value>
+  </data>
   <data name="ProvidersView_NineRouterConnection_DeleteTooltip" xml:space="preserve">
     <value>حذف الاتصال</value>
   </data>

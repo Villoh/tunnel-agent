@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
@@ -2501,6 +2502,110 @@ SelectedSection is SectionKey.Logs;
     [RelayCommand]
     private Task ConnectNineRouterKiroAsync() =>
         CreateNineRouterProviderAsync("kiro", "Kiro AI", NoAuthApiKeyPlaceholder);
+
+    [RelayCommand]
+    private Task ConnectNineRouterClaudeAsync() =>
+        ConnectNineRouterOAuthAsync(NineRouterOAuthProviders.Claude, "Claude");
+
+    [RelayCommand]
+    private Task ConnectNineRouterGeminiAsync() =>
+        ConnectNineRouterOAuthAsync(NineRouterOAuthProviders.GeminiCli, "Gemini");
+
+    [RelayCommand]
+    private Task ConnectNineRouterCopilotAsync() =>
+        ConnectNineRouterOAuthAsync(NineRouterOAuthProviders.GitHub, "Copilot");
+
+    private async Task ConnectNineRouterOAuthAsync(string providerId, string displayName)
+    {
+        if (!IsNineRouterEngineRunning)
+        {
+            ShowNineRouterStatus(_localization.GetString("ProvidersView_NineRouter_EngineNotRunning"), isError: true);
+            return;
+        }
+
+        if (IsNineRouterBusy) return;
+        IsNineRouterBusy = true;
+        try
+        {
+            using var client = new ApiClient(NineRouterEngine.Port);
+            using var timeoutCts = new CancellationTokenSource(NineRouterOAuthProviders.DefaultTimeout);
+
+            if (NineRouterOAuthProviders.IsDeviceCode(providerId))
+            {
+                var start = await client.StartOAuthAsync(providerId, redirectUri: null, timeoutCts.Token);
+                OpenNineRouterOAuthUrl(start.BrowserUrl!);
+                ShowNineRouterStatus(
+                    _localization.GetString("ProvidersView_NineRouter_OAuthWaiting", displayName),
+                    isError: false);
+                if (string.IsNullOrWhiteSpace(start.DeviceCode))
+                {
+                    throw new NineRouterApiException(
+                        HttpStatusCode.BadRequest,
+                        "OAuth start did not return a device code.");
+                }
+
+                await client.PollOAuthUntilConnectedAsync(
+                    providerId,
+                    start.DeviceCode,
+                    start.CodeVerifier,
+                    NineRouterOAuthProviders.DefaultTimeout,
+                    TimeSpan.FromSeconds(Math.Max(1, start.IntervalSeconds)),
+                    timeoutCts.Token);
+            }
+            else
+            {
+                using var listener = OAuthCallbackListener.Start();
+                var start = await client.StartOAuthAsync(providerId, listener.RedirectUri, timeoutCts.Token);
+                OpenNineRouterOAuthUrl(start.BrowserUrl!);
+                ShowNineRouterStatus(
+                    _localization.GetString("ProvidersView_NineRouter_OAuthWaiting", displayName),
+                    isError: false);
+                var code = await listener.WaitForCodeAsync(NineRouterOAuthProviders.DefaultTimeout, timeoutCts.Token);
+                await client.ExchangeOAuthAsync(
+                    providerId,
+                    code,
+                    start.RedirectUri ?? listener.RedirectUri,
+                    start.CodeVerifier,
+                    start.State,
+                    timeoutCts.Token);
+            }
+
+            await RefreshNineRouterConnectionsAsync();
+            RestartNineRouterModelFetch();
+            ShowNineRouterStatus(
+                _localization.GetString("ProvidersView_NineRouter_OAuthConnected", displayName),
+                isError: false);
+        }
+        catch (Exception ex) when (ex is OperationCanceledException)
+        {
+            ShowNineRouterStatus(
+                _localization.GetString("ProvidersView_NineRouter_OAuthTimeout", displayName),
+                isError: true);
+        }
+        catch (NineRouterApiException ex)
+        {
+            ShowNineRouterStatus(
+                ex.StatusCode == HttpStatusCode.RequestTimeout
+                    ? _localization.GetString("ProvidersView_NineRouter_OAuthTimeout", displayName)
+                    : _localization.GetString("ProvidersView_NineRouter_OAuthFailed", displayName, ex.Message),
+                isError: true);
+        }
+        catch (Exception ex)
+        {
+            ShowNineRouterStatus(
+                _localization.GetString("ProvidersView_NineRouter_OAuthFailed", displayName, ex.Message),
+                isError: true);
+        }
+        finally
+        {
+            IsNineRouterBusy = false;
+        }
+    }
+
+    private static void OpenNineRouterOAuthUrl(string url)
+    {
+        Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+    }
 
     [RelayCommand]
     private async Task ConnectNineRouterOpenCodeFreeAsync()
