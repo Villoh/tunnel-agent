@@ -6,6 +6,7 @@ using TunnelAgent.Core.Engine;
 using TunnelAgent.Services;
 using CliProxyEngineService = TunnelAgent.Infrastructure.Engine.CliProxy.EngineService;
 using PerplexityEngineService = TunnelAgent.Infrastructure.Engine.Perplexity.EngineService;
+using NineRouterEngineService = TunnelAgent.Infrastructure.Engine.NineRouter.EngineService;
 
 namespace TunnelAgent.Infrastructure.Engine;
 
@@ -19,7 +20,8 @@ public sealed class EngineRegistryService
         var engines = new IManagedEngine[]
         {
             new CliProxyEngineService(settings),
-            new PerplexityEngineService(settings)
+            new PerplexityEngineService(settings),
+            new NineRouterEngineService(settings)
         };
 
         _engines = engines.ToDictionary(e => e.Definition.Id, StringComparer.OrdinalIgnoreCase);
