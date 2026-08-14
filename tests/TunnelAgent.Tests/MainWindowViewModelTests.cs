@@ -3,8 +3,6 @@ using System.Text.Json;
 using IconPacks.Avalonia.SimpleIcons;
 using TunnelAgent.Services;
 using TunnelAgent.ViewModels;
-using Xunit;
-
 using TunnelAgent.Core.Engine;
 using TunnelAgent.Infrastructure.Engine;
 namespace TunnelAgent.Tests;
@@ -44,7 +42,7 @@ public sealed class MainWindowViewModelTests
         vm.SelectConfigNineRouterCommand.Execute(null);
 
         Assert.Equal(SectionKey.ConfigNineRouter, vm.SelectedSection);
-        Assert.Equal(3, vm.ConfigTabIndex);
+        Assert.Equal(2, vm.ConfigTabIndex);
         Assert.True(vm.IsConfigSection);
         Assert.Equal(EngineCatalog.NineRouter.Id, vm.FocusedConfigEngineId);
         Assert.Equal(EngineCatalog.NineRouter.DefaultPort, vm.NineRouterPort);
@@ -66,7 +64,7 @@ public sealed class MainWindowViewModelTests
         Assert.True(vm.IsNineRouterEngineSelected);
         Assert.False(vm.IsCliProxyEngineSelected);
         Assert.False(vm.IsPerplexityEngineSelected);
-        Assert.Equal(2, vm.ProvidersTabIndex);
+        Assert.Equal(1, vm.ProvidersTabIndex);
         Assert.Equal(EngineCatalog.NineRouter.Id, vm.ProvidersEngineId);
         Assert.Equal(EngineCatalog.NineRouter.Id, vm.FocusedConfigEngineId);
         Assert.Equal($"http://127.0.0.1:{EngineCatalog.NineRouter.DefaultPort}", vm.EndpointUrl);

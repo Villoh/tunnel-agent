@@ -25,8 +25,8 @@
                     <ctrl:SlidingTabBar.Tabs>
                         <ctrl:SlidingTab Header="{l:Loc ConfigView_TabGeneral}"    Command="{Binding SelectConfigGeneralCommand}" />
                         <ctrl:SlidingTab Header="{l:Loc ConfigView_TabCLIProxyAPI}" Command="{Binding SelectConfigCliProxyCommand}" />
-                        <ctrl:SlidingTab Header="{l:Loc ConfigView_TabPerplexity}" Command="{Binding SelectConfigPerplexityCommand}" />
                         <ctrl:SlidingTab Header="{l:Loc ConfigView_TabNineRouter}" Command="{Binding SelectConfigNineRouterCommand}" />
+                        <ctrl:SlidingTab Header="{l:Loc ConfigView_TabPerplexity}" Command="{Binding SelectConfigPerplexityCommand}" />
                     </ctrl:SlidingTabBar.Tabs>
                 </ctrl:SlidingTabBar>
 

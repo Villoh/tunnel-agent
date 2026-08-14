@@ -30,8 +30,8 @@
                                     SelectedIndex="{Binding ProvidersTabIndex}">
                     <ctrl:SlidingTabBar.Tabs>
                         <ctrl:SlidingTab Header="{l:Loc ProvidersView_TabCLIProxyAPI}" Command="{Binding FocusCliProxyCommand}" />
-                        <ctrl:SlidingTab Header="{l:Loc ProvidersView_TabPerplexity}"  Command="{Binding FocusPerplexityCommand}" />
                         <ctrl:SlidingTab Header="{l:Loc ProvidersView_TabNineRouter}"  Command="{Binding FocusNineRouterCommand}" />
+                        <ctrl:SlidingTab Header="{l:Loc ProvidersView_TabPerplexity}"  Command="{Binding FocusPerplexityCommand}" />
                     </ctrl:SlidingTabBar.Tabs>
                 </ctrl:SlidingTabBar>
 
