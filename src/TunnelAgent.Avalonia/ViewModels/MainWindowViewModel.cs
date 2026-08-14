@@ -75,8 +75,10 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     private bool _quotaScannedOnce;
     private bool _quotaScanInProgress;
 
+    private readonly NineRouterClientKeyService _nineRouterClientKey = new();
     private CancellationTokenSource? _cliProxyModelFetchCts;
     private CancellationTokenSource? _perplexityModelFetchCts;
+    private CancellationTokenSource? _nineRouterModelFetchCts;
     private string? _pendingCliProxyModelOwner;
     private int _pendingCliProxyModelCount;
     private bool _engineReleaseSelectionReady;
@@ -216,6 +218,12 @@ SelectedSection is SectionKey.Logs;
     [ObservableProperty] private PerplexityAccountViewModel? _editPerplexityLabelTarget;
     [ObservableProperty] private string _editPerplexityLabelDraft = "";
     [ObservableProperty] private bool _showResetPerplexityDialog;
+    [ObservableProperty] private bool _showNineRouterAddKeyDialog;
+    [ObservableProperty] private string _nineRouterAddProviderIdDraft = "";
+    [ObservableProperty] private string _nineRouterAddNameDraft = "";
+    [ObservableProperty] private string _nineRouterAddApiKeyDraft = "";
+    [ObservableProperty] private bool _showNineRouterAddApiKey;
+    [ObservableProperty] private bool _isNineRouterBusy;
 
     [ObservableProperty] private bool _showOAuthStatus;
     [ObservableProperty] private bool _oAuthStatusIsError;
@@ -344,11 +352,13 @@ SelectedSection is SectionKey.Logs;
     public ObservableCollection<ProviderViewModel> StandaloneQuotaProviders { get; } = new();
     public ObservableCollection<QuotaProviderViewModel> QuotaAccounts { get; } = new();
     public ObservableCollection<PerplexityAccountViewModel> PerplexityAccounts { get; } = new();
+    public ObservableCollection<NineRouterConnectionViewModel> NineRouterConnections { get; } = new();
     public ObservableCollection<AgentViewModel> Agents { get; } = new();
     public ObservableCollection<EngineReleaseViewModel> EngineReleases { get; } = new();
     public ObservableCollection<AvailableModelGroupViewModel> AvailableModelGroups { get; }
     public ObservableCollection<AvailableModelGroupViewModel> CliProxyModelGroups { get; }
     public ObservableCollection<AvailableModelGroupViewModel> PerplexityModelGroups { get; }
+    public ObservableCollection<AvailableModelGroupViewModel> NineRouterModelGroups { get; }
     public ObservableCollection<EngineOptionViewModel> EngineOptions { get; } = new();
     public ObservableCollection<CliProxyApiKeyViewModel> CliProxyApiKeys { get; } = new();
     public ObservableCollection<SelectableModelViewModel> SelectableModels { get; } = new();
@@ -386,6 +396,7 @@ SelectedSection is SectionKey.Logs;
 
         CliProxyModelGroups = new ObservableCollection<AvailableModelGroupViewModel>();
         PerplexityModelGroups = new ObservableCollection<AvailableModelGroupViewModel>();
+        NineRouterModelGroups = new ObservableCollection<AvailableModelGroupViewModel>();
         AvailableModelGroups = new ObservableCollection<AvailableModelGroupViewModel>();
 
         void OnEngineModelsChanged(object? s, System.Collections.Specialized.NotifyCollectionChangedEventArgs _)
@@ -393,6 +404,7 @@ SelectedSection is SectionKey.Logs;
             AvailableModelGroups.Clear();
             foreach (var g in CliProxyModelGroups) AvailableModelGroups.Add(g);
             foreach (var g in PerplexityModelGroups) AvailableModelGroups.Add(g);
+            foreach (var g in NineRouterModelGroups) AvailableModelGroups.Add(g);
             OnPropertyChanged(nameof(FocusedModelGroups));
             OnPropertyChanged(nameof(TotalAvailableModelCount));
             OnPropertyChanged(nameof(HasCliProxySelectableModels));
@@ -401,6 +413,7 @@ SelectedSection is SectionKey.Logs;
         }
         CliProxyModelGroups.CollectionChanged += OnEngineModelsChanged;
         PerplexityModelGroups.CollectionChanged += OnEngineModelsChanged;
+        NineRouterModelGroups.CollectionChanged += OnEngineModelsChanged;
         AvailableModelGroups.CollectionChanged += (_, _) =>
         {
             OnPropertyChanged(nameof(TotalAvailableModelCount));
@@ -455,9 +468,11 @@ SelectedSection is SectionKey.Logs;
     // Providers submenu highlight — independent from Config section
     public bool IsCliProxyEngineSelected => string.Equals(ProvidersEngineId, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase);
     public bool IsPerplexityEngineSelected => string.Equals(ProvidersEngineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase);
+    public bool IsNineRouterEngineSelected => string.Equals(ProvidersEngineId, EngineCatalog.NineRouter.Id, StringComparison.OrdinalIgnoreCase);
 
     // Tab indices for SlidingTabBar
-    public int ProvidersTabIndex => IsPerplexityEngineSelected ? 1 : 0;
+    public int ProvidersTabIndex =>
+        IsPerplexityEngineSelected ? 1 : IsNineRouterEngineSelected ? 2 : 0;
     public int ConfigTabIndex => SelectedSection switch
     {
         SectionKey.ConfigCliProxy => 1,
@@ -577,14 +592,20 @@ SelectedSection is SectionKey.Logs;
         ? _localization.GetString("AgentConfigOverlay_BulkDescription")
         : AgentConfigTarget?.Description ?? "";
     public IEnumerable<AvailableModelGroupViewModel> FocusedModelGroups =>
-        IsPerplexityEngineSelected ? PerplexityModelGroups : CliProxyModelGroups;
+        IsNineRouterEngineSelected ? NineRouterModelGroups
+        : IsPerplexityEngineSelected ? PerplexityModelGroups
+        : CliProxyModelGroups;
     public int TotalAvailableModelCount => FocusedModelGroups.Sum(g => g.ModelCount);
     public int PerplexityAccountCount => PerplexityAccounts.Count;
     public bool HasPerplexityAccounts => PerplexityAccounts.Count > 0;
     public string PerplexityEmptyStateText => "Perplexity needs at least one saved WebUI session token account.";
-    public string AuthFilesDescription => IsPerplexityEngineSelected
-        ? "Perplexity session accounts are stored in app settings."
-        : "OAuth tokens and custom provider keys are stored in the app auth folder.";
+    public bool HasNineRouterConnections => NineRouterConnections.Count > 0;
+    public bool IsNineRouterEngineRunning => NineRouterEngine.State == EngineState.Running;
+    public string AuthFilesDescription => IsNineRouterEngineSelected
+        ? _localization.GetString("ProvidersView_NineRouterSection_AuthFiles")
+        : IsPerplexityEngineSelected
+            ? "Perplexity session accounts are stored in app settings."
+            : "OAuth tokens and custom provider keys are stored in the app auth folder.";
 
     private IManagedEngine FocusedConfigEngine => _engineRegistry.Get(FocusedConfigEngineId);
     private IManagedEngine CliProxyEngine => _engineRegistry.Get(EngineCatalog.CliProxyApi.Id);
@@ -912,9 +933,13 @@ SelectedSection is SectionKey.Logs;
     {
         OnPropertyChanged(nameof(IsCliProxyEngineSelected));
         OnPropertyChanged(nameof(IsPerplexityEngineSelected));
+        OnPropertyChanged(nameof(IsNineRouterEngineSelected));
         OnPropertyChanged(nameof(ProvidersTabIndex));
         OnPropertyChanged(nameof(FocusedModelGroups));
         OnPropertyChanged(nameof(TotalAvailableModelCount));
+        OnPropertyChanged(nameof(AuthFilesDescription));
+        if (IsNineRouterEngineSelected && NineRouterEngine.State == EngineState.Running)
+            _ = RefreshNineRouterConnectionsAsync();
     }
 
     partial void OnFocusedConfigEngineIdChanged(string value)
@@ -1062,8 +1087,8 @@ SelectedSection is SectionKey.Logs;
             foreach (var engine in _engineRegistry.Engines)
             {
                 if (engine.State != EngineState.Running) continue;
-                var isCliProxy = string.Equals(engine.Definition.Id, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase);
-                if (isCliProxy)
+                var engineId = engine.Definition.Id;
+                if (string.Equals(engineId, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase))
                 {
                     _cliProxyModelFetchCts = new CancellationTokenSource();
                     _ = ObserveStartupTaskAsync(Task.Run(() =>
@@ -1083,11 +1108,18 @@ SelectedSection is SectionKey.Logs;
                         UpdateLogsPollingState();
                     }
                 }
-                else
+                else if (string.Equals(engineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase))
                 {
                     _perplexityModelFetchCts = new CancellationTokenSource();
                     _ = ObserveStartupTaskAsync(Task.Run(() =>
                         _modelFetch.FetchAndApplyAsync(PerplexityModelGroups, engine.Port, engine.Definition.Id, _perplexityModelFetchCts.Token)));
+                }
+                else if (string.Equals(engineId, EngineCatalog.NineRouter.Id, StringComparison.OrdinalIgnoreCase))
+                {
+                    _nineRouterModelFetchCts = new CancellationTokenSource();
+                    var token = _nineRouterModelFetchCts.Token;
+                    _ = ObserveStartupTaskAsync(Task.Run(() => FetchNineRouterModelsAsync(engine, token)));
+                    _ = ObserveStartupTaskAsync(RefreshNineRouterConnectionsAsync());
                 }
             }
 
@@ -1267,26 +1299,26 @@ SelectedSection is SectionKey.Logs;
         {
             if (sender is IManagedEngine engine)
             {
-                var isCliProxy = string.Equals(engine.Definition.Id, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase);
-                var modelGroups = isCliProxy ? CliProxyModelGroups : PerplexityModelGroups;
-                ref var cts = ref isCliProxy ? ref _cliProxyModelFetchCts : ref _perplexityModelFetchCts;
+                var engineId = engine.Definition.Id;
+                var isCliProxy = string.Equals(engineId, EngineCatalog.CliProxyApi.Id, StringComparison.OrdinalIgnoreCase);
+                var isPerplexity = string.Equals(engineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase);
+                var isNineRouter = string.Equals(engineId, EngineCatalog.NineRouter.Id, StringComparison.OrdinalIgnoreCase);
+                var modelGroups = isCliProxy ? CliProxyModelGroups
+                    : isPerplexity ? PerplexityModelGroups
+                    : isNineRouter ? NineRouterModelGroups
+                    : null;
 
                 if (engine.State == EngineState.Running)
                 {
                     // A successful (re)start clears the last error so a future failure re-toasts.
                     _lastEngineErrorShown.Remove(engine.Definition.Id);
-                    if (cts is null || cts.IsCancellationRequested)
-                    {
-                        cts = new CancellationTokenSource();
-                        if (isCliProxy && _pendingCliProxyModelOwner is { } owner && _pendingCliProxyModelCount > 0)
-                        {
-                            _ = FetchPendingCliProxyModelsAsync(engine, cts.Token, owner, _pendingCliProxyModelCount);
-                        }
-                        else
-                        {
-                            _ = _modelFetch.FetchAndApplyAsync(modelGroups, engine.Port, engine.Definition.Id, cts.Token);
-                        }
-                    }
+                    if (isCliProxy)
+                        StartCliProxyModelFetch(engine);
+                    else if (isPerplexity)
+                        StartPerplexityModelFetch(engine);
+                    else if (isNineRouter)
+                        StartNineRouterModelFetch(engine);
+
                     if (isCliProxy)
                     {
                         ConfigureLogsService(engine.Port);
@@ -1303,12 +1335,29 @@ SelectedSection is SectionKey.Logs;
                             UpdateLogsPollingState();
                         }
                     }
+                    if (isNineRouter)
+                        _ = RefreshNineRouterConnectionsAsync();
                 }
                 else if (engine.State == EngineState.Stopped || engine.State == EngineState.Error)
                 {
-                    cts?.Cancel();
-                    cts = null;
-                    modelGroups.Clear();
+                    if (isCliProxy)
+                    {
+                        _cliProxyModelFetchCts?.Cancel();
+                        _cliProxyModelFetchCts = null;
+                    }
+                    else if (isPerplexity)
+                    {
+                        _perplexityModelFetchCts?.Cancel();
+                        _perplexityModelFetchCts = null;
+                    }
+                    else if (isNineRouter)
+                    {
+                        _nineRouterModelFetchCts?.Cancel();
+                        _nineRouterModelFetchCts = null;
+                        NineRouterConnections.Clear();
+                        OnPropertyChanged(nameof(HasNineRouterConnections));
+                    }
+                    modelGroups?.Clear();
                     if (isCliProxy)
                     {
                         _logs.SetManagementApiAvailable(false);
@@ -1368,6 +1417,54 @@ SelectedSection is SectionKey.Logs;
 
             RefreshEngineSectionProperties();
         });
+    }
+
+    private void StartCliProxyModelFetch(IManagedEngine engine)
+    {
+        if (_cliProxyModelFetchCts is not null && !_cliProxyModelFetchCts.IsCancellationRequested)
+            return;
+        _cliProxyModelFetchCts = new CancellationTokenSource();
+        if (_pendingCliProxyModelOwner is { } owner && _pendingCliProxyModelCount > 0)
+            _ = FetchPendingCliProxyModelsAsync(engine, _cliProxyModelFetchCts.Token, owner, _pendingCliProxyModelCount);
+        else
+            _ = _modelFetch.FetchAndApplyAsync(CliProxyModelGroups, engine.Port, engine.Definition.Id, _cliProxyModelFetchCts.Token);
+    }
+
+    private void StartPerplexityModelFetch(IManagedEngine engine)
+    {
+        if (_perplexityModelFetchCts is not null && !_perplexityModelFetchCts.IsCancellationRequested)
+            return;
+        _perplexityModelFetchCts = new CancellationTokenSource();
+        _ = _modelFetch.FetchAndApplyAsync(PerplexityModelGroups, engine.Port, engine.Definition.Id, _perplexityModelFetchCts.Token);
+    }
+
+    private void StartNineRouterModelFetch(IManagedEngine engine)
+    {
+        if (_nineRouterModelFetchCts is not null && !_nineRouterModelFetchCts.IsCancellationRequested)
+            return;
+        _nineRouterModelFetchCts = new CancellationTokenSource();
+        var token = _nineRouterModelFetchCts.Token;
+        _ = FetchNineRouterModelsAsync(engine, token);
+    }
+
+    private async Task FetchNineRouterModelsAsync(IManagedEngine engine, CancellationToken token)
+    {
+        try
+        {
+            using var client = new ApiClient(engine.Port);
+            await _nineRouterClientKey.EnsureUserApiKeyAsync(client, token);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            return;
+        }
+        catch (Exception ex)
+        {
+            TraceStartupWarning("Failed to sync 9Router API key", ex);
+        }
+
+        if (token.IsCancellationRequested) return;
+        await _modelFetch.FetchAndApplyAsync(NineRouterModelGroups, engine.Port, engine.Definition.Id, token);
     }
 
     private string? BuildEngineErrorMessage(IManagedEngine engine)
@@ -1436,6 +1533,7 @@ SelectedSection is SectionKey.Logs;
         OnPropertyChanged(nameof(NineRouterPort));
         OnPropertyChanged(nameof(NineRouterEndpointUrl));
         OnPropertyChanged(nameof(NineRouterDashboardUrl));
+        OnPropertyChanged(nameof(IsNineRouterEngineRunning));
         OnPropertyChanged(nameof(EndpointUrl));
         OnPropertyChanged(nameof(Port));
         OnPropertyChanged(nameof(EditablePort));
@@ -2299,6 +2397,7 @@ SelectedSection is SectionKey.Logs;
     [RelayCommand] private void ToggleApiKeyDraftVisibility() => ShowApiKeyDraft = !ShowApiKeyDraft;
     [RelayCommand] private void ToggleAddAccountApiKeyVisibility() => ShowAddAccountApiKey = !ShowAddAccountApiKey;
     [RelayCommand] private void TogglePerplexitySessionTokenVisibility() => ShowPerplexitySessionToken = !ShowPerplexitySessionToken;
+    [RelayCommand] private void ToggleNineRouterAddApiKeyVisibility() => ShowNineRouterAddApiKey = !ShowNineRouterAddApiKey;
     [RelayCommand] private void ToggleAmpUpstreamApiKeyVisibility() => ShowAmpUpstreamApiKey = !ShowAmpUpstreamApiKey;
 
     [RelayCommand]
@@ -2363,6 +2462,230 @@ SelectedSection is SectionKey.Logs;
     {
         ProvidersEngineId = EngineCatalog.PerplexityWebUiScraper.Id;
         FocusedConfigEngineId = EngineCatalog.PerplexityWebUiScraper.Id;
+    }
+
+    [RelayCommand]
+    private void FocusNineRouter()
+    {
+        ProvidersEngineId = EngineCatalog.NineRouter.Id;
+        FocusedConfigEngineId = EngineCatalog.NineRouter.Id;
+    }
+
+    [RelayCommand]
+    private void ShowAddNineRouterApiKey()
+    {
+        NineRouterAddProviderIdDraft = "";
+        NineRouterAddNameDraft = "";
+        NineRouterAddApiKeyDraft = "";
+        ShowNineRouterAddApiKey = false;
+        ShowNineRouterAddKeyDialog = true;
+    }
+
+    [RelayCommand]
+    private void DismissNineRouterAddKeyDialog()
+    {
+        ShowNineRouterAddKeyDialog = false;
+        ShowNineRouterAddApiKey = false;
+        NineRouterAddProviderIdDraft = "";
+        NineRouterAddNameDraft = "";
+        NineRouterAddApiKeyDraft = "";
+    }
+
+    public async Task ConfirmAddNineRouterApiKeyAsync(string providerId, string? name, string apiKey)
+    {
+        DismissNineRouterAddKeyDialog();
+        var displayName = string.IsNullOrWhiteSpace(name) ? providerId.Trim() : name.Trim();
+        await CreateNineRouterProviderAsync(providerId.Trim(), displayName, apiKey);
+    }
+
+    [RelayCommand]
+    private Task ConnectNineRouterKiroAsync() =>
+        CreateNineRouterProviderAsync("kiro", "Kiro AI", NoAuthApiKeyPlaceholder);
+
+    [RelayCommand]
+    private async Task ConnectNineRouterOpenCodeFreeAsync()
+    {
+        if (!IsNineRouterEngineRunning)
+        {
+            ShowNineRouterStatus(_localization.GetString("ProvidersView_NineRouter_EngineNotRunning"), isError: true);
+            return;
+        }
+
+        if (IsNineRouterBusy) return;
+        IsNineRouterBusy = true;
+        try
+        {
+            Exception? last = null;
+            foreach (var providerId in OpenCodeFreeProviderIds)
+            {
+                try
+                {
+                    await PostNineRouterProviderAsync(providerId, "OpenCode Free", NoAuthApiKeyPlaceholder);
+                    await RefreshNineRouterConnectionsAsync();
+                    RestartNineRouterModelFetch();
+                    return;
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    last = ex;
+                }
+            }
+
+            ShowNineRouterStatus(
+                _localization.GetString("ProvidersView_NineRouter_CreateFailed", last?.Message ?? "opencode"),
+                isError: true);
+        }
+        finally
+        {
+            IsNineRouterBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ToggleNineRouterConnectionAsync(NineRouterConnectionViewModel? connection)
+    {
+        if (connection is null || !IsNineRouterEngineRunning || IsNineRouterBusy) return;
+        IsNineRouterBusy = true;
+        try
+        {
+            using var client = new ApiClient(NineRouterEngine.Port);
+            await client.UpdateProviderAsync(
+                connection.Id,
+                new NineRouterUpdateProviderRequest { IsActive = !connection.IsActive });
+            await RefreshNineRouterConnectionsAsync();
+        }
+        catch (Exception ex)
+        {
+            ShowNineRouterStatus(ex.Message, isError: true);
+        }
+        finally
+        {
+            IsNineRouterBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task DeleteNineRouterConnectionAsync(NineRouterConnectionViewModel? connection)
+    {
+        if (connection is null || !IsNineRouterEngineRunning || IsNineRouterBusy) return;
+        IsNineRouterBusy = true;
+        try
+        {
+            using var client = new ApiClient(NineRouterEngine.Port);
+            await client.DeleteProviderAsync(connection.Id);
+            await RefreshNineRouterConnectionsAsync();
+            RestartNineRouterModelFetch();
+        }
+        catch (Exception ex)
+        {
+            ShowNineRouterStatus(ex.Message, isError: true);
+        }
+        finally
+        {
+            IsNineRouterBusy = false;
+        }
+    }
+
+    private const string NoAuthApiKeyPlaceholder = "none";
+    private static readonly string[] OpenCodeFreeProviderIds = ["opencode", "opencode-zen", "opencode-free"];
+
+    private async Task CreateNineRouterProviderAsync(string providerId, string name, string apiKey)
+    {
+        if (!IsNineRouterEngineRunning)
+        {
+            ShowNineRouterStatus(_localization.GetString("ProvidersView_NineRouter_EngineNotRunning"), isError: true);
+            return;
+        }
+
+        if (IsNineRouterBusy) return;
+        IsNineRouterBusy = true;
+        try
+        {
+            await PostNineRouterProviderAsync(providerId, name, apiKey);
+            await RefreshNineRouterConnectionsAsync();
+            RestartNineRouterModelFetch();
+        }
+        catch (Exception ex)
+        {
+            ShowNineRouterStatus(
+                _localization.GetString("ProvidersView_NineRouter_CreateFailed", ex.Message),
+                isError: true);
+        }
+        finally
+        {
+            IsNineRouterBusy = false;
+        }
+    }
+
+    private async Task PostNineRouterProviderAsync(string providerId, string name, string apiKey)
+    {
+        using var client = new ApiClient(NineRouterEngine.Port);
+        await client.CreateProviderAsync(new NineRouterCreateProviderRequest
+        {
+            Provider = providerId,
+            Name = name,
+            ApiKey = apiKey,
+            AuthType = "apikey"
+        });
+    }
+
+    private async Task RefreshNineRouterConnectionsAsync()
+    {
+        if (NineRouterEngine.State != EngineState.Running)
+        {
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                NineRouterConnections.Clear();
+                OnPropertyChanged(nameof(HasNineRouterConnections));
+            });
+            return;
+        }
+
+        try
+        {
+            using var client = new ApiClient(NineRouterEngine.Port);
+            var connections = await client.ListProvidersAsync();
+            await Dispatcher.UIThread.InvokeAsync(() => ApplyNineRouterConnections(connections));
+        }
+        catch (Exception ex)
+        {
+            await Dispatcher.UIThread.InvokeAsync(() =>
+                ShowNineRouterStatus(
+                    _localization.GetString("ProvidersView_NineRouter_LoadFailed", ex.Message),
+                    isError: true));
+        }
+    }
+
+    private void ApplyNineRouterConnections(IReadOnlyList<NineRouterProvider> connections)
+    {
+        NineRouterConnections.Clear();
+        foreach (var connection in connections)
+        {
+            NineRouterConnections.Add(new NineRouterConnectionViewModel(
+                connection.Id ?? "",
+                connection.Provider ?? "",
+                connection.Name ?? "",
+                connection.IsActive ?? true,
+                connection.LastError));
+        }
+        OnPropertyChanged(nameof(HasNineRouterConnections));
+    }
+
+    private void RestartNineRouterModelFetch()
+    {
+        if (NineRouterEngine.State != EngineState.Running) return;
+        _nineRouterModelFetchCts?.Cancel();
+        _nineRouterModelFetchCts = null;
+        StartNineRouterModelFetch(NineRouterEngine);
+    }
+
+    private void ShowNineRouterStatus(string message, bool isError)
+    {
+        ShowOAuthStatus = false;
+        OAuthStatusUrl = "";
+        OAuthStatusIsError = isError;
+        OAuthStatusMessage = message;
+        ShowOAuthStatus = true;
     }
 
 
@@ -3477,6 +3800,10 @@ SelectedSection is SectionKey.Logs;
         _perplexityModelFetchCts?.Cancel();
         _perplexityModelFetchCts?.Dispose();
         _perplexityModelFetchCts = null;
+
+        _nineRouterModelFetchCts?.Cancel();
+        _nineRouterModelFetchCts?.Dispose();
+        _nineRouterModelFetchCts = null;
 
         foreach (var engine in _engineRegistry.Engines)
             engine.StateChanged -= OnAnyEngineStateChanged;

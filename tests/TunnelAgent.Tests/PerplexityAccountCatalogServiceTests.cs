@@ -3,6 +3,7 @@ using TunnelAgent.Services;
 
 namespace TunnelAgent.Tests;
 
+[Collection("UserEnvironment")]
 public sealed class PerplexityAccountCatalogServiceTests : IDisposable
 {
     private readonly InMemoryUserEnvironmentService _env = new();
