@@ -14,6 +14,7 @@ using TunnelAgent.Core.Engine;
 using TunnelAgent.Infrastructure.Engine;
 using TunnelAgent.Infrastructure.Engine.CliProxy;
 using TunnelAgent.Infrastructure.Engine.Perplexity;
+using TunnelAgent.Infrastructure.Engine.NineRouter;
 
 namespace TunnelAgent.ViewModels;
 
@@ -178,6 +179,8 @@ SelectedSection is SectionKey.Logs;
     [ObservableProperty] private bool _showUpdateSuccess;
     [ObservableProperty] private bool _showCliProxyUpdateSuccess;
     [ObservableProperty] private bool _showPerplexityUpdateSuccess;
+    [ObservableProperty] private bool _showNineRouterUpdateSuccess;
+    [ObservableProperty] private bool _isNineRouterNodeMissing;
     [ObservableProperty] private string _engineStatusText = "Stopped";
 
     [ObservableProperty] private bool _showAddAccountDialog;
@@ -459,6 +462,7 @@ SelectedSection is SectionKey.Logs;
     {
         SectionKey.ConfigCliProxy => 1,
         SectionKey.ConfigPerplexity => 2,
+        SectionKey.ConfigNineRouter => 3,
         _ => 0
     };
     public int QuotaTabIndex =>
@@ -477,6 +481,7 @@ SelectedSection is SectionKey.Logs;
     {
         "cliproxyapi" => _localization.GetString("Provider_cliproxyapi_Description"),
         "perplexity-webui-scraper" => _localization.GetString("Provider_perplexity-webui-scraper_Description"),
+        "9router" => _localization.GetString("Provider_9router_Description"),
         _ => FocusedConfigEngine.Definition.Description,
     };
     public string EndpointUrl => $"http://127.0.0.1:{Port}";
@@ -584,6 +589,7 @@ SelectedSection is SectionKey.Logs;
     private IManagedEngine FocusedConfigEngine => _engineRegistry.Get(FocusedConfigEngineId);
     private IManagedEngine CliProxyEngine => _engineRegistry.Get(EngineCatalog.CliProxyApi.Id);
     private IManagedEngine PerplexityEngine => _engineRegistry.Get(EngineCatalog.PerplexityWebUiScraper.Id);
+    private IManagedEngine NineRouterEngine => _engineRegistry.Get(EngineCatalog.NineRouter.Id);
 
     public bool EngineAutoStart
     {
@@ -865,6 +871,15 @@ SelectedSection is SectionKey.Logs;
     public string PerplexityEndpointUrl => $"http://127.0.0.1:{PerplexityPort}";
     public bool IsPerplexityFocused => IsPerplexityEngineSelected;
 
+    public string NineRouterInstalledVersion => NineRouterEngine.InstalledVersion ?? "Not installed";
+    public string? NineRouterLatestVersion => NineRouterEngine.LatestVersion;
+    public bool NineRouterUpdateAvailable => NineRouterEngine.UpdateAvailable;
+    public string NineRouterStatusText => BuildEngineStatusText(NineRouterEngine);
+    public ServerState NineRouterServerState => ToServerState(NineRouterEngine.State);
+    public int NineRouterPort => _settings.Current.GetOrAddEngine(EngineCatalog.NineRouter.Id, EngineCatalog.NineRouter.DefaultPort).Port;
+    public string NineRouterEndpointUrl => $"http://127.0.0.1:{NineRouterPort}";
+    public string NineRouterDashboardUrl => $"http://127.0.0.1:{NineRouterPort}/dashboard";
+
     partial void OnSelectedSectionChanged(SectionKey value)
     {
         OnPropertyChanged(nameof(IsConfigSection));
@@ -886,6 +901,11 @@ SelectedSection is SectionKey.Logs;
             FocusedConfigEngineId = EngineCatalog.CliProxyApi.Id;
         else if (value == SectionKey.ConfigPerplexity)
             FocusedConfigEngineId = EngineCatalog.PerplexityWebUiScraper.Id;
+        else if (value == SectionKey.ConfigNineRouter)
+        {
+            FocusedConfigEngineId = EngineCatalog.NineRouter.Id;
+            _ = RefreshNineRouterNodeMissingAsync();
+        }
     }
 
     partial void OnProvidersEngineIdChanged(string value)
@@ -1081,6 +1101,7 @@ SelectedSection is SectionKey.Logs;
             EnsureInitialLogsLoad();
 
             _ = ObserveStartupTaskAsync(LoadEngineReleasesAsync());
+            _ = ObserveStartupTaskAsync(RefreshNineRouterNodeMissingAsync());
         }
         catch (Exception ex)
         {
@@ -1407,6 +1428,14 @@ SelectedSection is SectionKey.Logs;
         OnPropertyChanged(nameof(PerplexityServerState));
         OnPropertyChanged(nameof(PerplexityPort));
         OnPropertyChanged(nameof(PerplexityEndpointUrl));
+        OnPropertyChanged(nameof(NineRouterInstalledVersion));
+        OnPropertyChanged(nameof(NineRouterLatestVersion));
+        OnPropertyChanged(nameof(NineRouterUpdateAvailable));
+        OnPropertyChanged(nameof(NineRouterStatusText));
+        OnPropertyChanged(nameof(NineRouterServerState));
+        OnPropertyChanged(nameof(NineRouterPort));
+        OnPropertyChanged(nameof(NineRouterEndpointUrl));
+        OnPropertyChanged(nameof(NineRouterDashboardUrl));
         OnPropertyChanged(nameof(EndpointUrl));
         OnPropertyChanged(nameof(Port));
         OnPropertyChanged(nameof(EditablePort));
@@ -2461,6 +2490,54 @@ SelectedSection is SectionKey.Logs;
         }
     }
 
+    [RelayCommand]
+    public void OpenNineRouterEngineFolder()
+    {
+        try { _folderOpen.OpenFolder(TunnelAgent.Infrastructure.Engine.NineRouter.DownloadService.DefaultEngineDir); }
+        catch (Exception ex)
+        {
+            ConfigurationStatusIsError = true;
+            ConfigurationStatusMessage = $"Could not open engine folder: {ex.Message}";
+            ShowConfigurationStatus = true;
+        }
+    }
+
+    [RelayCommand]
+    private void OpenNineRouterDashboard()
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(NineRouterDashboardUrl) { UseShellExecute = true });
+        }
+        catch { }
+    }
+
+    private async Task RefreshNineRouterNodeMissingAsync()
+    {
+        bool missing;
+        try
+        {
+            missing = await Task.Run(() => new NodeRuntimeDetector().Detect() is null);
+        }
+        catch
+        {
+            missing = true;
+        }
+
+        void Apply() => IsNineRouterNodeMissing = missing;
+        try
+        {
+            if (Dispatcher.UIThread.CheckAccess())
+                Apply();
+            else
+                Dispatcher.UIThread.Post(Apply);
+        }
+        catch
+        {
+            Apply();
+        }
+    }
+
     [RelayCommand] private void ResetPerplexityAccounts() => ShowResetPerplexityDialog = true;
     [RelayCommand] private void DismissResetPerplexityDialog() => ShowResetPerplexityDialog = false;
 
@@ -3046,8 +3123,9 @@ SelectedSection is SectionKey.Logs;
         OnPropertyChanged(nameof(LocalProxyScrollRequestId));
     }
     [RelayCommand] private void SelectConfigPerplexity() => SelectedSection = SectionKey.ConfigPerplexity;
+    [RelayCommand] private void SelectConfigNineRouter() => SelectedSection = SectionKey.ConfigNineRouter;
 
-    public bool IsConfigSection => SelectedSection is SectionKey.ConfigGeneral or SectionKey.ConfigCliProxy or SectionKey.ConfigPerplexity;
+    public bool IsConfigSection => SelectedSection is SectionKey.ConfigGeneral or SectionKey.ConfigCliProxy or SectionKey.ConfigPerplexity or SectionKey.ConfigNineRouter;
 
     partial void OnSelectedQuotaProviderChanged(ProviderViewModel? value)
     {
@@ -3103,6 +3181,7 @@ SelectedSection is SectionKey.Logs;
         // Invalidate cache so manual check always fetches fresh data
         TunnelAgent.Infrastructure.Engine.CliProxy.DownloadService.InvalidateCache();
         TunnelAgent.Infrastructure.Engine.Perplexity.DownloadService.InvalidateCache();
+        TunnelAgent.Infrastructure.Engine.NineRouter.DownloadService.InvalidateCache();
         try
         {
             await FocusedConfigEngine.CheckForUpdateAsync();
@@ -3122,6 +3201,7 @@ SelectedSection is SectionKey.Logs;
         // Invalidate cache so Reload always fetches fresh data from GitHub
         TunnelAgent.Infrastructure.Engine.CliProxy.DownloadService.InvalidateCache();
         TunnelAgent.Infrastructure.Engine.Perplexity.DownloadService.InvalidateCache();
+        TunnelAgent.Infrastructure.Engine.NineRouter.DownloadService.InvalidateCache();
         await LoadEngineReleasesAsync();
     }
 
@@ -3155,7 +3235,9 @@ SelectedSection is SectionKey.Logs;
         // Stay on correct config section for the engine being updated.
         SelectedSection = string.Equals(engineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase)
             ? SectionKey.ConfigPerplexity
-            : SectionKey.ConfigCliProxy;
+            : string.Equals(engineId, EngineCatalog.NineRouter.Id, StringComparison.OrdinalIgnoreCase)
+                ? SectionKey.ConfigNineRouter
+                : SectionKey.ConfigCliProxy;
         ShowUpdateToast = false;
         var requestedVersion = string.IsNullOrWhiteSpace(version) ? engine.LatestVersion : version;
         if (!string.IsNullOrWhiteSpace(requestedVersion) && !VersionsEqual(requestedVersion, engine.LatestVersion))
@@ -3166,13 +3248,16 @@ SelectedSection is SectionKey.Logs;
         _engineUpdateToastShown[engineId] = false;
         ShowUpdateSuccess = true;
         var isPerplexity = string.Equals(engineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase);
+        var isNineRouter = string.Equals(engineId, EngineCatalog.NineRouter.Id, StringComparison.OrdinalIgnoreCase);
         if (isPerplexity) ShowPerplexityUpdateSuccess = true;
+        else if (isNineRouter) ShowNineRouterUpdateSuccess = true;
         else ShowCliProxyUpdateSuccess = true;
         _ = Task.Delay(4000).ContinueWith(_ => Dispatcher.UIThread.Post(() =>
         {
             ShowUpdateSuccess = false;
             ShowCliProxyUpdateSuccess = false;
             ShowPerplexityUpdateSuccess = false;
+            ShowNineRouterUpdateSuccess = false;
         }));
     }
 

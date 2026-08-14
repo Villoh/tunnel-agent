@@ -772,6 +772,9 @@
   <data name="ConfigView_TabPerplexity" xml:space="preserve">
     <value>Perplexity</value>
   </data>
+  <data name="ConfigView_TabNineRouter" xml:space="preserve">
+    <value>9Router</value>
+  </data>
 
   <data name="ConfigView_General_Title" xml:space="preserve">
     <value>General</value>
@@ -1031,6 +1034,66 @@
   </data>
 
   <!-- ═══════════════════════════════════════════════════════════════════════════
+       CONFIGURATION VIEW - 9ROUTER
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ConfigView_NineRouter_Title" xml:space="preserve">
+    <value>9Router</value>
+  </data>
+  <data name="ConfigView_NineRouter_Subtitle" xml:space="preserve">
+    <value>Engine version, port, and Node.js requirements.</value>
+  </data>
+  <data name="ConfigView_NineRouter_UpdateSuccess" xml:space="preserve">
+    <value>Successfully updated to {0}</value>
+  </data>
+
+  <data name="ConfigView_NineRouter_Engine_Label" xml:space="preserve">
+    <value>9Router</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_Installed" xml:space="preserve">
+    <value>Installed: {0}</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_Available" xml:space="preserve">
+    <value>{0} available</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_Check" xml:space="preserve">
+    <value>Check</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_UpdateNow" xml:space="preserve">
+    <value>Update now</value>
+  </data>
+
+  <data name="ConfigView_NineRouter_EngineFolder_Label" xml:space="preserve">
+    <value>Engine install folder</value>
+  </data>
+  <data name="ConfigView_NineRouter_EngineFolder_Description" xml:space="preserve">
+    <value>Downloaded 9Router files are stored in the local engine directory.</value>
+  </data>
+  <data name="ConfigView_NineRouter_EngineFolder_Open" xml:space="preserve">
+    <value>Open Folder</value>
+  </data>
+  <data name="ConfigView_NineRouter_Dashboard_Label" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="ConfigView_NineRouter_Dashboard_Description" xml:space="preserve">
+    <value>Opens the local 9Router dashboard in your browser.</value>
+  </data>
+  <data name="ConfigView_NineRouter_Dashboard_Open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="ConfigView_NineRouter_ListenPort_Label" xml:space="preserve">
+    <value>Listen port</value>
+  </data>
+  <data name="ConfigView_NineRouter_ListenPort_Description" xml:space="preserve">
+    <value>Localhost only. Restart required to apply.</value>
+  </data>
+  <data name="ConfigView_NineRouter_ListenPort_Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="ConfigView_NineRouter_NodeMissing" xml:space="preserve">
+    <value>Node.js 18 or later is required to run 9Router. Install Node and restart Tunnel Agent.</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
        MISCELLANEOUS
        ═══════════════════════════════════════════════════════════════════════════ -->
   <data name="Toast_NoUpdateAvailable" xml:space="preserve">
@@ -1249,6 +1312,9 @@
   </data>
   <data name="Provider_perplexity-webui-scraper_Description" xml:space="preserve">
     <value>OpenAI-compatible local API backed by Perplexity WebUI sessions.</value>
+  </data>
+  <data name="Provider_9router_Description" xml:space="preserve">
+    <value>OpenAI-compatible local router for 40+ providers with auto-fallback.</value>
   </data>
   <data name="ProvidersView_Provider_ConnectedAccountSingular" xml:space="preserve">
     <value>{0} connected account</value>

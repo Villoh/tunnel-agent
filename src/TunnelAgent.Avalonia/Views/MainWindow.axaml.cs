@@ -184,7 +184,7 @@ public partial class MainWindow : Window
     }
 
     private static SectionKey NormalizeSectionKey(SectionKey section) =>
-        section is SectionKey.ConfigGeneral or SectionKey.ConfigCliProxy or SectionKey.ConfigPerplexity
+        section is SectionKey.ConfigGeneral or SectionKey.ConfigCliProxy or SectionKey.ConfigPerplexity or SectionKey.ConfigNineRouter
             ? SectionKey.Configuration
             : section;
 

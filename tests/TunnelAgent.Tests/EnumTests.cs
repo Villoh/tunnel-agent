@@ -28,6 +28,7 @@ public sealed class EnumTests
         Assert.Contains(SectionKey.ConfigGeneral, values);
         Assert.Contains(SectionKey.ConfigCliProxy, values);
         Assert.Contains(SectionKey.ConfigPerplexity, values);
+        Assert.Contains(SectionKey.ConfigNineRouter, values);
     }
 
     [Fact]
