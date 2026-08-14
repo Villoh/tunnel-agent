@@ -582,6 +582,27 @@
   <data name="ProvidersView_NineRouterSection_ConnectOpenCode" xml:space="preserve">
     <value>Ligar OpenCode Free</value>
   </data>
+  <data name="ProvidersView_NineRouterSection_ConnectClaude" xml:space="preserve">
+    <value>Ligar Claude</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectGemini" xml:space="preserve">
+    <value>Ligar Gemini</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectCopilot" xml:space="preserve">
+    <value>Ligar Copilot</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthWaiting" xml:space="preserve">
+    <value>Conclua o início de sessão em {0} no browser.</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthConnected" xml:space="preserve">
+    <value>{0} está ligado.</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthFailed" xml:space="preserve">
+    <value>Não foi possível ligar {0}: {1}</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthTimeout" xml:space="preserve">
+    <value>O início de sessão em {0} expirou. Tente novamente depois de concluir no browser.</value>
+  </data>
   <data name="ProvidersView_NineRouterConnection_DeleteTooltip" xml:space="preserve">
     <value>Eliminar ligação</value>
   </data>

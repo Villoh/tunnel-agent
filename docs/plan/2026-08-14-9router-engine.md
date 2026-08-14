@@ -409,3 +409,19 @@ Enabled/disabled is `isActive`, not `enabled`/`disabled`. 9Router sets `authType
 | --- | --- | --- | --- |
 | GET | `/api/keys` | — | `200` `{ "keys": [ { id, name, key, machineId, isActive, createdAt } ] }` |
 | POST | `/api/keys` | `{ "name": "..." }` | `201` `{ "id", "name", "key", "machineId" }` |
+
+---
+
+## Phase 10 OAuth contract
+
+Captured from [decolua/9router](https://github.com/decolua/9router) `master` (`src/app/api/oauth/[provider]/[action]/route.js`, `src/lib/oauth/providers/index.js`, dashboard `OAuthModal.js`). Cookie auth retry is the same as Phase 7.
+
+Curated provider ids (do not use `copilot` / `github-copilot` / `gemini`):
+
+| Button | 9Router id | Flow |
+| --- | --- | --- |
+| Connect Claude | `claude` | `GET /api/oauth/claude/authorize?redirect_uri=...` → open `authUrl` → loopback captures `code` → `POST /api/oauth/claude/exchange` `{ code, redirectUri, codeVerifier, state }` |
+| Connect Gemini | `gemini-cli` | Same authorize + exchange pattern (`flowType`: `authorization_code`) |
+| Connect Copilot | `github` | `GET /api/oauth/github/device-code` → open `verification_uri_complete` (fallback `verification_uri`) → `POST /api/oauth/github/poll` `{ deviceCode }` until `{ success: true, connection }` |
+
+Authorize JSON (camelCase): `{ authUrl, state, codeVerifier, redirectUri, flowType }`. Device-code JSON is GitHub snake_case plus optional `codeVerifier`: `{ device_code, verification_uri, verification_uri_complete, interval, expires_in }`. Poll pending: `{ success: false, pending: true, error: "authorization_pending" }`. Default wait is ~2.5 minutes. Secrets (`code`, `codeVerifier`, `deviceCode`) are never logged.
