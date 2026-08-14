@@ -52,7 +52,7 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
-    public async Task FocusNineRouter_SetsProvidersTabAndFocusedEngine()
+    public async Task SelectNineRouterProviders_SetsProvidersTabAndFocusedEngine()
     {
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
@@ -60,8 +60,9 @@ public sealed class MainWindowViewModelTests
         var registry = new EngineRegistryService(settings);
         var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
 
-        vm.FocusNineRouterCommand.Execute(null);
+        vm.SelectNineRouterProvidersCommand.Execute(null);
 
+        Assert.Equal(SectionKey.Providers, vm.SelectedSection);
         Assert.True(vm.IsNineRouterEngineSelected);
         Assert.False(vm.IsCliProxyEngineSelected);
         Assert.False(vm.IsPerplexityEngineSelected);

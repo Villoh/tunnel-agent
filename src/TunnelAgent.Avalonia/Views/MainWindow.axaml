@@ -359,6 +359,27 @@
                             </Button>
 
                             <Button Classes="proxy-card" Margin="2,0"
+                                    Command="{Binding SelectNineRouterProvidersCommand}"
+                                    ToolTip.Tip="{l:Loc Sidebar_NineRouter_StatusTooltip}"
+                                    IsVisible="{Binding !IsSidebarCollapsed}"
+                                    Opacity="{Binding SidebarContentOpacity}">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="9">
+                                    <Grid Grid.Column="0" Classes="status-indicator" VerticalAlignment="Center">
+                                        <Ellipse Classes="status-pulse"
+                                                 Fill="{Binding NineRouterServerState, Converter={StaticResource StateToBrush}}"
+                                                 IsVisible="{Binding NineRouterServerState, Converter={StaticResource StateIsRunning}}" />
+                                        <Ellipse Classes="status-dot"
+                                                 Fill="{Binding NineRouterServerState, Converter={StaticResource StateToBrush}}" />
+                                    </Grid>
+                                    <TextBlock Grid.Column="1" Text="{l:Loc Sidebar_NineRouter}" FontSize="12" FontWeight="Medium"
+                                               Foreground="{DynamicResource FgBrush}" TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center" />
+                                    <lucide:PackIconLucide Grid.Column="2" Kind="ChevronRight" Width="13" Height="13"
+                                                           VerticalAlignment="Center" Foreground="{DynamicResource FgFaintBrush}" />
+                                </Grid>
+                            </Button>
+
+                            <Button Classes="proxy-card" Margin="2,0"
                                     Command="{Binding SelectConfigLocalProxyCommand}"
                                     ToolTip.Tip="{l:Loc Sidebar_ProxyCard_Hint}"
                                     IsVisible="{Binding !IsSidebarCollapsed}"

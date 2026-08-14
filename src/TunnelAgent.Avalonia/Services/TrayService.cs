@@ -31,6 +31,10 @@ public sealed class TrayService : IDisposable
     private readonly NativeMenuItem _perplexityStopItem;
     private readonly NativeMenuItem _perplexityRestartItem;
     private readonly NativeMenuItem _perplexityStatusItem;
+    private readonly NativeMenuItem _nineRouterStartItem;
+    private readonly NativeMenuItem _nineRouterStopItem;
+    private readonly NativeMenuItem _nineRouterRestartItem;
+    private readonly NativeMenuItem _nineRouterStatusItem;
     private bool _isQuitting;
 
     public TrayService(
@@ -54,6 +58,11 @@ public sealed class TrayService : IDisposable
         _perplexityStartItem = CreateItem("Start Server", async (_, _) => await RunForEngineAsync(EngineCatalog.PerplexityWebUiScraper.Id, () => _viewModel.StartServerAsync()));
         _perplexityStopItem = CreateItem("Stop Server", async (_, _) => await RunForEngineAsync(EngineCatalog.PerplexityWebUiScraper.Id, () => _viewModel.StopServerAsync()));
         _perplexityRestartItem = CreateItem("Restart Server", async (_, _) => await RunForEngineAsync(EngineCatalog.PerplexityWebUiScraper.Id, () => _viewModel.RestartEngineAsync()));
+
+        _nineRouterStatusItem = CreateItem("Server: Stopped", null);
+        _nineRouterStartItem = CreateItem("Start Server", async (_, _) => await RunForEngineAsync(EngineCatalog.NineRouter.Id, () => _viewModel.StartServerAsync()));
+        _nineRouterStopItem = CreateItem("Stop Server", async (_, _) => await RunForEngineAsync(EngineCatalog.NineRouter.Id, () => _viewModel.StopServerAsync()));
+        _nineRouterRestartItem = CreateItem("Restart Server", async (_, _) => await RunForEngineAsync(EngineCatalog.NineRouter.Id, () => _viewModel.RestartEngineAsync()));
 
         var cliProxyMenu = new NativeMenu
         {
@@ -79,6 +88,18 @@ public sealed class TrayService : IDisposable
             }
         };
 
+        var nineRouterMenu = new NativeMenu
+        {
+            Items =
+            {
+                _nineRouterStatusItem,
+                new NativeMenuItemSeparator(),
+                _nineRouterStartItem,
+                _nineRouterStopItem,
+                _nineRouterRestartItem
+            }
+        };
+
         var menu = new NativeMenu
         {
             Items =
@@ -88,6 +109,7 @@ public sealed class TrayService : IDisposable
                 new NativeMenuItemSeparator(),
                 new NativeMenuItem { Header = "CLIProxyAPI", Menu = cliProxyMenu },
                 new NativeMenuItem { Header = "Perplexity", Menu = perplexityMenu },
+                new NativeMenuItem { Header = "9Router", Menu = nineRouterMenu },
                 new NativeMenuItemSeparator(),
                 CreateItem("Configuration", (_, _) => ShowConfiguration()),
                 CreateItem("Open Auth Folder", (_, _) => _viewModel.OpenAuthFolder()),
@@ -124,6 +146,7 @@ public sealed class TrayService : IDisposable
         _isQuitting = true;
         await RunForEngineAsync(EngineCatalog.CliProxyApi.Id, () => _viewModel.StopServerAsync());
         await RunForEngineAsync(EngineCatalog.PerplexityWebUiScraper.Id, () => _viewModel.StopServerAsync());
+        await RunForEngineAsync(EngineCatalog.NineRouter.Id, () => _viewModel.StopServerAsync());
         _desktop.Shutdown();
     }
 
@@ -157,6 +180,7 @@ public sealed class TrayService : IDisposable
         _isQuitting = true;
         RunForEngineAsync(EngineCatalog.CliProxyApi.Id, () => _viewModel.StopServerAsync()).GetAwaiter().GetResult();
         RunForEngineAsync(EngineCatalog.PerplexityWebUiScraper.Id, () => _viewModel.StopServerAsync()).GetAwaiter().GetResult();
+        RunForEngineAsync(EngineCatalog.NineRouter.Id, () => _viewModel.StopServerAsync()).GetAwaiter().GetResult();
     }
 
     private void OnWindowPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
@@ -171,7 +195,8 @@ public sealed class TrayService : IDisposable
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName is nameof(MainWindowViewModel.EngineState) or nameof(MainWindowViewModel.ServerState)
-            or nameof(MainWindowViewModel.CliProxyServerState) or nameof(MainWindowViewModel.PerplexityServerState))
+            or nameof(MainWindowViewModel.CliProxyServerState) or nameof(MainWindowViewModel.PerplexityServerState)
+            or nameof(MainWindowViewModel.NineRouterServerState))
             RefreshMenu();
     }
 
@@ -285,6 +310,7 @@ public sealed class TrayService : IDisposable
         _showHideItem.Header = visible ? "Hide Window" : "Show Window";
         RefreshEngineMenu(_cliProxyStatusItem, _cliProxyStartItem, _cliProxyStopItem, _cliProxyRestartItem, _viewModel.CliProxyServerState, _viewModel.CliProxyStatusText);
         RefreshEngineMenu(_perplexityStatusItem, _perplexityStartItem, _perplexityStopItem, _perplexityRestartItem, _viewModel.PerplexityServerState, _viewModel.PerplexityStatusText);
+        RefreshEngineMenu(_nineRouterStatusItem, _nineRouterStartItem, _nineRouterStopItem, _nineRouterRestartItem, _viewModel.NineRouterServerState, _viewModel.NineRouterStatusText);
     }
 
     private async Task RunForEngineAsync(string engineId, Func<Task> action)
