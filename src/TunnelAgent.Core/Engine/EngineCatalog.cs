@@ -21,6 +21,14 @@ public static class EngineCatalog
         "perplexity-webui-scraper",
         8327);
 
+    public static readonly EngineDefinition NineRouter = new(
+        "9router",
+        "9Router",
+        "OpenAI-compatible local router for 40+ providers with auto-fallback.",
+        "decolua",
+        "9router",
+        20128);
+
     public static IReadOnlyList<EngineDefinition> All { get; } =
-        [CliProxyApi, PerplexityWebUiScraper];
+        [CliProxyApi, PerplexityWebUiScraper, NineRouter];
 }
