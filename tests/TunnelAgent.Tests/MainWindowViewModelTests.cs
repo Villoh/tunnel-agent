@@ -52,6 +52,48 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
+    public async Task FocusNineRouter_SetsProvidersTabAndFocusedEngine()
+    {
+        using var temp = new TestTempDirectory();
+        var settings = new SettingsService(temp.File("settings.json"));
+        await settings.LoadAsync();
+        var registry = new EngineRegistryService(settings);
+        var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
+
+        vm.FocusNineRouterCommand.Execute(null);
+
+        Assert.True(vm.IsNineRouterEngineSelected);
+        Assert.False(vm.IsCliProxyEngineSelected);
+        Assert.False(vm.IsPerplexityEngineSelected);
+        Assert.Equal(2, vm.ProvidersTabIndex);
+        Assert.Equal(EngineCatalog.NineRouter.Id, vm.ProvidersEngineId);
+        Assert.Equal(EngineCatalog.NineRouter.Id, vm.FocusedConfigEngineId);
+        Assert.Equal($"http://127.0.0.1:{EngineCatalog.NineRouter.DefaultPort}", vm.EndpointUrl);
+        Assert.False(vm.HasNineRouterConnections);
+    }
+
+    [Fact]
+    public async Task ShowAddNineRouterApiKey_OpensAndDismissesDialog()
+    {
+        using var temp = new TestTempDirectory();
+        var settings = new SettingsService(temp.File("settings.json"));
+        await settings.LoadAsync();
+        var registry = new EngineRegistryService(settings);
+        var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
+
+        vm.ShowAddNineRouterApiKeyCommand.Execute(null);
+
+        Assert.True(vm.ShowNineRouterAddKeyDialog);
+        Assert.False(vm.ShowNineRouterAddApiKey);
+
+        vm.NineRouterAddProviderIdDraft = "openai";
+        vm.DismissNineRouterAddKeyDialogCommand.Execute(null);
+
+        Assert.False(vm.ShowNineRouterAddKeyDialog);
+        Assert.Equal("", vm.NineRouterAddProviderIdDraft);
+    }
+
+    [Fact]
     public async Task EngineService_InitialServerState_IsStopped()
     {
         using var temp = new TestTempDirectory();

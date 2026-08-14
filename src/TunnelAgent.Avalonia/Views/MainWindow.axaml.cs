@@ -309,6 +309,50 @@ public partial class MainWindow : Window
     private async void OnConfirmPerplexityAccount(object? sender, RoutedEventArgs e) =>
         await ConfirmPerplexityAccountFromInputsAsync();
 
+    private async void OnConfirmNineRouterAddKey(object? sender, RoutedEventArgs e) =>
+        await ConfirmNineRouterAddKeyFromInputsAsync();
+
+    private async Task ConfirmNineRouterAddKeyFromInputsAsync()
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        var providerId = NineRouterProviderIdBox.Text?.Trim() ?? "";
+        var name = NineRouterNameBox.Text?.Trim();
+        var apiKey = NineRouterApiKeyBox.Text?.Trim() ?? "";
+        if (string.IsNullOrEmpty(providerId) || string.IsNullOrEmpty(apiKey)) return;
+
+        NineRouterProviderIdBox.Text = "";
+        NineRouterNameBox.Text = "";
+        NineRouterApiKeyBox.Text = "";
+        await vm.ConfirmAddNineRouterApiKeyAsync(providerId, string.IsNullOrEmpty(name) ? null : name, apiKey);
+    }
+
+    private async void OnNineRouterAddKeyInputKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter) return;
+        e.Handled = true;
+        await ConfirmNineRouterAddKeyFromInputsAsync();
+    }
+
+    private void OnNineRouterAddKeyOverlayPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm) vm.DismissNineRouterAddKeyDialogCommand.Execute(null);
+    }
+
+    private async void OnNineRouterAddKeyDialogKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            vm.DismissNineRouterAddKeyDialogCommand.Execute(null);
+        }
+        else if (e.Key == Key.Enter)
+        {
+            e.Handled = true;
+            await ConfirmNineRouterAddKeyFromInputsAsync();
+        }
+    }
+
     private async Task ConfirmPerplexityAccountFromInputsAsync()
     {
         if (DataContext is not MainWindowViewModel vm) return;

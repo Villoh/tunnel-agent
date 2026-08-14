@@ -6,6 +6,7 @@ using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using TunnelAgent.Core.Engine;
 using TunnelAgent.ViewModels;
 
 namespace TunnelAgent.Services;
@@ -53,7 +54,7 @@ public sealed class ModelFetchService
             try
             {
                 using var request = new HttpRequestMessage(HttpMethod.Get, url);
-                var apiKey = TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get("TUNNEL_AGENT_CLIPROXY_API_KEY") ?? "";
+                var apiKey = ApiKeyForEngine(engineId);
                 if (!string.IsNullOrWhiteSpace(apiKey))
                     request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {apiKey}");
                 using var resp = await Http.SendAsync(request, ct);
@@ -120,6 +121,23 @@ public sealed class ModelFetchService
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Bearer token for <c>/v1/models</c>, chosen by engine so 9Router and
+    /// Perplexity do not inherit the CLIProxy key.
+    /// </summary>
+    /// <param name="engineId">
+    /// Catalog id (<c>cliproxyapi</c>, <c>perplexity-webui-scraper</c>,
+    /// <c>9router</c>). Null or unknown ids use the CLIProxy key.
+    /// </param>
+    internal static string ApiKeyForEngine(string? engineId)
+    {
+        if (string.Equals(engineId, EngineCatalog.PerplexityWebUiScraper.Id, StringComparison.OrdinalIgnoreCase))
+            return "";
+        if (string.Equals(engineId, EngineCatalog.NineRouter.Id, StringComparison.OrdinalIgnoreCase))
+            return TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get(NineRouterClientKeyService.EnvVarName) ?? "";
+        return TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get("TUNNEL_AGENT_CLIPROXY_API_KEY") ?? "";
+    }
 
     private static int CountOwnedBy(JsonArray data, string ownedBy)
     {

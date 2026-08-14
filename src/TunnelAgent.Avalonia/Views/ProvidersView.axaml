@@ -31,6 +31,7 @@
                     <ctrl:SlidingTabBar.Tabs>
                         <ctrl:SlidingTab Header="{l:Loc ProvidersView_TabCLIProxyAPI}" Command="{Binding FocusCliProxyCommand}" />
                         <ctrl:SlidingTab Header="{l:Loc ProvidersView_TabPerplexity}"  Command="{Binding FocusPerplexityCommand}" />
+                        <ctrl:SlidingTab Header="{l:Loc ProvidersView_TabNineRouter}"  Command="{Binding FocusNineRouterCommand}" />
                     </ctrl:SlidingTabBar.Tabs>
                 </ctrl:SlidingTabBar>
 
@@ -159,6 +160,80 @@
                                             <Button Grid.Column="3" Classes="icon-btn"
                                                     ToolTip.Tip="{l:Loc ProvidersView_PerplexityAccount_RemoveTooltip}"
                                                     Command="{Binding #Root.DataContext.RemovePerplexityAccountCommand}"
+                                                    CommandParameter="{Binding}">
+                                                <lucide:PackIconLucide Kind="Trash2" Width="13" Height="13"
+                                                                       Foreground="#D46A6A" />
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card" IsVisible="{Binding IsNineRouterEngineSelected}" Margin="0,0,0,12">
+                    <StackPanel Margin="16,14" Spacing="12">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel>
+                                <TextBlock Classes="row-label" Text="{l:Loc ProvidersView_NineRouterSection_Title}" />
+                                <TextBlock Classes="row-desc" Text="{l:Loc ProvidersView_NineRouterSection_Description}" />
+                            </StackPanel>
+                            <Button Grid.Column="1" Classes="icon-btn"
+                                    ToolTip.Tip="{l:Loc ProvidersView_NineRouterSection_AddTooltip}"
+                                    Command="{Binding ShowAddNineRouterApiKeyCommand}"
+                                    IsEnabled="{Binding IsNineRouterEngineRunning}">
+                                <lucide:PackIconLucide Kind="Plus" Width="14" Height="14"
+                                                       Foreground="{DynamicResource FgMutedBrush}" />
+                            </Button>
+                        </Grid>
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Classes="app" Content="{l:Loc ProvidersView_NineRouterSection_ConnectKiro}"
+                                    Command="{Binding ConnectNineRouterKiroCommand}"
+                                    IsEnabled="{Binding IsNineRouterEngineRunning}" />
+                            <Button Classes="app" Content="{l:Loc ProvidersView_NineRouterSection_ConnectOpenCode}"
+                                    Command="{Binding ConnectNineRouterOpenCodeFreeCommand}"
+                                    IsEnabled="{Binding IsNineRouterEngineRunning}" />
+                        </StackPanel>
+
+                        <Border Background="#08FFFFFF" CornerRadius="8" Padding="14,16"
+                                IsVisible="{Binding HasNineRouterConnections, Converter={StaticResource InvertBool}}">
+                            <StackPanel Spacing="6">
+                                <TextBlock Classes="row-label" Text="{l:Loc ProvidersView_NineRouterSection_NoConnections}" />
+                                <TextBlock Classes="row-desc" Text="{l:Loc ProvidersView_NineRouterSection_EmptyState}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+
+                        <ItemsControl ItemsSource="{Binding NineRouterConnections}" IsVisible="{Binding HasNineRouterConnections}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:NineRouterConnectionViewModel">
+                                    <Border Background="#08FFFFFF" CornerRadius="8" Padding="14,12" Margin="0,0,0,8">
+                                        <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto">
+                                            <StackPanel Grid.Column="0" Grid.RowSpan="2" Spacing="4">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <TextBlock Classes="row-label" Text="{Binding Name}" />
+                                                    <Border Classes="chip" Background="#22FF7A00"
+                                                            IsVisible="{Binding IsActive, Converter={StaticResource InvertBool}}"
+                                                            VerticalAlignment="Center">
+                                                        <TextBlock Text="{l:Loc ProvidersView_Provider_Disabled}" Foreground="#CC7A2B" FontSize="10" />
+                                                    </Border>
+                                                </StackPanel>
+                                                <TextBlock Classes="row-desc" Text="{Binding ProviderId}"
+                                                           FontFamily="Cascadia Mono,Consolas,monospace" />
+                                                <TextBlock Classes="row-desc" Text="{Binding LastError}"
+                                                           Foreground="#D46A6A"
+                                                           TextWrapping="Wrap"
+                                                           IsVisible="{Binding HasLastError}" />
+                                            </StackPanel>
+                                            <Button Grid.Column="1" Classes="app"
+                                                    Margin="8,0,8,0"
+                                                    Content="{Binding IsActive, Converter={StaticResource BoolToEnableDisableText}}"
+                                                    Command="{Binding #Root.DataContext.ToggleNineRouterConnectionCommand}"
+                                                    CommandParameter="{Binding}" />
+                                            <Button Grid.Column="2" Classes="icon-btn"
+                                                    ToolTip.Tip="{l:Loc ProvidersView_NineRouterConnection_DeleteTooltip}"
+                                                    Command="{Binding #Root.DataContext.DeleteNineRouterConnectionCommand}"
                                                     CommandParameter="{Binding}">
                                                 <lucide:PackIconLucide Kind="Trash2" Width="13" Height="13"
                                                                        Foreground="#D46A6A" />
