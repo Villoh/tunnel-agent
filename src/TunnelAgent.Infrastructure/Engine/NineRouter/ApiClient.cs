@@ -106,7 +106,55 @@ public sealed class ApiClient : IDisposable
         return payload.Connections ?? [];
     }
 
-    /// <summary>Gets routing settings via <c>GET /api/settings</c>.</summary>
+    /// <summary>Lists model combos via <c>GET /api/combos</c>.</summary>
+    /// <param name="ct">Token used to cancel the request.</param>
+    public async Task<IReadOnlyList<NineRouterCombo>> ListCombosAsync(CancellationToken ct = default)
+    {
+        using var response = await SendWithAuthRetryAsync(HttpMethod.Get, "api/combos", body: null, ct)
+            .ConfigureAwait(false);
+        var payload = await ReadJsonAsync<ComboListResponse>(response, ct).ConfigureAwait(false);
+        return payload.Combos ?? [];
+    }
+
+    /// <summary>Creates a model combo via <c>POST /api/combos</c>.</summary>
+    /// <param name="request">Combo name and ordered models.</param>
+    /// <param name="ct">Token used to cancel the request.</param>
+    public async Task<NineRouterCombo> CreateComboAsync(NineRouterCreateComboRequest request, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        using var response = await SendWithAuthRetryAsync(HttpMethod.Post, "api/combos", request, ct)
+            .ConfigureAwait(false);
+        return await ReadJsonAsync<NineRouterCombo>(response, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>Updates a model combo via <c>PUT /api/combos/{id}</c>.</summary>
+    /// <param name="id">Combo id.</param>
+    /// <param name="request">Replacement name and ordered models.</param>
+    /// <param name="ct">Token used to cancel the request.</param>
+    public async Task<NineRouterCombo> UpdateComboAsync(
+        string id,
+        NineRouterUpdateComboRequest request,
+        CancellationToken ct = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        ArgumentNullException.ThrowIfNull(request);
+        using var response = await SendWithAuthRetryAsync(HttpMethod.Put, ComboPath(id), request, ct)
+            .ConfigureAwait(false);
+        return await ReadJsonAsync<NineRouterCombo>(response, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>Deletes a model combo via <c>DELETE /api/combos/{id}</c>.</summary>
+    /// <param name="id">Combo id.</param>
+    /// <param name="ct">Token used to cancel the request.</param>
+    public async Task DeleteComboAsync(string id, CancellationToken ct = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        using var response = await SendWithAuthRetryAsync(HttpMethod.Delete, ComboPath(id), body: null, ct)
+            .ConfigureAwait(false);
+        await EnsureSuccessAsync(response, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>Gets combo strategy settings via <c>GET /api/settings</c>.</summary>
     /// <param name="ct">Token used to cancel the request.</param>
     public async Task<NineRouterSettings> GetSettingsAsync(CancellationToken ct = default)
     {
@@ -124,6 +172,23 @@ public sealed class ApiClient : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
         using var response = await SendWithAuthRetryAsync(HttpMethod.Patch, "api/settings", request, ct)
+            .ConfigureAwait(false);
+        return await ReadJsonAsync<NineRouterSettings>(response, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>Updates combo strategy settings via <c>PATCH /api/settings</c>.</summary>
+    /// <param name="strategies">Complete per-combo strategy map.</param>
+    /// <param name="ct">Token used to cancel the request.</param>
+    public async Task<NineRouterSettings> UpdateComboStrategiesAsync(
+        Dictionary<string, NineRouterComboStrategy> strategies,
+        CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(strategies);
+        using var response = await SendWithAuthRetryAsync(
+                HttpMethod.Patch,
+                "api/settings",
+                new NineRouterUpdateComboStrategiesRequest { ComboStrategies = strategies },
+                ct)
             .ConfigureAwait(false);
         return await ReadJsonAsync<NineRouterSettings>(response, ct).ConfigureAwait(false);
     }
@@ -574,6 +639,9 @@ public sealed class ApiClient : IDisposable
     private static string ProviderPath(string id) =>
         "api/providers/" + Uri.EscapeDataString(id);
 
+    private static string ComboPath(string id) =>
+        "api/combos/" + Uri.EscapeDataString(id);
+
     private static string OAuthPath(string providerId, string action) =>
         "api/oauth/" + Uri.EscapeDataString(providerId) + "/" + action;
 
@@ -608,6 +676,8 @@ public sealed class ApiClient : IDisposable
     private sealed record ProviderListResponse(List<NineRouterProvider>? Connections, string? Error);
 
     private sealed record ProviderEnvelope(NineRouterProvider? Connection, string? Error);
+
+    private sealed record ComboListResponse(List<NineRouterCombo>? Combos, string? Error);
 
     private sealed record ValidationResponse(bool Valid, string? Error);
 

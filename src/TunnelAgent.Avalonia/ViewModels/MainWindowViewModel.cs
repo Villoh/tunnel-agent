@@ -96,6 +96,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     public LogsViewModel Logs { get; } = new();
     public DashboardViewModel Dashboard { get; } = new();
     public FallbackViewModel Fallback { get; }
+    public NineRouterCombosViewModel NineRouterCombos { get; }
     private bool _logsInitialLoadPending;
     private bool _isWindowVisibleForLogs = true;
     private bool _managementKeyRepairAttempted;
@@ -161,6 +162,7 @@ SelectedSection is SectionKey.Logs;
 
     [ObservableProperty] private SectionKey _selectedSection = SectionKey.Home;
     [ObservableProperty] private bool _isSidebarCollapsed;
+    [ObservableProperty] private bool _isFallbackSubmenuExpanded;
     [ObservableProperty] private bool _isDark;
     [ObservableProperty] private string _focusedConfigEngineId = EngineCatalog.CliProxyApi.Id;
     [ObservableProperty] private string _providersEngineId = EngineCatalog.CliProxyApi.Id;
@@ -449,6 +451,10 @@ SelectedSection is SectionKey.Logs;
         PerplexityModelGroups = new ObservableCollection<AvailableModelGroupViewModel>();
         NineRouterModelGroups = new ObservableCollection<AvailableModelGroupViewModel>();
         AvailableModelGroups = new ObservableCollection<AvailableModelGroupViewModel>();
+        NineRouterCombos = new NineRouterCombosViewModel(
+            () => NineRouterEngine.Port,
+            () => IsNineRouterEngineRunning,
+            NineRouterModelGroups);
 
         void OnEngineModelsChanged(object? s, System.Collections.Specialized.NotifyCollectionChangedEventArgs _)
         {
@@ -1599,6 +1605,7 @@ SelectedSection is SectionKey.Logs;
         OnPropertyChanged(nameof(NineRouterEndpointUrl));
         OnPropertyChanged(nameof(NineRouterDashboardUrl));
         OnPropertyChanged(nameof(IsNineRouterEngineRunning));
+        NineRouterCombos.NotifyEngineStateChanged();
         OnPropertyChanged(nameof(EndpointUrl));
         OnPropertyChanged(nameof(Port));
         OnPropertyChanged(nameof(EditablePort));
@@ -3420,7 +3427,22 @@ SelectedSection is SectionKey.Logs;
     private void SelectAgents() => SelectedSection = SectionKey.Agents;
 
     [RelayCommand]
-    private void SelectFallback() => SelectedSection = SectionKey.Fallback;
+    private void ToggleFallbackSubmenu() => IsFallbackSubmenuExpanded = !IsFallbackSubmenuExpanded;
+
+    [RelayCommand]
+    private void SelectFallback()
+    {
+        IsFallbackSubmenuExpanded = true;
+        SelectedSection = SectionKey.Fallback;
+    }
+
+    [RelayCommand]
+    private void SelectNineRouterCombos()
+    {
+        IsFallbackSubmenuExpanded = true;
+        SelectedSection = SectionKey.NineRouterCombos;
+        NineRouterCombos.RefreshCommand.Execute(null);
+    }
 
     private void RefreshFallbackModelOptions()
     {

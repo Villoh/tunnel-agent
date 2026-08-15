@@ -1,0 +1,100 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TunnelAgent.ViewModels"
+             xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+             xmlns:l="using:TunnelAgent.Services"
+             x:Class="TunnelAgent.Views.NineRouterCombosView"
+             x:Name="Root"
+             x:DataType="vm:MainWindowViewModel">
+    <Grid>
+        <StackPanel Margin="0,0,0,24" Spacing="10" DataContext="{Binding NineRouterCombos}">
+            <StackPanel Margin="0,0,0,6">
+                <TextBlock Classes="page-title" Text="{l:Loc NineRouterCombos_Title}" />
+                <TextBlock Classes="page-sub" Text="{l:Loc NineRouterCombos_Subtitle}" />
+            </StackPanel>
+
+            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                <TextBlock Classes="section-label" Text="{l:Loc NineRouterCombos_Title}" VerticalAlignment="Center" />
+                <Button Grid.Column="1" Classes="icon-btn" Command="{Binding RefreshCommand}" IsEnabled="{Binding IsEngineRunning}">
+                    <lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                </Button>
+                <Button Grid.Column="2" Classes="icon-btn" ToolTip.Tip="{l:Loc NineRouterCombos_Create}"
+                        Command="{Binding OpenCreatePanelCommand}" IsEnabled="{Binding IsEngineRunning}">
+                    <lucide:PackIconLucide Kind="Plus" Width="15" Height="15" />
+                </Button>
+            </Grid>
+
+            <Border Background="#18F59E0B" BorderBrush="#44F59E0B" BorderThickness="1" CornerRadius="8" Padding="10"
+                    IsVisible="{Binding !IsEngineRunning}">
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="row-label" Text="{l:Loc Fallback_AddModelPopup_ServerWarning_Title}" />
+                    <TextBlock Classes="row-desc" TextWrapping="Wrap" Text="{l:Loc NineRouterCombos_EngineNotRunning}" />
+                </StackPanel>
+            </Border>
+
+            <Border Background="#18D46A6A" BorderBrush="#44D46A6A" BorderThickness="1" CornerRadius="8" Padding="10"
+                    IsVisible="{Binding HasError}">
+                <TextBlock Classes="row-desc" Text="{Binding ErrorMessage}" TextWrapping="Wrap" />
+            </Border>
+
+            <StackPanel Spacing="8" IsVisible="{Binding IsEngineRunning}">
+                <TextBlock Classes="row-desc" Text="{l:Loc NineRouterCombos_Empty}" IsVisible="{Binding !HasCombos}" />
+                <ItemsControl ItemsSource="{Binding Combos}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Classes="card" Margin="0,0,0,8">
+                                <StackPanel>
+                                    <Grid Margin="12,10" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
+                                        <ToggleButton Grid.Column="0" Classes="chevron" Width="22" Height="22" VerticalAlignment="Center"
+                                                      IsChecked="{Binding IsExpanded, Mode=TwoWay}">
+                                            <lucide:PackIconLucide Kind="ChevronRight" Width="14" Height="14"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                   Foreground="{DynamicResource FgMutedBrush}" />
+                                        </ToggleButton>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13"
+                                                       FontFamily="Cascadia Mono,Consolas,monospace" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Classes="row-desc"
+                                                       Text="{l:LocFormat Key=NineRouterCombos_ModelCount, Path=ModelCount}" />
+                                        </StackPanel>
+                                        <Button Grid.Column="2" Classes="icon-btn" VerticalAlignment="Center"
+                                                ToolTip.Tip="{l:Loc NineRouterCombos_Edit}"
+                                                Command="{Binding #Root.DataContext.NineRouterCombos.OpenEditPanelCommand}" CommandParameter="{Binding}">
+                                            <lucide:PackIconLucide Kind="Pencil" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                                        </Button>
+                                        <Button Grid.Column="3" Classes="icon-btn" VerticalAlignment="Center"
+                                                Command="{Binding #Root.DataContext.NineRouterCombos.DeleteCommand}" CommandParameter="{Binding}">
+                                            <lucide:PackIconLucide Kind="Trash2" Width="14" Height="14" Foreground="#D46A6A" />
+                                        </Button>
+                                    </Grid>
+
+                                    <Border Classes="collapsible" Classes.expanded="{Binding IsExpanded}">
+                                        <StackPanel>
+                                            <Border Classes="row-divider" />
+                                            <ItemsControl ItemsSource="{Binding Models}" Margin="12,6,12,2">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid ColumnDefinitions="26,*" ColumnSpacing="10" Margin="0,4">
+                                                            <Border Grid.Column="0" Width="22" Height="22" CornerRadius="999"
+                                                                    Background="#14000000" VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Position}" FontSize="11" Foreground="{DynamicResource FgMutedBrush}"
+                                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                            </Border>
+                                                            <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="12"
+                                                                       FontFamily="Cascadia Mono,Consolas,monospace"
+                                                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

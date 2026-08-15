@@ -84,11 +84,14 @@ public sealed record NineRouterProvider
     public JsonElement? ProviderSpecificData { get; init; }
 }
 
-/// <summary>9Router routing settings returned by <c>GET /api/settings</c>.</summary>
+/// <summary>9Router settings used to configure model-combo strategies.</summary>
 public sealed record NineRouterSettings
 {
     /// <summary>Gets per-provider routing overrides keyed by provider id.</summary>
     public Dictionary<string, NineRouterProviderStrategy> ProviderStrategies { get; init; } = [];
+
+    /// <summary>Gets the per-combo strategy overrides keyed by combo name.</summary>
+    public Dictionary<string, NineRouterComboStrategy> ComboStrategies { get; init; } = [];
 }
 
 /// <summary>Routing override for one 9Router provider.</summary>
@@ -105,11 +108,68 @@ public sealed record NineRouterProviderStrategy
     public Dictionary<string, JsonElement>? AdditionalData { get; init; }
 }
 
+/// <summary>Strategy override for one 9Router combo.</summary>
+public sealed record NineRouterComboStrategy
+{
+    /// <summary>Gets the routing strategy, such as <c>fallback</c>, <c>round-robin</c>, or <c>fusion</c>.</summary>
+    public string? FallbackStrategy { get; init; }
+
+    /// <summary>Gets the optional model used to judge Fusion panel responses.</summary>
+    public string? JudgeModel { get; init; }
+
+    /// <summary>Gets settings that Tunnel Agent does not manage.</summary>
+    [JsonExtensionData]
+    public Dictionary<string, JsonElement>? AdditionalData { get; init; }
+}
+
+/// <summary>A model combo returned by <c>GET /api/combos</c>.</summary>
+public sealed record NineRouterCombo
+{
+    /// <summary>Gets the combo id.</summary>
+    public string? Id { get; init; }
+
+    /// <summary>Gets the name exposed to clients as a model.</summary>
+    public string? Name { get; init; }
+
+    /// <summary>Gets the ordered model fallback chain.</summary>
+    public List<string>? Models { get; init; }
+
+    /// <summary>Gets the optional combo type reported by 9Router.</summary>
+    public string? Kind { get; init; }
+}
+
+/// <summary>Body for <c>POST /api/combos</c>.</summary>
+public sealed record NineRouterCreateComboRequest
+{
+    /// <summary>Gets the combo name.</summary>
+    public required string Name { get; init; }
+
+    /// <summary>Gets the ordered models in the combo.</summary>
+    public required List<string> Models { get; init; }
+}
+
+/// <summary>Body for <c>PUT /api/combos/{id}</c>.</summary>
+public sealed record NineRouterUpdateComboRequest
+{
+    /// <summary>Gets the replacement combo name.</summary>
+    public required string Name { get; init; }
+
+    /// <summary>Gets the replacement ordered models.</summary>
+    public required List<string> Models { get; init; }
+}
+
 /// <summary>Body for <c>PATCH /api/settings</c> when replacing provider routing overrides.</summary>
 public sealed record NineRouterUpdateSettingsRequest
 {
     /// <summary>Gets the complete per-provider routing-override map.</summary>
     public required Dictionary<string, NineRouterProviderStrategy> ProviderStrategies { get; init; }
+}
+
+/// <summary>Body for <c>PATCH /api/settings</c> when replacing combo strategies.</summary>
+public sealed record NineRouterUpdateComboStrategiesRequest
+{
+    /// <summary>Gets the complete per-combo strategy map.</summary>
+    public required Dictionary<string, NineRouterComboStrategy> ComboStrategies { get; init; }
 }
 
 /// <summary>

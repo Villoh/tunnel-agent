@@ -316,6 +316,14 @@
     <Style Selector="Button.side.selected lucide|PackIconLucide">
         <Setter Property="Foreground" Value="White" />
     </Style>
+    <Style Selector="Button.side-sub">
+        <Setter Property="Padding" Value="8,5" />
+        <Setter Property="Margin" Value="0,0,0,1" />
+    </Style>
+    <Style Selector="Button.side-sub.selected /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource AccentBrush}" />
+    </Style>
 
     <!-- Sidebar footer proxy status card (Quotio-style) -->
     <Style Selector="Button.proxy-card">
