@@ -160,15 +160,25 @@ SelectedSection is SectionKey.Logs;
         }
     }
 
-    [ObservableProperty] private SectionKey _selectedSection = SectionKey.Home;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsQuotaLimitsActive))]
+    [NotifyPropertyChangedFor(nameof(IsQuotaUsageActive))]
+    private SectionKey _selectedSection = SectionKey.Home;
     [ObservableProperty] private bool _isSidebarCollapsed;
+    [ObservableProperty] private bool _isQuotaSubmenuExpanded;
     [ObservableProperty] private bool _isFallbackSubmenuExpanded;
     [ObservableProperty] private bool _isDark;
     [ObservableProperty] private string _focusedConfigEngineId = EngineCatalog.CliProxyApi.Id;
     [ObservableProperty] private string _providersEngineId = EngineCatalog.CliProxyApi.Id;
     [ObservableProperty] private ProviderViewModel? _selectedQuotaProvider;
     [ObservableProperty] private QuotaProviderViewModel? _selectedQuotaAccount;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsQuotaLimitsSelected))]
+    [NotifyPropertyChangedFor(nameof(IsQuotaLimitsActive))]
+    [NotifyPropertyChangedFor(nameof(IsQuotaUsageActive))]
+    private bool _isQuotaUsageSelected;
     [ObservableProperty] private bool _isRefreshingAllQuotaProviders;
+    [ObservableProperty] private bool _isRefreshingNineRouterUsage;
 
     [ObservableProperty] private EngineState _engineState = EngineState.Stopped;
     [ObservableProperty] private string? _installedVersion;
@@ -538,6 +548,12 @@ SelectedSection is SectionKey.Logs;
         SectionKey.ConfigPerplexity => 3,
         _ => 0
     };
+    public bool IsQuotaLimitsSelected => !IsQuotaUsageSelected;
+    public bool IsQuotaLimitsActive => SelectedSection == SectionKey.Quota && IsQuotaLimitsSelected;
+    public bool IsQuotaUsageActive => SelectedSection == SectionKey.Quota && IsQuotaUsageSelected;
+    public bool HasNineRouterUsageConnections => NineRouterConnections.Count > 0;
+    public bool ShowNineRouterUsageEmptyState => IsNineRouterEngineRunning && !HasNineRouterUsageConnections;
+
     public int QuotaTabIndex =>
         (SelectedQuotaAccount?.Id ?? SelectedQuotaProvider?.Id) switch
         {
@@ -968,7 +984,7 @@ SelectedSection is SectionKey.Logs;
         if (value == SectionKey.Quota)
         {
             RefreshQuotaNavigation();
-            _ = ScanAndRefreshQuotaOnceAsync();
+            _ = IsQuotaUsageSelected ? RefreshNineRouterUsageAsync() : ScanAndRefreshQuotaOnceAsync();
         }
         else if (value == SectionKey.Agents && !_agentsDetectedOnce)
         {
@@ -1417,6 +1433,8 @@ SelectedSection is SectionKey.Logs;
                         _allNineRouterProviders.Clear();
                         NineRouterProviderPageNavigationItems.Clear();
                         OnPropertyChanged(nameof(HasNineRouterConnections));
+                        OnPropertyChanged(nameof(HasNineRouterUsageConnections));
+                        OnPropertyChanged(nameof(ShowNineRouterUsageEmptyState));
                     }
                     modelGroups?.Clear();
                     if (isCliProxy)
@@ -1477,6 +1495,7 @@ SelectedSection is SectionKey.Logs;
             }
 
             RefreshEngineSectionProperties();
+            OnPropertyChanged(nameof(ShowNineRouterUsageEmptyState));
         });
     }
 
@@ -2972,6 +2991,8 @@ SelectedSection is SectionKey.Logs;
                 _allNineRouterProviders.Clear();
                 NineRouterProviderPageNavigationItems.Clear();
                 OnPropertyChanged(nameof(HasNineRouterConnections));
+                OnPropertyChanged(nameof(HasNineRouterUsageConnections));
+                OnPropertyChanged(nameof(ShowNineRouterUsageEmptyState));
             });
             return;
         }
@@ -3041,6 +3062,56 @@ SelectedSection is SectionKey.Logs;
         NineRouterProviderCurrentPage = 1;
         ApplyNineRouterProviderFilter();
         OnPropertyChanged(nameof(HasNineRouterConnections));
+        OnPropertyChanged(nameof(HasNineRouterUsageConnections));
+        OnPropertyChanged(nameof(ShowNineRouterUsageEmptyState));
+    }
+
+    private async Task RefreshNineRouterUsageAsync()
+    {
+        if (IsRefreshingNineRouterUsage || NineRouterEngine.State != EngineState.Running) return;
+
+        IsRefreshingNineRouterUsage = true;
+        try
+        {
+            await RefreshNineRouterConnectionsAsync();
+            using var client = new ApiClient(NineRouterEngine.Port);
+            foreach (var connection in NineRouterConnections)
+                await RefreshNineRouterUsageAsync(connection, client);
+        }
+        finally
+        {
+            IsRefreshingNineRouterUsage = false;
+        }
+    }
+
+    public async Task RefreshNineRouterUsageAsync(NineRouterConnectionViewModel connection)
+    {
+        ArgumentNullException.ThrowIfNull(connection);
+        if (NineRouterEngine.State != EngineState.Running || connection.IsUsageRefreshing) return;
+
+        using var client = new ApiClient(NineRouterEngine.Port);
+        await RefreshNineRouterUsageAsync(connection, client);
+    }
+
+    private static async Task RefreshNineRouterUsageAsync(
+        NineRouterConnectionViewModel connection,
+        ApiClient client)
+    {
+        if (connection.IsUsageRefreshing) return;
+
+        connection.IsUsageRefreshing = true;
+        try
+        {
+            connection.ApplyUsage(await client.GetUsageAsync(connection.Id, force: true));
+        }
+        catch (Exception ex)
+        {
+            connection.SetUsageError(ex.Message);
+        }
+        finally
+        {
+            connection.IsUsageRefreshing = false;
+        }
     }
 
     [RelayCommand]
@@ -3390,8 +3461,30 @@ SelectedSection is SectionKey.Logs;
     [RelayCommand]
     private void SelectQuota()
     {
+        IsQuotaSubmenuExpanded = true;
+        IsQuotaUsageSelected = false;
         SelectedSection = SectionKey.Quota;
         FocusedConfigEngineId = EngineCatalog.CliProxyApi.Id;
+    }
+
+    [RelayCommand]
+    private void ToggleQuotaSubmenu() => IsQuotaSubmenuExpanded = !IsQuotaSubmenuExpanded;
+
+    [RelayCommand]
+    private void SelectQuotaLimits()
+    {
+        IsQuotaSubmenuExpanded = true;
+        IsQuotaUsageSelected = false;
+        SelectedSection = SectionKey.Quota;
+    }
+
+    [RelayCommand]
+    private async Task SelectQuotaUsageAsync()
+    {
+        IsQuotaSubmenuExpanded = true;
+        IsQuotaUsageSelected = true;
+        SelectedSection = SectionKey.Quota;
+        await RefreshNineRouterUsageAsync();
     }
 
     /// <summary>True when the tray usage popup is showing the Home view (engines + aggregated usage) instead of a single provider's quota.</summary>

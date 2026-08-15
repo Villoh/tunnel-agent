@@ -132,6 +132,29 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
+    public async Task QuotaSubmenu_TogglesAndSelectsBothViews()
+    {
+        var vm = new MainWindowViewModel();
+
+        vm.ToggleQuotaSubmenuCommand.Execute(null);
+        Assert.True(vm.IsQuotaSubmenuExpanded);
+
+        vm.SelectQuotaLimitsCommand.Execute(null);
+        Assert.Equal(SectionKey.Quota, vm.SelectedSection);
+        Assert.True(vm.IsQuotaLimitsSelected);
+
+        await vm.SelectQuotaUsageCommand.ExecuteAsync(null);
+        Assert.True(vm.IsQuotaUsageSelected);
+        Assert.True(vm.IsQuotaUsageActive);
+
+        vm.SelectedSection = SectionKey.Home;
+        Assert.False(vm.IsQuotaUsageActive);
+
+        vm.ToggleQuotaSubmenuCommand.Execute(null);
+        Assert.False(vm.IsQuotaSubmenuExpanded);
+    }
+
+    [Fact]
     public void NineRouterProviderPagination_FiltersAndNavigatesCatalog()
     {
         var vm = new MainWindowViewModel();
