@@ -260,6 +260,10 @@
                                                         <si:PackIconSimpleIcons Kind="{Binding IconKind}" Foreground="White" Width="14" Height="14"
                                                                                 HorizontalAlignment="Center" VerticalAlignment="Center"
                                                                                 IsVisible="{Binding ShowSimpleIcon}" />
+                                                        <Viewbox Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                 IsVisible="{Binding HasCustomIcon}">
+                                                            <Path Data="{Binding CustomIconData}" Fill="White" Stretch="Uniform" />
+                                                        </Viewbox>
                                                         <TextBlock Text="{Binding Monogram}" Foreground="White" FontSize="17" FontWeight="SemiBold"
                                                                    HorizontalAlignment="Center" VerticalAlignment="Center"
                                                                    IsVisible="{Binding UseMonogram}" />
