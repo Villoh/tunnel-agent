@@ -333,6 +333,57 @@ public sealed class NineRouterApiClientTests
     }
 
     [Fact]
+    public async Task UsageAsync_GetsStatsAndRedactedRequestDetails()
+    {
+        using var handler = new FakeApiHandler();
+        handler.EnqueueJson(HttpStatusCode.OK, """
+            {
+              "totalRequests": 12,
+              "totalPromptTokens": 1000,
+              "totalCompletionTokens": 250,
+              "totalCachedTokens": 100,
+              "totalCost": 0.42,
+              "byProvider": { "openai": { "requests": 12, "promptTokens": 1000, "completionTokens": 250, "cachedTokens": 100, "cost": 0.42 } },
+              "activeRequests": [{ "provider": "openai", "model": "gpt-5", "account": "Primary", "count": 1 }]
+            }
+            """);
+        handler.EnqueueJson(HttpStatusCode.OK, """
+            {
+              "details": [{
+                "id": "request-1", "provider": "openai", "model": "gpt-5", "connectionId": "conn-1",
+                "timestamp": "2026-08-14T12:00:00.000Z", "status": "ok",
+                "latency": { "total": 125 },
+                "tokens": { "prompt_tokens": 100, "completion_tokens": 25 },
+                "request": { "redacted": true }
+              }],
+              "pagination": { "page": 2, "pageSize": 20, "totalItems": 21, "totalPages": 2, "hasNext": false, "hasPrev": true }
+            }
+            """);
+        using var client = new ApiClient(Port, handler);
+
+        var stats = await client.GetUsageStatsAsync("7d");
+        var details = await client.ListRequestDetailsAsync(page: 2, pageSize: 20);
+
+        Assert.Equal(12, stats.TotalRequests);
+        Assert.Equal(1_000, stats.TotalPromptTokens);
+        Assert.Equal(250, stats.TotalCompletionTokens);
+        Assert.Equal(0.42, stats.TotalCost);
+        Assert.Equal(12, stats.ByProvider["openai"].Requests);
+        Assert.Single(stats.ActiveRequests);
+        Assert.Equal("gpt-5", stats.ActiveRequests[0].Model);
+        Assert.Single(details.Details);
+        Assert.Equal("request-1", details.Details[0].Id);
+        Assert.Equal(100, details.Details[0].Tokens?.PromptTokens);
+        Assert.Equal(25, details.Details[0].Tokens?.CompletionTokens);
+        Assert.Equal(2, details.Pagination.Page);
+        Assert.Equal(21, details.Pagination.TotalItems);
+        Assert.Equal("/api/usage/stats", handler.Requests[0].Path);
+        Assert.Equal("?period=7d", handler.Requests[0].Query);
+        Assert.Equal("/api/usage/request-details", handler.Requests[1].Path);
+        Assert.Equal("?page=2&pageSize=20", handler.Requests[1].Query);
+    }
+
+    [Fact]
     public async Task ListProvidersAsync_401ThenLoginCookieThenRetry_Succeeds()
     {
         using var handler = new FakeApiHandler();

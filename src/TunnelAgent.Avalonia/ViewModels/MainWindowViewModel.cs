@@ -37,6 +37,9 @@ internal sealed record PendingNineRouterOAuth(
     NineRouterOAuthStartResult Start,
     string RedirectUri);
 
+/// <summary>The usage source currently shown on Home.</summary>
+public enum HomeDashboardTab { LocalProxy, NineRouter }
+
 public sealed class RoutingStrategyOption(RoutingStrategy value, string displayKey) : ObservableObject
 {
     public RoutingStrategy Value { get; } = value;
@@ -95,6 +98,7 @@ public partial class MainWindowViewModel : ViewModelBase, IAsyncDisposable
     private readonly UsageService _usage;
     public LogsViewModel Logs { get; } = new();
     public DashboardViewModel Dashboard { get; } = new();
+    public NineRouterUsageViewModel NineRouterUsage { get; }
     public FallbackViewModel Fallback { get; }
     public NineRouterCombosViewModel NineRouterCombos { get; }
     private bool _logsInitialLoadPending;
@@ -161,6 +165,7 @@ SelectedSection is SectionKey.Logs;
     }
 
     [ObservableProperty] private SectionKey _selectedSection = SectionKey.Home;
+    [ObservableProperty] private HomeDashboardTab _homeDashboardTab = HomeDashboardTab.LocalProxy;
     [ObservableProperty] private bool _isSidebarCollapsed;
     [ObservableProperty] private bool _isFallbackSubmenuExpanded;
     [ObservableProperty] private bool _isDark;
@@ -451,6 +456,9 @@ SelectedSection is SectionKey.Logs;
         PerplexityModelGroups = new ObservableCollection<AvailableModelGroupViewModel>();
         NineRouterModelGroups = new ObservableCollection<AvailableModelGroupViewModel>();
         AvailableModelGroups = new ObservableCollection<AvailableModelGroupViewModel>();
+        NineRouterUsage = new NineRouterUsageViewModel(
+            () => NineRouterEngine.Port,
+            () => IsNineRouterEngineRunning);
         NineRouterCombos = new NineRouterCombosViewModel(
             () => NineRouterEngine.Port,
             () => IsNineRouterEngineRunning,
@@ -955,6 +963,11 @@ SelectedSection is SectionKey.Logs;
     public bool NineRouterUpdateAvailable => NineRouterEngine.UpdateAvailable;
     public string NineRouterStatusText => BuildEngineStatusText(NineRouterEngine);
     public ServerState NineRouterServerState => ToServerState(NineRouterEngine.State);
+    public int HomeDashboardTabIndex => (int)HomeDashboardTab;
+    public bool IsLocalHomeDashboardTab => HomeDashboardTab == HomeDashboardTab.LocalProxy;
+    public bool IsNineRouterHomeDashboardTab => HomeDashboardTab == HomeDashboardTab.NineRouter;
+    public bool ShowNineRouterUsage => IsNineRouterHomeDashboardTab && IsNineRouterEngineRunning;
+    public bool ShowNineRouterUsageWarning => IsNineRouterHomeDashboardTab && !IsNineRouterEngineRunning;
     public int NineRouterPort => _settings.Current.GetOrAddEngine(EngineCatalog.NineRouter.Id, EngineCatalog.NineRouter.DefaultPort).Port;
     public string NineRouterEndpointUrl => $"http://127.0.0.1:{NineRouterPort}";
     public string NineRouterDashboardUrl => $"http://127.0.0.1:{NineRouterPort}/dashboard";
@@ -965,7 +978,11 @@ SelectedSection is SectionKey.Logs;
         OnPropertyChanged(nameof(ConfigTabIndex));
         UpdateLogsPollingState();
 
-        if (value == SectionKey.Quota)
+        if (value == SectionKey.Home && ShowNineRouterUsage)
+        {
+            _ = NineRouterUsage.RefreshAsync();
+        }
+        else if (value == SectionKey.Quota)
         {
             RefreshQuotaNavigation();
             _ = ScanAndRefreshQuotaOnceAsync();
@@ -985,6 +1002,24 @@ SelectedSection is SectionKey.Logs;
             FocusedConfigEngineId = EngineCatalog.NineRouter.Id;
             _ = RefreshNineRouterNodeMissingAsync();
         }
+    }
+
+    partial void OnHomeDashboardTabChanged(HomeDashboardTab value)
+    {
+        OnPropertyChanged(nameof(HomeDashboardTabIndex));
+        OnPropertyChanged(nameof(IsLocalHomeDashboardTab));
+        OnPropertyChanged(nameof(IsNineRouterHomeDashboardTab));
+        OnPropertyChanged(nameof(ShowNineRouterUsage));
+        OnPropertyChanged(nameof(ShowNineRouterUsageWarning));
+        if (ShowNineRouterUsage)
+            _ = NineRouterUsage.RefreshAsync();
+    }
+
+    [RelayCommand]
+    private void SelectHomeDashboardTab(string tab)
+    {
+        if (Enum.TryParse<HomeDashboardTab>(tab, out var selected))
+            HomeDashboardTab = selected;
     }
 
     partial void OnProvidersEngineIdChanged(string value)
@@ -1394,7 +1429,12 @@ SelectedSection is SectionKey.Logs;
                         }
                     }
                     if (isNineRouter)
+                    {
+                        NineRouterUsage.NotifyEngineStateChanged();
                         _ = RefreshNineRouterConnectionsAsync();
+                        if (SelectedSection == SectionKey.Home && IsNineRouterHomeDashboardTab)
+                            _ = NineRouterUsage.RefreshAsync();
+                    }
                 }
                 else if (engine.State == EngineState.Stopped || engine.State == EngineState.Error)
                 {
@@ -1417,6 +1457,7 @@ SelectedSection is SectionKey.Logs;
                         _allNineRouterProviders.Clear();
                         NineRouterProviderPageNavigationItems.Clear();
                         OnPropertyChanged(nameof(HasNineRouterConnections));
+                        NineRouterUsage.NotifyEngineStateChanged();
                     }
                     modelGroups?.Clear();
                     if (isCliProxy)
@@ -1605,6 +1646,9 @@ SelectedSection is SectionKey.Logs;
         OnPropertyChanged(nameof(NineRouterEndpointUrl));
         OnPropertyChanged(nameof(NineRouterDashboardUrl));
         OnPropertyChanged(nameof(IsNineRouterEngineRunning));
+        OnPropertyChanged(nameof(ShowNineRouterUsage));
+        OnPropertyChanged(nameof(ShowNineRouterUsageWarning));
+        NineRouterUsage.NotifyEngineStateChanged();
         NineRouterCombos.NotifyEngineStateChanged();
         OnPropertyChanged(nameof(EndpointUrl));
         OnPropertyChanged(nameof(Port));

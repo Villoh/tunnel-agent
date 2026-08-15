@@ -275,6 +275,42 @@ public sealed class ApiClient : IDisposable
         return payload.Keys ?? [];
     }
 
+    /// <summary>Gets usage aggregates from <c>GET /api/usage/stats</c>.</summary>
+    /// <param name="period">One of <c>today</c>, <c>24h</c>, <c>7d</c>, <c>30d</c>, <c>60d</c>, or <c>all</c>.</param>
+    /// <param name="ct">Token used to cancel the request.</param>
+    public async Task<NineRouterUsageStats> GetUsageStatsAsync(string period = "7d", CancellationToken ct = default)
+    {
+        if (period is not ("today" or "24h" or "7d" or "30d" or "60d" or "all"))
+            throw new ArgumentOutOfRangeException(nameof(period), "Unsupported 9Router usage period.");
+
+        using var response = await SendWithAuthRetryAsync(
+            HttpMethod.Get,
+            "api/usage/stats?period=" + Uri.EscapeDataString(period),
+            body: null,
+            ct).ConfigureAwait(false);
+        return await ReadJsonAsync<NineRouterUsageStats>(response, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>Gets one page of redacted request metadata from <c>GET /api/usage/request-details</c>.</summary>
+    /// <param name="page">One-based page number.</param>
+    /// <param name="pageSize">Records per page, from 1 to 100.</param>
+    /// <param name="ct">Token used to cancel the request.</param>
+    public async Task<NineRouterRequestDetailsPage> ListRequestDetailsAsync(
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        if (page < 1) throw new ArgumentOutOfRangeException(nameof(page));
+        if (pageSize is < 1 or > 100) throw new ArgumentOutOfRangeException(nameof(pageSize));
+
+        using var response = await SendWithAuthRetryAsync(
+            HttpMethod.Get,
+            $"api/usage/request-details?page={page}&pageSize={pageSize}",
+            body: null,
+            ct).ConfigureAwait(false);
+        return await ReadJsonAsync<NineRouterRequestDetailsPage>(response, ct).ConfigureAwait(false);
+    }
+
     /// <summary>
     /// Starts a curated OAuth flow via <c>GET /api/oauth/{provider}/authorize</c>
     /// (Claude, Gemini CLI) or <c>GET /api/oauth/{provider}/device-code</c>
