@@ -555,6 +555,9 @@
   <data name="ProvidersView_NineRouterSection_Description" xml:space="preserve">
     <value>Conexiones de proveedores almacenadas por el motor 9Router en ejecución.</value>
   </data>
+  <data name="ProvidersView_NineRouterProvider_RoundRobin" xml:space="preserve">
+    <value>Round robin</value>
+  </data>
   <data name="ProvidersView_NineRouterSection_AuthFiles" xml:space="preserve">
     <value>Las conexiones de 9Router las almacena el motor 9Router en ejecución.</value>
   </data>

@@ -1508,7 +1508,8 @@ SelectedSection is SectionKey.Logs;
         {
             using var client = new ApiClient(engine.Port);
             var connections = await client.ListProvidersAsync(token);
-            await Dispatcher.UIThread.InvokeAsync(() => ApplyNineRouterConnections(connections));
+            var settings = await client.GetSettingsAsync(token);
+            await Dispatcher.UIThread.InvokeAsync(() => ApplyNineRouterConnections(connections, settings));
             if (connections.Count == 0)
             {
                 await Dispatcher.UIThread.InvokeAsync(NineRouterModelGroups.Clear);
@@ -2832,6 +2833,40 @@ SelectedSection is SectionKey.Logs;
     }
 
     [RelayCommand]
+    private async Task ToggleNineRouterProviderRoundRobinAsync(NineRouterProviderViewModel? provider)
+    {
+        if (provider is null || !IsNineRouterEngineRunning || IsNineRouterBusy) return;
+        IsNineRouterBusy = true;
+        try
+        {
+            using var client = new ApiClient(NineRouterEngine.Port);
+            var settings = await client.GetSettingsAsync();
+            var strategies = new Dictionary<string, NineRouterProviderStrategy>(
+                settings.ProviderStrategies ?? [],
+                StringComparer.OrdinalIgnoreCase);
+            if (provider.IsRoundRobin)
+                strategies.Remove(provider.Id);
+            else
+                strategies[provider.Id] = new NineRouterProviderStrategy
+                {
+                    FallbackStrategy = "round-robin",
+                    StickyRoundRobinLimit = 1
+                };
+
+            await client.UpdateSettingsAsync(new NineRouterUpdateSettingsRequest { ProviderStrategies = strategies });
+            await RefreshNineRouterConnectionsAsync();
+        }
+        catch (Exception ex)
+        {
+            ShowNineRouterStatus(ex.Message, isError: true);
+        }
+        finally
+        {
+            IsNineRouterBusy = false;
+        }
+    }
+
+    [RelayCommand]
     private async Task ToggleNineRouterConnectionAsync(NineRouterConnectionViewModel? connection)
     {
         if (connection is null || !IsNineRouterEngineRunning || IsNineRouterBusy) return;
@@ -2938,7 +2973,8 @@ SelectedSection is SectionKey.Logs;
         {
             using var client = new ApiClient(NineRouterEngine.Port);
             var connections = await client.ListProvidersAsync();
-            await Dispatcher.UIThread.InvokeAsync(() => ApplyNineRouterConnections(connections));
+            var settings = await client.GetSettingsAsync();
+            await Dispatcher.UIThread.InvokeAsync(() => ApplyNineRouterConnections(connections, settings));
         }
         catch (Exception ex)
         {
@@ -2949,10 +2985,14 @@ SelectedSection is SectionKey.Logs;
         }
     }
 
-    private void ApplyNineRouterConnections(IReadOnlyList<NineRouterProvider> connections)
+    private void ApplyNineRouterConnections(IReadOnlyList<NineRouterProvider> connections, NineRouterSettings settings)
     {
+        var strategies = settings.ProviderStrategies ?? [];
         var providers = NineRouterProviderCatalog.All
-            .Select(option => new NineRouterProviderViewModel(option))
+            .Select(option => new NineRouterProviderViewModel(
+                option,
+                strategies.TryGetValue(option.Id, out var strategy)
+                && string.Equals(strategy.FallbackStrategy, "round-robin", StringComparison.OrdinalIgnoreCase)))
             .ToDictionary(provider => provider.Id, StringComparer.OrdinalIgnoreCase);
         var accounts = new List<NineRouterConnectionViewModel>();
 
@@ -2961,11 +3001,14 @@ SelectedSection is SectionKey.Logs;
             var providerId = connection.Provider ?? "";
             if (!providers.TryGetValue(providerId, out var provider))
             {
-                provider = new NineRouterProviderViewModel(new NineRouterProviderOption(
-                    providerId,
-                    string.IsNullOrWhiteSpace(providerId) ? "Unknown provider" : providerId,
-                    NineRouterAuthModes.None,
-                    NineRouterOAuthFlow.None));
+                provider = new NineRouterProviderViewModel(
+                    new NineRouterProviderOption(
+                        providerId,
+                        string.IsNullOrWhiteSpace(providerId) ? "Unknown provider" : providerId,
+                        NineRouterAuthModes.None,
+                        NineRouterOAuthFlow.None),
+                    strategies.TryGetValue(providerId, out var strategy)
+                    && string.Equals(strategy.FallbackStrategy, "round-robin", StringComparison.OrdinalIgnoreCase));
                 providers.Add(providerId, provider);
             }
 

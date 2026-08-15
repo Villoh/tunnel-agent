@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace TunnelAgent.Infrastructure.Engine.NineRouter;
 
@@ -80,6 +82,34 @@ public sealed record NineRouterProvider
 
     /// <summary>Gets provider-specific extra fields such as <c>baseUrl</c> or proxy settings.</summary>
     public JsonElement? ProviderSpecificData { get; init; }
+}
+
+/// <summary>9Router routing settings returned by <c>GET /api/settings</c>.</summary>
+public sealed record NineRouterSettings
+{
+    /// <summary>Gets per-provider routing overrides keyed by provider id.</summary>
+    public Dictionary<string, NineRouterProviderStrategy> ProviderStrategies { get; init; } = [];
+}
+
+/// <summary>Routing override for one 9Router provider.</summary>
+public sealed record NineRouterProviderStrategy
+{
+    /// <summary>Gets the account-selection strategy, such as <c>round-robin</c>.</summary>
+    public string? FallbackStrategy { get; init; }
+
+    /// <summary>Gets the number of calls to make before rotating accounts.</summary>
+    public int? StickyRoundRobinLimit { get; init; }
+
+    /// <summary>Gets provider-specific settings that Tunnel Agent does not manage.</summary>
+    [JsonExtensionData]
+    public Dictionary<string, JsonElement>? AdditionalData { get; init; }
+}
+
+/// <summary>Body for <c>PATCH /api/settings</c> when replacing provider routing overrides.</summary>
+public sealed record NineRouterUpdateSettingsRequest
+{
+    /// <summary>Gets the complete per-provider routing-override map.</summary>
+    public required Dictionary<string, NineRouterProviderStrategy> ProviderStrategies { get; init; }
 }
 
 /// <summary>

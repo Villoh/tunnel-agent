@@ -56,6 +56,38 @@ public sealed class NineRouterApiClientTests
     }
 
     [Fact]
+    public async Task SettingsAsync_GetsAndPatchesProviderStrategies()
+    {
+        using var handler = new FakeApiHandler();
+        handler.EnqueueJson(HttpStatusCode.OK, """
+            { "providerStrategies": { "anthropic": { "fallbackStrategy": "round-robin", "stickyRoundRobinLimit": 2 } } }
+            """);
+        handler.EnqueueJson(HttpStatusCode.OK, """
+            { "providerStrategies": { "openai": { "fallbackStrategy": "round-robin", "stickyRoundRobinLimit": 1 } } }
+            """);
+        using var client = new ApiClient(Port, handler);
+
+        var settings = await client.GetSettingsAsync();
+        var updated = await client.UpdateSettingsAsync(new NineRouterUpdateSettingsRequest
+        {
+            ProviderStrategies = new Dictionary<string, NineRouterProviderStrategy>
+            {
+                ["openai"] = new() { FallbackStrategy = "round-robin", StickyRoundRobinLimit = 1 }
+            }
+        });
+
+        Assert.Equal("round-robin", settings.ProviderStrategies["anthropic"].FallbackStrategy);
+        Assert.Equal("round-robin", updated.ProviderStrategies["openai"].FallbackStrategy);
+        Assert.Equal("GET", handler.Requests[0].Method);
+        Assert.Equal("/api/settings", handler.Requests[0].Path);
+        Assert.Equal("PATCH", handler.Requests[1].Method);
+        using var body = JsonDocument.Parse(handler.Requests[1].Body!);
+        var strategy = body.RootElement.GetProperty("providerStrategies").GetProperty("openai");
+        Assert.Equal("round-robin", strategy.GetProperty("fallbackStrategy").GetString());
+        Assert.Equal(1, strategy.GetProperty("stickyRoundRobinLimit").GetInt32());
+    }
+
+    [Fact]
     public async Task CreateProviderAsync_PostsCamelCaseBody_Returns201Connection()
     {
         using var handler = new FakeApiHandler();
