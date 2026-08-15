@@ -136,6 +136,8 @@ public partial class MainWindow : Window
             Dispatcher.UIThread.Post(() => PerplexityAccountOverlay.Focus(), DispatcherPriority.Input);
         else if (args.PropertyName == nameof(MainWindowViewModel.ShowNineRouterOAuthCodeDialog) && vm.ShowNineRouterOAuthCodeDialog)
             Dispatcher.UIThread.Post(() => NineRouterOAuthCodeOverlay.Focus(), DispatcherPriority.Input);
+        else if (args.PropertyName == nameof(MainWindowViewModel.ShowEditNineRouterConnectionNameDialog) && vm.ShowEditNineRouterConnectionNameDialog)
+            Dispatcher.UIThread.Post(() => this.FindControl<Border>("NineRouterConnectionNameOverlay")?.Focus(), DispatcherPriority.Input);
         else if (args.PropertyName == nameof(MainWindowViewModel.ShowAgentConfigDialog) && vm.ShowAgentConfigDialog)
             Dispatcher.UIThread.Post(() => EnsureAgentConfigOverlay(vm).FocusOverlay(), DispatcherPriority.Input);
     }
@@ -440,6 +442,26 @@ public partial class MainWindow : Window
             PerplexityTokenFlowInputBox.Text = "";
 
         PerplexityTokenFlowInputBox.Focus();
+    }
+
+    private void OnEditNineRouterConnectionNameKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            vm.DismissEditNineRouterConnectionNameDialogCommand.Execute(null);
+        }
+        else if (e.Key == Key.Enter)
+        {
+            e.Handled = true;
+            vm.ConfirmEditNineRouterConnectionNameCommand.Execute(null);
+        }
+    }
+
+    private void OnEditNineRouterConnectionNameOverlayPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm) vm.DismissEditNineRouterConnectionNameDialogCommand.Execute(null);
     }
 
     private async void OnEditPerplexityLabelKeyDown(object? sender, KeyEventArgs e)

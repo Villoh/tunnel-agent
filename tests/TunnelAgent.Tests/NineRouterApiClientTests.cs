@@ -117,21 +117,23 @@ public sealed class NineRouterApiClientTests
     }
 
     [Fact]
-    public async Task UpdateProviderAsync_PutsIsActive_ReturnsUpdatedConnection()
+    public async Task UpdateProviderAsync_PutsSuppliedFields_ReturnsUpdatedConnection()
     {
         using var handler = new FakeApiHandler();
         handler.EnqueueJson(HttpStatusCode.OK, """
-            { "connection": { "id": "conn-1", "provider": "openai", "name": "OpenAI", "isActive": false } }
+            { "connection": { "id": "conn-1", "provider": "openai", "name": "Personal", "isActive": false } }
             """);
         using var client = new ApiClient(Port, handler);
 
-        var updated = await client.UpdateProviderAsync("conn-1", new NineRouterUpdateProviderRequest { IsActive = false });
+        var updated = await client.UpdateProviderAsync("conn-1", new NineRouterUpdateProviderRequest { Name = "Personal", IsActive = false });
 
         Assert.Equal("conn-1", updated.Id);
+        Assert.Equal("Personal", updated.Name);
         Assert.False(updated.IsActive);
         Assert.Equal("PUT", handler.Requests[0].Method);
         Assert.Equal("/api/providers/conn-1", handler.Requests[0].Path);
         using var body = JsonDocument.Parse(handler.Requests[0].Body!);
+        Assert.Equal("Personal", body.RootElement.GetProperty("name").GetString());
         Assert.False(body.RootElement.GetProperty("isActive").GetBoolean());
         Assert.False(body.RootElement.TryGetProperty("apiKey", out _));
     }

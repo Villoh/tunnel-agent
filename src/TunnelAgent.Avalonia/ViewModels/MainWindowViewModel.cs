@@ -225,6 +225,9 @@ SelectedSection is SectionKey.Logs;
     [ObservableProperty] private string _editPerplexityLabelDraft = "";
     [ObservableProperty] private bool _showResetPerplexityDialog;
     [ObservableProperty] private bool _showNineRouterAddKeyDialog;
+    [ObservableProperty] private bool _showEditNineRouterConnectionNameDialog;
+    [ObservableProperty] private NineRouterConnectionViewModel? _editNineRouterConnectionTarget;
+    [ObservableProperty] private string _editNineRouterConnectionNameDraft = "";
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SelectedNineRouterSupportsApiKey))]
     [NotifyPropertyChangedFor(nameof(SelectedNineRouterSupportsOAuth))]
@@ -2769,6 +2772,53 @@ SelectedSection is SectionKey.Logs;
                     account.Id,
                     new NineRouterUpdateProviderRequest { IsActive = !provider.IsEnabled });
             }
+            await RefreshNineRouterConnectionsAsync();
+        }
+        catch (Exception ex)
+        {
+            ShowNineRouterStatus(ex.Message, isError: true);
+        }
+        finally
+        {
+            IsNineRouterBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private void EditNineRouterConnectionName(NineRouterConnectionViewModel? connection)
+    {
+        if (connection is null) return;
+        EditNineRouterConnectionTarget = connection;
+        EditNineRouterConnectionNameDraft = connection.Name;
+        ShowEditNineRouterConnectionNameDialog = true;
+    }
+
+    [RelayCommand]
+    private void DismissEditNineRouterConnectionNameDialog()
+    {
+        ShowEditNineRouterConnectionNameDialog = false;
+        EditNineRouterConnectionTarget = null;
+        EditNineRouterConnectionNameDraft = "";
+    }
+
+    [RelayCommand]
+    private async Task ConfirmEditNineRouterConnectionNameAsync()
+    {
+        var connection = EditNineRouterConnectionTarget;
+        var name = EditNineRouterConnectionNameDraft.Trim();
+        if (connection is null || string.IsNullOrWhiteSpace(name) || !IsNineRouterEngineRunning || IsNineRouterBusy) return;
+        if (string.Equals(name, connection.Name, StringComparison.CurrentCulture))
+        {
+            DismissEditNineRouterConnectionNameDialog();
+            return;
+        }
+
+        IsNineRouterBusy = true;
+        try
+        {
+            using var client = new ApiClient(NineRouterEngine.Port);
+            await client.UpdateProviderAsync(connection.Id, new NineRouterUpdateProviderRequest { Name = name });
+            DismissEditNineRouterConnectionNameDialog();
             await RefreshNineRouterConnectionsAsync();
         }
         catch (Exception ex)

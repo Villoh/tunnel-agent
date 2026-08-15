@@ -609,6 +609,9 @@
   <data name="ProvidersView_NineRouterConnection_DeleteTooltip" xml:space="preserve">
     <value>Delete connection</value>
   </data>
+  <data name="ProvidersView_NineRouterConnection_EditNameTooltip" xml:space="preserve">
+    <value>Edit connection name</value>
+  </data>
   <data name="ProvidersView_NineRouter_EngineNotRunning" xml:space="preserve">
     <value>Start 9Router before managing connections.</value>
   </data>
@@ -617,6 +620,9 @@
   </data>
   <data name="ProvidersView_NineRouter_LoadFailed" xml:space="preserve">
     <value>Could not load 9Router connections: {0}</value>
+  </data>
+  <data name="Dialog_EditNineRouterConnectionName_Title" xml:space="preserve">
+    <value>Edit 9Router connection name</value>
   </data>
   <data name="Dialog_AddNineRouterKey_Title" xml:space="preserve">
     <value>Add API key</value>
