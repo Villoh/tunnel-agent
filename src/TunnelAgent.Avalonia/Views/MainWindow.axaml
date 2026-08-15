@@ -441,7 +441,7 @@
                                                        Cursor="Hand" />
                                         </Button>
                                     </StackPanel>
-                                    <Button Grid.Column="1" Classes="icon" HorizontalAlignment="Right"
+                                    <Button Grid.Column="1" Classes="icon theme-toggle" HorizontalAlignment="Right"
                                             ToolTip.Tip="{l:Loc Sidebar_ToggleThemeTooltip}"
                                             Command="{Binding ToggleThemeCommand}">
                                         <Grid Width="18" Height="18" Classes="theme-icon" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -456,7 +456,7 @@
                                         </Grid>
                                     </Button>
                                 </Grid>
-                                <Button Classes="icon" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                <Button Classes="icon theme-toggle" HorizontalAlignment="Center" VerticalAlignment="Center"
                                         IsVisible="{Binding IsSidebarCollapsed}"
                                         ToolTip.Tip="{l:Loc Sidebar_ToggleThemeTooltip}"
                                         Command="{Binding ToggleThemeCommand}">
