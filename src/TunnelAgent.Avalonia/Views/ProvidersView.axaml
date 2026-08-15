@@ -62,6 +62,12 @@
                                 <lucide:PackIconLucide Kind="Check" Width="13" Height="13" IsVisible="{Binding EndpointCopied}" />
                             </Panel>
                         </Button>
+                        <Button Classes="icon-btn"
+                                ToolTip.Tip="{l:Loc ConfigView_NineRouter_Dashboard_Open}"
+                                Command="{Binding OpenNineRouterDashboardCommand}"
+                                IsVisible="{Binding IsNineRouterEngineSelected}">
+                            <lucide:PackIconLucide Kind="ExternalLink" Width="13" Height="13" />
+                        </Button>
                         <Panel Width="26" Height="26">
                             <Button Classes="icon-btn engine-action start"
                                     ToolTip.Tip="{l:Loc ProvidersView_StartServerTooltip}"
