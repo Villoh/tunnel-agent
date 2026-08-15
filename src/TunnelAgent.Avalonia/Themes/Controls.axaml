@@ -236,9 +236,6 @@
     <Style Selector="Button.engine-action:pressed">
         <Setter Property="Opacity" Value="0.72" />
     </Style>
-    <Style Selector="Button.engine-action:pressed /template/ ContentPresenter">
-        <Setter Property="Background" Value="Transparent" />
-    </Style>
     <Style Selector="Button.engine-action.start">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="#58B97B" />
@@ -781,6 +778,9 @@
     </Style>
     <Style Selector="Button.icon-btn:pressed /template/ ContentPresenter">
         <Setter Property="Background" Value="#22000000" />
+    </Style>
+    <Style Selector="Button.icon-btn.engine-action:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
     </Style>
     <Style Selector="Button.icon-btn.page">
         <Setter Property="Foreground" Value="{DynamicResource FgMutedBrush}" />
