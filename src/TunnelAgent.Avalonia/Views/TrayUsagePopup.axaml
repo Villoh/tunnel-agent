@@ -503,7 +503,7 @@
                                         <Border Classes="card" Padding="14">
                                             <StackPanel Spacing="8">
                                                 <Grid ColumnDefinitions="*,Auto">
-                                                    <Grid ColumnDefinitions="Auto,*">
+                                                    <Grid ColumnDefinitions="Auto,Auto">
                                                         <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold"
                                                                    Foreground="{DynamicResource FgBrush}"
                                                                    VerticalAlignment="Center" />
