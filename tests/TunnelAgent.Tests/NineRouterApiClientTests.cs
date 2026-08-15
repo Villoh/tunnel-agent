@@ -292,6 +292,38 @@ public sealed class NineRouterApiClientTests
     }
 
     [Fact]
+    public async Task GetUsageAsync_Force_ParsesQuotasAndAddsQuery()
+    {
+        using var handler = new FakeApiHandler();
+        handler.EnqueueJson(HttpStatusCode.OK, """
+            {
+              "plan": "pro",
+              "quotas": {
+                "five_hour": {
+                  "displayName": "Primary (5h)",
+                  "used": 25,
+                  "total": 100,
+                  "resetAt": "2026-08-15T12:00:00Z"
+                }
+              }
+            }
+            """);
+        using var client = new ApiClient(Port, handler);
+
+        var usage = await client.GetUsageAsync("conn/1", force: true);
+
+        Assert.Equal("pro", usage.Plan);
+        var quota = Assert.Single(usage.Quotas!);
+        Assert.Equal("five_hour", quota.Key);
+        Assert.Equal("Primary (5h)", quota.Value.DisplayName);
+        Assert.Equal(25, quota.Value.Used);
+        Assert.Equal(100, quota.Value.Total);
+        Assert.Equal("GET", handler.Requests[0].Method);
+        Assert.Equal("/api/usage/conn%2F1", handler.Requests[0].Path);
+        Assert.Equal("?force=1", handler.Requests[0].Query);
+    }
+
+    [Fact]
     public async Task ListKeysAsync_200WithKeys_ParsesList()
     {
         using var handler = new FakeApiHandler();

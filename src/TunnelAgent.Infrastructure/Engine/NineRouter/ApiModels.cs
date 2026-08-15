@@ -239,6 +239,41 @@ public sealed record NineRouterValidationResult(bool Valid, string? Error);
 /// <param name="Refreshed">Whether 9Router refreshed OAuth credentials during the test.</param>
 public sealed record NineRouterTestResult(bool Valid, string? Error, bool Refreshed);
 
+/// <summary>Usage limits returned by <c>GET /api/usage/{connectionId}</c>.</summary>
+public sealed record NineRouterUsage
+{
+    /// <summary>Gets the plan reported by the upstream provider, if any.</summary>
+    public string? Plan { get; init; }
+
+    /// <summary>Gets the provider's explanation when usage is unavailable.</summary>
+    public string? Message { get; init; }
+
+    /// <summary>Gets usage windows keyed by their provider-specific names.</summary>
+    public Dictionary<string, NineRouterUsageQuota>? Quotas { get; init; }
+}
+
+/// <summary>One normalized 9Router usage window.</summary>
+public sealed record NineRouterUsageQuota
+{
+    /// <summary>Gets the display name supplied by the provider, if any.</summary>
+    public string? DisplayName { get; init; }
+
+    /// <summary>Gets the consumed amount.</summary>
+    public double? Used { get; init; }
+
+    /// <summary>Gets the total allocation.</summary>
+    public double? Total { get; init; }
+
+    /// <summary>Gets the remaining amount or percentage when the provider supplies one.</summary>
+    public double? Remaining { get; init; }
+
+    /// <summary>Gets the explicit remaining percentage, if supplied.</summary>
+    public double? RemainingPercentage { get; init; }
+
+    /// <summary>Gets the ISO-8601 reset time, if supplied.</summary>
+    public string? ResetAt { get; init; }
+}
+
 /// <summary>
 /// A client API key from <c>GET /api/keys</c>. These keys authenticate callers of
 /// <c>/v1</c>; they are not upstream provider keys.

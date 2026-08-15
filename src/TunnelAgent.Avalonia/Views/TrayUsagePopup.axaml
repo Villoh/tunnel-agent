@@ -111,6 +111,12 @@
         <Style Selector="Button.icon.engine-restart:pointerover">
             <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
         </Style>
+        <Style Selector="Button.rail-icon">
+            <Setter Property="Foreground" Value="{DynamicResource FgMutedBrush}" />
+        </Style>
+        <Style Selector="Button.rail-icon:pointerover">
+            <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
+        </Style>
         <Style Selector="Button.icon.engine-restart:disabled">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="Foreground" Value="{DynamicResource FgMutedBrush}" />
@@ -142,7 +148,7 @@
               <DockPanel LastChildFill="True">
                 <!-- Open app (bottom) -->
                 <Button DockPanel.Dock="Bottom"
-                        Classes="rail"
+                        Classes="rail rail-icon"
                         ToolTip.Tip="{l:Loc TrayUsagePopup_OpenAppTooltip}"
                         ToolTip.Placement="Right"
                         ToolTip.HorizontalOffset="8"
@@ -180,7 +186,7 @@
                         <StackPanel x:Name="RailItems">
                             <!-- Home / engines -->
                             <Button x:Name="HomeButton"
-                                    Classes="rail"
+                                    Classes="rail rail-icon"
                                     ToolTip.Tip="{l:Loc TrayUsagePopup_Home}"
                                     Click="OnHomeClick">
                                 <Panel Width="34" Height="34">
@@ -466,9 +472,92 @@
                                             <lucide:PackIconLucide Classes="check" Kind="Check" Width="13" Height="13" />
                                         </Panel>
                                     </Button>
+                                    <Button Classes="icon-btn"
+                                            ToolTip.Tip="{l:Loc ConfigView_NineRouter_Dashboard_Open}"
+                                            Command="{Binding OpenNineRouterDashboardCommand}"
+                                            IsEnabled="{Binding IsNineRouterEngineRunning}">
+                                        <lucide:PackIconLucide Kind="ExternalLink" Width="13" Height="13" />
+                                    </Button>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
+
+                        <!-- 9Router usage -->
+                        <StackPanel Spacing="8" IsVisible="{Binding HasNineRouterUsageConnections}">
+                            <Grid ColumnDefinitions="*,Auto" Margin="2,8,0,0">
+                                <TextBlock Text="{l:Loc QuotaView_NineRouterUsage_Title}" Classes="section-label" Margin="0"
+                                           VerticalAlignment="Center" />
+                                <Button Grid.Column="1"
+                                        Classes="icon"
+                                        VerticalAlignment="Center"
+                                        ToolTip.Tip="{l:Loc QuotaView_NineRouterUsage_RefreshAllTooltip}"
+                                        IsEnabled="{Binding IsNineRouterEngineRunning}"
+                                        Click="OnRefreshNineRouterUsage">
+                                    <lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14"
+                                                           Classes.spin="{Binding IsRefreshingNineRouterUsage}" />
+                                </Button>
+                            </Grid>
+                            <ItemsControl ItemsSource="{Binding NineRouterConnections}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:NineRouterConnectionViewModel">
+                                        <Border Classes="card" Padding="14">
+                                            <StackPanel Spacing="8">
+                                                <Grid ColumnDefinitions="*,Auto">
+                                                    <Grid ColumnDefinitions="Auto,*">
+                                                        <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource FgBrush}"
+                                                                   VerticalAlignment="Center" />
+                                                        <Border Grid.Column="1"
+                                                                Classes="chip"
+                                                                Margin="8,0,0,0"
+                                                                Background="{DynamicResource AccentSoftBrush}"
+                                                                VerticalAlignment="Center"
+                                                                IsVisible="{Binding PlanBadge, Converter={StaticResource StringNotEmpty}}">
+                                                            <TextBlock Text="{Binding PlanBadge}"
+                                                                       Foreground="{DynamicResource AccentBrush}"
+                                                                       FontWeight="Bold" />
+                                                        </Border>
+                                                    </Grid>
+                                                    <Button Grid.Column="1"
+                                                            Classes="icon"
+                                                            ToolTip.Tip="{l:Loc QuotaView_NineRouterUsage_RefreshTooltip}"
+                                                            Click="OnRefreshNineRouterConnectionUsage"
+                                                            Tag="{Binding}">
+                                                        <lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14"
+                                                                               Classes.spin="{Binding IsUsageRefreshing}" />
+                                                    </Button>
+                                                </Grid>
+                                                <TextBlock Text="{Binding UsageError}"
+                                                           Classes="row-desc"
+                                                           Foreground="{DynamicResource ErrBrush}"
+                                                           TextWrapping="Wrap"
+                                                           IsVisible="{Binding UsageError, Converter={StaticResource StringNotEmpty}}" />
+                                                <ItemsControl ItemsSource="{Binding UsageBars}" IsVisible="{Binding HasUsage}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:QuotaBarViewModel">
+                                                            <StackPanel Spacing="5">
+                                                                <Grid ColumnDefinitions="*,Auto">
+                                                                    <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold"
+                                                                               Foreground="{DynamicResource FgBrush}" />
+                                                                    <TextBlock Grid.Column="1" Text="{Binding UsedLabel}" FontSize="12" FontWeight="SemiBold"
+                                                                               Foreground="{DynamicResource AccentBrush}" />
+                                                                </Grid>
+                                                                <ProgressBar Minimum="0" Maximum="1" Value="{Binding Used}" Height="8" />
+                                                                <TextBlock Text="{Binding ResetIn}" FontSize="10.5"
+                                                                           Foreground="{DynamicResource FgFaintBrush}"
+                                                                           IsVisible="{Binding ResetIn, Converter={StaticResource StringNotEmpty}}" />
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                                <TextBlock Classes="row-desc" Text="{Binding UsageEmptyDescription}" TextWrapping="Wrap"
+                                                           IsVisible="{Binding HasUsage, Converter={StaticResource InvertBool}}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
 
                         <!-- Usage section -->
                         <Grid ColumnDefinitions="*,Auto" Margin="2,8,0,0">

@@ -447,6 +447,9 @@
     <Style Selector="Button:pressed > Grid.theme-icon">
         <Setter Property="RenderTransform" Value="rotate(180deg) scale(0.85)" />
     </Style>
+    <Style Selector="Button.theme-toggle:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
 
     <!-- Status indicator -->
     <Style Selector="Grid.status-indicator">

@@ -82,6 +82,19 @@ public partial class TrayUsagePopup : Window
         await vm.RefreshAllQuotaProvidersAsync();
     }
 
+    private async void OnRefreshNineRouterUsage(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm)
+            await vm.RefreshNineRouterUsageAsync();
+    }
+
+    private async void OnRefreshNineRouterConnectionUsage(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        if (sender is Button { Tag: NineRouterConnectionViewModel connection })
+            await vm.RefreshNineRouterUsageAsync(connection);
+    }
+
     private void OnOpenMainWindow(object? sender, RoutedEventArgs e)
         => OpenMainWindowRequested?.Invoke(this, EventArgs.Empty);
 

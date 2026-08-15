@@ -265,6 +265,25 @@ public sealed class ApiClient : IDisposable
         return new NineRouterTestResult(payload.Valid, payload.Error, payload.Refreshed);
     }
 
+    /// <summary>Gets usage limits for a 9Router connection via <c>GET /api/usage/{connectionId}</c>.</summary>
+    /// <param name="connectionId">Connection id from <see cref="NineRouterProvider.Id"/>.</param>
+    /// <param name="force">Whether 9Router should bypass its usage cache.</param>
+    /// <param name="ct">Token used to cancel the request.</param>
+    public async Task<NineRouterUsage> GetUsageAsync(
+        string connectionId,
+        bool force = false,
+        CancellationToken ct = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionId);
+        using var response = await SendWithAuthRetryAsync(
+                HttpMethod.Get,
+                UsagePath(connectionId) + (force ? "?force=1" : ""),
+                body: null,
+                ct)
+            .ConfigureAwait(false);
+        return await ReadJsonAsync<NineRouterUsage>(response, ct).ConfigureAwait(false);
+    }
+
     /// <summary>Lists client API keys for <c>/v1</c> via <c>GET /api/keys</c>.</summary>
     /// <param name="ct">Token used to cancel the request.</param>
     public async Task<IReadOnlyList<NineRouterApiKey>> ListKeysAsync(CancellationToken ct = default)
@@ -677,6 +696,9 @@ public sealed class ApiClient : IDisposable
 
     private static string ComboPath(string id) =>
         "api/combos/" + Uri.EscapeDataString(id);
+
+    private static string UsagePath(string connectionId) =>
+        "api/usage/" + Uri.EscapeDataString(connectionId);
 
     private static string OAuthPath(string providerId, string action) =>
         "api/oauth/" + Uri.EscapeDataString(providerId) + "/" + action;

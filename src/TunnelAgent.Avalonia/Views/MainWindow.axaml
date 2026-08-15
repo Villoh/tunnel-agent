@@ -194,27 +194,34 @@
                                 </Grid>
                             </Button>
 
-                            <Button Classes="side" Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Quota}"
-                                    Command="{Binding SelectQuotaCommand}">
-                                <Grid ColumnDefinitions="20,*,Auto">
-                                    <lucide:PackIconLucide Grid.Column="0" Kind="ChartBar" Width="15" Height="15"
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <Panel Grid.Column="1" Grid.ColumnSpan="2"
-                                           Opacity="{Binding SidebarContentOpacity}">
-                                        <Panel.Transitions>
-                                            <Transitions>
-                                                <DoubleTransition Property="Opacity" Duration="0:0:0.18" Easing="CubicEaseInOut" />
-                                            </Transitions>
-                                        </Panel.Transitions>
-                                        <TextBlock Text="{l:Loc Sidebar_Quota}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
-                                                   IsVisible="{Binding !IsSidebarCollapsed}"/>
-                                        <Border HorizontalAlignment="Right" CornerRadius="999" Background="#14000000" Padding="6,1"
-                                                IsVisible="{Binding !IsSidebarCollapsed}">
-                                            <TextBlock Text="{Binding QuotaProviderCount}" FontSize="11" />
-                                        </Border>
-                                    </Panel>
-                                </Grid>
-                            </Button>
+                            <StackPanel Spacing="2">
+                                <Button Classes="side" Command="{Binding ToggleQuotaSubmenuCommand}">
+                                    <Grid ColumnDefinitions="20,*,Auto">
+                                        <lucide:PackIconLucide Grid.Column="0" Kind="ChartBar" Width="15" Height="15"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{l:Loc Sidebar_Quota}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
+                                                   Opacity="{Binding SidebarContentOpacity}" IsVisible="{Binding !IsSidebarCollapsed}" />
+                                        <Panel Grid.Column="2" Width="16" VerticalAlignment="Center" IsVisible="{Binding !IsSidebarCollapsed}">
+                                            <lucide:PackIconLucide Kind="ChevronRight" Width="11" Height="11" Foreground="{DynamicResource FgMutedBrush}"
+                                                                    IsVisible="{Binding IsQuotaSubmenuExpanded, Converter={StaticResource InvertBool}}" />
+                                            <lucide:PackIconLucide Kind="ChevronDown" Width="11" Height="11" Foreground="{DynamicResource FgMutedBrush}"
+                                                                    IsVisible="{Binding IsQuotaSubmenuExpanded}" />
+                                        </Panel>
+                                    </Grid>
+                                </Button>
+                                <StackPanel Spacing="2" Margin="18,0,0,0" IsVisible="{Binding IsQuotaSubmenuExpanded}">
+                                    <Button Classes="side side-sub" Classes.selected="{Binding IsQuotaLimitsActive}"
+                                            Command="{Binding SelectQuotaLimitsCommand}">
+                                        <TextBlock Text="{l:Loc Sidebar_Quota}" FontSize="11" Margin="0"
+                                                   IsVisible="{Binding !IsSidebarCollapsed}" />
+                                    </Button>
+                                    <Button Classes="side side-sub" Classes.selected="{Binding IsQuotaUsageActive}"
+                                            Command="{Binding SelectQuotaUsageCommand}">
+                                        <TextBlock Text="{l:Loc Sidebar_NineRouterUsage}" FontSize="11" Margin="0"
+                                                   IsVisible="{Binding !IsSidebarCollapsed}" />
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
 
                             <StackPanel Spacing="2">
                                 <Button Classes="side" Command="{Binding ToggleFallbackSubmenuCommand}">
@@ -434,7 +441,7 @@
                                                        Cursor="Hand" />
                                         </Button>
                                     </StackPanel>
-                                    <Button Grid.Column="1" Classes="icon" HorizontalAlignment="Right"
+                                    <Button Grid.Column="1" Classes="icon theme-toggle" HorizontalAlignment="Right"
                                             ToolTip.Tip="{l:Loc Sidebar_ToggleThemeTooltip}"
                                             Command="{Binding ToggleThemeCommand}">
                                         <Grid Width="18" Height="18" Classes="theme-icon" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -449,7 +456,7 @@
                                         </Grid>
                                     </Button>
                                 </Grid>
-                                <Button Classes="icon" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                <Button Classes="icon theme-toggle" HorizontalAlignment="Center" VerticalAlignment="Center"
                                         IsVisible="{Binding IsSidebarCollapsed}"
                                         ToolTip.Tip="{l:Loc Sidebar_ToggleThemeTooltip}"
                                         Command="{Binding ToggleThemeCommand}">

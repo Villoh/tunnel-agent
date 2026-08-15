@@ -32,4 +32,17 @@ public partial class QuotaView : UserControl
             Dispatcher.UIThread.Post(() => account.IsRefreshing = false);
         }
     }
+
+    private async void OnRefreshAllNineRouterUsage(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm)
+            await vm.SelectQuotaUsageCommand.ExecuteAsync(null);
+    }
+
+    private async void OnRefreshNineRouterUsage(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        if (sender is not Button { Tag: NineRouterConnectionViewModel connection }) return;
+        await vm.RefreshNineRouterUsageAsync(connection);
+    }
 }
