@@ -567,6 +567,9 @@
   <data name="ProvidersView_NineRouterSection_Description" xml:space="preserve">
     <value>Provider connections stored by the running 9Router engine.</value>
   </data>
+  <data name="ProvidersView_NineRouterProvider_RoundRobin" xml:space="preserve">
+    <value>Round Robin</value>
+  </data>
   <data name="ProvidersView_NineRouterSection_AuthFiles" xml:space="preserve">
     <value>9Router connections are stored by the running 9Router engine.</value>
   </data>

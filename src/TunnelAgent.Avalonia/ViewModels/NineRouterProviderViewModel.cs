@@ -11,9 +11,10 @@ public sealed partial class NineRouterProviderViewModel : ObservableObject
 {
     /// <summary>Initializes a provider row from its catalog entry.</summary>
     /// <param name="option">The provider metadata from the 9Router registry.</param>
-    public NineRouterProviderViewModel(NineRouterProviderOption option)
+    public NineRouterProviderViewModel(NineRouterProviderOption option, bool isRoundRobin = false)
     {
         Option = option;
+        IsRoundRobin = isRoundRobin;
         var icon = ProviderIconRegistry.GetDisplay(option.Id, option.Name);
         IconKind = icon.IconKind;
         LogoColor = icon.LogoColor;
@@ -87,6 +88,9 @@ public sealed partial class NineRouterProviderViewModel : ObservableObject
 
     /// <summary>Gets whether a Simple Icons glyph is available.</summary>
     public bool ShowSimpleIcon => !UseMonogram && !HasCustomIcon;
+
+    /// <summary>Gets or sets whether 9Router rotates this provider's accounts.</summary>
+    [ObservableProperty] private bool _isRoundRobin;
 
     /// <summary>Gets or sets whether the provider's connection list is expanded.</summary>
     [ObservableProperty] private bool _isExpanded;

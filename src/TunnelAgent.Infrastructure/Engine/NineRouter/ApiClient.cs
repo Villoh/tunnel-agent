@@ -106,6 +106,28 @@ public sealed class ApiClient : IDisposable
         return payload.Connections ?? [];
     }
 
+    /// <summary>Gets routing settings via <c>GET /api/settings</c>.</summary>
+    /// <param name="ct">Token used to cancel the request.</param>
+    public async Task<NineRouterSettings> GetSettingsAsync(CancellationToken ct = default)
+    {
+        using var response = await SendWithAuthRetryAsync(HttpMethod.Get, "api/settings", body: null, ct)
+            .ConfigureAwait(false);
+        return await ReadJsonAsync<NineRouterSettings>(response, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>Updates routing settings via <c>PATCH /api/settings</c>.</summary>
+    /// <param name="request">Fields to change. Null properties are omitted.</param>
+    /// <param name="ct">Token used to cancel the request.</param>
+    public async Task<NineRouterSettings> UpdateSettingsAsync(
+        NineRouterUpdateSettingsRequest request,
+        CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        using var response = await SendWithAuthRetryAsync(HttpMethod.Patch, "api/settings", request, ct)
+            .ConfigureAwait(false);
+        return await ReadJsonAsync<NineRouterSettings>(response, ct).ConfigureAwait(false);
+    }
+
     /// <summary>Creates an API-key connection via <c>POST /api/providers</c>.</summary>
     /// <param name="request">Provider id, display name, and API key.</param>
     /// <param name="ct">Token used to cancel the request.</param>

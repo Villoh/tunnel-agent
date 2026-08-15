@@ -308,6 +308,18 @@
                                                 </Panel>
                                             </Grid>
                                         </ToggleButton>
+                                        <Border Background="#08FFFFFF" Margin="16,0,16,4" CornerRadius="8" Padding="14,10"
+                                                IsVisible="{Binding IsExpanded}">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <TextBlock Classes="row-label" Text="{l:Loc ProvidersView_NineRouterProvider_RoundRobin}"
+                                                           VerticalAlignment="Center" />
+                                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                                              IsChecked="{Binding IsRoundRobin, Mode=OneWay}"
+                                                              IsEnabled="{Binding #Root.DataContext.IsNineRouterEngineRunning}"
+                                                              Command="{Binding #Root.DataContext.ToggleNineRouterProviderRoundRobinCommand}"
+                                                              CommandParameter="{Binding}" />
+                                            </Grid>
+                                        </Border>
                                         <ItemsControl ItemsSource="{Binding Accounts}" IsVisible="{Binding IsExpanded}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate x:DataType="vm:NineRouterConnectionViewModel">
