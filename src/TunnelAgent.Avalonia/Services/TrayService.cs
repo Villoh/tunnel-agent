@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -36,6 +37,13 @@ public sealed class TrayService : IDisposable
     private readonly NativeMenuItem _nineRouterRestartItem;
     private readonly NativeMenuItem _nineRouterStatusItem;
     private bool _isQuitting;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativePoint
+    {
+        public int X;
+        public int Y;
+    }
 
     public TrayService(
         IClassicDesktopStyleApplicationLifetime desktop,
@@ -246,23 +254,57 @@ public sealed class TrayService : IDisposable
 
     private void PositionPopup(TrayUsagePopup popup)
     {
-        var screen = popup.Screens?.Primary ?? popup.Screens?.All?.FirstOrDefault();
+        var hasCursor = TryGetCursorPosition(out var cursor);
+        var screen = hasCursor
+            ? popup.Screens?.All?.FirstOrDefault(s => s.Bounds.Contains(cursor))
+            : null;
+        screen ??= popup.Screens?.Primary ?? popup.Screens?.All?.FirstOrDefault();
         if (screen is null) return;
 
         var area = screen.WorkingArea;
         var scale = screen.Scaling;
-        var w = (int)(popup.Width * scale);
-        var h = (int)(popup.Height * scale);
+        var width = (int)(popup.Width * scale);
+        var height = (int)(popup.Height * scale);
         var margin = (int)(8 * scale);
 
-        var x = area.X + area.Width - w - margin;
-        // Windows tray sits bottom-right; macOS/Linux status bar sits top-right.
-        var y = OperatingSystem.IsWindows()
-            ? area.Y + area.Height - h - margin
-            : area.Y + margin;
-
-        popup.Position = new PixelPoint(x, y);
+        popup.Position = hasCursor
+            ? PositionNearCursor(area, cursor, width, height, margin)
+            : new PixelPoint(
+                area.X + area.Width - width - margin,
+                OperatingSystem.IsWindows()
+                    ? area.Y + area.Height - height - margin
+                    : area.Y + margin);
     }
+
+    internal static PixelPoint PositionNearCursor(
+        PixelRect area,
+        PixelPoint cursor,
+        int popupWidth,
+        int popupHeight,
+        int margin)
+    {
+        var minX = area.X + margin;
+        var maxX = Math.Max(minX, area.X + area.Width - popupWidth - margin);
+        var minY = area.Y + margin;
+        var maxY = Math.Max(minY, area.Y + area.Height - popupHeight - margin);
+        var x = Math.Clamp(cursor.X - popupWidth + margin, minX, maxX);
+        var y = cursor.Y <= area.Y + area.Height / 2
+            ? Math.Min(cursor.Y + margin, maxY)
+            : Math.Max(cursor.Y - popupHeight - margin, minY);
+        return new PixelPoint(x, y);
+    }
+
+    private static bool TryGetCursorPosition(out PixelPoint cursor)
+    {
+        cursor = default;
+        if (!OperatingSystem.IsWindows() || !GetCursorPos(out var point)) return false;
+        cursor = new PixelPoint(point.X, point.Y);
+        return true;
+    }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetCursorPos(out NativePoint point);
 
     private void ToggleWindow()
     {
