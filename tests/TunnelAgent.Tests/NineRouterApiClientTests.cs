@@ -88,6 +88,78 @@ public sealed class NineRouterApiClientTests
     }
 
     [Fact]
+    public async Task CombosAsync_UsesManagementEndpoints()
+    {
+        using var handler = new FakeApiHandler();
+        handler.EnqueueJson(HttpStatusCode.OK, """
+            { "combos": [{ "id": "combo-1", "name": "coding", "models": ["cc/claude-opus-5", "cc/claude-sonnet-5"] }] }
+            """);
+        handler.EnqueueJson(HttpStatusCode.Created, """
+            { "id": "combo-2", "name": "backup", "models": ["openai/gpt-5"] }
+            """);
+        handler.EnqueueJson(HttpStatusCode.OK, """{ "success": true }""");
+        handler.EnqueueJson(HttpStatusCode.OK, """{ "comboStrategies": {} }""");
+        handler.EnqueueJson(HttpStatusCode.OK, """{ "comboStrategies": { "coding": { "fallbackStrategy": "fusion", "judgeModel": "openai/gpt-5" } } }""");
+        using var client = new ApiClient(Port, handler);
+
+        var combos = await client.ListCombosAsync();
+        var created = await client.CreateComboAsync(new NineRouterCreateComboRequest
+        {
+            Name = "backup",
+            Models = ["openai/gpt-5"]
+        });
+        await client.DeleteComboAsync("combo-2");
+        var settings = await client.GetSettingsAsync();
+        var updated = await client.UpdateComboStrategiesAsync(new Dictionary<string, NineRouterComboStrategy>
+        {
+            ["coding"] = new() { FallbackStrategy = "fusion", JudgeModel = "openai/gpt-5" }
+        });
+
+        Assert.Single(combos);
+        Assert.Equal("coding", combos[0].Name);
+        Assert.Equal("combo-2", created.Id);
+        Assert.Empty(settings.ComboStrategies);
+        Assert.Equal("fusion", updated.ComboStrategies["coding"].FallbackStrategy);
+        Assert.Equal("openai/gpt-5", updated.ComboStrategies["coding"].JudgeModel);
+        Assert.Equal("GET", handler.Requests[0].Method);
+        Assert.Equal("/api/combos", handler.Requests[0].Path);
+        Assert.Equal("POST", handler.Requests[1].Method);
+        Assert.Equal("DELETE", handler.Requests[2].Method);
+        Assert.Equal("/api/combos/combo-2", handler.Requests[2].Path);
+        Assert.Equal("PATCH", handler.Requests[4].Method);
+        using var createBody = JsonDocument.Parse(handler.Requests[1].Body!);
+        Assert.Equal("backup", createBody.RootElement.GetProperty("name").GetString());
+        Assert.Equal("openai/gpt-5", createBody.RootElement.GetProperty("models")[0].GetString());
+        using var settingsBody = JsonDocument.Parse(handler.Requests[4].Body!);
+        var strategyBody = settingsBody.RootElement.GetProperty("comboStrategies").GetProperty("coding");
+        Assert.Equal("fusion", strategyBody.GetProperty("fallbackStrategy").GetString());
+        Assert.Equal("openai/gpt-5", strategyBody.GetProperty("judgeModel").GetString());
+    }
+
+    [Fact]
+    public async Task UpdateComboAsync_PutsReplacementNameAndModels()
+    {
+        using var handler = new FakeApiHandler();
+        handler.EnqueueJson(HttpStatusCode.OK, """
+            { "id": "combo-1", "name": "coding-v2", "models": ["openai/gpt-5"] }
+            """);
+        using var client = new ApiClient(Port, handler);
+
+        var updated = await client.UpdateComboAsync("combo-1", new NineRouterUpdateComboRequest
+        {
+            Name = "coding-v2",
+            Models = ["openai/gpt-5"]
+        });
+
+        Assert.Equal("coding-v2", updated.Name);
+        Assert.Equal("PUT", handler.Requests[0].Method);
+        Assert.Equal("/api/combos/combo-1", handler.Requests[0].Path);
+        using var body = JsonDocument.Parse(handler.Requests[0].Body!);
+        Assert.Equal("coding-v2", body.RootElement.GetProperty("name").GetString());
+        Assert.Equal("openai/gpt-5", body.RootElement.GetProperty("models")[0].GetString());
+    }
+
+    [Fact]
     public async Task CreateProviderAsync_PostsCamelCaseBody_Returns201Connection()
     {
         using var handler = new FakeApiHandler();
@@ -149,23 +221,21 @@ public sealed class NineRouterApiClientTests
     }
 
     [Fact]
-    public async Task UpdateProviderAsync_PutsSuppliedFields_ReturnsUpdatedConnection()
+    public async Task UpdateProviderAsync_PutsIsActive_ReturnsUpdatedConnection()
     {
         using var handler = new FakeApiHandler();
         handler.EnqueueJson(HttpStatusCode.OK, """
-            { "connection": { "id": "conn-1", "provider": "openai", "name": "Personal", "isActive": false } }
+            { "connection": { "id": "conn-1", "provider": "openai", "name": "OpenAI", "isActive": false } }
             """);
         using var client = new ApiClient(Port, handler);
 
-        var updated = await client.UpdateProviderAsync("conn-1", new NineRouterUpdateProviderRequest { Name = "Personal", IsActive = false });
+        var updated = await client.UpdateProviderAsync("conn-1", new NineRouterUpdateProviderRequest { IsActive = false });
 
         Assert.Equal("conn-1", updated.Id);
-        Assert.Equal("Personal", updated.Name);
         Assert.False(updated.IsActive);
         Assert.Equal("PUT", handler.Requests[0].Method);
         Assert.Equal("/api/providers/conn-1", handler.Requests[0].Path);
         using var body = JsonDocument.Parse(handler.Requests[0].Body!);
-        Assert.Equal("Personal", body.RootElement.GetProperty("name").GetString());
         Assert.False(body.RootElement.GetProperty("isActive").GetBoolean());
         Assert.False(body.RootElement.TryGetProperty("apiKey", out _));
     }

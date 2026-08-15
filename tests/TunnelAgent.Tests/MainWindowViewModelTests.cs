@@ -93,6 +93,45 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
+    public void NineRouterComboDialog_RequiresRunningEngine()
+    {
+        var running = false;
+        var combos = new NineRouterCombosViewModel(
+            () => 8317,
+            () => running,
+            new System.Collections.ObjectModel.ObservableCollection<AvailableModelGroupViewModel>());
+
+        combos.OpenCreatePanelCommand.Execute(null);
+        Assert.False(combos.ShowCreatePanel);
+
+        running = true;
+        combos.OpenCreatePanelCommand.Execute(null);
+        Assert.True(combos.ShowCreatePanel);
+
+        running = false;
+        combos.NotifyEngineStateChanged();
+        Assert.False(combos.ShowCreatePanel);
+    }
+
+    [Fact]
+    public void FallbackSubmenu_TogglesAndSelectsBothViews()
+    {
+        var vm = new MainWindowViewModel();
+
+        vm.ToggleFallbackSubmenuCommand.Execute(null);
+        Assert.True(vm.IsFallbackSubmenuExpanded);
+
+        vm.SelectFallbackCommand.Execute(null);
+        Assert.Equal(SectionKey.Fallback, vm.SelectedSection);
+
+        vm.SelectNineRouterCombosCommand.Execute(null);
+        Assert.Equal(SectionKey.NineRouterCombos, vm.SelectedSection);
+
+        vm.ToggleFallbackSubmenuCommand.Execute(null);
+        Assert.False(vm.IsFallbackSubmenuExpanded);
+    }
+
+    [Fact]
     public void NineRouterProviderPagination_FiltersAndNavigatesCatalog()
     {
         var vm = new MainWindowViewModel();

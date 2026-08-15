@@ -71,6 +71,12 @@
   <data name="Sidebar_Fallback" xml:space="preserve">
     <value>Fallback</value>
   </data>
+  <data name="Sidebar_FallbackCliProxy" xml:space="preserve">
+    <value>Fallback (CLIProxyAPI)</value>
+  </data>
+  <data name="Sidebar_NineRouterCombos" xml:space="preserve">
+    <value>Combos (9R)</value>
+  </data>
   <data name="Fallback_Title" xml:space="preserve">
     <value>Fallback de modelos</value>
   </data>
@@ -558,6 +564,75 @@
   <data name="ProvidersView_NineRouterProvider_RoundRobin" xml:space="preserve">
     <value>Round robin</value>
   </data>
+  <data name="NineRouterCombos_Title" xml:space="preserve">
+    <value>Combos de 9Router</value>
+  </data>
+  <data name="NineRouterCombos_Subtitle" xml:space="preserve">
+    <value>Agrupa modelos para fallback ordenado o round robin.</value>
+  </data>
+  <data name="NineRouterCombos_Refresh" xml:space="preserve">
+    <value>Actualizar combos</value>
+  </data>
+  <data name="NineRouterCombos_Create" xml:space="preserve">
+    <value>Crear combo</value>
+  </data>
+  <data name="NineRouterCombos_Edit" xml:space="preserve">
+    <value>Editar combo</value>
+  </data>
+  <data name="NineRouterCombos_Save" xml:space="preserve">
+    <value>Guardar cambios</value>
+  </data>
+  <data name="NineRouterCombos_CreateSubtitle" xml:space="preserve">
+    <value>Añade los modelos en su orden de fallback.</value>
+  </data>
+  <data name="NineRouterCombos_Models" xml:space="preserve">
+    <value>Modelos</value>
+  </data>
+  <data name="NineRouterCombos_ModelCount" xml:space="preserve">
+    <value>{0} modelos</value>
+  </data>
+  <data name="NineRouterCombos_DraftEmpty" xml:space="preserve">
+    <value>Añade al menos un modelo para crear el combo.</value>
+  </data>
+  <data name="NineRouterCombos_Strategy" xml:space="preserve">
+    <value>Estrategia</value>
+  </data>
+  <data name="NineRouterCombos_StrategyFallback" xml:space="preserve">
+    <value>Fallback — probar en orden</value>
+  </data>
+  <data name="NineRouterCombos_StrategyRoundRobin" xml:space="preserve">
+    <value>Round Robin — rotar</value>
+  </data>
+  <data name="NineRouterCombos_StrategyFusion" xml:space="preserve">
+    <value>Fusion — panel + juez</value>
+  </data>
+  <data name="NineRouterCombos_Judge" xml:space="preserve">
+    <value>Modelo juez</value>
+  </data>
+  <data name="NineRouterCombos_JudgeAuto" xml:space="preserve">
+    <value>Automático: usa el primer modelo si no seleccionas otro.</value>
+  </data>
+  <data name="NineRouterCombos_EngineNotRunning" xml:space="preserve">
+    <value>Inicia 9Router antes de administrar los combos.</value>
+  </data>
+  <data name="NineRouterCombos_Name" xml:space="preserve">
+    <value>Nombre del combo</value>
+  </data>
+  <data name="NineRouterCombos_NamePlaceholder" xml:space="preserve">
+    <value>mi-combo</value>
+  </data>
+  <data name="NineRouterCombos_AddModel" xml:space="preserve">
+    <value>Añadir modelo</value>
+  </data>
+  <data name="NineRouterCombos_NoModelsAvailable" xml:space="preserve">
+    <value>Aún no hay modelos de 9Router disponibles.</value>
+  </data>
+  <data name="NineRouterCombos_Empty" xml:space="preserve">
+    <value>Aún no hay combos.</value>
+  </data>
+  <data name="NineRouterCombos_RoundRobin" xml:space="preserve">
+    <value>Round robin</value>
+  </data>
   <data name="ProvidersView_NineRouterSection_AuthFiles" xml:space="preserve">
     <value>Las conexiones de 9Router las almacena el motor 9Router en ejecución.</value>
   </data>
@@ -600,9 +675,6 @@
   <data name="ProvidersView_NineRouterConnection_DeleteTooltip" xml:space="preserve">
     <value>Eliminar conexión</value>
   </data>
-  <data name="ProvidersView_NineRouterConnection_EditNameTooltip" xml:space="preserve">
-    <value>Editar nombre de conexión</value>
-  </data>
   <data name="ProvidersView_NineRouter_EngineNotRunning" xml:space="preserve">
     <value>Inicia 9Router antes de gestionar las conexiones.</value>
   </data>
@@ -611,9 +683,6 @@
   </data>
   <data name="ProvidersView_NineRouter_LoadFailed" xml:space="preserve">
     <value>No se pudieron cargar las conexiones de 9Router: {0}</value>
-  </data>
-  <data name="Dialog_EditNineRouterConnectionName_Title" xml:space="preserve">
-    <value>Editar nombre de conexión de 9Router</value>
   </data>
   <data name="Dialog_AddNineRouterKey_Title" xml:space="preserve">
     <value>Añadir clave API</value>

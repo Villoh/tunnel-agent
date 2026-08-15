@@ -53,8 +53,16 @@ public partial class MainWindow : Window
         var selected = SidebarNavItems.Children
             .OfType<Button>()
             .FirstOrDefault(b => b.Classes.Contains("selected"));
-        if (selected is null) return;
+        if (selected is null)
+        {
+            SidebarPill.IsVisible = false;
+            return;
+        }
 
+        // A pill returning from a selected submenu must snap in, not animate
+        // from the last top-level item.
+        var wasVisible = SidebarPill.IsVisible;
+        SidebarPill.IsVisible = true;
         var bounds = selected.Bounds;
         if (bounds.Height <= 0) return;
 
@@ -62,7 +70,7 @@ public partial class MainWindow : Window
         SidebarPill.Height = bounds.Height;
         translate.X = bounds.X;
 
-        if (animate)
+        if (animate && wasVisible)
         {
             translate.Y = bounds.Y;
         }
@@ -198,6 +206,7 @@ public partial class MainWindow : Window
         SectionKey.Providers => new ProvidersView(),
         SectionKey.Quota => new QuotaView(),
         SectionKey.Fallback => new FallbackView(),
+        SectionKey.NineRouterCombos => new NineRouterCombosView(),
         SectionKey.Agents => new AgentsView(),
         SectionKey.Logs => new LogsView(),
         SectionKey.Configuration => new ConfigurationView(),
