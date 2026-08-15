@@ -764,6 +764,59 @@
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">
                                 <StackPanel>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_NineRouter_RequireLogin_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_NineRouter_RequireLogin_Description}"/>
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                              IsChecked="{Binding NineRouterRequireLogin, Mode=TwoWay}"
+                                              IsEnabled="{Binding CanChangeNineRouterRequireLogin}" />
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <StackPanel Margin="14,11" Spacing="8"
+                                        IsVisible="{Binding ShowNineRouterPasswordSettings}">
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Classes="row-label" Text="{l:Loc ConfigView_NineRouter_NewPassword_Label}"/>
+                                        <TextBox Classes="app" PasswordChar="●"
+                                                 Watermark="{l:Loc ConfigView_NineRouter_NewPassword_Placeholder}"
+                                                 Text="{Binding NineRouterNewPasswordDraft, Mode=TwoWay}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Spacing="4">
+                                        <TextBlock Classes="row-label" Text="{l:Loc ConfigView_NineRouter_ConfirmPassword_Label}"/>
+                                        <TextBox Classes="app" PasswordChar="●"
+                                                 Watermark="{l:Loc ConfigView_NineRouter_ConfirmPassword_Placeholder}"
+                                                 Text="{Binding NineRouterConfirmPasswordDraft, Mode=TwoWay}" />
+                                    </StackPanel>
+                                </Grid>
+                                <Button Classes="app primary" HorizontalAlignment="Left"
+                                        Content="{l:Loc ConfigView_NineRouter_SetPassword}"
+                                        Command="{Binding SetNineRouterDashboardPasswordCommand}"
+                                        IsEnabled="{Binding CanSetNineRouterDashboardPassword}" />
+                            </StackPanel>
+                            <Border Classes="row-divider"
+                                    IsVisible="{Binding ShowNineRouterPasswordSettings}"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_NineRouter_RequireApiKey_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_NineRouter_RequireApiKey_Description}"/>
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                              IsChecked="{Binding NineRouterRequireApiKey, Mode=TwoWay}"
+                                              IsEnabled="{Binding CanChangeNineRouterRequireApiKey}" />
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_ApiKeys_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_NineRouter_ApiKeys_Description}"/>
+                                </StackPanel>
+                                <Button Grid.Column="1" Classes="app" Content="{l:Loc ConfigView_CLIProxy_ApiKeys_Manage}"
+                                        Command="{Binding OpenNineRouterApiKeysCommand}"
+                                        IsEnabled="{Binding IsNineRouterEngineRunning}" />
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
                                     <TextBlock Classes="row-label" Text="{l:Loc ConfigView_NineRouter_Dashboard_Label}"/>
                                     <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_NineRouter_Dashboard_Description}"/>
                                     <TextBlock Classes="row-desc" Text="{Binding NineRouterDashboardUrl}" />

@@ -20,9 +20,9 @@
         <Grid RowDefinitions="Auto,*,Auto">
             <Grid Grid.Row="0" Margin="24,20,24,14" ColumnDefinitions="*,Auto">
                 <StackPanel Grid.Column="0" Spacing="4">
-                    <TextBlock Classes="row-label" FontSize="15" Text="{l:Loc ApiKeysOverlay_Title}" />
+                    <TextBlock Classes="row-label" FontSize="15" Text="{Binding ApiKeysDialogTitle}" />
                     <TextBlock Classes="row-desc" TextWrapping="Wrap"
-                               Text="{l:Loc ApiKeysOverlay_Description}" />
+                               Text="{Binding ApiKeysDialogDescription}" />
                 </StackPanel>
                 <Button Grid.Column="1" Classes="icon" Command="{Binding DismissApiKeysCommand}" VerticalAlignment="Top">
                     <lucide:PackIconLucide Kind="X" Width="14" Height="14" />
@@ -30,12 +30,14 @@
             </Grid>
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                 <StackPanel Spacing="12" Margin="24,0,24,0">
-                    <ItemsControl ItemsSource="{Binding CliProxyApiKeys}">
+                    <ItemsControl ItemsSource="{Binding ApiKeys}">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="vm:CliProxyApiKeyViewModel">
+                            <DataTemplate x:DataType="vm:ApiKeyViewModel">
                                 <Border Background="{DynamicResource SideBgBrush}" CornerRadius="8" Padding="10,8" Margin="0,0,0,6">
                                     <Grid ColumnDefinitions="*,Auto,Auto,Auto">
                                         <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}" IsVisible="{Binding HasName}"
+                                                       FontSize="12" VerticalAlignment="Center" />
                                             <TextBlock Text="{Binding Masked}"
                                                        FontFamily="Cascadia Mono,Consolas,monospace"
                                                        FontSize="12" VerticalAlignment="Center" />
@@ -65,15 +67,16 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                     <StackPanel Spacing="4">
-                        <TextBlock Classes="row-desc" Text="{l:Loc ApiKeysOverlay_AddKeyLabel}" />
+                        <TextBlock Classes="row-desc" Text="{Binding ApiKeyDraftLabel}" />
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBox Grid.Column="0" Classes="app"
-                                     PasswordChar="{Binding ShowApiKeyDraft, Converter={StaticResource SecretPasswordChar}}"
-                                     Watermark="sk-..."
+                                     PasswordChar="{Binding IsApiKeyDraftSecret, Converter={StaticResource SecretPasswordChar}}"
+                                     Watermark="{Binding ApiKeyDraftWatermark}"
                                      Text="{Binding ApiKeyDraft, Mode=TwoWay}"
                                      KeyDown="OnApiKeyDraftKeyDown" />
                             <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0"
                                     ToolTip.Tip="{l:Loc ApiKeysOverlay_ShowHideKeyTooltip}"
+                                    IsVisible="{Binding IsApiKeyDraftSecret}"
                                     Command="{Binding ToggleApiKeyDraftVisibilityCommand}">
                                 <lucide:PackIconLucide Kind="{Binding ShowApiKeyDraft, Converter={StaticResource EyeIcon}}" Width="14" Height="14" />
                             </Button>

@@ -87,6 +87,12 @@ public sealed record NineRouterProvider
 /// <summary>9Router settings used to configure model-combo strategies.</summary>
 public sealed record NineRouterSettings
 {
+    /// <summary>Gets whether dashboard access requires authentication.</summary>
+    public bool RequireLogin { get; init; }
+
+    /// <summary>Gets whether callers must provide a valid API key.</summary>
+    public bool RequireApiKey { get; init; }
+
     /// <summary>Gets per-provider routing overrides keyed by provider id.</summary>
     public Dictionary<string, NineRouterProviderStrategy> ProviderStrategies { get; init; } = [];
 
@@ -158,11 +164,14 @@ public sealed record NineRouterUpdateComboRequest
     public required List<string> Models { get; init; }
 }
 
-/// <summary>Body for <c>PATCH /api/settings</c> when replacing provider routing overrides.</summary>
+/// <summary>Body for <c>PATCH /api/settings</c>. Null properties are omitted.</summary>
 public sealed record NineRouterUpdateSettingsRequest
 {
-    /// <summary>Gets the complete per-provider routing-override map.</summary>
-    public required Dictionary<string, NineRouterProviderStrategy> ProviderStrategies { get; init; }
+    /// <summary>Gets the complete per-provider routing-override map, when changing it.</summary>
+    public Dictionary<string, NineRouterProviderStrategy>? ProviderStrategies { get; init; }
+
+    /// <summary>Gets whether callers must provide a valid API key.</summary>
+    public bool? RequireApiKey { get; init; }
 }
 
 /// <summary>Body for <c>PATCH /api/settings</c> when replacing combo strategies.</summary>

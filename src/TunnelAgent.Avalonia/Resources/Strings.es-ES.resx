@@ -1208,6 +1208,36 @@
     <value>Actualizar ahora</value>
   </data>
 
+  <data name="ConfigView_NineRouter_RequireLogin_Label" xml:space="preserve">
+    <value>Requerir inicio de sesión</value>
+  </data>
+  <data name="ConfigView_NineRouter_RequireLogin_Description" xml:space="preserve">
+    <value>Al activarlo, el panel requiere una contraseña.</value>
+  </data>
+  <data name="ConfigView_NineRouter_NewPassword_Label" xml:space="preserve">
+    <value>Nueva contraseña</value>
+  </data>
+  <data name="ConfigView_NineRouter_NewPassword_Placeholder" xml:space="preserve">
+    <value>Introduce la nueva contraseña</value>
+  </data>
+  <data name="ConfigView_NineRouter_ConfirmPassword_Label" xml:space="preserve">
+    <value>Confirmar nueva contraseña</value>
+  </data>
+  <data name="ConfigView_NineRouter_ConfirmPassword_Placeholder" xml:space="preserve">
+    <value>Confirma la nueva contraseña</value>
+  </data>
+  <data name="ConfigView_NineRouter_SetPassword" xml:space="preserve">
+    <value>Establecer contraseña</value>
+  </data>
+  <data name="ConfigView_NineRouter_RequireApiKey_Label" xml:space="preserve">
+    <value>Requerir clave de API</value>
+  </data>
+  <data name="ConfigView_NineRouter_RequireApiKey_Description" xml:space="preserve">
+    <value>Se rechazarán las solicitudes sin una clave válida.</value>
+  </data>
+  <data name="ConfigView_NineRouter_ApiKeys_Description" xml:space="preserve">
+    <value>Claves aceptadas por los clientes de 9Router. La configuración del agente usa la clave predeterminada.</value>
+  </data>
   <data name="ConfigView_NineRouter_EngineFolder_Label" xml:space="preserve">
     <value>Carpeta de instalación del motor</value>
   </data>
@@ -1390,6 +1420,15 @@
   </data>
   <data name="AgentConfigOverlay_DoneButton" xml:space="preserve">
     <value>Hecho</value>
+  </data>
+  <data name="ApiKeysOverlay_NineRouter_Title" xml:space="preserve">
+    <value>Claves de 9Router</value>
+  </data>
+  <data name="ApiKeysOverlay_NineRouter_Description" xml:space="preserve">
+    <value>Claves aceptadas por los clientes de 9Router. La configuración del agente usa la clave predeterminada.</value>
+  </data>
+  <data name="ApiKeysOverlay_NineRouter_AddKeyLabel" xml:space="preserve">
+    <value>Nombre de la clave</value>
   </data>
   <data name="ApiKeysOverlay_Title" xml:space="preserve">
     <value>Claves de CLIProxyAPI</value>

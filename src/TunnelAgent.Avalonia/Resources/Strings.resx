@@ -1258,6 +1258,36 @@
     <value>Update now</value>
   </data>
 
+  <data name="ConfigView_NineRouter_RequireLogin_Label" xml:space="preserve">
+    <value>Require login</value>
+  </data>
+  <data name="ConfigView_NineRouter_RequireLogin_Description" xml:space="preserve">
+    <value>When on, the dashboard requires a password.</value>
+  </data>
+  <data name="ConfigView_NineRouter_NewPassword_Label" xml:space="preserve">
+    <value>New password</value>
+  </data>
+  <data name="ConfigView_NineRouter_NewPassword_Placeholder" xml:space="preserve">
+    <value>Enter new password</value>
+  </data>
+  <data name="ConfigView_NineRouter_ConfirmPassword_Label" xml:space="preserve">
+    <value>Confirm new password</value>
+  </data>
+  <data name="ConfigView_NineRouter_ConfirmPassword_Placeholder" xml:space="preserve">
+    <value>Confirm new password</value>
+  </data>
+  <data name="ConfigView_NineRouter_SetPassword" xml:space="preserve">
+    <value>Set password</value>
+  </data>
+  <data name="ConfigView_NineRouter_RequireApiKey_Label" xml:space="preserve">
+    <value>Require API key</value>
+  </data>
+  <data name="ConfigView_NineRouter_RequireApiKey_Description" xml:space="preserve">
+    <value>Requests without a valid key will be rejected.</value>
+  </data>
+  <data name="ConfigView_NineRouter_ApiKeys_Description" xml:space="preserve">
+    <value>Keys accepted by 9Router clients. Agent setup uses the default key.</value>
+  </data>
   <data name="ConfigView_NineRouter_EngineFolder_Label" xml:space="preserve">
     <value>Engine install folder</value>
   </data>
@@ -1442,6 +1472,15 @@
   </data>
   <data name="AgentConfigOverlay_DoneButton" xml:space="preserve">
     <value>Done</value>
+  </data>
+  <data name="ApiKeysOverlay_NineRouter_Title" xml:space="preserve">
+    <value>9Router keys</value>
+  </data>
+  <data name="ApiKeysOverlay_NineRouter_Description" xml:space="preserve">
+    <value>Keys accepted by 9Router clients. Agent setup uses the default key.</value>
+  </data>
+  <data name="ApiKeysOverlay_NineRouter_AddKeyLabel" xml:space="preserve">
+    <value>Key name</value>
   </data>
   <data name="ApiKeysOverlay_Title" xml:space="preserve">
     <value>CLIProxyAPI keys</value>
