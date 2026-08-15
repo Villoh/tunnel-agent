@@ -2927,7 +2927,10 @@ SelectedSection is SectionKey.Logs;
         foreach (var account in accounts)
             NineRouterConnections.Add(account);
         _allNineRouterProviders.Clear();
-        _allNineRouterProviders.AddRange(providers.Values.OrderBy(provider => provider.Name, StringComparer.CurrentCultureIgnoreCase));
+        _allNineRouterProviders.AddRange(providers.Values
+            .OrderByDescending(provider => provider.IsEnabled)
+            .ThenByDescending(provider => provider.HasAccounts)
+            .ThenBy(provider => provider.Name, StringComparer.CurrentCultureIgnoreCase));
         NineRouterProviderCurrentPage = 1;
         ApplyNineRouterProviderFilter();
         OnPropertyChanged(nameof(HasNineRouterConnections));
