@@ -195,18 +195,23 @@
                             </Button>
                         </Grid>
 
-                        <Border Background="{DynamicResource BtnBgBrush}" BorderBrush="{DynamicResource BtnBorderBrush}"
-                                BorderThickness="1" CornerRadius="8" Padding="10,0,0,0">
-                            <Grid ColumnDefinitions="Auto,*" VerticalAlignment="Center">
-                                <lucide:PackIconLucide Grid.Column="0" Kind="Search" Width="13" Height="13"
-                                                       Foreground="{DynamicResource FgFaintBrush}"
-                                                       VerticalAlignment="Center" Margin="0,0,8,0" />
-                                <TextBox Grid.Column="1" Background="Transparent" BorderThickness="0" Padding="4,8"
-                                         VerticalContentAlignment="Center" FontSize="12"
-                                         Watermark="{l:Loc ProvidersView_NineRouterSection_SearchPlaceholder}"
-                                         Text="{Binding NineRouterProviderSearch, Mode=TwoWay}" />
-                            </Grid>
-                        </Border>
+                        <Grid ColumnDefinitions="*,130" ColumnSpacing="8">
+                            <Border Grid.Column="0" Background="{DynamicResource BtnBgBrush}" BorderBrush="{DynamicResource BtnBorderBrush}"
+                                    BorderThickness="1" CornerRadius="8" Padding="10,0,0,0">
+                                <Grid ColumnDefinitions="Auto,*" VerticalAlignment="Center">
+                                    <lucide:PackIconLucide Grid.Column="0" Kind="Search" Width="13" Height="13"
+                                                           Foreground="{DynamicResource FgFaintBrush}"
+                                                           VerticalAlignment="Center" Margin="0,0,8,0" />
+                                    <TextBox Grid.Column="1" Background="Transparent" BorderThickness="0" Padding="4,8"
+                                             VerticalContentAlignment="Center" FontSize="12"
+                                             Watermark="{l:Loc ProvidersView_NineRouterSection_SearchPlaceholder}"
+                                             Text="{Binding NineRouterProviderSearch, Mode=TwoWay}" />
+                                </Grid>
+                            </Border>
+                            <ComboBox Grid.Column="1" Classes="app" HorizontalAlignment="Stretch"
+                                      ItemsSource="{Binding NineRouterProviderAuthFilters}"
+                                      SelectedItem="{Binding NineRouterProviderAuthFilter, Mode=TwoWay}" />
+                        </Grid>
 
                         <ItemsControl ItemsSource="{Binding NineRouterProviders}">
                             <ItemsControl.ItemTemplate>

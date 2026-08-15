@@ -369,10 +369,12 @@ SelectedSection is SectionKey.Logs;
     private const int NineRouterProviderPageSize = 12;
     private readonly List<NineRouterProviderViewModel> _allNineRouterProviders = [];
     [ObservableProperty] private string _nineRouterProviderSearch = "";
+    [ObservableProperty] private string _nineRouterProviderAuthFilter = "Both";
     [ObservableProperty] private int _nineRouterProviderCurrentPage = 1;
     [ObservableProperty] private int _nineRouterProviderTotalPages = 1;
     public ObservableCollection<NineRouterConnectionViewModel> NineRouterConnections { get; } = new();
     public ObservableCollection<NineRouterProviderViewModel> NineRouterProviders { get; } = new();
+    public IReadOnlyList<string> NineRouterProviderAuthFilters { get; } = ["Both", "OAuth", "API Key"];
     public ObservableCollection<LogPageItem> NineRouterProviderPageNavigationItems { get; } = new();
     public bool CanGoNineRouterProviderPrev => NineRouterProviderCurrentPage > 1;
     public bool CanGoNineRouterProviderNext => NineRouterProviderCurrentPage < NineRouterProviderTotalPages;
@@ -384,6 +386,11 @@ SelectedSection is SectionKey.Logs;
     public bool SelectedNineRouterSupportsOAuth => SelectedNineRouterProvider?.SupportsOAuth == true;
     public bool SelectedNineRouterSupportsNoAuth => SelectedNineRouterProvider?.SupportsNoAuth == true;
     partial void OnNineRouterProviderSearchChanged(string value)
+    {
+        NineRouterProviderCurrentPage = 1;
+        ApplyNineRouterProviderFilter();
+    }
+    partial void OnNineRouterProviderAuthFilterChanged(string value)
     {
         NineRouterProviderCurrentPage = 1;
         ApplyNineRouterProviderFilter();
@@ -2963,13 +2970,7 @@ SelectedSection is SectionKey.Logs;
 
     private void ApplyNineRouterProviderFilter()
     {
-        var query = NineRouterProviderSearch.Trim();
-        var filtered = string.IsNullOrEmpty(query)
-            ? _allNineRouterProviders
-            : _allNineRouterProviders.Where(provider =>
-                provider.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
-                || provider.Id.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
-
+        var filtered = FilterNineRouterProviders();
         NineRouterProviderTotalPages = Math.Max(1, (int)Math.Ceiling(filtered.Count / (double)NineRouterProviderPageSize));
         if (NineRouterProviderCurrentPage > NineRouterProviderTotalPages)
         {
@@ -2981,15 +2982,17 @@ SelectedSection is SectionKey.Logs;
         ApplyNineRouterProviderPage(filtered);
     }
 
-    private void ApplyNineRouterProviderPage()
+    private void ApplyNineRouterProviderPage() => ApplyNineRouterProviderPage(FilterNineRouterProviders());
+
+    private List<NineRouterProviderViewModel> FilterNineRouterProviders()
     {
         var query = NineRouterProviderSearch.Trim();
-        var filtered = string.IsNullOrEmpty(query)
-            ? _allNineRouterProviders
-            : _allNineRouterProviders.Where(provider =>
-                provider.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
-                || provider.Id.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
-        ApplyNineRouterProviderPage(filtered);
+        return _allNineRouterProviders.Where(provider =>
+            provider.MatchesAuthFilter(NineRouterProviderAuthFilter)
+            && (string.IsNullOrEmpty(query)
+                || provider.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
+                || provider.Id.Contains(query, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
     }
 
     private void ApplyNineRouterProviderPage(IEnumerable<NineRouterProviderViewModel> providers)

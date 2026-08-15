@@ -60,6 +60,13 @@ public sealed partial class NineRouterProviderViewModel : ObservableObject
         + (Option.SupportsApiKey || Option.SupportsCookie ? 1 : 0)
         + (Option.SupportsNoAuth ? 1 : 0) > 1;
 
+    internal bool MatchesAuthFilter(string filter) => filter switch
+    {
+        "OAuth" => Option.SupportsOAuth,
+        "API Key" => SupportsStoredCredential,
+        _ => Option.SupportsOAuth || SupportsStoredCredential,
+    };
+
     /// <summary>Gets the icon glyph.</summary>
     public PackIconSimpleIconsKind IconKind { get; }
 
