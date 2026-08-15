@@ -191,7 +191,7 @@ public sealed partial class NineRouterCombosViewModel : ObservableObject
         ErrorMessage = null;
         try
         {
-            using var client = new ApiClient(_port());
+            using var client = ApiClient.CreateDashboardClient(_port());
             var combos = await client.ListCombosAsync();
             var settings = await client.GetSettingsAsync();
             Combos.Clear();
@@ -300,7 +300,7 @@ public sealed partial class NineRouterCombosViewModel : ObservableObject
             var strategy = DraftStrategy;
             var judgeModel = DraftJudgeModel;
             var previousName = _editingComboName;
-            using var client = new ApiClient(_port());
+            using var client = ApiClient.CreateDashboardClient(_port());
             if (_editingComboId is null)
                 await client.CreateComboAsync(new NineRouterCreateComboRequest { Name = name, Models = [.. DraftModels] });
             else
@@ -338,7 +338,7 @@ public sealed partial class NineRouterCombosViewModel : ObservableObject
         ErrorMessage = null;
         try
         {
-            using var client = new ApiClient(_port());
+            using var client = ApiClient.CreateDashboardClient(_port());
             await client.DeleteComboAsync(combo.Id);
             var settings = await client.GetSettingsAsync();
             if (settings.ComboStrategies.Remove(combo.Name))

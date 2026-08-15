@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using TunnelAgent.Infrastructure.Services;
 
 namespace TunnelAgent.Infrastructure.Engine.NineRouter;
 
@@ -30,6 +31,9 @@ public sealed class ApiClient : IDisposable
 
     /// <summary>9Router's password before the user changes it in the dashboard.</summary>
     public const string DefaultDashboardPassword = "123456";
+
+    /// <summary>User-environment variable that stores the local 9Router dashboard password.</summary>
+    public const string DashboardPasswordEnvVarName = "TUNNEL_AGENT_9ROUTER_DASHBOARD_PASSWORD";
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -88,6 +92,15 @@ public sealed class ApiClient : IDisposable
         if (_http.DefaultRequestHeaders.UserAgent.Count == 0)
             _http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("TunnelAgent", TunnelAgent.AppVersion.Current));
     }
+
+    /// <summary>Creates a client with Tunnel Agent's saved dashboard password.</summary>
+    public static ApiClient CreateDashboardClient(int port) => new(
+        port,
+        UserEnvironmentService.Get(DashboardPasswordEnvVarName) ?? DefaultDashboardPassword);
+
+    /// <summary>Gets the dashboard password Tunnel Agent will use for local management requests.</summary>
+    public static string DashboardPassword =>
+        UserEnvironmentService.Get(DashboardPasswordEnvVarName) ?? DefaultDashboardPassword;
 
     /// <summary>Gets the loopback port this client was constructed with.</summary>
     public int Port { get; }
@@ -172,6 +185,26 @@ public sealed class ApiClient : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
         using var response = await SendWithAuthRetryAsync(HttpMethod.Patch, "api/settings", request, ct)
+            .ConfigureAwait(false);
+        return await ReadJsonAsync<NineRouterSettings>(response, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>Updates the dashboard-login setting or password via <c>PATCH /api/settings</c>.</summary>
+    /// <remarks>Passwords are only sent to the local 9Router process and are never logged.</remarks>
+    public async Task<NineRouterSettings> UpdateDashboardSecurityAsync(
+        bool? requireLogin = null,
+        string? currentPassword = null,
+        string? newPassword = null,
+        CancellationToken ct = default)
+    {
+        if (requireLogin is null && string.IsNullOrWhiteSpace(newPassword))
+            throw new ArgumentException("Specify a dashboard security change.");
+
+        using var response = await SendWithAuthRetryAsync(
+                HttpMethod.Patch,
+                "api/settings",
+                new UpdateDashboardSecurityRequest(requireLogin, currentPassword, newPassword),
+                ct)
             .ConfigureAwait(false);
         return await ReadJsonAsync<NineRouterSettings>(response, ct).ConfigureAwait(false);
     }
@@ -515,6 +548,15 @@ public sealed class ApiClient : IDisposable
         return await ReadJsonAsync<NineRouterCreatedApiKey>(response, ct).ConfigureAwait(false);
     }
 
+    /// <summary>Deletes a client API key via <c>DELETE /api/keys/{id}</c>.</summary>
+    public async Task DeleteKeyAsync(string id, CancellationToken ct = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        using var response = await SendWithAuthRetryAsync(HttpMethod.Delete, KeyPath(id), body: null, ct)
+            .ConfigureAwait(false);
+        await EnsureSuccessAsync(response, ct).ConfigureAwait(false);
+    }
+
     /// <inheritdoc />
     public void Dispose()
     {
@@ -697,6 +739,9 @@ public sealed class ApiClient : IDisposable
     private static string ComboPath(string id) =>
         "api/combos/" + Uri.EscapeDataString(id);
 
+    private static string KeyPath(string id) =>
+        "api/keys/" + Uri.EscapeDataString(id);
+
     private static string UsagePath(string connectionId) =>
         "api/usage/" + Uri.EscapeDataString(connectionId);
 
@@ -744,6 +789,11 @@ public sealed class ApiClient : IDisposable
     private sealed record KeyListResponse(List<NineRouterApiKey>? Keys, string? Error);
 
     private sealed record CreateKeyRequest(string Name);
+
+    private sealed record UpdateDashboardSecurityRequest(
+        bool? RequireLogin,
+        string? CurrentPassword,
+        string? NewPassword);
 
     private sealed record LoginRequest(string Password);
 

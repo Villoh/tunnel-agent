@@ -135,7 +135,7 @@ public sealed partial class NineRouterUsageViewModel : ViewModelBase
         ErrorMessage = null;
         try
         {
-            using var client = new ApiClient(_port());
+            using var client = ApiClient.CreateDashboardClient(_port());
             var stats = await client.GetUsageStatsAsync("7d");
             var details = await client.ListRequestDetailsAsync(CurrentPage, PageSize);
             Apply(stats, details);

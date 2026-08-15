@@ -88,6 +88,47 @@ public sealed class NineRouterApiClientTests
     }
 
     [Fact]
+    public async Task UpdateSettingsAsync_UpdatesApiKeyRequirement()
+    {
+        using var handler = new FakeApiHandler();
+        handler.EnqueueJson(HttpStatusCode.OK, """{ "requireApiKey": true }""");
+        using var client = new ApiClient(Port, handler);
+
+        var settings = await client.UpdateSettingsAsync(new NineRouterUpdateSettingsRequest
+        {
+            RequireApiKey = true
+        });
+
+        Assert.True(settings.RequireApiKey);
+        Assert.Equal("PATCH", handler.Requests[0].Method);
+        Assert.Equal("/api/settings", handler.Requests[0].Path);
+        using var body = JsonDocument.Parse(handler.Requests[0].Body!);
+        Assert.True(body.RootElement.GetProperty("requireApiKey").GetBoolean());
+        Assert.False(body.RootElement.TryGetProperty("providerStrategies", out _));
+    }
+
+    [Fact]
+    public async Task UpdateDashboardSecurityAsync_UpdatesLoginAndPassword()
+    {
+        using var handler = new FakeApiHandler();
+        handler.EnqueueJson(HttpStatusCode.OK, """{ "requireLogin": true }""");
+        using var client = new ApiClient(Port, handler, dashboardPassword: "old-password");
+
+        var settings = await client.UpdateDashboardSecurityAsync(
+            requireLogin: true,
+            currentPassword: "old-password",
+            newPassword: "new-password");
+
+        Assert.True(settings.RequireLogin);
+        Assert.Equal("PATCH", handler.Requests[0].Method);
+        Assert.Equal("/api/settings", handler.Requests[0].Path);
+        using var body = JsonDocument.Parse(handler.Requests[0].Body!);
+        Assert.True(body.RootElement.GetProperty("requireLogin").GetBoolean());
+        Assert.Equal("old-password", body.RootElement.GetProperty("currentPassword").GetString());
+        Assert.Equal("new-password", body.RootElement.GetProperty("newPassword").GetString());
+    }
+
+    [Fact]
     public async Task CombosAsync_UsesManagementEndpoints()
     {
         using var handler = new FakeApiHandler();
@@ -362,6 +403,20 @@ public sealed class NineRouterApiClientTests
         Assert.Equal("sk-9r-new", created.Key);
         using var body = JsonDocument.Parse(handler.Requests[0].Body!);
         Assert.Equal("tunnel-agent", body.RootElement.GetProperty("name").GetString());
+    }
+
+    [Fact]
+    public async Task DeleteKeyAsync_DeletesEscapedKeyId()
+    {
+        using var handler = new FakeApiHandler();
+        handler.EnqueueJson(HttpStatusCode.OK, """{ "message": "Key deleted successfully" }""");
+        using var client = new ApiClient(Port, handler);
+
+        await client.DeleteKeyAsync("key/one");
+
+        Assert.Equal("DELETE", handler.Requests[0].Method);
+        Assert.Equal("/api/keys/key%2Fone", handler.Requests[0].Path);
+        Assert.Null(handler.Requests[0].Body);
     }
 
     [Fact]

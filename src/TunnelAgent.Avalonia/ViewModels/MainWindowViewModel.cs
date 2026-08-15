@@ -16,6 +16,7 @@ using TunnelAgent.Infrastructure.Engine;
 using TunnelAgent.Infrastructure.Engine.CliProxy;
 using TunnelAgent.Infrastructure.Engine.Perplexity;
 using TunnelAgent.Infrastructure.Engine.NineRouter;
+using TunnelAgent.Infrastructure.Services;
 
 namespace TunnelAgent.ViewModels;
 
@@ -23,14 +24,17 @@ namespace TunnelAgent.ViewModels;
 public sealed record AgentConfigItemResult(
     string AgentName, bool Success, string? Error, string? ConfigPath);
 
-public sealed record CliProxyApiKeyViewModel(string Value, bool IsDefault)
+public sealed record ApiKeyViewModel(string Value, string? Id, string? Name, bool IsDefault)
 {
     public string Masked => string.IsNullOrEmpty(Value)
         ? ""
         : Value.Length > 12 ? $"{Value[..8]}...{Value[^4..]}" : Value;
-    public bool CanRemove => true;
+    public bool HasName => !string.IsNullOrWhiteSpace(Name);
+    public bool CanRemove => Id is null || !string.IsNullOrWhiteSpace(Id);
     public bool CanSetDefault => !IsDefault;
 }
+
+internal enum ApiKeyTarget { CliProxy, NineRouter }
 
 internal sealed record PendingNineRouterOAuth(
     NineRouterProviderOption Provider,
@@ -257,6 +261,27 @@ SelectedSection is SectionKey.Logs;
     [ObservableProperty] private bool _showNineRouterOAuthCodeDialog;
     [ObservableProperty] private string _nineRouterOAuthCodeDraft = "";
     [ObservableProperty] private bool _isNineRouterBusy;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowNineRouterPasswordSettings))]
+    private bool _nineRouterRequireLogin;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanChangeNineRouterRequireLogin))]
+    private bool _isUpdatingNineRouterRequireLogin;
+    private bool _suppressNineRouterRequireLoginUpdate;
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SetNineRouterDashboardPasswordCommand))]
+    private string _nineRouterNewPasswordDraft = "";
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SetNineRouterDashboardPasswordCommand))]
+    private string _nineRouterConfirmPasswordDraft = "";
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SetNineRouterDashboardPasswordCommand))]
+    private bool _isSettingNineRouterDashboardPassword;
+    [ObservableProperty] private bool _nineRouterRequireApiKey;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanChangeNineRouterRequireApiKey))]
+    private bool _isUpdatingNineRouterRequireApiKey;
+    private bool _suppressNineRouterRequireApiKeyUpdate;
     private PendingNineRouterOAuth? _pendingNineRouterOAuth;
 
     [ObservableProperty] private bool _showOAuthStatus;
@@ -337,6 +362,7 @@ SelectedSection is SectionKey.Logs;
     [ObservableProperty] private bool _showApiKeysDialog;
     [ObservableProperty] private string _apiKeyDraft = "";
     [ObservableProperty] private bool _showApiKeyDraft;
+    private ApiKeyTarget _apiKeyTarget;
     [ObservableProperty] private string _addAccountApiKeyDraft = "";
     [ObservableProperty] private string _addAccountBaseUrlDraft = "";
     [ObservableProperty]
@@ -428,7 +454,7 @@ SelectedSection is SectionKey.Logs;
     public ObservableCollection<AvailableModelGroupViewModel> PerplexityModelGroups { get; }
     public ObservableCollection<AvailableModelGroupViewModel> NineRouterModelGroups { get; }
     public ObservableCollection<EngineOptionViewModel> EngineOptions { get; } = new();
-    public ObservableCollection<CliProxyApiKeyViewModel> CliProxyApiKeys { get; } = new();
+    public ObservableCollection<ApiKeyViewModel> ApiKeys { get; } = new();
     public ObservableCollection<SelectableModelViewModel> SelectableModels { get; } = new();
     private bool _suppressSelectableModelState;
     public ObservableCollection<SelectableModelViewModel> CustomProviderModels { get; } = new();
@@ -683,6 +709,9 @@ SelectedSection is SectionKey.Logs;
     public string PerplexityEmptyStateText => "Perplexity needs at least one saved WebUI session token account.";
     public bool HasNineRouterConnections => NineRouterConnections.Count > 0;
     public bool IsNineRouterEngineRunning => NineRouterEngine.State == EngineState.Running;
+    public bool ShowNineRouterPasswordSettings => NineRouterRequireLogin;
+    public bool CanChangeNineRouterRequireLogin => IsNineRouterEngineRunning && !IsUpdatingNineRouterRequireLogin;
+    public bool CanChangeNineRouterRequireApiKey => IsNineRouterEngineRunning && !IsUpdatingNineRouterRequireApiKey;
     public string AuthFilesDescription => IsNineRouterEngineSelected
         ? _localization.GetString("ProvidersView_NineRouterSection_AuthFiles")
         : IsPerplexityEngineSelected
@@ -822,6 +851,9 @@ SelectedSection is SectionKey.Logs;
                 OnPropertyChanged(nameof(AgentConfigDialogTitle));
                 OnPropertyChanged(nameof(AgentConfigDialogDescription));
                 OnPropertyChanged(nameof(ModelsExpanderLabel));
+                OnPropertyChanged(nameof(ApiKeysDialogTitle));
+                OnPropertyChanged(nameof(ApiKeysDialogDescription));
+                OnPropertyChanged(nameof(ApiKeyDraftLabel));
                 OnPropertyChanged(nameof(SelectedEngineVersionDescription));
                 OnPropertyChanged(nameof(InstalledEngineHashLabel));
                 foreach (var mode in ThemeModes)
@@ -1572,7 +1604,7 @@ SelectedSection is SectionKey.Logs;
     {
         try
         {
-            using var client = new ApiClient(engine.Port);
+            using var client = ApiClient.CreateDashboardClient(engine.Port);
             var connections = await client.ListProvidersAsync(token);
             var settings = await client.GetSettingsAsync(token);
             await Dispatcher.UIThread.InvokeAsync(() => ApplyNineRouterConnections(connections, settings));
@@ -1665,6 +1697,9 @@ SelectedSection is SectionKey.Logs;
         OnPropertyChanged(nameof(NineRouterEndpointUrl));
         OnPropertyChanged(nameof(NineRouterDashboardUrl));
         OnPropertyChanged(nameof(IsNineRouterEngineRunning));
+        OnPropertyChanged(nameof(CanChangeNineRouterRequireLogin));
+        OnPropertyChanged(nameof(CanChangeNineRouterRequireApiKey));
+        SetNineRouterDashboardPasswordCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(ShowNineRouterUsage));
         OnPropertyChanged(nameof(ShowNineRouterUsageWarning));
         NineRouterUsage.NotifyEngineStateChanged();
@@ -2707,7 +2742,7 @@ SelectedSection is SectionKey.Logs;
         IsNineRouterBusy = true;
         try
         {
-            using var client = new ApiClient(NineRouterEngine.Port);
+            using var client = ApiClient.CreateDashboardClient(NineRouterEngine.Port);
             using var timeoutCts = new CancellationTokenSource(NineRouterOAuthProviders.DefaultTimeout);
 
             if (provider.OAuthFlow == NineRouterOAuthFlow.DeviceCode)
@@ -2778,7 +2813,7 @@ SelectedSection is SectionKey.Logs;
         try
         {
             var code = ExtractNineRouterOAuthCode(input, pending.Start.State);
-            using var client = new ApiClient(NineRouterEngine.Port);
+            using var client = ApiClient.CreateDashboardClient(NineRouterEngine.Port);
             await client.ExchangeOAuthAsync(
                 pending.Provider.Id,
                 code,
@@ -2836,7 +2871,7 @@ SelectedSection is SectionKey.Logs;
         IsNineRouterBusy = true;
         try
         {
-            using var client = new ApiClient(NineRouterEngine.Port);
+            using var client = ApiClient.CreateDashboardClient(NineRouterEngine.Port);
             foreach (var account in provider.Accounts)
             {
                 await client.UpdateProviderAsync(
@@ -2887,7 +2922,7 @@ SelectedSection is SectionKey.Logs;
         IsNineRouterBusy = true;
         try
         {
-            using var client = new ApiClient(NineRouterEngine.Port);
+            using var client = ApiClient.CreateDashboardClient(NineRouterEngine.Port);
             await client.UpdateProviderAsync(connection.Id, new NineRouterUpdateProviderRequest { Name = name });
             DismissEditNineRouterConnectionNameDialog();
             await RefreshNineRouterConnectionsAsync();
@@ -2909,7 +2944,7 @@ SelectedSection is SectionKey.Logs;
         IsNineRouterBusy = true;
         try
         {
-            using var client = new ApiClient(NineRouterEngine.Port);
+            using var client = ApiClient.CreateDashboardClient(NineRouterEngine.Port);
             var settings = await client.GetSettingsAsync();
             var strategies = new Dictionary<string, NineRouterProviderStrategy>(
                 settings.ProviderStrategies ?? [],
@@ -2943,7 +2978,7 @@ SelectedSection is SectionKey.Logs;
         IsNineRouterBusy = true;
         try
         {
-            using var client = new ApiClient(NineRouterEngine.Port);
+            using var client = ApiClient.CreateDashboardClient(NineRouterEngine.Port);
             await client.UpdateProviderAsync(
                 connection.Id,
                 new NineRouterUpdateProviderRequest { IsActive = !connection.IsActive });
@@ -2966,7 +3001,7 @@ SelectedSection is SectionKey.Logs;
         IsNineRouterBusy = true;
         try
         {
-            using var client = new ApiClient(NineRouterEngine.Port);
+            using var client = ApiClient.CreateDashboardClient(NineRouterEngine.Port);
             await client.DeleteProviderAsync(connection.Id);
             await RefreshNineRouterConnectionsAsync();
             RestartNineRouterModelFetch();
@@ -3014,7 +3049,7 @@ SelectedSection is SectionKey.Logs;
 
     private async Task PostNineRouterProviderAsync(string providerId, string name, string apiKey, string authType = "apikey")
     {
-        using var client = new ApiClient(NineRouterEngine.Port);
+        using var client = ApiClient.CreateDashboardClient(NineRouterEngine.Port);
         await client.CreateProviderAsync(new NineRouterCreateProviderRequest
         {
             Provider = providerId,
@@ -3043,7 +3078,7 @@ SelectedSection is SectionKey.Logs;
 
         try
         {
-            using var client = new ApiClient(NineRouterEngine.Port);
+            using var client = ApiClient.CreateDashboardClient(NineRouterEngine.Port);
             var connections = await client.ListProvidersAsync();
             var settings = await client.GetSettingsAsync();
             await Dispatcher.UIThread.InvokeAsync(() => ApplyNineRouterConnections(connections, settings));
@@ -3059,6 +3094,8 @@ SelectedSection is SectionKey.Logs;
 
     private void ApplyNineRouterConnections(IReadOnlyList<NineRouterProvider> connections, NineRouterSettings settings)
     {
+        SetNineRouterRequireLogin(settings.RequireLogin);
+        SetNineRouterRequireApiKey(settings.RequireApiKey);
         var strategies = settings.ProviderStrategies ?? [];
         var providers = NineRouterProviderCatalog.All
             .Select(option => new NineRouterProviderViewModel(
@@ -3118,7 +3155,7 @@ SelectedSection is SectionKey.Logs;
         try
         {
             await RefreshNineRouterConnectionsAsync();
-            using var client = new ApiClient(NineRouterEngine.Port);
+            using var client = ApiClient.CreateDashboardClient(NineRouterEngine.Port);
             foreach (var connection in NineRouterConnections)
                 await RefreshNineRouterUsageAsync(connection, client);
         }
@@ -3133,7 +3170,7 @@ SelectedSection is SectionKey.Logs;
         ArgumentNullException.ThrowIfNull(connection);
         if (NineRouterEngine.State != EngineState.Running || connection.IsUsageRefreshing) return;
 
-        using var client = new ApiClient(NineRouterEngine.Port);
+        using var client = ApiClient.CreateDashboardClient(NineRouterEngine.Port);
         await RefreshNineRouterUsageAsync(connection, client);
     }
 
@@ -3244,6 +3281,112 @@ SelectedSection is SectionKey.Logs;
         _nineRouterModelFetchCts?.Cancel();
         _nineRouterModelFetchCts = null;
         StartNineRouterModelFetch(NineRouterEngine);
+    }
+
+    partial void OnNineRouterRequireLoginChanged(bool value)
+    {
+        if (!value)
+        {
+            NineRouterNewPasswordDraft = "";
+            NineRouterConfirmPasswordDraft = "";
+        }
+        if (!_suppressNineRouterRequireLoginUpdate && CanChangeNineRouterRequireLogin)
+            _ = UpdateNineRouterRequireLoginAsync(value);
+    }
+
+    private void SetNineRouterRequireLogin(bool value)
+    {
+        _suppressNineRouterRequireLoginUpdate = true;
+        NineRouterRequireLogin = value;
+        _suppressNineRouterRequireLoginUpdate = false;
+    }
+
+    private async Task UpdateNineRouterRequireLoginAsync(bool value)
+    {
+        IsUpdatingNineRouterRequireLogin = true;
+        try
+        {
+            using var client = ApiClient.CreateDashboardClient(NineRouterEngine.Port);
+            var settings = await client.UpdateDashboardSecurityAsync(requireLogin: value);
+            SetNineRouterRequireLogin(settings.RequireLogin);
+        }
+        catch (Exception ex)
+        {
+            SetNineRouterRequireLogin(!value);
+            ShowNineRouterStatus(ex.Message, isError: true);
+        }
+        finally
+        {
+            IsUpdatingNineRouterRequireLogin = false;
+        }
+    }
+
+    private bool CanSetNineRouterDashboardPassword() =>
+        CanChangeNineRouterRequireLogin &&
+        !IsSettingNineRouterDashboardPassword &&
+        !string.IsNullOrWhiteSpace(NineRouterNewPasswordDraft) &&
+        string.Equals(NineRouterNewPasswordDraft, NineRouterConfirmPasswordDraft, StringComparison.Ordinal);
+
+    [RelayCommand(CanExecute = nameof(CanSetNineRouterDashboardPassword))]
+    private async Task SetNineRouterDashboardPasswordAsync()
+    {
+        var password = NineRouterNewPasswordDraft;
+        IsSettingNineRouterDashboardPassword = true;
+        try
+        {
+            using var client = ApiClient.CreateDashboardClient(NineRouterEngine.Port);
+            var settings = await client.UpdateDashboardSecurityAsync(
+                currentPassword: ApiClient.DashboardPassword,
+                newPassword: password);
+            await Task.Run(() => UserEnvironmentService.Set(ApiClient.DashboardPasswordEnvVarName, password));
+            SetNineRouterRequireLogin(settings.RequireLogin);
+        }
+        catch (Exception ex)
+        {
+            ShowNineRouterStatus(ex.Message, isError: true);
+        }
+        finally
+        {
+            NineRouterNewPasswordDraft = "";
+            NineRouterConfirmPasswordDraft = "";
+            IsSettingNineRouterDashboardPassword = false;
+        }
+    }
+
+    partial void OnNineRouterRequireApiKeyChanged(bool value)
+    {
+        if (!_suppressNineRouterRequireApiKeyUpdate && CanChangeNineRouterRequireApiKey)
+            _ = UpdateNineRouterRequireApiKeyAsync(value);
+    }
+
+    private void SetNineRouterRequireApiKey(bool value)
+    {
+        _suppressNineRouterRequireApiKeyUpdate = true;
+        NineRouterRequireApiKey = value;
+        _suppressNineRouterRequireApiKeyUpdate = false;
+    }
+
+    private async Task UpdateNineRouterRequireApiKeyAsync(bool value)
+    {
+        IsUpdatingNineRouterRequireApiKey = true;
+        try
+        {
+            using var client = ApiClient.CreateDashboardClient(NineRouterEngine.Port);
+            var settings = await client.UpdateSettingsAsync(new NineRouterUpdateSettingsRequest
+            {
+                RequireApiKey = value
+            });
+            SetNineRouterRequireApiKey(settings.RequireApiKey);
+        }
+        catch (Exception ex)
+        {
+            SetNineRouterRequireApiKey(!value);
+            ShowNineRouterStatus(ex.Message, isError: true);
+        }
+        finally
+        {
+            IsUpdatingNineRouterRequireApiKey = false;
+        }
     }
 
     private void ShowNineRouterStatus(string message, bool isError)
@@ -3961,11 +4104,20 @@ SelectedSection is SectionKey.Logs;
         RefreshApiKeyItems();
     }
 
-    private void RefreshApiKeyItems() => _ = RefreshApiKeyItemsAsync();
+    private void RefreshApiKeyItems() => _ = RefreshCliProxyApiKeyItemsAsync();
 
-    private async Task RefreshApiKeyItemsAsync()
+    public string ApiKeysDialogTitle => _localization.GetString(_apiKeyTarget == ApiKeyTarget.NineRouter
+        ? "ApiKeysOverlay_NineRouter_Title" : "ApiKeysOverlay_Title");
+    public string ApiKeysDialogDescription => _localization.GetString(_apiKeyTarget == ApiKeyTarget.NineRouter
+        ? "ApiKeysOverlay_NineRouter_Description" : "ApiKeysOverlay_Description");
+    public string ApiKeyDraftLabel => _localization.GetString(_apiKeyTarget == ApiKeyTarget.NineRouter
+        ? "ApiKeysOverlay_NineRouter_AddKeyLabel" : "ApiKeysOverlay_AddKeyLabel");
+    public string ApiKeyDraftWatermark => _apiKeyTarget == ApiKeyTarget.NineRouter ? "Tunnel Agent" : "sk-...";
+    public bool IsApiKeyDraftSecret => _apiKeyTarget != ApiKeyTarget.NineRouter;
+
+    private async Task RefreshCliProxyApiKeyItemsAsync()
     {
-        var keys   = await _configService.ReadApiKeysFromConfigAsync();
+        var keys = await _configService.ReadApiKeysFromConfigAsync();
         var defKey = TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get("TUNNEL_AGENT_CLIPROXY_API_KEY") ?? "";
 
         // If env var has a key not in yaml, add it so both stay in sync.
@@ -3983,20 +4135,63 @@ SelectedSection is SectionKey.Logs;
             await SyncCliProxyEnvVarAsync(defKey);
         }
 
-        CliProxyApiKeys.Clear();
+        if (_apiKeyTarget != ApiKeyTarget.CliProxy) return;
+        ApiKeys.Clear();
         foreach (var key in keys)
-            CliProxyApiKeys.Add(new CliProxyApiKeyViewModel(key,
+            ApiKeys.Add(new ApiKeyViewModel(key, null, null,
                 string.Equals(key, defKey, StringComparison.Ordinal)));
         OnPropertyChanged(nameof(CurrentAgentApiKey));
+    }
+
+    private async Task RefreshNineRouterApiKeyItemsAsync()
+    {
+        if (NineRouterEngine.State != EngineState.Running || _apiKeyTarget != ApiKeyTarget.NineRouter)
+            return;
+
+        using var client = ApiClient.CreateDashboardClient(NineRouterEngine.Port);
+        var keys = await client.ListKeysAsync();
+        var defKey = TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get(NineRouterClientKeyService.EnvVarName) ?? "";
+        ApiKeys.Clear();
+        foreach (var key in keys)
+            ApiKeys.Add(new ApiKeyViewModel(key.Key ?? "", key.Id, key.Name,
+                string.Equals(key.Key, defKey, StringComparison.Ordinal)));
     }
 
     [RelayCommand]
     private void OpenApiKeys()
     {
+        _apiKeyTarget = ApiKeyTarget.CliProxy;
+        RefreshApiKeyDialogProperties();
         RefreshApiKeyItems();
         ApiKeyDraft = "";
         ShowApiKeyDraft = false;
         ShowApiKeysDialog = true;
+    }
+
+    [RelayCommand]
+    private void OpenNineRouterApiKeys()
+    {
+        if (NineRouterEngine.State != EngineState.Running)
+        {
+            ShowNineRouterStatus(_localization.GetString("ProvidersView_NineRouter_EngineNotRunning"), isError: true);
+            return;
+        }
+
+        _apiKeyTarget = ApiKeyTarget.NineRouter;
+        RefreshApiKeyDialogProperties();
+        ApiKeyDraft = "";
+        ShowApiKeyDraft = false;
+        ShowApiKeysDialog = true;
+        _ = RefreshNineRouterApiKeyItemsAsync();
+    }
+
+    private void RefreshApiKeyDialogProperties()
+    {
+        OnPropertyChanged(nameof(ApiKeysDialogTitle));
+        OnPropertyChanged(nameof(ApiKeysDialogDescription));
+        OnPropertyChanged(nameof(ApiKeyDraftLabel));
+        OnPropertyChanged(nameof(ApiKeyDraftWatermark));
+        OnPropertyChanged(nameof(IsApiKeyDraftSecret));
     }
 
     [RelayCommand]
@@ -4010,34 +4205,71 @@ SelectedSection is SectionKey.Logs;
     [RelayCommand]
     private async Task AddApiKeyAsync()
     {
-        var key = ApiKeyDraft.Trim();
-        if (string.IsNullOrWhiteSpace(key)) return;
+        var value = ApiKeyDraft.Trim();
+        if (string.IsNullOrWhiteSpace(value)) return;
         ApiKeyDraft = "";
         ShowApiKeyDraft = false;
-        var isFirst = !CliProxyApiKeys.Any() || string.IsNullOrWhiteSpace(TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get("TUNNEL_AGENT_CLIPROXY_API_KEY"));
-        await PersistApiKeysAsync(key, setDefault: isFirst);
+
+        if (_apiKeyTarget == ApiKeyTarget.NineRouter)
+        {
+            using var client = ApiClient.CreateDashboardClient(NineRouterEngine.Port);
+            var created = await client.CreateKeyAsync(value);
+            if (string.IsNullOrWhiteSpace(TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get(NineRouterClientKeyService.EnvVarName)))
+                await SyncNineRouterEnvVarAsync(created.Key ?? "");
+            await RefreshNineRouterApiKeyItemsAsync();
+            return;
+        }
+
+        var isFirst = !ApiKeys.Any() || string.IsNullOrWhiteSpace(TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get("TUNNEL_AGENT_CLIPROXY_API_KEY"));
+        await PersistApiKeysAsync(value, setDefault: isFirst);
     }
 
     [RelayCommand]
-    private async Task RemoveApiKeyAsync(CliProxyApiKeyViewModel? key)
+    private async Task RemoveApiKeyAsync(ApiKeyViewModel? key)
     {
         if (key is null) return;
+
+        if (_apiKeyTarget == ApiKeyTarget.NineRouter)
+        {
+            if (string.IsNullOrWhiteSpace(key.Id)) return;
+            var wasDefault = key.IsDefault;
+            using var client = ApiClient.CreateDashboardClient(NineRouterEngine.Port);
+            await client.DeleteKeyAsync(key.Id);
+            if (wasDefault)
+                await SyncNineRouterEnvVarAsync("");
+            await RefreshNineRouterApiKeyItemsAsync();
+            if (wasDefault)
+            {
+                var replacement = ApiKeys.FirstOrDefault(item => !string.IsNullOrWhiteSpace(item.Value));
+                await SyncNineRouterEnvVarAsync(replacement?.Value ?? "");
+                await RefreshNineRouterApiKeyItemsAsync();
+            }
+            return;
+        }
+
         var keys = await _configService.ReadApiKeysFromConfigAsync();
         keys.RemoveAll(k => string.Equals(k, key.Value, StringComparison.Ordinal));
         await _configService.WriteApiKeysToConfigAsync(keys);
-        // Update default env var if removed key was the default
+        // Update default env var if removed key was the default.
         var defKey = TunnelAgent.Infrastructure.Services.UserEnvironmentService.Get("TUNNEL_AGENT_CLIPROXY_API_KEY") ?? "";
         if (string.Equals(defKey, key.Value, StringComparison.Ordinal))
             await SyncCliProxyEnvVarAsync(keys.FirstOrDefault() ?? "");
-        await RefreshApiKeyItemsAsync();
+        await RefreshCliProxyApiKeyItemsAsync();
     }
 
     [RelayCommand]
-    private async Task SetDefaultApiKeyAsync(CliProxyApiKeyViewModel? key)
+    private async Task SetDefaultApiKeyAsync(ApiKeyViewModel? key)
     {
         if (key is null) return;
+        if (_apiKeyTarget == ApiKeyTarget.NineRouter)
+        {
+            await SyncNineRouterEnvVarAsync(key.Value);
+            await RefreshNineRouterApiKeyItemsAsync();
+            return;
+        }
+
         await SyncCliProxyEnvVarAsync(key.Value);
-        await RefreshApiKeyItemsAsync();
+        await RefreshCliProxyApiKeyItemsAsync();
     }
 
     private async Task PersistApiKeysAsync(string newKey, bool setDefault)
@@ -4047,7 +4279,7 @@ SelectedSection is SectionKey.Logs;
             keys.Add(newKey);
         await _configService.WriteApiKeysToConfigAsync(keys);
         if (setDefault) await SyncCliProxyEnvVarAsync(newKey);
-        await RefreshApiKeyItemsAsync();
+        await RefreshCliProxyApiKeyItemsAsync();
         await CliProxyEngine.WriteConfigAsync();
     }
 
@@ -4057,6 +4289,14 @@ SelectedSection is SectionKey.Logs;
             TunnelAgent.Infrastructure.Services.UserEnvironmentService.Set("TUNNEL_AGENT_CLIPROXY_API_KEY", key);
         else
             TunnelAgent.Infrastructure.Services.UserEnvironmentService.Remove("TUNNEL_AGENT_CLIPROXY_API_KEY");
+    });
+
+    private static Task SyncNineRouterEnvVarAsync(string key) => Task.Run(() =>
+    {
+        if (!string.IsNullOrWhiteSpace(key))
+            TunnelAgent.Infrastructure.Services.UserEnvironmentService.Set(NineRouterClientKeyService.EnvVarName, key);
+        else
+            TunnelAgent.Infrastructure.Services.UserEnvironmentService.Remove(NineRouterClientKeyService.EnvVarName);
     });
 
     public int LocalProxyScrollRequestId { get; private set; }
