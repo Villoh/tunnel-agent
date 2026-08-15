@@ -111,6 +111,12 @@
         <Style Selector="Button.icon.engine-restart:pointerover">
             <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
         </Style>
+        <Style Selector="Button.rail-icon">
+            <Setter Property="Foreground" Value="{DynamicResource FgMutedBrush}" />
+        </Style>
+        <Style Selector="Button.rail-icon:pointerover">
+            <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
+        </Style>
         <Style Selector="Button.icon.engine-restart:disabled">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="Foreground" Value="{DynamicResource FgMutedBrush}" />
@@ -142,7 +148,7 @@
               <DockPanel LastChildFill="True">
                 <!-- Open app (bottom) -->
                 <Button DockPanel.Dock="Bottom"
-                        Classes="rail"
+                        Classes="rail rail-icon"
                         ToolTip.Tip="{l:Loc TrayUsagePopup_OpenAppTooltip}"
                         ToolTip.Placement="Right"
                         ToolTip.HorizontalOffset="8"
@@ -180,7 +186,7 @@
                         <StackPanel x:Name="RailItems">
                             <!-- Home / engines -->
                             <Button x:Name="HomeButton"
-                                    Classes="rail"
+                                    Classes="rail rail-icon"
                                     ToolTip.Tip="{l:Loc TrayUsagePopup_Home}"
                                     Click="OnHomeClick">
                                 <Panel Width="34" Height="34">
