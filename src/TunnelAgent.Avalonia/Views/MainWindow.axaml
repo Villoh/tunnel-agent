@@ -911,7 +911,8 @@
                     </Grid>
                     <StackPanel Spacing="4">
                         <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddNineRouterKey_ProviderId}" />
-                        <ComboBox Classes="app" ItemsSource="{Binding NineRouterProviderOptions}"
+                        <ComboBox Classes="app" HorizontalAlignment="Stretch"
+                                  ItemsSource="{Binding NineRouterProviderOptions}"
                                   SelectedItem="{Binding SelectedNineRouterProvider, Mode=TwoWay}" />
                     </StackPanel>
                     <StackPanel Spacing="4">
