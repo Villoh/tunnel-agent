@@ -3066,7 +3066,7 @@ SelectedSection is SectionKey.Logs;
         OnPropertyChanged(nameof(ShowNineRouterUsageEmptyState));
     }
 
-    private async Task RefreshNineRouterUsageAsync()
+    public async Task RefreshNineRouterUsageAsync()
     {
         if (IsRefreshingNineRouterUsage || NineRouterEngine.State != EngineState.Running) return;
 

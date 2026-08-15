@@ -231,6 +231,7 @@ public sealed class TrayService : IDisposable
         }
 
         _popup.Show();
+        _ = _viewModel.RefreshNineRouterUsageAsync();
         PositionPopup(_popup);
         _popupShownAt = DateTime.UtcNow;
         _popup.Activate();
