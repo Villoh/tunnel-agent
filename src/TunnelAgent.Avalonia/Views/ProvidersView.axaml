@@ -195,6 +195,15 @@
                             </Button>
                         </Grid>
 
+                        <Border Background="#18F59E0B" BorderBrush="#44F59E0B" BorderThickness="1" CornerRadius="8" Padding="10"
+                                IsVisible="{Binding IsNineRouterEngineRunning, Converter={StaticResource InvertBool}}">
+                            <StackPanel Spacing="4">
+                                <TextBlock Classes="row-label" Text="{l:Loc Fallback_AddModelPopup_ServerWarning_Title}" />
+                                <TextBlock Classes="row-desc" TextWrapping="Wrap"
+                                           Text="{l:Loc ProvidersView_NineRouter_EngineNotRunning}" />
+                            </StackPanel>
+                        </Border>
+
                         <Grid ColumnDefinitions="*,130" ColumnSpacing="8">
                             <Border Grid.Column="0" Background="{DynamicResource BtnBgBrush}" BorderBrush="{DynamicResource BtnBorderBrush}"
                                     BorderThickness="1" CornerRadius="8" Padding="10,0,0,0">
@@ -253,18 +262,21 @@
                                                 <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center" Margin="8,0">
                                                     <Button Classes="icon-btn" ToolTip.Tip="{l:Loc ProvidersView_Provider_AddAccountTooltip}"
                                                             IsVisible="{Binding Option.SupportsOAuth}"
+                                                            IsEnabled="{Binding #Root.DataContext.IsNineRouterEngineRunning}"
                                                             Command="{Binding #Root.DataContext.ConnectNineRouterOAuthProviderCommand}"
                                                             CommandParameter="{Binding Option}">
                                                         <lucide:PackIconLucide Kind="CircleUserRound" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
                                                     </Button>
                                                     <Button Classes="icon-btn" ToolTip.Tip="{l:Loc ProvidersView_Provider_AddApiKeyTooltip}"
                                                             IsVisible="{Binding SupportsStoredCredential}"
+                                                            IsEnabled="{Binding #Root.DataContext.IsNineRouterEngineRunning}"
                                                             Command="{Binding #Root.DataContext.ShowAddNineRouterProviderCommand}"
                                                             CommandParameter="{Binding}">
                                                         <lucide:PackIconLucide Kind="KeyRound" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
                                                     </Button>
                                                     <Button Classes="icon-btn" ToolTip.Tip="{l:Loc ProvidersView_Provider_AddAccountTooltip}"
                                                             IsVisible="{Binding Option.SupportsNoAuth}"
+                                                            IsEnabled="{Binding #Root.DataContext.IsNineRouterEngineRunning}"
                                                             Command="{Binding #Root.DataContext.ShowAddNineRouterProviderCommand}"
                                                             CommandParameter="{Binding}">
                                                         <lucide:PackIconLucide Kind="Plus" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
