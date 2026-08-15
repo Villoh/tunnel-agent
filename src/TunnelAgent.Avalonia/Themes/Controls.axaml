@@ -170,6 +170,37 @@
         <Setter Property="Background" Value="#1F808080" />
     </Style>
 
+    <!-- Shared motion for every icon button; size and chrome stay class-specific. -->
+    <Style Selector="Button.icon, Button.icon-btn">
+        <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+        <Setter Property="RenderTransform" Value="scale(1)" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12" Easing="CubicEaseOut" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Button.icon /template/ ContentPresenter, Button.icon-btn /template/ ContentPresenter">
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.12" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <!-- Override Fluent's default hover fill while retaining the scale feedback. -->
+    <Style Selector="Button.icon:pointerover /template/ ContentPresenter, Button.icon-btn:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.icon:pointerover, Button.icon-btn:pointerover">
+        <Setter Property="RenderTransform" Value="scale(1.18)" />
+    </Style>
+    <Style Selector="Button.icon:pressed, Button.icon-btn:pressed">
+        <Setter Property="RenderTransform" Value="scale(0.96)" />
+    </Style>
+    <Style Selector="Button.icon:disabled, Button.icon-btn:disabled">
+        <Setter Property="RenderTransform" Value="scale(1)" />
+    </Style>
+
     <Style Selector="Button.icon">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
@@ -180,9 +211,6 @@
         <Setter Property="Padding" Value="0" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
-    </Style>
-    <Style Selector="Button.icon:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="#1A000000" />
     </Style>
     <Style Selector="Button.icon:pressed /template/ ContentPresenter">
         <Setter Property="Background" Value="#26000000" />
@@ -201,6 +229,7 @@
         <Setter Property="Transitions">
             <Transitions>
                 <DoubleTransition Property="Opacity" Duration="0:0:0.16" />
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12" Easing="CubicEaseOut" />
             </Transitions>
         </Setter>
     </Style>
@@ -746,28 +775,9 @@
         <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
-        <Setter Property="RenderTransformOrigin" Value="50%,50%" />
-        <Setter Property="RenderTransform" Value="scale(1)" />
-        <Setter Property="Transitions">
-            <Transitions>
-                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12" Easing="CubicEaseOut" />
-            </Transitions>
-        </Setter>
-    </Style>
-    <Style Selector="Button.icon-btn:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="#14000000" />
-    </Style>
-    <Style Selector="Button.icon-btn:pointerover">
-        <Setter Property="RenderTransform" Value="scale(1.18)" />
     </Style>
     <Style Selector="Button.icon-btn:pressed /template/ ContentPresenter">
         <Setter Property="Background" Value="#22000000" />
-    </Style>
-    <Style Selector="Button.icon-btn:pressed">
-        <Setter Property="RenderTransform" Value="scale(0.9)" />
-    </Style>
-    <Style Selector="Button.icon-btn:disabled">
-        <Setter Property="RenderTransform" Value="scale(1)" />
     </Style>
     <Style Selector="Button.icon-btn.page">
         <Setter Property="Foreground" Value="{DynamicResource FgMutedBrush}" />
@@ -781,9 +791,6 @@
         <Setter Property="RenderTransform" Value="scale(1)" />
     </Style>
     <Style Selector="Button.icon-btn.page.current /template/ ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
-    </Style>
-    <Style Selector="Button.icon-btn.page.current:pointerover /template/ ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
     </Style>
     <Style Selector="Button.icon-btn.page.current:pressed /template/ ContentPresenter">
