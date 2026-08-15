@@ -1750,6 +1750,6 @@ Conclua o início de sessão no navegador. A aplicação irá detetar automatica
     <value>OAUTH PROVIDERS</value>
   </data>
   <data name="ProvidersView_NineRouterSection_SearchPlaceholder" xml:space="preserve">
-    <value>Search providers by name or id</value>
+    <value>Pesquisar fornecedores por nome ou ID</value>
   </data>
 </root>

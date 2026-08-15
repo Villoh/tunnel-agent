@@ -1750,6 +1750,6 @@ Terminez la connexion dans votre navigateur. L'application détectera automatiqu
     <value>OAUTH PROVIDERS</value>
   </data>
   <data name="ProvidersView_NineRouterSection_SearchPlaceholder" xml:space="preserve">
-    <value>Search providers by name or id</value>
+    <value>Rechercher des fournisseurs par nom ou identifiant</value>
   </data>
 </root>

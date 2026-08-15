@@ -363,7 +363,8 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
 
-                        <StackPanel Margin="0,2,0,0" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                        <StackPanel Margin="0,2,0,0" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center"
+                                    IsVisible="{Binding IsNineRouterEngineRunning}">
                             <Button Classes="icon-btn" ToolTip.Tip="{l:Loc LogsView_Requests_FirstPageTooltip}"
                                     IsVisible="{Binding CanGoNineRouterProviderPrev}"
                                     Command="{Binding FirstNineRouterProviderPageCommand}">

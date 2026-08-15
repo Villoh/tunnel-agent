@@ -1750,6 +1750,6 @@ Girişi tarayıcınızda tamamlayın. Kimliğiniz doğrulandığında uygulama b
     <value>OAUTH PROVIDERS</value>
   </data>
   <data name="ProvidersView_NineRouterSection_SearchPlaceholder" xml:space="preserve">
-    <value>Search providers by name or id</value>
+    <value>Sağlayıcıları ada veya kimliğe göre ara</value>
   </data>
 </root>

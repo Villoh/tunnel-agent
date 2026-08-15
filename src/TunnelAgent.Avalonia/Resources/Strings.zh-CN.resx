@@ -1750,6 +1750,6 @@
     <value>OAUTH PROVIDERS</value>
   </data>
   <data name="ProvidersView_NineRouterSection_SearchPlaceholder" xml:space="preserve">
-    <value>Search providers by name or id</value>
+    <value>按名称或 ID 搜索提供商</value>
   </data>
 </root>

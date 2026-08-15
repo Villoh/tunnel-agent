@@ -1750,6 +1750,6 @@
     <value>OAUTH PROVIDERS</value>
   </data>
   <data name="ProvidersView_NineRouterSection_SearchPlaceholder" xml:space="preserve">
-    <value>Search providers by name or id</value>
+    <value>이름 또는 ID로 제공업체 검색</value>
   </data>
 </root>

@@ -1750,6 +1750,6 @@ Completa l'accesso nel browser. L'app rileverà automaticamente quando sei auten
     <value>OAUTH PROVIDERS</value>
   </data>
   <data name="ProvidersView_NineRouterSection_SearchPlaceholder" xml:space="preserve">
-    <value>Search providers by name or id</value>
+    <value>Cerca provider per nome o ID</value>
   </data>
 </root>
