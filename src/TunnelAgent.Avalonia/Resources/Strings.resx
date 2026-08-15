@@ -1758,6 +1758,63 @@
   <data name="DashboardView_Summary_Empty" xml:space="preserve">
     <value>No requests yet. Point an agent at the local proxy to see activity here.</value>
   </data>
+  <data name="DashboardView_Tab_Local" xml:space="preserve">
+    <value>Local proxy</value>
+  </data>
+  <data name="DashboardView_Tab_NineRouter" xml:space="preserve">
+    <value>9Router</value>
+  </data>
+  <data name="DashboardView_NineRouter_EngineNotRunning" xml:space="preserve">
+    <value>Start 9Router to view its usage and request details.</value>
+  </data>
+  <data name="DashboardView_NineRouter_Title" xml:space="preserve">
+    <value>9Router usage</value>
+  </data>
+  <data name="DashboardView_NineRouter_Subtitle" xml:space="preserve">
+    <value>Live usage and redacted request metadata from the last 7 days.</value>
+  </data>
+  <data name="DashboardView_NineRouter_Requests" xml:space="preserve">
+    <value>REQUESTS</value>
+  </data>
+  <data name="DashboardView_NineRouter_Tokens" xml:space="preserve">
+    <value>TOKENS</value>
+  </data>
+  <data name="DashboardView_NineRouter_Cached" xml:space="preserve">
+    <value>Cached {0}</value>
+  </data>
+  <data name="DashboardView_NineRouter_Cost" xml:space="preserve">
+    <value>COST</value>
+  </data>
+  <data name="DashboardView_NineRouter_Active" xml:space="preserve">
+    <value>ACTIVE</value>
+  </data>
+  <data name="DashboardView_NineRouter_ActiveRequests" xml:space="preserve">
+    <value>Active requests</value>
+  </data>
+  <data name="DashboardView_NineRouter_ByProvider" xml:space="preserve">
+    <value>Usage by provider</value>
+  </data>
+  <data name="DashboardView_NineRouter_CachedLabel" xml:space="preserve">
+    <value>CACHED</value>
+  </data>
+  <data name="DashboardView_NineRouter_Empty" xml:space="preserve">
+    <value>No 9Router usage yet.</value>
+  </data>
+  <data name="DashboardView_NineRouter_RequestDetails" xml:space="preserve">
+    <value>Request details</value>
+  </data>
+  <data name="DashboardView_NineRouter_RequestDetailsEmpty" xml:space="preserve">
+    <value>No request details have been recorded.</value>
+  </data>
+  <data name="DashboardView_NineRouter_Connection" xml:space="preserve">
+    <value>CONNECTION</value>
+  </data>
+  <data name="DashboardView_NineRouter_Status" xml:space="preserve">
+    <value>STATUS</value>
+  </data>
+  <data name="DashboardView_NineRouter_Latency" xml:space="preserve">
+    <value>LATENCY</value>
+  </data>
 
   <data name="Quota_Error_Title" xml:space="preserve">
     <value>Quota unavailable</value>

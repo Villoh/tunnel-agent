@@ -315,6 +315,123 @@ public sealed record NineRouterCreatedApiKey
     public string? MachineId { get; init; }
 }
 
+/// <summary>Aggregated usage returned by <c>GET /api/usage/stats</c>.</summary>
+public sealed record NineRouterUsageStats
+{
+    /// <summary>Gets the request count for the selected period.</summary>
+    public long TotalRequests { get; init; }
+    /// <summary>Gets total prompt/input tokens.</summary>
+    public long TotalPromptTokens { get; init; }
+    /// <summary>Gets total completion/output tokens.</summary>
+    public long TotalCompletionTokens { get; init; }
+    /// <summary>Gets total cached tokens.</summary>
+    public long TotalCachedTokens { get; init; }
+    /// <summary>Gets the cost reported by 9Router.</summary>
+    public double TotalCost { get; init; }
+    /// <summary>Gets usage grouped by provider.</summary>
+    public Dictionary<string, NineRouterUsageBucket> ByProvider { get; init; } = [];
+    /// <summary>Gets currently active requests.</summary>
+    public List<NineRouterActiveRequest> ActiveRequests { get; init; } = [];
+}
+
+/// <summary>One grouped usage value returned by 9Router.</summary>
+public sealed record NineRouterUsageBucket
+{
+    /// <summary>Gets the request count.</summary>
+    public long Requests { get; init; }
+    /// <summary>Gets prompt/input tokens.</summary>
+    public long PromptTokens { get; init; }
+    /// <summary>Gets completion/output tokens.</summary>
+    public long CompletionTokens { get; init; }
+    /// <summary>Gets cached tokens.</summary>
+    public long CachedTokens { get; init; }
+    /// <summary>Gets reported cost.</summary>
+    public double Cost { get; init; }
+}
+
+/// <summary>One active request returned by 9Router.</summary>
+public sealed record NineRouterActiveRequest
+{
+    /// <summary>Gets the requested model.</summary>
+    public string? Model { get; init; }
+    /// <summary>Gets the upstream provider.</summary>
+    public string? Provider { get; init; }
+    /// <summary>Gets the selected connection label.</summary>
+    public string? Account { get; init; }
+    /// <summary>Gets the number of matching active requests.</summary>
+    public long Count { get; init; }
+}
+
+/// <summary>One request record returned by <c>GET /api/usage/request-details</c>.</summary>
+public sealed record NineRouterRequestDetail
+{
+    /// <summary>Gets the request id.</summary>
+    public string? Id { get; init; }
+    /// <summary>Gets the upstream provider.</summary>
+    public string? Provider { get; init; }
+    /// <summary>Gets the requested model.</summary>
+    public string? Model { get; init; }
+    /// <summary>Gets the 9Router connection id.</summary>
+    public string? ConnectionId { get; init; }
+    /// <summary>Gets the request timestamp.</summary>
+    public string? Timestamp { get; init; }
+    /// <summary>Gets the final request status.</summary>
+    public string? Status { get; init; }
+    /// <summary>Gets the timing object returned by 9Router.</summary>
+    public JsonElement? Latency { get; init; }
+    /// <summary>Gets the token counters returned by 9Router.</summary>
+    public NineRouterUsageTokens? Tokens { get; init; }
+}
+
+/// <summary>Token counters reported with an individual request.</summary>
+public sealed record NineRouterUsageTokens
+{
+    /// <summary>Gets prompt tokens, when reported in OpenAI format.</summary>
+    [JsonPropertyName("prompt_tokens")]
+    public long PromptTokens { get; init; }
+    /// <summary>Gets input tokens, when reported in Anthropic format.</summary>
+    [JsonPropertyName("input_tokens")]
+    public long InputTokens { get; init; }
+    /// <summary>Gets completion tokens, when reported in OpenAI format.</summary>
+    [JsonPropertyName("completion_tokens")]
+    public long CompletionTokens { get; init; }
+    /// <summary>Gets output tokens, when reported in Anthropic format.</summary>
+    [JsonPropertyName("output_tokens")]
+    public long OutputTokens { get; init; }
+    /// <summary>Gets cached tokens, when reported in OpenAI format.</summary>
+    [JsonPropertyName("cached_tokens")]
+    public long CachedTokens { get; init; }
+    /// <summary>Gets cache-read input tokens, when reported in Anthropic format.</summary>
+    [JsonPropertyName("cache_read_input_tokens")]
+    public long CacheReadInputTokens { get; init; }
+}
+
+/// <summary>Paged response returned by <c>GET /api/usage/request-details</c>.</summary>
+public sealed record NineRouterRequestDetailsPage
+{
+    /// <summary>Gets the requested page of redacted request metadata.</summary>
+    public List<NineRouterRequestDetail> Details { get; init; } = [];
+    /// <summary>Gets server-side paging information.</summary>
+    public NineRouterPagination Pagination { get; init; } = new();
+}
+
+/// <summary>Paging information returned by 9Router.</summary>
+public sealed record NineRouterPagination
+{
+    /// <summary>Gets the current one-based page.</summary>
+    public int Page { get; init; } = 1;
+    /// <summary>Gets the selected page size.</summary>
+    public int PageSize { get; init; }
+    /// <summary>Gets the total result count.</summary>
+    public int TotalItems { get; init; }
+    /// <summary>Gets the total page count.</summary>
+    public int TotalPages { get; init; }
+    /// <summary>Gets whether a next page exists.</summary>
+    public bool HasNext { get; init; }
+    /// <summary>Gets whether a previous page exists.</summary>
+    public bool HasPrev { get; init; }
+}
+
 /// <summary>9Router OAuth provider ids and flow helpers.</summary>
 public static class NineRouterOAuthProviders
 {

@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TunnelAgent.ViewModels"
+             xmlns:nineRouter="using:TunnelAgent.Infrastructure.Engine.NineRouter"
              xmlns:ctrl="using:TunnelAgent.Controls"
              xmlns:lucide="using:IconPacks.Avalonia.Lucide"
              xmlns:l="using:TunnelAgent.Services"
@@ -32,8 +33,15 @@
             <TextBlock Classes="page-sub" Text="{l:Loc DashboardView_Subtitle}" />
         </StackPanel>
 
+        <ctrl:SlidingTabBar HorizontalAlignment="Left" MinWidth="280" SelectedIndex="{Binding HomeDashboardTabIndex}">
+            <ctrl:SlidingTabBar.Tabs>
+                <ctrl:SlidingTab Header="{l:Loc DashboardView_Tab_Local}" Command="{Binding SelectHomeDashboardTabCommand}" CommandParameter="LocalProxy" />
+                <ctrl:SlidingTab Header="{l:Loc DashboardView_Tab_NineRouter}" Command="{Binding SelectHomeDashboardTabCommand}" CommandParameter="NineRouter" />
+            </ctrl:SlidingTabBar.Tabs>
+        </ctrl:SlidingTabBar>
+
         <!-- Toolbar: range tabs + refresh -->
-        <Border Classes="card" Padding="14">
+        <Border Classes="card" Padding="14" IsVisible="{Binding IsLocalHomeDashboardTab}">
             <StackPanel Spacing="12">
                 <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
                     <ctrl:SlidingTabBar Grid.Column="0" HorizontalAlignment="Left"
@@ -78,8 +86,170 @@
             </StackPanel>
         </Border>
 
+        <!-- 9Router live usage -->
+        <Border Background="#18F59E0B" BorderBrush="#44F59E0B" BorderThickness="1" CornerRadius="8" Padding="10"
+                IsVisible="{Binding ShowNineRouterUsageWarning}">
+            <StackPanel Spacing="4">
+                <TextBlock Classes="row-label" Text="{l:Loc Fallback_AddModelPopup_ServerWarning_Title}" />
+                <TextBlock Classes="row-desc" TextWrapping="Wrap" Text="{l:Loc DashboardView_NineRouter_EngineNotRunning}" />
+            </StackPanel>
+        </Border>
+        <Border Classes="card" Padding="18" IsVisible="{Binding ShowNineRouterUsage}">
+            <StackPanel Spacing="14">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel>
+                        <TextBlock Text="{l:Loc DashboardView_NineRouter_Title}" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AccentBrush}" />
+                        <TextBlock Classes="row-desc" Text="{l:Loc DashboardView_NineRouter_Subtitle}" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Classes="icon" ToolTip.Tip="{l:Loc DashboardView_Refresh}"
+                            Command="{Binding NineRouterUsage.RefreshCommand}">
+                        <lucide:PackIconLucide Kind="RefreshCw" Width="14" Height="14"
+                                               Classes.spin="{Binding NineRouterUsage.IsBusy}" />
+                    </Button>
+                </Grid>
+
+                <TextBlock Text="{Binding NineRouterUsage.ErrorMessage}" Foreground="{DynamicResource ErrBrush}"
+                           IsVisible="{Binding NineRouterUsage.HasError}" />
+
+                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
+                    <Border Grid.Column="0" Classes="card" Padding="14,12">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="section-label" Text="{l:Loc DashboardView_NineRouter_Requests}" />
+                            <TextBlock Text="{Binding NineRouterUsage.TotalRequests}" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="1" Classes="card" Padding="14,12">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="section-label" Text="{l:Loc DashboardView_NineRouter_Tokens}" />
+                            <TextBlock Text="{Binding NineRouterUsage.TotalTokens}" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" />
+                            <TextBlock Classes="row-desc" Text="{l:LocFormat Key=DashboardView_NineRouter_Cached, Path=NineRouterUsage.CachedTokens}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="2" Classes="card" Padding="14,12">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="section-label" Text="{l:Loc DashboardView_NineRouter_Cost}" />
+                            <TextBlock Text="{Binding NineRouterUsage.TotalCost}" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource WarnBrush}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="3" Classes="card" Padding="14,12">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="section-label" Text="{l:Loc DashboardView_NineRouter_Active}" />
+                            <TextBlock Text="{Binding NineRouterUsage.ActiveRequestCount}" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource OkBrush}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <StackPanel Spacing="8" IsVisible="{Binding NineRouterUsage.HasActiveRequests}">
+                    <TextBlock Text="{l:Loc DashboardView_NineRouter_ActiveRequests}" FontWeight="SemiBold" />
+                    <ItemsControl ItemsSource="{Binding NineRouterUsage.ActiveRequests}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="nineRouter:NineRouterActiveRequest">
+                                <Grid ColumnDefinitions="2*,2*,2*,Auto" Margin="4,0">
+                                    <TextBlock Grid.Column="0" Text="{Binding Provider}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Model}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="2" Text="{Binding Account}" Foreground="{DynamicResource FgMutedBrush}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="3" Text="{Binding Count}" FontWeight="SemiBold" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{l:Loc DashboardView_NineRouter_ByProvider}" FontWeight="SemiBold" />
+                    <Grid ColumnDefinitions="3*,*,*,*,*" Margin="4,0">
+                        <TextBlock Grid.Column="0" Classes="section-label" Text="{l:Loc DashboardView_Summary_Provider}" />
+                        <TextBlock Grid.Column="1" Classes="section-label" Text="{l:Loc DashboardView_Summary_Calls}" HorizontalAlignment="Right" />
+                        <TextBlock Grid.Column="2" Classes="section-label" Text="{l:Loc DashboardView_Summary_Tokens}" HorizontalAlignment="Right" />
+                        <TextBlock Grid.Column="3" Classes="section-label" Text="{l:Loc DashboardView_NineRouter_CachedLabel}" HorizontalAlignment="Right" />
+                        <TextBlock Grid.Column="4" Classes="section-label" Text="{l:Loc DashboardView_Summary_Cost}" HorizontalAlignment="Right" />
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding NineRouterUsage.ProviderRows}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:NineRouterUsageProviderRow">
+                                <Grid ColumnDefinitions="3*,*,*,*,*" Margin="4,0">
+                                    <TextBlock Grid.Column="0" Text="{Binding Provider}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Requests}" HorizontalAlignment="Right" />
+                                    <TextBlock Grid.Column="2" Text="{Binding Tokens}" HorizontalAlignment="Right" />
+                                    <TextBlock Grid.Column="3" Text="{Binding CachedTokens}" HorizontalAlignment="Right" />
+                                    <TextBlock Grid.Column="4" Text="{Binding Cost}" HorizontalAlignment="Right" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="{l:Loc DashboardView_NineRouter_Empty}" Classes="row-desc"
+                               IsVisible="{Binding !NineRouterUsage.HasProviderRows}" />
+                </StackPanel>
+
+                <StackPanel Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="{l:Loc DashboardView_NineRouter_RequestDetails}" FontWeight="SemiBold" />
+                        <TextBlock Grid.Column="1" Text="{Binding NineRouterUsage.PageLabel}" Classes="row-desc" />
+                    </Grid>
+                    <Grid ColumnDefinitions="1.1*,2*,1.4*,*,*,*,1.5*" Margin="4,0">
+                        <TextBlock Grid.Column="0" Classes="section-label" Text="{l:Loc DashboardView_Summary_Provider}" />
+                        <TextBlock Grid.Column="1" Classes="section-label" Text="{l:Loc DashboardView_Summary_Model}" />
+                        <TextBlock Grid.Column="2" Classes="section-label" Text="{l:Loc DashboardView_NineRouter_Connection}" />
+                        <TextBlock Grid.Column="3" Classes="section-label" Text="{l:Loc DashboardView_NineRouter_Status}" HorizontalAlignment="Right" />
+                        <TextBlock Grid.Column="4" Classes="section-label" Text="{l:Loc DashboardView_Summary_Tokens}" HorizontalAlignment="Right" />
+                        <TextBlock Grid.Column="5" Classes="section-label" Text="{l:Loc DashboardView_NineRouter_Latency}" HorizontalAlignment="Right" />
+                        <TextBlock Grid.Column="6" Classes="section-label" Text="{l:Loc DashboardView_Summary_Last}" HorizontalAlignment="Right" />
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding NineRouterUsage.RequestRows}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:NineRouterUsageRequestRow">
+                                <Grid ColumnDefinitions="1.1*,2*,1.4*,*,*,*,1.5*" Margin="4,0">
+                                    <TextBlock Grid.Column="0" Text="{Binding Provider}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Model}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="2" Text="{Binding Connection}" Foreground="{DynamicResource FgMutedBrush}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="3" Text="{Binding Status}" HorizontalAlignment="Right" />
+                                    <TextBlock Grid.Column="4" Text="{Binding Tokens}" HorizontalAlignment="Right" />
+                                    <TextBlock Grid.Column="5" Text="{Binding Latency}" HorizontalAlignment="Right" />
+                                    <TextBlock Grid.Column="6" Text="{Binding Timestamp}" HorizontalAlignment="Right" Foreground="{DynamicResource FgFaintBrush}" FontSize="11" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="{l:Loc DashboardView_NineRouter_RequestDetailsEmpty}" Classes="row-desc"
+                               IsVisible="{Binding !NineRouterUsage.HasRequestRows}" />
+
+                    <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center"
+                                IsVisible="{Binding NineRouterUsage.HasRequestRows}">
+                        <Button Classes="icon-btn" IsVisible="{Binding NineRouterUsage.CanGoPrev}" Command="{Binding NineRouterUsage.FirstPageCommand}">
+                            <lucide:PackIconLucide Kind="ChevronsLeft" Width="14" Height="14" />
+                        </Button>
+                        <Button Classes="icon-btn" IsVisible="{Binding NineRouterUsage.CanGoPrev}" Command="{Binding NineRouterUsage.PrevPageCommand}">
+                            <lucide:PackIconLucide Kind="ChevronLeft" Width="14" Height="14" />
+                        </Button>
+                        <ItemsControl ItemsSource="{Binding NineRouterUsage.PageNavigationItems}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="3" /></ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:LogPageItem">
+                                    <Panel>
+                                        <Button Classes="icon-btn page" Classes.current="{Binding IsCurrent}" MinWidth="24" Padding="6,4"
+                                                Content="{Binding Label}" IsVisible="{Binding !IsEllipsis}"
+                                                Command="{Binding $parent[ItemsControl].DataContext.NineRouterUsage.GoToPageCommand}" CommandParameter="{Binding}" />
+                                        <TextBlock Text="{Binding Label}" IsVisible="{Binding IsEllipsis}" Padding="6,4" />
+                                    </Panel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button Classes="icon-btn" IsVisible="{Binding NineRouterUsage.CanGoNext}" Command="{Binding NineRouterUsage.NextPageCommand}">
+                            <lucide:PackIconLucide Kind="ChevronRight" Width="14" Height="14" />
+                        </Button>
+                        <Button Classes="icon-btn" IsVisible="{Binding NineRouterUsage.CanGoNext}" Command="{Binding NineRouterUsage.LastPageCommand}">
+                            <lucide:PackIconLucide Kind="ChevronsRight" Width="14" Height="14" />
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
         <!-- Stat cards row 1 -->
-        <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
+        <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12" IsVisible="{Binding IsLocalHomeDashboardTab}">
             <Border Grid.Column="0" Classes="card" Padding="18,16">
                 <StackPanel Spacing="6">
                     <TextBlock Classes="section-label" Text="{l:Loc DashboardView_Card_TotalCalls}" />
@@ -118,7 +288,7 @@
         </Grid>
 
         <!-- Stat cards row 2 (tokens — placeholder) -->
-        <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
+        <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12" IsVisible="{Binding IsLocalHomeDashboardTab}">
             <Border Grid.Column="0" Classes="card" Padding="18,16">
                 <StackPanel Spacing="6">
                     <TextBlock Classes="section-label" Text="{l:Loc DashboardView_Card_TotalTokens}" />
@@ -166,7 +336,7 @@ Foreground="{DynamicResource AccentBrush}" />
         </Grid>
 
         <!-- Usage chart -->
-        <Border Classes="card" Padding="18">
+        <Border Classes="card" Padding="18" IsVisible="{Binding IsLocalHomeDashboardTab}">
             <StackPanel Spacing="14">
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Grid.Column="0">
@@ -214,7 +384,7 @@ Foreground="{DynamicResource AccentBrush}" />
         </Border>
 
         <!-- Usage summary (by provider / by model) -->
-        <Border Classes="card">
+        <Border Classes="card" IsVisible="{Binding IsLocalHomeDashboardTab}">
             <StackPanel>
                 <Grid Margin="16,14,16,10" ColumnDefinitions="Auto,Auto,*">
                     <TextBlock Grid.Column="0" Text="{l:Loc DashboardView_Summary_Title}"
