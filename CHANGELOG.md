@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **9Router dashboard security** (`ConfigurationView`, `MainWindowViewModel`, `NineRouter/ApiClient`): manage client API keys and the default agent key; require API keys for `/v1`; require dashboard login; and set a dashboard password that Tunnel Agent reuses for local management requests.
 
+### Fixed
+
+- **9Router tray usage spacing** (`TrayUsagePopup`): added consistent spacing between 9Router connection cards and between individual usage bars when reset text is absent.
+
 ## [1.1.0] - 2026-08-15
 
 ### Added
