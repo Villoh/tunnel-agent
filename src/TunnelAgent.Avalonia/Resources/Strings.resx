@@ -73,6 +73,12 @@
   <data name="Sidebar_Fallback" xml:space="preserve">
     <value>Fallback</value>
   </data>
+  <data name="Sidebar_FallbackCliProxy" xml:space="preserve">
+    <value>Fallback (CLIProxyAPI)</value>
+  </data>
+  <data name="Sidebar_NineRouterCombos" xml:space="preserve">
+    <value>Combos (9Router)</value>
+  </data>
   <data name="Fallback_Title" xml:space="preserve">
     <value>Model Fallback</value>
   </data>
@@ -225,6 +231,12 @@
   </data>
   <data name="Sidebar_Perplexity" xml:space="preserve">
     <value>Perplexity</value>
+  </data>
+  <data name="Sidebar_NineRouter_StatusTooltip" xml:space="preserve">
+    <value>Open 9Router providers</value>
+  </data>
+  <data name="Sidebar_NineRouter" xml:space="preserve">
+    <value>9Router</value>
   </data>
   <data name="Sidebar_Version" xml:space="preserve">
     <value>v{0} · MIT</value>
@@ -514,6 +526,9 @@
   <data name="ProvidersView_TabPerplexity" xml:space="preserve">
     <value>Perplexity</value>
   </data>
+  <data name="ProvidersView_TabNineRouter" xml:space="preserve">
+    <value>9Router</value>
+  </data>
   <data name="ProvidersView_Title" xml:space="preserve">
     <value>Services</value>
   </data>
@@ -550,6 +565,166 @@
   </data>
   <data name="ProvidersView_PerplexityAccount_RemoveTooltip" xml:space="preserve">
     <value>Remove account</value>
+  </data>
+
+  <data name="ProvidersView_NineRouterSection_Title" xml:space="preserve">
+    <value>9Router connections</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_Description" xml:space="preserve">
+    <value>Provider connections stored by the running 9Router engine.</value>
+  </data>
+  <data name="ProvidersView_NineRouterProvider_RoundRobin" xml:space="preserve">
+    <value>Round Robin</value>
+  </data>
+  <data name="NineRouterCombos_Title" xml:space="preserve">
+    <value>9Router combos</value>
+  </data>
+  <data name="NineRouterCombos_Subtitle" xml:space="preserve">
+    <value>Group models for ordered fallback or round robin.</value>
+  </data>
+  <data name="NineRouterCombos_Refresh" xml:space="preserve">
+    <value>Refresh combos</value>
+  </data>
+  <data name="NineRouterCombos_Create" xml:space="preserve">
+    <value>Create combo</value>
+  </data>
+  <data name="NineRouterCombos_Edit" xml:space="preserve">
+    <value>Edit combo</value>
+  </data>
+  <data name="NineRouterCombos_Save" xml:space="preserve">
+    <value>Save changes</value>
+  </data>
+  <data name="NineRouterCombos_CreateSubtitle" xml:space="preserve">
+    <value>Add models in their fallback order.</value>
+  </data>
+  <data name="NineRouterCombos_Models" xml:space="preserve">
+    <value>Models</value>
+  </data>
+  <data name="NineRouterCombos_ModelCount" xml:space="preserve">
+    <value>{0} models</value>
+  </data>
+  <data name="NineRouterCombos_DraftEmpty" xml:space="preserve">
+    <value>Add at least one model to create the combo.</value>
+  </data>
+  <data name="NineRouterCombos_Strategy" xml:space="preserve">
+    <value>Strategy</value>
+  </data>
+  <data name="NineRouterCombos_StrategyFallback" xml:space="preserve">
+    <value>Fallback — try in order</value>
+  </data>
+  <data name="NineRouterCombos_StrategyRoundRobin" xml:space="preserve">
+    <value>Round Robin — rotate</value>
+  </data>
+  <data name="NineRouterCombos_StrategyFusion" xml:space="preserve">
+    <value>Fusion — panel + judge</value>
+  </data>
+  <data name="NineRouterCombos_Judge" xml:space="preserve">
+    <value>Judge model</value>
+  </data>
+  <data name="NineRouterCombos_JudgeAuto" xml:space="preserve">
+    <value>Automatic: uses the first model if none is selected.</value>
+  </data>
+  <data name="NineRouterCombos_EngineNotRunning" xml:space="preserve">
+    <value>Start 9Router before managing combos.</value>
+  </data>
+  <data name="NineRouterCombos_Name" xml:space="preserve">
+    <value>Combo name</value>
+  </data>
+  <data name="NineRouterCombos_NamePlaceholder" xml:space="preserve">
+    <value>my-combo</value>
+  </data>
+  <data name="NineRouterCombos_AddModel" xml:space="preserve">
+    <value>Add model</value>
+  </data>
+  <data name="NineRouterCombos_NoModelsAvailable" xml:space="preserve">
+    <value>No 9Router models available yet.</value>
+  </data>
+  <data name="NineRouterCombos_Empty" xml:space="preserve">
+    <value>No combos yet.</value>
+  </data>
+  <data name="NineRouterCombos_RoundRobin" xml:space="preserve">
+    <value>Round robin</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_AuthFiles" xml:space="preserve">
+    <value>9Router connections are stored by the running 9Router engine.</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_AddTooltip" xml:space="preserve">
+    <value>Add API key</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_NoConnections" xml:space="preserve">
+    <value>No connections yet</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_EmptyState" xml:space="preserve">
+    <value>Start 9Router, then add an API key or connect a free provider.</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectKiro" xml:space="preserve">
+    <value>Connect Kiro</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectOpenCode" xml:space="preserve">
+    <value>Connect OpenCode Free</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectClaude" xml:space="preserve">
+    <value>Connect Claude</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectGemini" xml:space="preserve">
+    <value>Connect Gemini</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectCopilot" xml:space="preserve">
+    <value>Connect Copilot</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthWaiting" xml:space="preserve">
+    <value>Finish signing in to {0} in the browser.</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthConnected" xml:space="preserve">
+    <value>{0} is connected.</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthFailed" xml:space="preserve">
+    <value>Could not connect {0}: {1}</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthTimeout" xml:space="preserve">
+    <value>{0} sign-in timed out. Try again after finishing in the browser.</value>
+  </data>
+  <data name="ProvidersView_NineRouterConnection_DeleteTooltip" xml:space="preserve">
+    <value>Delete connection</value>
+  </data>
+  <data name="ProvidersView_NineRouter_EngineNotRunning" xml:space="preserve">
+    <value>Start 9Router before managing connections.</value>
+  </data>
+  <data name="ProvidersView_NineRouter_CreateFailed" xml:space="preserve">
+    <value>Could not add the 9Router connection: {0}</value>
+  </data>
+  <data name="ProvidersView_NineRouter_LoadFailed" xml:space="preserve">
+    <value>Could not load 9Router connections: {0}</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Title" xml:space="preserve">
+    <value>Add API key</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ProviderId" xml:space="preserve">
+    <value>Provider id</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ProviderIdPlaceholder" xml:space="preserve">
+    <value>openai</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_NamePlaceholder" xml:space="preserve">
+    <value>Optional display name</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ApiKey" xml:space="preserve">
+    <value>API key</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ApiKeyPlaceholder" xml:space="preserve">
+    <value>sk-…</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ShowHideTooltip" xml:space="preserve">
+    <value>Show or hide API key</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Save" xml:space="preserve">
+    <value>Add</value>
   </data>
   <data name="ProvidersView_PerplexityAccount_DefaultBadge" xml:space="preserve">
     <value>default</value>
@@ -731,6 +906,27 @@
   <data name="QuotaView_Subtitle" xml:space="preserve">
     <value>Track quota usage for supported CLIProxyAPI accounts.</value>
   </data>
+  <data name="Sidebar_NineRouterUsage" xml:space="preserve">
+    <value>9Router Usage</value>
+  </data>
+  <data name="QuotaView_NineRouterUsage_Title" xml:space="preserve">
+    <value>9Router Usage</value>
+  </data>
+  <data name="QuotaView_NineRouterUsage_Subtitle" xml:space="preserve">
+    <value>Track quota limits for connections managed by 9Router.</value>
+  </data>
+  <data name="QuotaView_NineRouterUsage_RefreshAllTooltip" xml:space="preserve">
+    <value>Refresh all 9Router usage</value>
+  </data>
+  <data name="QuotaView_NineRouterUsage_RefreshTooltip" xml:space="preserve">
+    <value>Refresh usage</value>
+  </data>
+  <data name="QuotaView_NineRouterUsage_EngineNotRunning" xml:space="preserve">
+    <value>Start 9Router to view connection usage.</value>
+  </data>
+  <data name="QuotaView_NineRouterUsage_NoAccountsDescription" xml:space="preserve">
+    <value>Connect an account in 9Router to view its usage limits.</value>
+  </data>
   <data name="QuotaView_RefreshAllTooltip" xml:space="preserve">
     <value>Refresh all quota providers</value>
   </data>
@@ -771,6 +967,9 @@
   </data>
   <data name="ConfigView_TabPerplexity" xml:space="preserve">
     <value>Perplexity</value>
+  </data>
+  <data name="ConfigView_TabNineRouter" xml:space="preserve">
+    <value>9Router</value>
   </data>
 
   <data name="ConfigView_General_Title" xml:space="preserve">
@@ -1031,6 +1230,66 @@
   </data>
 
   <!-- ═══════════════════════════════════════════════════════════════════════════
+       CONFIGURATION VIEW - 9ROUTER
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ConfigView_NineRouter_Title" xml:space="preserve">
+    <value>9Router</value>
+  </data>
+  <data name="ConfigView_NineRouter_Subtitle" xml:space="preserve">
+    <value>Engine version, port, and Node.js requirements.</value>
+  </data>
+  <data name="ConfigView_NineRouter_UpdateSuccess" xml:space="preserve">
+    <value>Successfully updated to {0}</value>
+  </data>
+
+  <data name="ConfigView_NineRouter_Engine_Label" xml:space="preserve">
+    <value>9Router</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_Installed" xml:space="preserve">
+    <value>Installed: {0}</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_Available" xml:space="preserve">
+    <value>{0} available</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_Check" xml:space="preserve">
+    <value>Check</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_UpdateNow" xml:space="preserve">
+    <value>Update now</value>
+  </data>
+
+  <data name="ConfigView_NineRouter_EngineFolder_Label" xml:space="preserve">
+    <value>Engine install folder</value>
+  </data>
+  <data name="ConfigView_NineRouter_EngineFolder_Description" xml:space="preserve">
+    <value>Downloaded 9Router files are stored in the local engine directory.</value>
+  </data>
+  <data name="ConfigView_NineRouter_EngineFolder_Open" xml:space="preserve">
+    <value>Open Folder</value>
+  </data>
+  <data name="ConfigView_NineRouter_Dashboard_Label" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="ConfigView_NineRouter_Dashboard_Description" xml:space="preserve">
+    <value>Opens the local 9Router dashboard in your browser.</value>
+  </data>
+  <data name="ConfigView_NineRouter_Dashboard_Open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="ConfigView_NineRouter_ListenPort_Label" xml:space="preserve">
+    <value>Listen port</value>
+  </data>
+  <data name="ConfigView_NineRouter_ListenPort_Description" xml:space="preserve">
+    <value>Localhost only. Restart required to apply.</value>
+  </data>
+  <data name="ConfigView_NineRouter_ListenPort_Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="ConfigView_NineRouter_NodeMissing" xml:space="preserve">
+    <value>Node.js 18 or later is required to run 9Router. Install Node and restart Tunnel Agent.</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
        MISCELLANEOUS
        ═══════════════════════════════════════════════════════════════════════════ -->
   <data name="Toast_NoUpdateAvailable" xml:space="preserve">
@@ -1249,6 +1508,9 @@
   </data>
   <data name="Provider_perplexity-webui-scraper_Description" xml:space="preserve">
     <value>OpenAI-compatible local API backed by Perplexity WebUI sessions.</value>
+  </data>
+  <data name="Provider_9router_Description" xml:space="preserve">
+    <value>OpenAI-compatible local router for 40+ providers with auto-fallback.</value>
   </data>
   <data name="ProvidersView_Provider_ConnectedAccountSingular" xml:space="preserve">
     <value>{0} connected account</value>
@@ -1496,6 +1758,63 @@
   <data name="DashboardView_Summary_Empty" xml:space="preserve">
     <value>No requests yet. Point an agent at the local proxy to see activity here.</value>
   </data>
+  <data name="DashboardView_Tab_Local" xml:space="preserve">
+    <value>Local proxy</value>
+  </data>
+  <data name="DashboardView_Tab_NineRouter" xml:space="preserve">
+    <value>9Router</value>
+  </data>
+  <data name="DashboardView_NineRouter_EngineNotRunning" xml:space="preserve">
+    <value>Start 9Router to view its usage and request details.</value>
+  </data>
+  <data name="DashboardView_NineRouter_Title" xml:space="preserve">
+    <value>9Router usage</value>
+  </data>
+  <data name="DashboardView_NineRouter_Subtitle" xml:space="preserve">
+    <value>Live usage and redacted request metadata from the last 7 days.</value>
+  </data>
+  <data name="DashboardView_NineRouter_Requests" xml:space="preserve">
+    <value>REQUESTS</value>
+  </data>
+  <data name="DashboardView_NineRouter_Tokens" xml:space="preserve">
+    <value>TOKENS</value>
+  </data>
+  <data name="DashboardView_NineRouter_Cached" xml:space="preserve">
+    <value>Cached {0}</value>
+  </data>
+  <data name="DashboardView_NineRouter_Cost" xml:space="preserve">
+    <value>COST</value>
+  </data>
+  <data name="DashboardView_NineRouter_Active" xml:space="preserve">
+    <value>ACTIVE</value>
+  </data>
+  <data name="DashboardView_NineRouter_ActiveRequests" xml:space="preserve">
+    <value>Active requests</value>
+  </data>
+  <data name="DashboardView_NineRouter_ByProvider" xml:space="preserve">
+    <value>Usage by provider</value>
+  </data>
+  <data name="DashboardView_NineRouter_CachedLabel" xml:space="preserve">
+    <value>CACHED</value>
+  </data>
+  <data name="DashboardView_NineRouter_Empty" xml:space="preserve">
+    <value>No 9Router usage yet.</value>
+  </data>
+  <data name="DashboardView_NineRouter_RequestDetails" xml:space="preserve">
+    <value>Request details</value>
+  </data>
+  <data name="DashboardView_NineRouter_RequestDetailsEmpty" xml:space="preserve">
+    <value>No request details have been recorded.</value>
+  </data>
+  <data name="DashboardView_NineRouter_Connection" xml:space="preserve">
+    <value>CONNECTION</value>
+  </data>
+  <data name="DashboardView_NineRouter_Status" xml:space="preserve">
+    <value>STATUS</value>
+  </data>
+  <data name="DashboardView_NineRouter_Latency" xml:space="preserve">
+    <value>LATENCY</value>
+  </data>
 
   <data name="Quota_Error_Title" xml:space="preserve">
     <value>Quota unavailable</value>
@@ -1569,5 +1888,26 @@ Complete the login in your browser. The app will detect when you're authenticate
   </data>
   <data name="OAuth_Status_CopyUrl" xml:space="preserve">
     <value>Copy URL</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Title" xml:space="preserve">
+    <value>Complete sign-in</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Description" xml:space="preserve">
+    <value>After signing in, copy the full callback URL from the browser and paste it here. This uses 9Router’s supported localhost callback instead of an unregistered temporary port.</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Code" xml:space="preserve">
+    <value>Callback URL or authorization code</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_CodePlaceholder" xml:space="preserve">
+    <value>http://localhost:20128/callback?code=…</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Submit" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_OAuthProviders" xml:space="preserve">
+    <value>OAUTH PROVIDERS</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_SearchPlaceholder" xml:space="preserve">
+    <value>Search providers by name or id</value>
   </data>
 </root>

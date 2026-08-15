@@ -255,4 +255,37 @@ public sealed class ViewModelTests
         Assert.False(vm.IsExpanded);
         Assert.False(raised);
     }
+
+    [Fact]
+    public void NineRouterProviderCatalog_ContainsEveryRegistryProviderAndCorrectFlowKinds()
+    {
+        Assert.Equal(120, NineRouterProviderCatalog.All.Count);
+        Assert.Equal(NineRouterOAuthFlow.Browser, NineRouterProviderCatalog.Find("claude")!.OAuthFlow);
+        Assert.Equal(NineRouterOAuthFlow.DeviceCode, NineRouterProviderCatalog.Find("github")!.OAuthFlow);
+        Assert.Equal(NineRouterOAuthFlow.Dashboard, NineRouterProviderCatalog.Find("codex")!.OAuthFlow);
+        Assert.True(NineRouterProviderCatalog.Find("xai")!.SupportsApiKey);
+        Assert.True(NineRouterProviderCatalog.Find("openai")!.SupportsApiKey);
+    }
+
+    [Fact]
+    public void NineRouterConnectionViewModel_Constructor_MapsAllProperties()
+    {
+        var vm = new NineRouterConnectionViewModel("conn-1", "openai", "My OpenAI", isActive: false, authType: "apikey", lastError: "quota");
+
+        Assert.Equal("conn-1", vm.Id);
+        Assert.Equal("openai", vm.ProviderId);
+        Assert.Equal("My OpenAI", vm.Name);
+        Assert.False(vm.IsActive);
+        Assert.Equal("quota", vm.LastError);
+        Assert.True(vm.HasLastError);
+    }
+
+    [Fact]
+    public void NineRouterConnectionViewModel_EmptyName_FallsBackToProviderId()
+    {
+        var vm = new NineRouterConnectionViewModel("id", "kiro", "", isActive: true, authType: "oauth", lastError: null);
+
+        Assert.Equal("kiro", vm.Name);
+        Assert.False(vm.HasLastError);
+    }
 }

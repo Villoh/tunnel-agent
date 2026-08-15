@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -31,7 +32,18 @@ public sealed class TrayService : IDisposable
     private readonly NativeMenuItem _perplexityStopItem;
     private readonly NativeMenuItem _perplexityRestartItem;
     private readonly NativeMenuItem _perplexityStatusItem;
+    private readonly NativeMenuItem _nineRouterStartItem;
+    private readonly NativeMenuItem _nineRouterStopItem;
+    private readonly NativeMenuItem _nineRouterRestartItem;
+    private readonly NativeMenuItem _nineRouterStatusItem;
     private bool _isQuitting;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativePoint
+    {
+        public int X;
+        public int Y;
+    }
 
     public TrayService(
         IClassicDesktopStyleApplicationLifetime desktop,
@@ -54,6 +66,11 @@ public sealed class TrayService : IDisposable
         _perplexityStartItem = CreateItem("Start Server", async (_, _) => await RunForEngineAsync(EngineCatalog.PerplexityWebUiScraper.Id, () => _viewModel.StartServerAsync()));
         _perplexityStopItem = CreateItem("Stop Server", async (_, _) => await RunForEngineAsync(EngineCatalog.PerplexityWebUiScraper.Id, () => _viewModel.StopServerAsync()));
         _perplexityRestartItem = CreateItem("Restart Server", async (_, _) => await RunForEngineAsync(EngineCatalog.PerplexityWebUiScraper.Id, () => _viewModel.RestartEngineAsync()));
+
+        _nineRouterStatusItem = CreateItem("Server: Stopped", null);
+        _nineRouterStartItem = CreateItem("Start Server", async (_, _) => await RunForEngineAsync(EngineCatalog.NineRouter.Id, () => _viewModel.StartServerAsync()));
+        _nineRouterStopItem = CreateItem("Stop Server", async (_, _) => await RunForEngineAsync(EngineCatalog.NineRouter.Id, () => _viewModel.StopServerAsync()));
+        _nineRouterRestartItem = CreateItem("Restart Server", async (_, _) => await RunForEngineAsync(EngineCatalog.NineRouter.Id, () => _viewModel.RestartEngineAsync()));
 
         var cliProxyMenu = new NativeMenu
         {
@@ -79,6 +96,18 @@ public sealed class TrayService : IDisposable
             }
         };
 
+        var nineRouterMenu = new NativeMenu
+        {
+            Items =
+            {
+                _nineRouterStatusItem,
+                new NativeMenuItemSeparator(),
+                _nineRouterStartItem,
+                _nineRouterStopItem,
+                _nineRouterRestartItem
+            }
+        };
+
         var menu = new NativeMenu
         {
             Items =
@@ -88,6 +117,7 @@ public sealed class TrayService : IDisposable
                 new NativeMenuItemSeparator(),
                 new NativeMenuItem { Header = "CLIProxyAPI", Menu = cliProxyMenu },
                 new NativeMenuItem { Header = "Perplexity", Menu = perplexityMenu },
+                new NativeMenuItem { Header = "9Router", Menu = nineRouterMenu },
                 new NativeMenuItemSeparator(),
                 CreateItem("Configuration", (_, _) => ShowConfiguration()),
                 CreateItem("Open Auth Folder", (_, _) => _viewModel.OpenAuthFolder()),
@@ -124,6 +154,7 @@ public sealed class TrayService : IDisposable
         _isQuitting = true;
         await RunForEngineAsync(EngineCatalog.CliProxyApi.Id, () => _viewModel.StopServerAsync());
         await RunForEngineAsync(EngineCatalog.PerplexityWebUiScraper.Id, () => _viewModel.StopServerAsync());
+        await RunForEngineAsync(EngineCatalog.NineRouter.Id, () => _viewModel.StopServerAsync());
         _desktop.Shutdown();
     }
 
@@ -157,6 +188,7 @@ public sealed class TrayService : IDisposable
         _isQuitting = true;
         RunForEngineAsync(EngineCatalog.CliProxyApi.Id, () => _viewModel.StopServerAsync()).GetAwaiter().GetResult();
         RunForEngineAsync(EngineCatalog.PerplexityWebUiScraper.Id, () => _viewModel.StopServerAsync()).GetAwaiter().GetResult();
+        RunForEngineAsync(EngineCatalog.NineRouter.Id, () => _viewModel.StopServerAsync()).GetAwaiter().GetResult();
     }
 
     private void OnWindowPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
@@ -171,7 +203,8 @@ public sealed class TrayService : IDisposable
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName is nameof(MainWindowViewModel.EngineState) or nameof(MainWindowViewModel.ServerState)
-            or nameof(MainWindowViewModel.CliProxyServerState) or nameof(MainWindowViewModel.PerplexityServerState))
+            or nameof(MainWindowViewModel.CliProxyServerState) or nameof(MainWindowViewModel.PerplexityServerState)
+            or nameof(MainWindowViewModel.NineRouterServerState))
             RefreshMenu();
     }
 
@@ -206,6 +239,7 @@ public sealed class TrayService : IDisposable
         }
 
         _popup.Show();
+        _ = _viewModel.RefreshNineRouterUsageAsync();
         PositionPopup(_popup);
         _popupShownAt = DateTime.UtcNow;
         _popup.Activate();
@@ -220,23 +254,57 @@ public sealed class TrayService : IDisposable
 
     private void PositionPopup(TrayUsagePopup popup)
     {
-        var screen = popup.Screens?.Primary ?? popup.Screens?.All?.FirstOrDefault();
+        var hasCursor = TryGetCursorPosition(out var cursor);
+        var screen = hasCursor
+            ? popup.Screens?.All?.FirstOrDefault(s => s.Bounds.Contains(cursor))
+            : null;
+        screen ??= popup.Screens?.Primary ?? popup.Screens?.All?.FirstOrDefault();
         if (screen is null) return;
 
         var area = screen.WorkingArea;
         var scale = screen.Scaling;
-        var w = (int)(popup.Width * scale);
-        var h = (int)(popup.Height * scale);
+        var width = (int)(popup.Width * scale);
+        var height = (int)(popup.Height * scale);
         var margin = (int)(8 * scale);
 
-        var x = area.X + area.Width - w - margin;
-        // Windows tray sits bottom-right; macOS/Linux status bar sits top-right.
-        var y = OperatingSystem.IsWindows()
-            ? area.Y + area.Height - h - margin
-            : area.Y + margin;
-
-        popup.Position = new PixelPoint(x, y);
+        popup.Position = hasCursor
+            ? PositionNearCursor(area, cursor, width, height, margin)
+            : new PixelPoint(
+                area.X + area.Width - width - margin,
+                OperatingSystem.IsWindows()
+                    ? area.Y + area.Height - height - margin
+                    : area.Y + margin);
     }
+
+    internal static PixelPoint PositionNearCursor(
+        PixelRect area,
+        PixelPoint cursor,
+        int popupWidth,
+        int popupHeight,
+        int margin)
+    {
+        var minX = area.X + margin;
+        var maxX = Math.Max(minX, area.X + area.Width - popupWidth - margin);
+        var minY = area.Y + margin;
+        var maxY = Math.Max(minY, area.Y + area.Height - popupHeight - margin);
+        var x = Math.Clamp(cursor.X - popupWidth + margin, minX, maxX);
+        var y = cursor.Y <= area.Y + area.Height / 2
+            ? Math.Min(cursor.Y + margin, maxY)
+            : Math.Max(cursor.Y - popupHeight - margin, minY);
+        return new PixelPoint(x, y);
+    }
+
+    private static bool TryGetCursorPosition(out PixelPoint cursor)
+    {
+        cursor = default;
+        if (!OperatingSystem.IsWindows() || !GetCursorPos(out var point)) return false;
+        cursor = new PixelPoint(point.X, point.Y);
+        return true;
+    }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetCursorPos(out NativePoint point);
 
     private void ToggleWindow()
     {
@@ -285,6 +353,7 @@ public sealed class TrayService : IDisposable
         _showHideItem.Header = visible ? "Hide Window" : "Show Window";
         RefreshEngineMenu(_cliProxyStatusItem, _cliProxyStartItem, _cliProxyStopItem, _cliProxyRestartItem, _viewModel.CliProxyServerState, _viewModel.CliProxyStatusText);
         RefreshEngineMenu(_perplexityStatusItem, _perplexityStartItem, _perplexityStopItem, _perplexityRestartItem, _viewModel.PerplexityServerState, _viewModel.PerplexityStatusText);
+        RefreshEngineMenu(_nineRouterStatusItem, _nineRouterStartItem, _nineRouterStopItem, _nineRouterRestartItem, _viewModel.NineRouterServerState, _viewModel.NineRouterStatusText);
     }
 
     private async Task RunForEngineAsync(string engineId, Func<Task> action)

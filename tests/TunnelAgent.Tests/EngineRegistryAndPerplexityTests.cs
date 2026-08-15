@@ -17,12 +17,14 @@ public sealed class EngineRegistryAndPerplexityTests
 
         var cli = settings.Current.GetOrAddEngine(EngineCatalog.CliProxyApi.Id, 0);
         var perplexity = settings.Current.GetOrAddEngine(EngineCatalog.PerplexityWebUiScraper.Id, 0);
+        var nineRouter = settings.Current.GetOrAddEngine(EngineCatalog.NineRouter.Id, 0);
         Assert.Equal(8317, cli.Port);
         Assert.Equal(8327, perplexity.Port);
+        Assert.Equal(20128, nineRouter.Port);
     }
 
     [Fact]
-    public async Task EngineRegistryService_ExposesBothManagedEngines()
+    public async Task EngineRegistryService_ExposesAllManagedEngines()
     {
         using var temp = new TestTempDirectory();
         var settings = new SettingsService(temp.File("settings.json"));
@@ -30,9 +32,10 @@ public sealed class EngineRegistryAndPerplexityTests
 
         var registry = new EngineRegistryService(settings);
 
-        Assert.Equal(2, registry.Engines.Count);
+        Assert.Equal(3, registry.Engines.Count);
         Assert.IsType<TunnelAgent.Infrastructure.Engine.CliProxy.EngineService>(registry.Get("cliproxyapi"));
         Assert.IsType<TunnelAgent.Infrastructure.Engine.Perplexity.EngineService>(registry.Get("perplexity-webui-scraper"));
+        Assert.IsType<TunnelAgent.Infrastructure.Engine.NineRouter.EngineService>(registry.Get("9router"));
     }
 
     [Fact]

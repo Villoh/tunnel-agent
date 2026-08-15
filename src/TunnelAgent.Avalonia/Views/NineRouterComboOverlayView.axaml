@@ -1,0 +1,107 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TunnelAgent.ViewModels"
+             xmlns:lucide="using:IconPacks.Avalonia.Lucide"
+             xmlns:l="using:TunnelAgent.Services"
+             x:Class="TunnelAgent.Views.NineRouterComboOverlayView"
+             x:Name="Root"
+             x:DataType="vm:MainWindowViewModel">
+    <Border Background="#88000000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="20"
+            DataContext="{Binding NineRouterCombos}" IsVisible="{Binding ShowCreatePanel}"
+            Focusable="True" KeyDown="OnDialogKeyDown" PointerPressed="OnOverlayPressed">
+        <Border Classes="card" Width="520" MaxHeight="620" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0"
+                PointerPressed="OnDialogCardPressed">
+            <Grid RowDefinitions="Auto,Auto,*,Auto">
+                <Grid Grid.Row="0" Margin="18,14" ColumnDefinitions="Auto,*,Auto">
+                    <lucide:PackIconLucide Kind="GitFork" Width="20" Height="20" VerticalAlignment="Top" Margin="0,2,0,0"
+                                           Foreground="{DynamicResource FgMutedBrush}" />
+                    <StackPanel Grid.Column="1" Margin="8,0,0,0" Spacing="2">
+                        <TextBlock Classes="row-label" FontSize="14" Text="{l:Loc NineRouterCombos_Create}" IsVisible="{Binding !IsEditing}" />
+                        <TextBlock Classes="row-label" FontSize="14" Text="{l:Loc NineRouterCombos_Edit}" IsVisible="{Binding IsEditing}" />
+                        <TextBlock Classes="row-desc" Text="{l:Loc NineRouterCombos_CreateSubtitle}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <Button Grid.Column="2" Classes="icon" VerticalAlignment="Top"
+                            Command="{Binding #Root.DataContext.NineRouterCombos.CloseCreatePanelCommand}">
+                        <lucide:PackIconLucide Kind="X" Width="14" Height="14" />
+                    </Button>
+                </Grid>
+
+                <Border Grid.Row="1" Classes="row-divider" />
+
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="18,14,18,24" Spacing="14">
+                        <StackPanel Spacing="6">
+                            <TextBlock Classes="section-label" Text="{l:Loc NineRouterCombos_Name}" Margin="2,0" />
+                            <TextBox Classes="app" Text="{Binding NameDraft, Mode=TwoWay}"
+                                     Watermark="{l:Loc NineRouterCombos_NamePlaceholder}" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Classes="section-label" Text="{l:Loc NineRouterCombos_Strategy}" Margin="2,0" />
+                            <ComboBox SelectedIndex="{Binding DraftStrategyIndex, Mode=TwoWay}" HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="{l:Loc NineRouterCombos_StrategyFallback}" />
+                                <ComboBoxItem Content="{l:Loc NineRouterCombos_StrategyRoundRobin}" />
+                                <ComboBoxItem Content="{l:Loc NineRouterCombos_StrategyFusion}" />
+                            </ComboBox>
+                            <StackPanel Spacing="4" IsVisible="{Binding IsDraftFusion}">
+                                <TextBlock Classes="row-desc" Text="{l:Loc NineRouterCombos_Judge}" />
+                                <ComboBox ItemsSource="{Binding AvailableModels}" SelectedItem="{Binding DraftJudgeModel, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                                <TextBlock Classes="row-desc" Text="{l:Loc NineRouterCombos_JudgeAuto}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Classes="section-label" Text="{l:Loc NineRouterCombos_Models}" Margin="2,0" />
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <ComboBox ItemsSource="{Binding AvailableModels}" SelectedItem="{Binding SelectedModel, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                                <Button Grid.Column="1" Classes="app" Content="{l:Loc NineRouterCombos_AddModel}"
+                                        Command="{Binding AddModelCommand}" IsEnabled="{Binding HasAvailableModels}" />
+                            </Grid>
+                            <TextBlock Classes="row-desc" Text="{l:Loc NineRouterCombos_NoModelsAvailable}"
+                                       IsVisible="{Binding !HasAvailableModels}" />
+
+                            <Border Classes="card" Padding="8" IsVisible="{Binding HasDraftModels}">
+                                <ItemsControl ItemsSource="{Binding DraftModels}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="4" Margin="0,2">
+                                                <TextBlock Text="{Binding}" FontFamily="Cascadia Mono,Consolas,monospace"
+                                                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                <Button Grid.Column="1" Classes="icon-btn"
+                                                        Command="{Binding #Root.DataContext.NineRouterCombos.MoveDraftModelUpCommand}" CommandParameter="{Binding}">
+                                                    <lucide:PackIconLucide Kind="ChevronUp" Width="13" Height="13" Foreground="{DynamicResource FgMutedBrush}" />
+                                                </Button>
+                                                <Button Grid.Column="2" Classes="icon-btn"
+                                                        Command="{Binding #Root.DataContext.NineRouterCombos.MoveDraftModelDownCommand}" CommandParameter="{Binding}">
+                                                    <lucide:PackIconLucide Kind="ChevronDown" Width="13" Height="13" Foreground="{DynamicResource FgMutedBrush}" />
+                                                </Button>
+                                                <Button Grid.Column="3" Classes="icon-btn"
+                                                        Command="{Binding #Root.DataContext.NineRouterCombos.RemoveDraftModelCommand}" CommandParameter="{Binding}">
+                                                    <lucide:PackIconLucide Kind="X" Width="13" Height="13" Foreground="#D46A6A" />
+                                                </Button>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Border>
+                            <TextBlock Classes="row-desc" Text="{l:Loc NineRouterCombos_DraftEmpty}" Margin="2,0"
+                                       IsVisible="{Binding !HasDraftModels}" />
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <Grid Grid.Row="3" RowDefinitions="Auto,Auto">
+                    <Border Grid.Row="0" Classes="row-divider" />
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="18,12">
+                        <Button Classes="app" Content="{l:Loc Dialog_AddNineRouterKey_Cancel}"
+                                Command="{Binding #Root.DataContext.NineRouterCombos.CloseCreatePanelCommand}" />
+                        <Button Classes="app primary" Content="{l:Loc NineRouterCombos_Create}" IsVisible="{Binding !IsEditing}"
+                                IsEnabled="{Binding CanSubmit}" Command="{Binding SaveComboCommand}" />
+                        <Button Classes="app primary" Content="{l:Loc NineRouterCombos_Save}" IsVisible="{Binding IsEditing}"
+                                IsEnabled="{Binding CanSubmit}" Command="{Binding SaveComboCommand}" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+    </Border>
+</UserControl>

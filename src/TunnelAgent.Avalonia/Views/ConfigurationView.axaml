@@ -25,12 +25,30 @@
                     <ctrl:SlidingTabBar.Tabs>
                         <ctrl:SlidingTab Header="{l:Loc ConfigView_TabGeneral}"    Command="{Binding SelectConfigGeneralCommand}" />
                         <ctrl:SlidingTab Header="{l:Loc ConfigView_TabCLIProxyAPI}" Command="{Binding SelectConfigCliProxyCommand}" />
+                        <ctrl:SlidingTab Header="{l:Loc ConfigView_TabNineRouter}" Command="{Binding SelectConfigNineRouterCommand}" />
                         <ctrl:SlidingTab Header="{l:Loc ConfigView_TabPerplexity}" Command="{Binding SelectConfigPerplexityCommand}" />
                     </ctrl:SlidingTabBar.Tabs>
                 </ctrl:SlidingTabBar>
 
+                <TransitioningContentControl Content="{Binding SelectedSection}"
+                                             HorizontalContentAlignment="Stretch">
+                    <TransitioningContentControl.PageTransition>
+                        <CompositePageTransition>
+                            <CompositePageTransition.PageTransitions>
+                                <PageSlide Duration="0:0:0.22" Orientation="Horizontal"
+                                           SlideInEasing="CubicEaseInOut" SlideOutEasing="CubicEaseInOut" />
+                                <CrossFade Duration="0:0:0.22" />
+                            </CompositePageTransition.PageTransitions>
+                        </CompositePageTransition>
+                    </TransitioningContentControl.PageTransition>
+                    <TransitioningContentControl.ContentTemplate>
+                        <DataTemplate>
+                            <StackPanel x:Name="ConfigTabContent" Tag="{Binding}" Spacing="0">
+                                <StackPanel DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            Spacing="0">
+
                 <!-- ══ GENERAL ══════════════════════════════════════════ -->
-                <StackPanel IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=ConfigGeneral}">
+                <StackPanel IsVisible="{Binding Tag, ElementName=ConfigTabContent, Converter={StaticResource SectionEq}, ConverterParameter=ConfigGeneral}">
                     <StackPanel Margin="0,0,0,14">
                         <TextBlock Classes="page-title" Text="{l:Loc ConfigView_General_Title}" />
                         <TextBlock Classes="page-sub" Text="{l:Loc ConfigView_General_Subtitle}" />
@@ -133,7 +151,7 @@
                 </StackPanel>
 
                 <!-- ══ CLIPROXY ══════════════════════════════════════════ -->
-                <StackPanel IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=ConfigCliProxy}">
+                <StackPanel IsVisible="{Binding Tag, ElementName=ConfigTabContent, Converter={StaticResource SectionEq}, ConverterParameter=ConfigCliProxy}">
                     <StackPanel Margin="0,0,0,14">
                         <TextBlock Classes="page-title" Text="{l:Loc ConfigView_CLIProxy_Title}" />
                         <TextBlock Classes="page-sub" Text="{l:Loc ConfigView_CLIProxy_Subtitle}" />
@@ -434,7 +452,7 @@
                 </StackPanel>
 
                 <!-- ══ PERPLEXITY ══════════════════════════════════════════ -->
-                <StackPanel IsVisible="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=ConfigPerplexity}">
+                <StackPanel IsVisible="{Binding Tag, ElementName=ConfigTabContent, Converter={StaticResource SectionEq}, ConverterParameter=ConfigPerplexity}">
                     <StackPanel Margin="0,0,0,14">
                         <TextBlock Classes="page-title" Text="{l:Loc ConfigView_Perplexity_Title}" />
                         <TextBlock Classes="page-sub" Text="{l:Loc ConfigView_Perplexity_Subtitle}" />
@@ -602,6 +620,186 @@
                         </StackPanel>
                     </Border>
                 </StackPanel>
+
+                <!-- ══ 9ROUTER ══════════════════════════════════════════ -->
+                <StackPanel IsVisible="{Binding Tag, ElementName=ConfigTabContent, Converter={StaticResource SectionEq}, ConverterParameter=ConfigNineRouter}">
+                    <StackPanel Margin="0,0,0,14">
+                        <TextBlock Classes="page-title" Text="{l:Loc ConfigView_NineRouter_Title}" />
+                        <TextBlock Classes="page-sub" Text="{l:Loc ConfigView_NineRouter_Subtitle}" />
+                    </StackPanel>
+
+                    <Border Classes="alert warning" IsVisible="{Binding IsNineRouterNodeMissing}" Margin="0,0,0,8">
+                        <TextBlock Classes="alert-body" Text="{l:Loc ConfigView_NineRouter_NodeMissing}" />
+                    </Border>
+
+                    <!-- Update success banner -->
+                    <Border IsVisible="{Binding ShowNineRouterUpdateSuccess}" Background="{DynamicResource AccentBrush}"
+                            CornerRadius="8" Padding="12,8" Margin="0,0,0,8">
+                        <TextBlock Text="{l:LocFormat Key=ConfigView_NineRouter_UpdateSuccess, Path=NineRouterInstalledVersion}"
+                                   Foreground="White" FontSize="12" FontWeight="Medium"/>
+                    </Border>
+
+                    <TextBlock Classes="section-label" Text="{l:Loc ConfigView_CLIProxy_EngineSection}"/>
+                    <Border Classes="card">
+                        <StackPanel>
+                            <!-- Version row -->
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_NineRouter_Engine_Label}"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,2,0,0">
+                                        <TextBlock Classes="row-desc"
+                                                   Text="{l:LocFormat Key=ConfigView_NineRouter_Engine_Installed, Path=NineRouterInstalledVersion}" />
+                                        <TextBlock Classes="row-desc" Text="→" IsVisible="{Binding NineRouterUpdateAvailable}" />
+                                        <TextBlock Classes="row-desc" Foreground="{DynamicResource AccentBrush}"
+                                                   Text="{l:LocFormat Key=ConfigView_NineRouter_Engine_Available, Path=NineRouterLatestVersion}"
+                                                   IsVisible="{Binding NineRouterUpdateAvailable}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Button Classes="app" Content="{l:Loc ConfigView_NineRouter_Engine_Check}"
+                                            Command="{Binding CheckForUpdateCommand}"
+                                            IsEnabled="{Binding !IsCheckingForUpdate}"
+                                            IsVisible="{Binding !UpdateAvailable}" />
+                                    <Button Classes="app primary" Content="{l:Loc ConfigView_NineRouter_Engine_UpdateNow}"
+                                            Command="{Binding UpdateEngineCommand}"
+                                            IsVisible="{Binding UpdateAvailable}" />
+                                </StackPanel>
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <!-- Version selector -->
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_EngineVersion_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{Binding SelectedEngineVersionDescription}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <ComboBox ItemsSource="{Binding EngineReleases}" SelectedItem="{Binding SelectedEngineRelease}"
+                                              Cursor="Hand" IsEnabled="{Binding CanSelectEngineRelease}"
+                                              Width="150" Height="26" MinHeight="0" Padding="8,0"
+                                              VerticalAlignment="Center" VerticalContentAlignment="Center" />
+                                    <Button Classes="app" Content="{l:Loc ConfigView_CLIProxy_EngineVersion_Reload}"
+                                            Command="{Binding RefreshEngineReleasesCommand}"
+                                            IsEnabled="{Binding CanSelectEngineRelease}" VerticalAlignment="Center" />
+                                    <Button Classes="app primary" Content="{l:Loc ConfigView_CLIProxy_EngineVersion_Install}"
+                                            Command="{Binding InstallSelectedEngineCommand}"
+                                            IsEnabled="{Binding CanInstallSelectedEngine}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                            <!-- Download progress -->
+                            <StackPanel Margin="14,0,14,11"
+                                        IsVisible="{Binding EngineState, Converter={StaticResource EngineStateToText}, ConverterParameter=IsDownloading}">
+                                <ProgressBar Value="{Binding DownloadProgress}" Minimum="0" Maximum="100"
+                                             Height="4" CornerRadius="2"
+                                             Foreground="{DynamicResource AccentBrush}"
+                                             Background="{DynamicResource RowDividerBrush}" />
+                                <TextBlock Classes="row-desc" Margin="0,4,0,0" Text="{Binding EngineStatusText}" />
+                            </StackPanel>
+                            <Border Classes="row-divider"/>
+                            <!-- Package integrity -->
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_Integrity_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_Integrity_Description}"/>
+                                    <TextBlock Classes="row-desc" ToolTip.Tip="{Binding InstalledEngineHashFull}">
+                                        <Run Text="{Binding InstalledEngineHashLabel}" /><Run Text=": " /><Run Text="{Binding InstalledEngineHashShort}" />
+                                    </TextBlock>
+                                    <TextBlock Classes="row-desc" ToolTip.Tip="{Binding LatestEngineHashFull}">
+                                        <Run Text="{l:Loc ConfigView_CLIProxy_Integrity_RemotePackageSha256}" /><Run Text=": " /><Run Text="{Binding LatestEngineHashShort}" />
+                                    </TextBlock>
+                                    <TextBlock Classes="row-desc" Foreground="{DynamicResource ErrBrush}"
+                                               Text="{Binding EngineIntegrityMessage}"
+                                               IsVisible="{Binding HasEngineIntegrityError}" />
+                                </StackPanel>
+                                <Border Grid.Column="1" Classes="chip" Background="{DynamicResource AccentSoftBrush}"
+                                        VerticalAlignment="Center" ToolTip.Tip="{Binding LatestEngineAssetName}">
+                                    <TextBlock Text="{Binding EngineIntegrityStatus}" Foreground="{DynamicResource AccentBrush}" />
+                                </Border>
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <!-- Auto-start -->
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_AutoStart_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_AutoStart_Description}"/>
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                              IsChecked="{Binding EngineAutoStart, Mode=TwoWay}" />
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <!-- Auto-check -->
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_AutoCheck_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_AutoCheck_Description}"/>
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                              IsChecked="{Binding AutoCheckForUpdates, Mode=TwoWay}" />
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <!-- Auto-update -->
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_AutoUpdate_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_AutoUpdate_Description}"/>
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                              IsChecked="{Binding AutoUpdate, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsAutoUpdateEnabled}" />
+                            </Grid>
+
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Classes="section-label" Text="{l:Loc ConfigView_CLIProxy_SecuritySection}"/>
+                    <Border Classes="card">
+                        <StackPanel>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_NineRouter_EngineFolder_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_NineRouter_EngineFolder_Description}"/>
+                                </StackPanel>
+                                <Button Grid.Column="1" Classes="app" Content="{l:Loc ConfigView_NineRouter_EngineFolder_Open}"
+                                        Command="{Binding OpenNineRouterEngineFolderCommand}" />
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_NineRouter_Dashboard_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_NineRouter_Dashboard_Description}"/>
+                                    <TextBlock Classes="row-desc" Text="{Binding NineRouterDashboardUrl}" />
+                                </StackPanel>
+                                <Button Grid.Column="1" Classes="app" Content="{l:Loc ConfigView_NineRouter_Dashboard_Open}"
+                                        Command="{Binding OpenNineRouterDashboardCommand}" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Classes="section-label" Text="{l:Loc ConfigView_CLIProxy_NetworkSection}"/>
+                    <Border Classes="card">
+                        <StackPanel>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_NineRouter_ListenPort_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_NineRouter_ListenPort_Description}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                    <TextBox Classes="app" Text="{Binding EditablePort, Mode=TwoWay}"
+                                             Width="70" Height="24" MinHeight="0" Padding="8,0" MaxLength="5"
+                                             VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                    <Button Classes="app primary" Content="{l:Loc ConfigView_ListenPort_Apply}"
+                                            Command="{Binding ApplyPortCommand}"
+                                            IsEnabled="{Binding CanApplyPort}" />
+                                    <Button Classes="app" Content="{l:Loc ConfigView_NineRouter_ListenPort_Reset}" Command="{Binding ResetPortCommand}" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </TransitioningContentControl.ContentTemplate>
+                </TransitioningContentControl>
 
             </StackPanel>
         </ScrollViewer>

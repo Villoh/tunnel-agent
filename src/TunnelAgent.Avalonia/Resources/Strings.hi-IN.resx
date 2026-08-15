@@ -226,6 +226,12 @@
   <data name="Sidebar_Perplexity" xml:space="preserve">
     <value>Perplexity</value>
   </data>
+  <data name="Sidebar_NineRouter_StatusTooltip" xml:space="preserve">
+    <value>9Router प्रदाता खोलें</value>
+  </data>
+  <data name="Sidebar_NineRouter" xml:space="preserve">
+    <value>9Router</value>
+  </data>
   <data name="Sidebar_Version" xml:space="preserve">
     <value>v{0} · MIT</value>
   </data>
@@ -512,6 +518,9 @@
   <data name="ProvidersView_TabPerplexity" xml:space="preserve">
     <value>Perplexity</value>
   </data>
+  <data name="ProvidersView_TabNineRouter" xml:space="preserve">
+    <value>9Router</value>
+  </data>
   <data name="ProvidersView_Title" xml:space="preserve">
     <value>सेवाएँ</value>
   </data>
@@ -548,6 +557,93 @@
   </data>
   <data name="ProvidersView_PerplexityAccount_RemoveTooltip" xml:space="preserve">
     <value>खाता हटाएँ</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_Title" xml:space="preserve">
+    <value>9Router कनेक्शन</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_Description" xml:space="preserve">
+    <value>चल रहे 9Router इंजन द्वारा संग्रहीत प्रदाता कनेक्शन।</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_AuthFiles" xml:space="preserve">
+    <value>9Router कनेक्शन चल रहे 9Router इंजन द्वारा संग्रहीत किए जाते हैं।</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_AddTooltip" xml:space="preserve">
+    <value>API कुंजी जोड़ें</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_NoConnections" xml:space="preserve">
+    <value>अभी तक कोई कनेक्शन नहीं</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_EmptyState" xml:space="preserve">
+    <value>9Router शुरू करें, फिर API कुंजी जोड़ें या कोई मुफ़्त प्रदाता कनेक्ट करें।</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectKiro" xml:space="preserve">
+    <value>Kiro कनेक्ट करें</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectOpenCode" xml:space="preserve">
+    <value>OpenCode Free कनेक्ट करें</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectClaude" xml:space="preserve">
+    <value>Claude कनेक्ट करें</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectGemini" xml:space="preserve">
+    <value>Gemini कनेक्ट करें</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectCopilot" xml:space="preserve">
+    <value>Copilot कनेक्ट करें</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthWaiting" xml:space="preserve">
+    <value>ब्राउज़र में {0} साइन-इन पूरा करें।</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthConnected" xml:space="preserve">
+    <value>{0} कनेक्ट हो गया है।</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthFailed" xml:space="preserve">
+    <value>{0} कनेक्ट नहीं हो सका: {1}</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthTimeout" xml:space="preserve">
+    <value>{0} साइन-इन समय समाप्त। ब्राउज़र में पूरा करने के बाद फिर कोशिश करें।</value>
+  </data>
+  <data name="ProvidersView_NineRouterConnection_DeleteTooltip" xml:space="preserve">
+    <value>कनेक्शन हटाएँ</value>
+  </data>
+  <data name="ProvidersView_NineRouter_EngineNotRunning" xml:space="preserve">
+    <value>कनेक्शन प्रबंधित करने से पहले 9Router शुरू करें।</value>
+  </data>
+  <data name="ProvidersView_NineRouter_CreateFailed" xml:space="preserve">
+    <value>9Router कनेक्शन जोड़ा नहीं जा सका: {0}</value>
+  </data>
+  <data name="ProvidersView_NineRouter_LoadFailed" xml:space="preserve">
+    <value>9Router कनेक्शन लोड नहीं हो सके: {0}</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Title" xml:space="preserve">
+    <value>API कुंजी जोड़ें</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ProviderId" xml:space="preserve">
+    <value>प्रदाता id</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ProviderIdPlaceholder" xml:space="preserve">
+    <value>openai</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Name" xml:space="preserve">
+    <value>नाम</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_NamePlaceholder" xml:space="preserve">
+    <value>वैकल्पिक प्रदर्शन नाम</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ApiKey" xml:space="preserve">
+    <value>API कुंजी</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ApiKeyPlaceholder" xml:space="preserve">
+    <value>sk-…</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ShowHideTooltip" xml:space="preserve">
+    <value>API कुंजी दिखाएँ या छिपाएँ</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Cancel" xml:space="preserve">
+    <value>रद्द करें</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Save" xml:space="preserve">
+    <value>जोड़ें</value>
   </data>
   <data name="ProvidersView_PerplexityAccount_DefaultBadge" xml:space="preserve">
     <value>डिफ़ॉल्ट</value>
@@ -769,6 +865,9 @@
   </data>
   <data name="ConfigView_TabPerplexity" xml:space="preserve">
     <value>Perplexity</value>
+  </data>
+  <data name="ConfigView_TabNineRouter" xml:space="preserve">
+    <value>9Router</value>
   </data>
 
   <data name="ConfigView_General_Title" xml:space="preserve">
@@ -1029,6 +1128,66 @@
   </data>
 
   <!-- ═══════════════════════════════════════════════════════════════════════════
+       CONFIGURATION VIEW - 9ROUTER
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ConfigView_NineRouter_Title" xml:space="preserve">
+    <value>9Router</value>
+  </data>
+  <data name="ConfigView_NineRouter_Subtitle" xml:space="preserve">
+    <value>इंजन वर्शन, पोर्ट, और Node.js आवश्यकताएँ।</value>
+  </data>
+  <data name="ConfigView_NineRouter_UpdateSuccess" xml:space="preserve">
+    <value>सफलतापूर्वक {0} पर अपडेट किया गया</value>
+  </data>
+
+  <data name="ConfigView_NineRouter_Engine_Label" xml:space="preserve">
+    <value>9Router</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_Installed" xml:space="preserve">
+    <value>इंस्टॉल किया गया: {0}</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_Available" xml:space="preserve">
+    <value>{0} उपलब्ध</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_Check" xml:space="preserve">
+    <value>जाँचें</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_UpdateNow" xml:space="preserve">
+    <value>अभी अपडेट करें</value>
+  </data>
+
+  <data name="ConfigView_NineRouter_EngineFolder_Label" xml:space="preserve">
+    <value>इंजन इंस्टॉल फ़ोल्डर</value>
+  </data>
+  <data name="ConfigView_NineRouter_EngineFolder_Description" xml:space="preserve">
+    <value>डाउनलोड की गई 9Router फ़ाइलें स्थानीय इंजन डायरेक्टरी में संग्रहित होती हैं।</value>
+  </data>
+  <data name="ConfigView_NineRouter_EngineFolder_Open" xml:space="preserve">
+    <value>फ़ोल्डर खोलें</value>
+  </data>
+  <data name="ConfigView_NineRouter_Dashboard_Label" xml:space="preserve">
+    <value>डैशबोर्ड</value>
+  </data>
+  <data name="ConfigView_NineRouter_Dashboard_Description" xml:space="preserve">
+    <value>आपके ब्राउज़र में स्थानीय 9Router डैशबोर्ड खोलता है।</value>
+  </data>
+  <data name="ConfigView_NineRouter_Dashboard_Open" xml:space="preserve">
+    <value>खोलें</value>
+  </data>
+  <data name="ConfigView_NineRouter_ListenPort_Label" xml:space="preserve">
+    <value>लिसन पोर्ट</value>
+  </data>
+  <data name="ConfigView_NineRouter_ListenPort_Description" xml:space="preserve">
+    <value>केवल localhost। लागू करने के लिए रीस्टार्ट आवश्यक है।</value>
+  </data>
+  <data name="ConfigView_NineRouter_ListenPort_Reset" xml:space="preserve">
+    <value>रीसेट करें</value>
+  </data>
+  <data name="ConfigView_NineRouter_NodeMissing" xml:space="preserve">
+    <value>9Router चलाने के लिए Node.js 18 या बाद का संस्करण आवश्यक है। Node इंस्टॉल करें और Tunnel Agent को रीस्टार्ट करें।</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
        MISCELLANEOUS
        ═══════════════════════════════════════════════════════════════════════════ -->
   <data name="Toast_NoUpdateAvailable" xml:space="preserve">
@@ -1247,6 +1406,9 @@
   </data>
   <data name="Provider_perplexity-webui-scraper_Description" xml:space="preserve">
     <value>Perplexity WebUI सत्रों द्वारा समर्थित OpenAI-संगत लोकल API।</value>
+  </data>
+  <data name="Provider_9router_Description" xml:space="preserve">
+    <value>ऑटो-फ़ॉलबैक के साथ 40+ प्रदाताओं के लिए OpenAI-संगत लोकल राउटर।</value>
   </data>
   <data name="ProvidersView_Provider_ConnectedAccountSingular" xml:space="preserve">
     <value>{0} कनेक्ट किया गया खाता</value>
@@ -1568,5 +1730,26 @@
   </data>
   <data name="OAuth_Status_CopyUrl" xml:space="preserve">
     <value>URL कॉपी करें</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Title" xml:space="preserve">
+    <value>Complete sign-in</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Description" xml:space="preserve">
+    <value>After signing in, copy the full callback URL from the browser and paste it here. This uses 9Router’s supported localhost callback instead of an unregistered temporary port.</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Code" xml:space="preserve">
+    <value>Callback URL or authorization code</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_CodePlaceholder" xml:space="preserve">
+    <value>http://localhost:20128/callback?code=…</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Submit" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_OAuthProviders" xml:space="preserve">
+    <value>OAUTH PROVIDERS</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_SearchPlaceholder" xml:space="preserve">
+    <value>नाम या आईडी से प्रदाताओं को खोजें</value>
   </data>
 </root>

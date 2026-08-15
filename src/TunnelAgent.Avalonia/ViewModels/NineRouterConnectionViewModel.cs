@@ -1,0 +1,175 @@
+using System;
+using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using IconPacks.Avalonia.SimpleIcons;
+using TunnelAgent.Infrastructure.Engine.NineRouter;
+using TunnelAgent.Services;
+
+namespace TunnelAgent.ViewModels;
+
+/// <summary>
+/// One 9Router provider connection shown on the Providers tab.
+/// </summary>
+public sealed partial class NineRouterConnectionViewModel : ObservableObject
+{
+    /// <summary>Creates a row from a management-API connection.</summary>
+    /// <param name="id">Connection id used for update/delete.</param>
+    /// <param name="providerId">9Router provider id (for example <c>openai</c>).</param>
+    /// <param name="name">Dashboard display name.</param>
+    /// <param name="isActive">Whether the connection is enabled (<c>isActive</c>).</param>
+    /// <param name="authType">The credential mode reported by 9Router.</param>
+    /// <param name="lastError">Last connection error, if any.</param>
+    public NineRouterConnectionViewModel(
+        string id,
+        string providerId,
+        string name,
+        bool isActive,
+        string? authType,
+        string? lastError)
+    {
+        Id = id;
+        ProviderId = providerId;
+        Name = string.IsNullOrWhiteSpace(name) ? providerId : name;
+        IsActive = isActive;
+        AuthType = authType;
+        LastError = lastError;
+        var icon = ProviderIconRegistry.GetDisplay(providerId, Name);
+        IconKind = icon.IconKind;
+        LogoColor = icon.LogoColor;
+        CustomIconData = icon.CustomIconData;
+        UseMonogram = icon.UseMonogram;
+        Monogram = icon.Monogram;
+        UsageBars.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasUsage));
+        LocalizationService.Instance.PropertyChanged += (_, _) => OnPropertyChanged(nameof(UsageEmptyDescription));
+    }
+
+    /// <summary>Gets the connection id.</summary>
+    public string Id { get; }
+
+    /// <summary>Gets the 9Router provider id.</summary>
+    public string ProviderId { get; }
+
+    /// <summary>Gets the display name.</summary>
+    public string Name { get; }
+
+    /// <summary>Gets whether the connection is enabled.</summary>
+    public bool IsActive { get; }
+
+    /// <summary>Gets the credential mode reported by 9Router.</summary>
+    public string? AuthType { get; }
+
+    /// <summary>Gets the icon glyph.</summary>
+    public PackIconSimpleIconsKind IconKind { get; }
+
+    /// <summary>Gets the icon background color.</summary>
+    public string LogoColor { get; }
+
+    /// <summary>Gets custom SVG path data, when the icon needs it.</summary>
+    public string? CustomIconData { get; }
+
+    /// <summary>Gets whether the connection uses a letter icon.</summary>
+    public bool UseMonogram { get; }
+
+    /// <summary>Gets the fallback letter icon.</summary>
+    public string Monogram { get; }
+
+    /// <summary>Gets whether a custom SVG icon is available.</summary>
+    public bool HasCustomIcon => CustomIconData is not null;
+
+    /// <summary>Gets whether a Simple Icons glyph is available.</summary>
+    public bool ShowSimpleIcon => !UseMonogram && !HasCustomIcon;
+
+    /// <summary>Gets the last error text, if 9Router reported one.</summary>
+    public string? LastError { get; }
+
+    /// <summary>Gets whether <see cref="LastError"/> should be shown.</summary>
+    public bool HasLastError => !string.IsNullOrWhiteSpace(LastError);
+
+    /// <summary>Gets whether <see cref="AuthType"/> should be shown.</summary>
+    public bool HasAuthType => !string.IsNullOrWhiteSpace(AuthType);
+
+    /// <summary>Gets the provider plan returned with usage, if any.</summary>
+    [ObservableProperty] private string _planBadge = "";
+
+    /// <summary>Gets the current usage windows.</summary>
+    public ObservableCollection<QuotaBarViewModel> UsageBars { get; } = [];
+
+    /// <summary>Gets whether any usage window was returned.</summary>
+    public bool HasUsage => UsageBars.Count > 0;
+
+    /// <summary>Gets the last usage error or unavailable message.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UsageEmptyDescription))]
+    private string _usageError = "";
+
+    /// <summary>Gets whether 9Router successfully returned no usage windows.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UsageEmptyDescription))]
+    private bool _usageFetchedEmpty;
+
+    /// <summary>Gets whether this connection's usage is being refreshed.</summary>
+    [ObservableProperty] private bool _isUsageRefreshing;
+
+    /// <summary>Gets the no-data description displayed below the connection.</summary>
+    public string UsageEmptyDescription => !string.IsNullOrWhiteSpace(UsageError)
+        ? UsageError
+        : UsageFetchedEmpty
+            ? LocalizationService.Instance.GetString("Quota_Empty_NoDataDescription")
+            : LocalizationService.Instance.GetString("Quota_Empty_NotLoadedDescription");
+
+    /// <summary>Applies a normalized response from 9Router's usage API.</summary>
+    public void ApplyUsage(NineRouterUsage usage)
+    {
+        ArgumentNullException.ThrowIfNull(usage);
+        PlanBadge = usage.Plan ?? "";
+        UsageError = usage.Message ?? "";
+        UsageBars.Clear();
+
+        foreach (var (name, quota) in usage.Quotas ?? [])
+        {
+            var used = UsedFraction(quota);
+            if (used is null) continue;
+            UsageBars.Add(new QuotaBarViewModel
+            {
+                Title = quota.DisplayName ?? name,
+                Used = used.Value,
+                ResetIn = ResetIn(quota.ResetAt)
+            });
+        }
+
+        UsageFetchedEmpty = UsageBars.Count == 0 && string.IsNullOrWhiteSpace(UsageError);
+    }
+
+    /// <summary>Records a failed usage fetch without discarding the last successful values.</summary>
+    public void SetUsageError(string error)
+    {
+        UsageError = error;
+        UsageFetchedEmpty = false;
+    }
+
+    private static double? UsedFraction(NineRouterUsageQuota quota)
+    {
+        if (quota.RemainingPercentage is { } remainingPercentage)
+            return Math.Clamp(1 - remainingPercentage / 100, 0, 1);
+        if (quota.Total is > 0)
+        {
+            if (quota.Used is { } used)
+                return Math.Clamp(used / quota.Total.Value, 0, 1);
+            if (quota.Remaining is { } remaining)
+                return Math.Clamp(1 - remaining / quota.Total.Value, 0, 1);
+        }
+        if (quota.Remaining is { } percentage and >= 0 and <= 100)
+            return Math.Clamp(1 - percentage / 100, 0, 1);
+        return null;
+    }
+
+    private static string ResetIn(string? resetAt)
+    {
+        if (!DateTimeOffset.TryParse(resetAt, out var at)) return "";
+        var diff = at - DateTimeOffset.UtcNow;
+        if (diff <= TimeSpan.Zero) return "loc:Quota_ResetInNow";
+        if (diff.TotalDays >= 1) return $"loc:Quota_ResetInDaysHours|{(int)diff.TotalDays}|{diff.Hours}";
+        if (diff.TotalHours >= 1) return $"loc:Quota_ResetInHoursMinutes|{(int)diff.TotalHours}|{diff.Minutes}";
+        return $"loc:Quota_ResetInMinutes|{diff.Minutes}";
+    }
+}

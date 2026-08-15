@@ -1,11 +1,26 @@
 using System.Linq;
+using TunnelAgent.Infrastructure.Services;
 using TunnelAgent.Services;
 
 namespace TunnelAgent.Tests;
 
-public sealed class AgentConfigurationServiceTests
+[Collection("UserEnvironment")]
+public sealed class AgentConfigurationServiceTests : IDisposable
 {
     private const string Proxy = "http://127.0.0.1:8317/v1";
+    private const string NineRouterProxy = "http://127.0.0.1:20128/v1";
+
+    private readonly InMemoryUserEnvironmentService _env = new();
+    private readonly IUserEnvironmentService _previousEnv;
+
+    public AgentConfigurationServiceTests()
+    {
+        _previousEnv = UserEnvironmentService.SetImplementation(_env);
+        _env.Set(NineRouterClientKeyService.EnvVarName, "9router-key");
+    }
+
+    public void Dispose() =>
+        UserEnvironmentService.SetImplementation(_previousEnv);
 
     private static ModelEntry Model(string id, string display) =>
         new(id, "", Proxy, "", display);
@@ -363,6 +378,75 @@ providers:
         Assert.Equal("{}", content);
     }
 
+    [Fact]
+    public async System.Threading.Tasks.Task PreviewAsync_OpenCode_WritesNineRouterProviderAndEnvVar()
+    {
+        var agent = Assert.Single(AgentCatalog.All, a => a.Id == "opencode");
+        var service = new AgentConfigurationService();
+        var entries = new[]
+        {
+            new ModelEntry(
+                "gpt-4o",
+                "openai",
+                NineRouterProxy,
+                NineRouterClientKeyService.EnvVarName,
+                "GPT-4o (Tunnel Agent - 9Router)")
+        };
+
+        var preview = Assert.Single(await service.PreviewAsync(agent, Proxy, "", modelEntries: entries));
+
+        Assert.Equal("opencode.json", preview.Filename);
+        Assert.Contains("\"tunnel-agent-9router\"", preview.Content);
+        Assert.Contains("\"baseURL\": \"http://127.0.0.1:20128/v1\"", preview.Content);
+        Assert.Contains($"\"apiKey\": \"{{env:{NineRouterClientKeyService.EnvVarName}}}\"", preview.Content);
+        Assert.DoesNotContain("tunnel-agent-cliproxy", preview.Content);
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task PreviewAsync_Pi_WritesNineRouterProviderAndEnvVar()
+    {
+        var agent = Assert.Single(AgentCatalog.All, a => a.Id == "pi");
+        var service = new AgentConfigurationService();
+        var entries = new[]
+        {
+            new ModelEntry(
+                "claude-sonnet-4",
+                "anthropic",
+                NineRouterProxy,
+                NineRouterClientKeyService.EnvVarName,
+                "Claude Sonnet 4 (Tunnel Agent - 9Router)")
+        };
+
+        var preview = Assert.Single(await service.PreviewAsync(agent, Proxy, "", modelEntries: entries));
+
+        Assert.Equal("models.json", preview.Filename);
+        Assert.Contains("\"tunnel-agent-9router\"", preview.Content);
+        Assert.Contains("\"baseUrl\": \"http://127.0.0.1:20128/v1\"", preview.Content);
+        Assert.Contains($"\"apiKey\": \"${{{NineRouterClientKeyService.EnvVarName}}}\"", preview.Content);
+        Assert.DoesNotContain("tunnel-agent-cliproxy-anthropic", preview.Content);
+    }
+
+    [Fact]
+    public void MergeOmpModelsYaml_NineRouterModels_WritesNineRouterProvider()
+    {
+        var entries = new[]
+        {
+            new ModelEntry(
+                "gpt-4o",
+                "openai",
+                NineRouterProxy,
+                NineRouterClientKeyService.EnvVarName,
+                "GPT-4o (Tunnel Agent - 9Router)")
+        };
+
+        var content = AgentConfigurationService.MergeOmpModelsYaml("", entries, modelInfoMap: null, remove: false);
+
+        Assert.Contains("tunnel-agent-9router:", content);
+        Assert.Contains("baseUrl: http://127.0.0.1:20128/v1", content);
+        Assert.Contains(NineRouterClientKeyService.EnvVarName, content);
+        Assert.DoesNotContain("tunnel-agent-cliproxy:", content);
+    }
+
     [Theory]
     [InlineData("providers: [")]
     [InlineData("- item")]
@@ -378,5 +462,13 @@ providers:
         int count = 0, i = 0;
         while ((i = haystack.IndexOf(needle, i, System.StringComparison.Ordinal)) >= 0) { count++; i += needle.Length; }
         return count;
+    }
+
+    private sealed class InMemoryUserEnvironmentService : IUserEnvironmentService
+    {
+        private readonly Dictionary<string, string> _values = new(StringComparer.Ordinal);
+        public string? Get(string name) => _values.TryGetValue(name, out var v) ? v : null;
+        public void Set(string name, string value) => _values[name] = value;
+        public void Remove(string name) => _values.Remove(name);
     }
 }

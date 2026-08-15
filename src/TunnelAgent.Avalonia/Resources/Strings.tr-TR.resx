@@ -226,6 +226,12 @@
   <data name="Sidebar_Perplexity" xml:space="preserve">
     <value>Perplexity</value>
   </data>
+  <data name="Sidebar_NineRouter_StatusTooltip" xml:space="preserve">
+    <value>9Router sağlayıcılarını aç</value>
+  </data>
+  <data name="Sidebar_NineRouter" xml:space="preserve">
+    <value>9Router</value>
+  </data>
   <data name="Sidebar_Version" xml:space="preserve">
     <value>v{0} · MIT</value>
   </data>
@@ -512,6 +518,9 @@
   <data name="ProvidersView_TabPerplexity" xml:space="preserve">
     <value>Perplexity</value>
   </data>
+  <data name="ProvidersView_TabNineRouter" xml:space="preserve">
+    <value>9Router</value>
+  </data>
   <data name="ProvidersView_Title" xml:space="preserve">
     <value>Hizmetler</value>
   </data>
@@ -548,6 +557,93 @@
   </data>
   <data name="ProvidersView_PerplexityAccount_RemoveTooltip" xml:space="preserve">
     <value>Hesabı kaldır</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_Title" xml:space="preserve">
+    <value>9Router bağlantıları</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_Description" xml:space="preserve">
+    <value>Çalışan 9Router motorunun sakladığı sağlayıcı bağlantıları.</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_AuthFiles" xml:space="preserve">
+    <value>9Router bağlantıları çalışan 9Router motoru tarafından saklanır.</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_AddTooltip" xml:space="preserve">
+    <value>API anahtarı ekle</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_NoConnections" xml:space="preserve">
+    <value>Henüz bağlantı yok</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_EmptyState" xml:space="preserve">
+    <value>9Router’ı başlatın, ardından bir API anahtarı ekleyin veya ücretsiz bir sağlayıcı bağlayın.</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectKiro" xml:space="preserve">
+    <value>Kiro bağla</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectOpenCode" xml:space="preserve">
+    <value>OpenCode Free bağla</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectClaude" xml:space="preserve">
+    <value>Claude bağla</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectGemini" xml:space="preserve">
+    <value>Gemini bağla</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectCopilot" xml:space="preserve">
+    <value>Copilot bağla</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthWaiting" xml:space="preserve">
+    <value>Tarayıcıda {0} oturumunu tamamlayın.</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthConnected" xml:space="preserve">
+    <value>{0} bağlandı.</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthFailed" xml:space="preserve">
+    <value>{0} bağlanamadı: {1}</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthTimeout" xml:space="preserve">
+    <value>{0} oturumu zaman aşımına uğradı. Tarayıcıda bitirdikten sonra yeniden deneyin.</value>
+  </data>
+  <data name="ProvidersView_NineRouterConnection_DeleteTooltip" xml:space="preserve">
+    <value>Bağlantıyı sil</value>
+  </data>
+  <data name="ProvidersView_NineRouter_EngineNotRunning" xml:space="preserve">
+    <value>Bağlantıları yönetmeden önce 9Router’ı başlatın.</value>
+  </data>
+  <data name="ProvidersView_NineRouter_CreateFailed" xml:space="preserve">
+    <value>9Router bağlantısı eklenemedi: {0}</value>
+  </data>
+  <data name="ProvidersView_NineRouter_LoadFailed" xml:space="preserve">
+    <value>9Router bağlantıları yüklenemedi: {0}</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Title" xml:space="preserve">
+    <value>API anahtarı ekle</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ProviderId" xml:space="preserve">
+    <value>Sağlayıcı id</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ProviderIdPlaceholder" xml:space="preserve">
+    <value>openai</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Name" xml:space="preserve">
+    <value>Ad</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_NamePlaceholder" xml:space="preserve">
+    <value>İsteğe bağlı görünen ad</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ApiKey" xml:space="preserve">
+    <value>API anahtarı</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ApiKeyPlaceholder" xml:space="preserve">
+    <value>sk-…</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ShowHideTooltip" xml:space="preserve">
+    <value>API anahtarını göster veya gizle</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Cancel" xml:space="preserve">
+    <value>İptal</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Save" xml:space="preserve">
+    <value>Ekle</value>
   </data>
   <data name="ProvidersView_PerplexityAccount_DefaultBadge" xml:space="preserve">
     <value>varsayılan</value>
@@ -769,6 +865,9 @@
   </data>
   <data name="ConfigView_TabPerplexity" xml:space="preserve">
     <value>Perplexity</value>
+  </data>
+  <data name="ConfigView_TabNineRouter" xml:space="preserve">
+    <value>9Router</value>
   </data>
 
   <data name="ConfigView_General_Title" xml:space="preserve">
@@ -1029,6 +1128,66 @@
   </data>
 
   <!-- ═══════════════════════════════════════════════════════════════════════════
+       CONFIGURATION VIEW - 9ROUTER
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ConfigView_NineRouter_Title" xml:space="preserve">
+    <value>9Router</value>
+  </data>
+  <data name="ConfigView_NineRouter_Subtitle" xml:space="preserve">
+    <value>Motor sürümü, port ve Node.js gereksinimleri.</value>
+  </data>
+  <data name="ConfigView_NineRouter_UpdateSuccess" xml:space="preserve">
+    <value>{0} sürümüne başarıyla güncellendi</value>
+  </data>
+
+  <data name="ConfigView_NineRouter_Engine_Label" xml:space="preserve">
+    <value>9Router</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_Installed" xml:space="preserve">
+    <value>Yüklü: {0}</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_Available" xml:space="preserve">
+    <value>{0} mevcut</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_Check" xml:space="preserve">
+    <value>Denetle</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_UpdateNow" xml:space="preserve">
+    <value>Şimdi güncelle</value>
+  </data>
+
+  <data name="ConfigView_NineRouter_EngineFolder_Label" xml:space="preserve">
+    <value>Motor kurulum klasörü</value>
+  </data>
+  <data name="ConfigView_NineRouter_EngineFolder_Description" xml:space="preserve">
+    <value>İndirilen 9Router dosyaları yerel motor dizininde saklanır.</value>
+  </data>
+  <data name="ConfigView_NineRouter_EngineFolder_Open" xml:space="preserve">
+    <value>Klasörü Aç</value>
+  </data>
+  <data name="ConfigView_NineRouter_Dashboard_Label" xml:space="preserve">
+    <value>Pano</value>
+  </data>
+  <data name="ConfigView_NineRouter_Dashboard_Description" xml:space="preserve">
+    <value>Yerel 9Router panosunu tarayıcınızda açar.</value>
+  </data>
+  <data name="ConfigView_NineRouter_Dashboard_Open" xml:space="preserve">
+    <value>Aç</value>
+  </data>
+  <data name="ConfigView_NineRouter_ListenPort_Label" xml:space="preserve">
+    <value>Dinleme portu</value>
+  </data>
+  <data name="ConfigView_NineRouter_ListenPort_Description" xml:space="preserve">
+    <value>Yalnızca localhost. Uygulamak için yeniden başlatma gerekir.</value>
+  </data>
+  <data name="ConfigView_NineRouter_ListenPort_Reset" xml:space="preserve">
+    <value>Sıfırla</value>
+  </data>
+  <data name="ConfigView_NineRouter_NodeMissing" xml:space="preserve">
+    <value>9Router’ı çalıştırmak için Node.js 18 veya üzeri gerekir. Node’u yükleyin ve Tunnel Agent’ı yeniden başlatın.</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
        MISCELLANEOUS
        ═══════════════════════════════════════════════════════════════════════════ -->
   <data name="Toast_NoUpdateAvailable" xml:space="preserve">
@@ -1247,6 +1406,9 @@
   </data>
   <data name="Provider_perplexity-webui-scraper_Description" xml:space="preserve">
     <value>Perplexity WebUI oturumlarıyla desteklenen OpenAI uyumlu yerel API.</value>
+  </data>
+  <data name="Provider_9router_Description" xml:space="preserve">
+    <value>Otomatik fallback ile 40’tan fazla sağlayıcı için OpenAI uyumlu yerel yönlendirici.</value>
   </data>
   <data name="ProvidersView_Provider_ConnectedAccountSingular" xml:space="preserve">
     <value>{0} bağlı hesap</value>
@@ -1568,5 +1730,26 @@ Girişi tarayıcınızda tamamlayın. Kimliğiniz doğrulandığında uygulama b
   </data>
   <data name="OAuth_Status_CopyUrl" xml:space="preserve">
     <value>URL'yi kopyala</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Title" xml:space="preserve">
+    <value>Complete sign-in</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Description" xml:space="preserve">
+    <value>After signing in, copy the full callback URL from the browser and paste it here. This uses 9Router’s supported localhost callback instead of an unregistered temporary port.</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Code" xml:space="preserve">
+    <value>Callback URL or authorization code</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_CodePlaceholder" xml:space="preserve">
+    <value>http://localhost:20128/callback?code=…</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Submit" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_OAuthProviders" xml:space="preserve">
+    <value>OAUTH PROVIDERS</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_SearchPlaceholder" xml:space="preserve">
+    <value>Sağlayıcıları ada veya kimliğe göre ara</value>
   </data>
 </root>

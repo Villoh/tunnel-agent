@@ -19,6 +19,7 @@
         <cv:StringNotEmptyConverter     x:Key="StringNotEmpty" />
         <cv:InvertBoolConverter         x:Key="InvertBool" />
         <cv:BoolToEnableDisableTextConverter x:Key="BoolToEnableDisableText" />
+        <cv:StringEqualsConverter x:Key="StringEq" />
     </UserControl.Resources>
 
     <Panel>
@@ -30,9 +31,27 @@
                                     SelectedIndex="{Binding ProvidersTabIndex}">
                     <ctrl:SlidingTabBar.Tabs>
                         <ctrl:SlidingTab Header="{l:Loc ProvidersView_TabCLIProxyAPI}" Command="{Binding FocusCliProxyCommand}" />
+                        <ctrl:SlidingTab Header="{l:Loc ProvidersView_TabNineRouter}"  Command="{Binding FocusNineRouterCommand}" />
                         <ctrl:SlidingTab Header="{l:Loc ProvidersView_TabPerplexity}"  Command="{Binding FocusPerplexityCommand}" />
                     </ctrl:SlidingTabBar.Tabs>
                 </ctrl:SlidingTabBar>
+
+                <TransitioningContentControl Content="{Binding ProvidersEngineId}"
+                                             HorizontalContentAlignment="Stretch">
+                    <TransitioningContentControl.PageTransition>
+                        <CompositePageTransition>
+                            <CompositePageTransition.PageTransitions>
+                                <PageSlide Duration="0:0:0.22" Orientation="Horizontal"
+                                           SlideInEasing="CubicEaseInOut" SlideOutEasing="CubicEaseInOut" />
+                                <CrossFade Duration="0:0:0.22" />
+                            </CompositePageTransition.PageTransitions>
+                        </CompositePageTransition>
+                    </TransitioningContentControl.PageTransition>
+                    <TransitioningContentControl.ContentTemplate>
+                        <DataTemplate>
+                            <StackPanel x:Name="ProviderTabContent" Tag="{Binding}" Spacing="0">
+                                <StackPanel DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            Spacing="0">
 
                 <Grid Margin="0,0,0,14">
                     <Grid.ColumnDefinitions>
@@ -60,6 +79,13 @@
                                 <lucide:PackIconLucide Kind="Copy" Width="13" Height="13" IsVisible="{Binding !EndpointCopied}" />
                                 <lucide:PackIconLucide Kind="Check" Width="13" Height="13" IsVisible="{Binding EndpointCopied}" />
                             </Panel>
+                        </Button>
+                        <Button Classes="icon-btn copy-endpoint"
+                                ToolTip.Tip="{l:Loc ConfigView_NineRouter_Dashboard_Open}"
+                                Command="{Binding OpenNineRouterDashboardCommand}"
+                                IsVisible="{Binding IsNineRouterEngineSelected}"
+                                IsEnabled="{Binding IsNineRouterEngineRunning}">
+                            <lucide:PackIconLucide Kind="ExternalLink" Width="13" Height="13" />
                         </Button>
                         <Panel Width="26" Height="26">
                             <Button Classes="icon-btn engine-action start"
@@ -105,7 +131,7 @@
                     </Grid>
                 </Border>
 
-                <Border Classes="card" IsVisible="{Binding IsPerplexityEngineSelected}" Margin="0,0,0,12">
+                <Border Classes="card" IsVisible="{Binding Tag, ElementName=ProviderTabContent, Converter={StaticResource StringEq}, ConverterParameter=perplexity-webui-scraper}" Margin="0,0,0,12">
                     <StackPanel Margin="16,14" Spacing="12">
                         <Grid ColumnDefinitions="*,Auto">
                             <StackPanel>
@@ -171,7 +197,222 @@
                     </StackPanel>
                 </Border>
 
-                <StackPanel IsVisible="{Binding IsCliProxyEngineSelected}">
+                <Border Classes="card" IsVisible="{Binding Tag, ElementName=ProviderTabContent, Converter={StaticResource StringEq}, ConverterParameter=9router}" Margin="0,0,0,12">
+                    <StackPanel Margin="16,14" Spacing="12">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel>
+                                <TextBlock Classes="row-label" Text="{l:Loc ProvidersView_NineRouterSection_Title}" />
+                                <TextBlock Classes="row-desc" Text="{l:Loc ProvidersView_NineRouterSection_Description}" />
+                            </StackPanel>
+                            <Button Grid.Column="1" Classes="icon-btn"
+                                    ToolTip.Tip="{l:Loc ProvidersView_NineRouterSection_AddTooltip}"
+                                    Command="{Binding ShowAddNineRouterApiKeyCommand}"
+                                    IsEnabled="{Binding IsNineRouterEngineRunning}">
+                                <lucide:PackIconLucide Kind="Plus" Width="14" Height="14"
+                                                       Foreground="{DynamicResource FgMutedBrush}" />
+                            </Button>
+                        </Grid>
+
+                        <Border Background="#18F59E0B" BorderBrush="#44F59E0B" BorderThickness="1" CornerRadius="8" Padding="10"
+                                IsVisible="{Binding IsNineRouterEngineRunning, Converter={StaticResource InvertBool}}">
+                            <StackPanel Spacing="4">
+                                <TextBlock Classes="row-label" Text="{l:Loc Fallback_AddModelPopup_ServerWarning_Title}" />
+                                <TextBlock Classes="row-desc" TextWrapping="Wrap"
+                                           Text="{l:Loc ProvidersView_NineRouter_EngineNotRunning}" />
+                            </StackPanel>
+                        </Border>
+
+                        <Grid ColumnDefinitions="*,130" ColumnSpacing="8">
+                            <Border Grid.Column="0" Background="{DynamicResource BtnBgBrush}" BorderBrush="{DynamicResource BtnBorderBrush}"
+                                    BorderThickness="1" CornerRadius="8" Padding="10,0,0,0">
+                                <Grid ColumnDefinitions="Auto,*" VerticalAlignment="Center">
+                                    <lucide:PackIconLucide Grid.Column="0" Kind="Search" Width="13" Height="13"
+                                                           Foreground="{DynamicResource FgFaintBrush}"
+                                                           VerticalAlignment="Center" Margin="0,0,8,0" />
+                                    <TextBox Grid.Column="1" Background="Transparent" BorderThickness="0" Padding="4,8"
+                                             VerticalContentAlignment="Center" FontSize="12"
+                                             Watermark="{l:Loc ProvidersView_NineRouterSection_SearchPlaceholder}"
+                                             Text="{Binding NineRouterProviderSearch, Mode=TwoWay}" />
+                                </Grid>
+                            </Border>
+                            <ComboBox Grid.Column="1" Classes="app" HorizontalAlignment="Stretch"
+                                      ItemsSource="{Binding NineRouterProviderAuthFilters}"
+                                      SelectedItem="{Binding NineRouterProviderAuthFilter, Mode=TwoWay}" />
+                        </Grid>
+
+                        <ItemsControl ItemsSource="{Binding NineRouterProviders}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:NineRouterProviderViewModel">
+                                    <StackPanel>
+                                        <ToggleButton Classes="provider-row" IsChecked="{Binding IsExpanded, Mode=TwoWay}">
+                                            <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+                                                <ToggleButton Grid.Column="0" Classes="enable-toggle"
+                                                              IsChecked="{Binding IsEnabled, Mode=OneWay}"
+                                                              IsEnabled="{Binding HasAccounts}"
+                                                              VerticalAlignment="Center" Margin="0,0,12,0"
+                                                              Command="{Binding #Root.DataContext.ToggleNineRouterProviderCommand}"
+                                                              CommandParameter="{Binding}" />
+                                                <Border Grid.Column="1" Classes="provider-logo" Width="28" Height="28"
+                                                        Background="{Binding LogoColor, Converter={StaticResource HexBrush}}"
+                                                        Opacity="{Binding IsEnabled, Converter={StaticResource BoolToOpacity}}"
+                                                        Margin="0,0,10,0">
+                                                    <Panel>
+                                                        <si:PackIconSimpleIcons Kind="{Binding IconKind}" Foreground="White" Width="14" Height="14"
+                                                                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                                IsVisible="{Binding ShowSimpleIcon}" />
+                                                        <Viewbox Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                 IsVisible="{Binding HasCustomIcon}">
+                                                            <Path Data="{Binding CustomIconData}" Fill="White" Stretch="Uniform" />
+                                                        </Viewbox>
+                                                        <TextBlock Text="{Binding Monogram}" Foreground="White" FontSize="17" FontWeight="SemiBold"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                   IsVisible="{Binding UseMonogram}" />
+                                                    </Panel>
+                                                </Border>
+                                                <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="1">
+                                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                                        <TextBlock Classes="row-label" Text="{Binding Name}" VerticalAlignment="Center" />
+                                                        <Border Classes="chip" Background="#22FF7A00"
+                                                                IsVisible="{Binding IsEnabled, Converter={StaticResource InvertBool}}"
+                                                                VerticalAlignment="Center">
+                                                            <TextBlock Text="{l:Loc ProvidersView_Provider_Disabled}" Foreground="#CC7A2B" FontSize="10" />
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <TextBlock Text="{Binding ConnectedSubText}" FontSize="11.5" Foreground="{DynamicResource FgMutedBrush}" />
+                                                    <TextBlock Text="{Binding Id}" Classes="row-desc" FontFamily="Cascadia Mono,Consolas,monospace" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center" Margin="8,0">
+                                                    <Button Classes="icon-btn" ToolTip.Tip="{l:Loc ProvidersView_Provider_AddAccountTooltip}"
+                                                            IsVisible="{Binding Option.SupportsOAuth}"
+                                                            IsEnabled="{Binding #Root.DataContext.IsNineRouterEngineRunning}"
+                                                            Command="{Binding #Root.DataContext.ConnectNineRouterOAuthProviderCommand}"
+                                                            CommandParameter="{Binding Option}">
+                                                        <lucide:PackIconLucide Kind="CircleUserRound" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                                                    </Button>
+                                                    <Button Classes="icon-btn" ToolTip.Tip="{l:Loc ProvidersView_Provider_AddApiKeyTooltip}"
+                                                            IsVisible="{Binding SupportsStoredCredential}"
+                                                            IsEnabled="{Binding #Root.DataContext.IsNineRouterEngineRunning}"
+                                                            Command="{Binding #Root.DataContext.ShowAddNineRouterProviderCommand}"
+                                                            CommandParameter="{Binding}">
+                                                        <lucide:PackIconLucide Kind="KeyRound" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                                                    </Button>
+                                                    <Button Classes="icon-btn" ToolTip.Tip="{l:Loc ProvidersView_Provider_AddAccountTooltip}"
+                                                            IsVisible="{Binding Option.SupportsNoAuth}"
+                                                            IsEnabled="{Binding #Root.DataContext.IsNineRouterEngineRunning}"
+                                                            Command="{Binding #Root.DataContext.ShowAddNineRouterProviderCommand}"
+                                                            CommandParameter="{Binding}">
+                                                        <lucide:PackIconLucide Kind="Plus" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                                                    </Button>
+                                                </StackPanel>
+                                                <Panel Grid.Column="4" Width="20" VerticalAlignment="Center">
+                                                    <lucide:PackIconLucide Kind="ChevronRight" Width="14" Height="14" Foreground="{DynamicResource FgFaintBrush}"
+                                                                            IsVisible="{Binding IsExpanded, Converter={StaticResource InvertBool}}" />
+                                                    <lucide:PackIconLucide Kind="ChevronDown" Width="14" Height="14" Foreground="{DynamicResource FgFaintBrush}"
+                                                                            IsVisible="{Binding IsExpanded}" />
+                                                </Panel>
+                                            </Grid>
+                                        </ToggleButton>
+                                        <Border Background="#08FFFFFF" Margin="16,0,16,4" CornerRadius="8" Padding="14,10"
+                                                IsVisible="{Binding IsExpanded}">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <TextBlock Classes="row-label" Text="{l:Loc ProvidersView_NineRouterProvider_RoundRobin}"
+                                                           VerticalAlignment="Center" />
+                                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                                              IsChecked="{Binding IsRoundRobin, Mode=OneWay}"
+                                                              IsEnabled="{Binding #Root.DataContext.IsNineRouterEngineRunning}"
+                                                              Command="{Binding #Root.DataContext.ToggleNineRouterProviderRoundRobinCommand}"
+                                                              CommandParameter="{Binding}" />
+                                            </Grid>
+                                        </Border>
+                                        <ItemsControl ItemsSource="{Binding Accounts}" IsVisible="{Binding IsExpanded}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:NineRouterConnectionViewModel">
+                                                    <Border Background="#08FFFFFF" Margin="16,8,16,10" CornerRadius="8" Padding="14,12">
+                                                        <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                                                            <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                                    <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource FgBrush}" />
+                                                                    <Border Classes="chip" Background="{DynamicResource AccentSoftBrush}" IsVisible="{Binding HasAuthType}">
+                                                                        <TextBlock Text="{Binding AuthType}" Foreground="{DynamicResource AccentBrush}" FontSize="10" />
+                                                                    </Border>
+                                                                </StackPanel>
+                                                                <TextBlock Text="{Binding LastError}" Classes="row-desc" Foreground="#D46A6A"
+                                                                           TextWrapping="Wrap" IsVisible="{Binding HasLastError}" />
+                                                            </StackPanel>
+                                                            <ToggleButton Grid.Column="1" Classes="enable-toggle" IsChecked="{Binding IsActive, Mode=OneWay}"
+                                                                          Margin="8,0" VerticalAlignment="Center"
+                                                                          Command="{Binding #Root.DataContext.ToggleNineRouterConnectionCommand}"
+                                                                          CommandParameter="{Binding}" />
+                                                            <Button Grid.Column="2" Classes="icon-btn" VerticalAlignment="Center"
+                                                                    ToolTip.Tip="{l:Loc ProvidersView_NineRouterConnection_EditNameTooltip}"
+                                                                    IsEnabled="{Binding #Root.DataContext.IsNineRouterEngineRunning}"
+                                                                    Command="{Binding #Root.DataContext.EditNineRouterConnectionNameCommand}"
+                                                                    CommandParameter="{Binding}">
+                                                                <lucide:PackIconLucide Kind="Pencil" Width="13" Height="13" Foreground="{DynamicResource FgMutedBrush}" />
+                                                            </Button>
+                                                            <Button Grid.Column="3" Classes="icon-btn" VerticalAlignment="Center"
+                                                                    ToolTip.Tip="{l:Loc ProvidersView_NineRouterConnection_DeleteTooltip}"
+                                                                    Command="{Binding #Root.DataContext.DeleteNineRouterConnectionCommand}"
+                                                                    CommandParameter="{Binding}">
+                                                                <lucide:PackIconLucide Kind="Trash2" Width="13" Height="13" Foreground="#D46A6A" />
+                                                            </Button>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <Border Classes="row-divider" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <StackPanel Margin="0,2,0,0" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center"
+                                    IsVisible="{Binding IsNineRouterEngineRunning}">
+                            <Button Classes="icon-btn" ToolTip.Tip="{l:Loc LogsView_Requests_FirstPageTooltip}"
+                                    IsVisible="{Binding CanGoNineRouterProviderPrev}"
+                                    Command="{Binding FirstNineRouterProviderPageCommand}">
+                                <lucide:PackIconLucide Kind="ChevronsLeft" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                            </Button>
+                            <Button Classes="icon-btn" ToolTip.Tip="{l:Loc LogsView_Requests_PrevPageTooltip}"
+                                    IsVisible="{Binding CanGoNineRouterProviderPrev}"
+                                    Command="{Binding PrevNineRouterProviderPageCommand}">
+                                <lucide:PackIconLucide Kind="ChevronLeft" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                            </Button>
+                            <ItemsControl ItemsSource="{Binding NineRouterProviderPageNavigationItems}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="3" /></ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:LogPageItem">
+                                        <Panel>
+                                            <Button Classes="icon-btn page" Classes.current="{Binding IsCurrent}" MinWidth="24" Padding="6,4"
+                                                    Content="{Binding Label}" FontSize="11" FontWeight="SemiBold"
+                                                    IsVisible="{Binding !IsEllipsis}"
+                                                    Command="{Binding #Root.DataContext.GoToNineRouterProviderPageCommand}"
+                                                    CommandParameter="{Binding}" />
+                                            <TextBlock Text="{Binding Label}" FontSize="11" FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource FgFaintBrush}" Padding="6,4" MinWidth="24"
+                                                       TextAlignment="Center" IsVisible="{Binding IsEllipsis}" />
+                                        </Panel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <Button Classes="icon-btn" ToolTip.Tip="{l:Loc LogsView_Requests_NextPageTooltip}"
+                                    IsVisible="{Binding CanGoNineRouterProviderNext}"
+                                    Command="{Binding NextNineRouterProviderPageCommand}">
+                                <lucide:PackIconLucide Kind="ChevronRight" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                            </Button>
+                            <Button Classes="icon-btn" ToolTip.Tip="{l:Loc LogsView_Requests_LastPageTooltip}"
+                                    IsVisible="{Binding CanGoNineRouterProviderNext}"
+                                    Command="{Binding LastNineRouterProviderPageCommand}">
+                                <lucide:PackIconLucide Kind="ChevronsRight" Width="14" Height="14" Foreground="{DynamicResource FgMutedBrush}" />
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel IsVisible="{Binding Tag, ElementName=ProviderTabContent, Converter={StaticResource StringEq}, ConverterParameter=cliproxyapi}">
                     <Border Classes="card">
                       <StackPanel>
                         <ItemsControl ItemsSource="{Binding Providers}">
@@ -454,6 +695,11 @@
 
                     </StackPanel>
                 </Border>
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </TransitioningContentControl.ContentTemplate>
+                </TransitioningContentControl>
             </StackPanel>
         </ScrollViewer>
     </Panel>

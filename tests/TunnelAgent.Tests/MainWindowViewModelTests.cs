@@ -3,8 +3,6 @@ using System.Text.Json;
 using IconPacks.Avalonia.SimpleIcons;
 using TunnelAgent.Services;
 using TunnelAgent.ViewModels;
-using Xunit;
-
 using TunnelAgent.Core.Engine;
 using TunnelAgent.Infrastructure.Engine;
 namespace TunnelAgent.Tests;
@@ -30,6 +28,153 @@ public sealed class MainWindowViewModelTests
         Assert.Equal("Stopped", vm.EngineStatusText);
         Assert.False(vm.IsLoadingEngineReleases);
         Assert.False(vm.ConfigHasBadge);
+    }
+
+    [Fact]
+    public async Task SelectConfigNineRouter_SetsTabIndexAndFocusedEngine()
+    {
+        using var temp = new TestTempDirectory();
+        var settings = new SettingsService(temp.File("settings.json"));
+        await settings.LoadAsync();
+        var registry = new EngineRegistryService(settings);
+        var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
+
+        vm.SelectConfigNineRouterCommand.Execute(null);
+
+        Assert.Equal(SectionKey.ConfigNineRouter, vm.SelectedSection);
+        Assert.Equal(2, vm.ConfigTabIndex);
+        Assert.True(vm.IsConfigSection);
+        Assert.Equal(EngineCatalog.NineRouter.Id, vm.FocusedConfigEngineId);
+        Assert.Equal(EngineCatalog.NineRouter.DefaultPort, vm.NineRouterPort);
+        Assert.Equal($"http://127.0.0.1:{EngineCatalog.NineRouter.DefaultPort}/dashboard", vm.NineRouterDashboardUrl);
+    }
+
+    [Fact]
+    public async Task SelectNineRouterProviders_SetsProvidersTabAndFocusedEngine()
+    {
+        using var temp = new TestTempDirectory();
+        var settings = new SettingsService(temp.File("settings.json"));
+        await settings.LoadAsync();
+        var registry = new EngineRegistryService(settings);
+        var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
+
+        vm.SelectNineRouterProvidersCommand.Execute(null);
+
+        Assert.Equal(SectionKey.Providers, vm.SelectedSection);
+        Assert.True(vm.IsNineRouterEngineSelected);
+        Assert.False(vm.IsCliProxyEngineSelected);
+        Assert.False(vm.IsPerplexityEngineSelected);
+        Assert.Equal(1, vm.ProvidersTabIndex);
+        Assert.Equal(EngineCatalog.NineRouter.Id, vm.ProvidersEngineId);
+        Assert.Equal(EngineCatalog.NineRouter.Id, vm.FocusedConfigEngineId);
+        Assert.Equal($"http://127.0.0.1:{EngineCatalog.NineRouter.DefaultPort}", vm.EndpointUrl);
+        Assert.False(vm.HasNineRouterConnections);
+    }
+
+    [Fact]
+    public async Task ShowAddNineRouterApiKey_OpensAndDismissesDialog()
+    {
+        using var temp = new TestTempDirectory();
+        var settings = new SettingsService(temp.File("settings.json"));
+        await settings.LoadAsync();
+        var registry = new EngineRegistryService(settings);
+        var vm = new MainWindowViewModel(settings, registry, null!, null!, null!, null!);
+
+        vm.ShowAddNineRouterApiKeyCommand.Execute(null);
+
+        Assert.True(vm.ShowNineRouterAddKeyDialog);
+        Assert.False(vm.ShowNineRouterAddApiKey);
+
+        vm.NineRouterAddProviderIdDraft = "openai";
+        vm.DismissNineRouterAddKeyDialogCommand.Execute(null);
+
+        Assert.False(vm.ShowNineRouterAddKeyDialog);
+        Assert.Equal("", vm.NineRouterAddProviderIdDraft);
+    }
+
+    [Fact]
+    public void NineRouterComboDialog_RequiresRunningEngine()
+    {
+        var running = false;
+        var combos = new NineRouterCombosViewModel(
+            () => 8317,
+            () => running,
+            new System.Collections.ObjectModel.ObservableCollection<AvailableModelGroupViewModel>());
+
+        combos.OpenCreatePanelCommand.Execute(null);
+        Assert.False(combos.ShowCreatePanel);
+
+        running = true;
+        combos.OpenCreatePanelCommand.Execute(null);
+        Assert.True(combos.ShowCreatePanel);
+
+        running = false;
+        combos.NotifyEngineStateChanged();
+        Assert.False(combos.ShowCreatePanel);
+    }
+
+    [Fact]
+    public void FallbackSubmenu_TogglesAndSelectsBothViews()
+    {
+        var vm = new MainWindowViewModel();
+
+        vm.ToggleFallbackSubmenuCommand.Execute(null);
+        Assert.True(vm.IsFallbackSubmenuExpanded);
+
+        vm.SelectFallbackCommand.Execute(null);
+        Assert.Equal(SectionKey.Fallback, vm.SelectedSection);
+
+        vm.SelectNineRouterCombosCommand.Execute(null);
+        Assert.Equal(SectionKey.NineRouterCombos, vm.SelectedSection);
+
+        vm.ToggleFallbackSubmenuCommand.Execute(null);
+        Assert.False(vm.IsFallbackSubmenuExpanded);
+    }
+
+    [Fact]
+    public async Task QuotaSubmenu_TogglesAndSelectsBothViews()
+    {
+        var vm = new MainWindowViewModel();
+
+        vm.ToggleQuotaSubmenuCommand.Execute(null);
+        Assert.True(vm.IsQuotaSubmenuExpanded);
+
+        vm.SelectQuotaLimitsCommand.Execute(null);
+        Assert.Equal(SectionKey.Quota, vm.SelectedSection);
+        Assert.True(vm.IsQuotaLimitsSelected);
+
+        await vm.SelectQuotaUsageCommand.ExecuteAsync(null);
+        Assert.True(vm.IsQuotaUsageSelected);
+        Assert.True(vm.IsQuotaUsageActive);
+
+        vm.SelectedSection = SectionKey.Home;
+        Assert.False(vm.IsQuotaUsageActive);
+
+        vm.ToggleQuotaSubmenuCommand.Execute(null);
+        Assert.False(vm.IsQuotaSubmenuExpanded);
+    }
+
+    [Fact]
+    public void NineRouterProviderPagination_FiltersAndNavigatesCatalog()
+    {
+        var vm = new MainWindowViewModel();
+        var providers = (System.Collections.Generic.List<NineRouterProviderViewModel>)typeof(MainWindowViewModel)
+            .GetField("_allNineRouterProviders", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
+            .GetValue(vm)!;
+        providers.AddRange(NineRouterProviderCatalog.All.Select(option => new NineRouterProviderViewModel(option)));
+        typeof(MainWindowViewModel)
+            .GetMethod("ApplyNineRouterProviderFilter", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
+            .Invoke(vm, null);
+
+        Assert.Equal(12, vm.NineRouterProviders.Count);
+        Assert.Equal(10, vm.NineRouterProviderTotalPages);
+        vm.NextNineRouterProviderPageCommand.Execute(null);
+        Assert.Equal(2, vm.NineRouterProviderCurrentPage);
+
+        vm.NineRouterProviderSearch = "claude";
+        Assert.Single(vm.NineRouterProviders);
+        Assert.Equal("claude", vm.NineRouterProviders[0].Id);
+        Assert.Equal(1, vm.NineRouterProviderCurrentPage);
     }
 
     [Fact]

@@ -194,46 +194,63 @@
                                 </Grid>
                             </Button>
 
-                            <Button Classes="side" Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Quota}"
-                                    Command="{Binding SelectQuotaCommand}">
-                                <Grid ColumnDefinitions="20,*,Auto">
-                                    <lucide:PackIconLucide Grid.Column="0" Kind="ChartBar" Width="15" Height="15"
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <Panel Grid.Column="1" Grid.ColumnSpan="2"
-                                           Opacity="{Binding SidebarContentOpacity}">
-                                        <Panel.Transitions>
-                                            <Transitions>
-                                                <DoubleTransition Property="Opacity" Duration="0:0:0.18" Easing="CubicEaseInOut" />
-                                            </Transitions>
-                                        </Panel.Transitions>
-                                        <TextBlock Text="{l:Loc Sidebar_Quota}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
-                                                   IsVisible="{Binding !IsSidebarCollapsed}"/>
-                                        <Border HorizontalAlignment="Right" CornerRadius="999" Background="#14000000" Padding="6,1"
-                                                IsVisible="{Binding !IsSidebarCollapsed}">
-                                            <TextBlock Text="{Binding QuotaProviderCount}" FontSize="11" />
-                                        </Border>
-                                    </Panel>
-                                </Grid>
-                            </Button>
+                            <StackPanel Spacing="2">
+                                <Button Classes="side" Command="{Binding ToggleQuotaSubmenuCommand}">
+                                    <Grid ColumnDefinitions="20,*,Auto">
+                                        <lucide:PackIconLucide Grid.Column="0" Kind="ChartBar" Width="15" Height="15"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{l:Loc Sidebar_Quota}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
+                                                   Opacity="{Binding SidebarContentOpacity}" IsVisible="{Binding !IsSidebarCollapsed}" />
+                                        <Panel Grid.Column="2" Width="16" VerticalAlignment="Center" IsVisible="{Binding !IsSidebarCollapsed}">
+                                            <lucide:PackIconLucide Kind="ChevronRight" Width="11" Height="11" Foreground="{DynamicResource FgMutedBrush}"
+                                                                    IsVisible="{Binding IsQuotaSubmenuExpanded, Converter={StaticResource InvertBool}}" />
+                                            <lucide:PackIconLucide Kind="ChevronDown" Width="11" Height="11" Foreground="{DynamicResource FgMutedBrush}"
+                                                                    IsVisible="{Binding IsQuotaSubmenuExpanded}" />
+                                        </Panel>
+                                    </Grid>
+                                </Button>
+                                <StackPanel Spacing="2" Margin="18,0,0,0" IsVisible="{Binding IsQuotaSubmenuExpanded}">
+                                    <Button Classes="side side-sub" Classes.selected="{Binding IsQuotaLimitsActive}"
+                                            Command="{Binding SelectQuotaLimitsCommand}">
+                                        <TextBlock Text="{l:Loc Sidebar_Quota}" FontSize="11" Margin="0"
+                                                   IsVisible="{Binding !IsSidebarCollapsed}" />
+                                    </Button>
+                                    <Button Classes="side side-sub" Classes.selected="{Binding IsQuotaUsageActive}"
+                                            Command="{Binding SelectQuotaUsageCommand}">
+                                        <TextBlock Text="{l:Loc Sidebar_NineRouterUsage}" FontSize="11" Margin="0"
+                                                   IsVisible="{Binding !IsSidebarCollapsed}" />
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
 
-                            <Button Classes="side"
-                                    Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Fallback}"
-                                    Command="{Binding SelectFallbackCommand}">
-                                <Grid ColumnDefinitions="20,*">
-                                    <lucide:PackIconLucide Grid.Column="0" Kind="GitFork" Width="15" Height="15"
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    <Panel Grid.Column="1"
-                                           Opacity="{Binding SidebarContentOpacity}">
-                                        <Panel.Transitions>
-                                            <Transitions>
-                                                <DoubleTransition Property="Opacity" Duration="0:0:0.18" Easing="CubicEaseInOut" />
-                                            </Transitions>
-                                        </Panel.Transitions>
-                                        <TextBlock Text="{l:Loc Sidebar_Fallback}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
-                                                   IsVisible="{Binding !IsSidebarCollapsed}"/>
-                                    </Panel>
-                                </Grid>
-                            </Button>
+                            <StackPanel Spacing="2">
+                                <Button Classes="side" Command="{Binding ToggleFallbackSubmenuCommand}">
+                                    <Grid ColumnDefinitions="20,*,Auto">
+                                        <lucide:PackIconLucide Grid.Column="0" Kind="GitFork" Width="15" Height="15"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{l:Loc Sidebar_Fallback}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
+                                                   Opacity="{Binding SidebarContentOpacity}" IsVisible="{Binding !IsSidebarCollapsed}" />
+                                        <Panel Grid.Column="2" Width="16" VerticalAlignment="Center" IsVisible="{Binding !IsSidebarCollapsed}">
+                                            <lucide:PackIconLucide Kind="ChevronRight" Width="11" Height="11" Foreground="{DynamicResource FgMutedBrush}"
+                                                                    IsVisible="{Binding IsFallbackSubmenuExpanded, Converter={StaticResource InvertBool}}" />
+                                            <lucide:PackIconLucide Kind="ChevronDown" Width="11" Height="11" Foreground="{DynamicResource FgMutedBrush}"
+                                                                    IsVisible="{Binding IsFallbackSubmenuExpanded}" />
+                                        </Panel>
+                                    </Grid>
+                                </Button>
+                                <StackPanel Spacing="2" Margin="18,0,0,0" IsVisible="{Binding IsFallbackSubmenuExpanded}">
+                                    <Button Classes="side side-sub" Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Fallback}"
+                                            Command="{Binding SelectFallbackCommand}">
+                                        <TextBlock Text="{l:Loc Sidebar_FallbackCliProxy}" FontSize="11" Margin="0"
+                                                   IsVisible="{Binding !IsSidebarCollapsed}" />
+                                    </Button>
+                                    <Button Classes="side side-sub" Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=NineRouterCombos}"
+                                            Command="{Binding SelectNineRouterCombosCommand}">
+                                        <TextBlock Text="{l:Loc Sidebar_NineRouterCombos}" FontSize="11" Margin="0"
+                                                   IsVisible="{Binding !IsSidebarCollapsed}" />
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
 
                             <Button Classes="side"
                                     Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Agents}"
@@ -359,6 +376,27 @@
                             </Button>
 
                             <Button Classes="proxy-card" Margin="2,0"
+                                    Command="{Binding SelectNineRouterProvidersCommand}"
+                                    ToolTip.Tip="{l:Loc Sidebar_NineRouter_StatusTooltip}"
+                                    IsVisible="{Binding !IsSidebarCollapsed}"
+                                    Opacity="{Binding SidebarContentOpacity}">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="9">
+                                    <Grid Grid.Column="0" Classes="status-indicator" VerticalAlignment="Center">
+                                        <Ellipse Classes="status-pulse"
+                                                 Fill="{Binding NineRouterServerState, Converter={StaticResource StateToBrush}}"
+                                                 IsVisible="{Binding NineRouterServerState, Converter={StaticResource StateIsRunning}}" />
+                                        <Ellipse Classes="status-dot"
+                                                 Fill="{Binding NineRouterServerState, Converter={StaticResource StateToBrush}}" />
+                                    </Grid>
+                                    <TextBlock Grid.Column="1" Text="{l:Loc Sidebar_NineRouter}" FontSize="12" FontWeight="Medium"
+                                               Foreground="{DynamicResource FgBrush}" TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center" />
+                                    <lucide:PackIconLucide Grid.Column="2" Kind="ChevronRight" Width="13" Height="13"
+                                                           VerticalAlignment="Center" Foreground="{DynamicResource FgFaintBrush}" />
+                                </Grid>
+                            </Button>
+
+                            <Button Classes="proxy-card" Margin="2,0"
                                     Command="{Binding SelectConfigLocalProxyCommand}"
                                     ToolTip.Tip="{l:Loc Sidebar_ProxyCard_Hint}"
                                     IsVisible="{Binding !IsSidebarCollapsed}"
@@ -403,7 +441,7 @@
                                                        Cursor="Hand" />
                                         </Button>
                                     </StackPanel>
-                                    <Button Grid.Column="1" Classes="icon" HorizontalAlignment="Right"
+                                    <Button Grid.Column="1" Classes="icon theme-toggle" HorizontalAlignment="Right"
                                             ToolTip.Tip="{l:Loc Sidebar_ToggleThemeTooltip}"
                                             Command="{Binding ToggleThemeCommand}">
                                         <Grid Width="18" Height="18" Classes="theme-icon" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -418,7 +456,7 @@
                                         </Grid>
                                     </Button>
                                 </Grid>
-                                <Button Classes="icon" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                <Button Classes="icon theme-toggle" HorizontalAlignment="Center" VerticalAlignment="Center"
                                         IsVisible="{Binding IsSidebarCollapsed}"
                                         ToolTip.Tip="{l:Loc Sidebar_ToggleThemeTooltip}"
                                         Command="{Binding ToggleThemeCommand}">
@@ -874,6 +912,122 @@
             </Border>
         </Border>
 
+        <!-- Add 9Router API-key connection dialog -->
+        <Border x:Name="NineRouterAddKeyOverlay" IsVisible="{Binding ShowNineRouterAddKeyDialog}" Background="#88000000"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50"
+                KeyDown="OnNineRouterAddKeyDialogKeyDown" Focusable="True"
+                PointerPressed="OnNineRouterAddKeyOverlayPressed">
+            <Border Classes="card" Width="440" MinHeight="150" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24"
+                    PointerPressed="OnDialogCardPressed">
+                <StackPanel Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Classes="row-label" FontSize="15" Text="{l:Loc Dialog_AddNineRouterKey_Title}" VerticalAlignment="Center" />
+                        <Button Grid.Column="1" Classes="icon" Command="{Binding DismissNineRouterAddKeyDialogCommand}" VerticalAlignment="Center">
+                            <lucide:PackIconLucide Kind="X" Width="14" Height="14" />
+                        </Button>
+                    </Grid>
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddNineRouterKey_ProviderId}" />
+                        <ComboBox Classes="app" HorizontalAlignment="Stretch"
+                                  ItemsSource="{Binding NineRouterProviderOptions}"
+                                  SelectedItem="{Binding SelectedNineRouterProvider, Mode=TwoWay}" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddNineRouterKey_Name}" />
+                        <TextBox x:Name="NineRouterNameBox" Classes="app"
+                                 Watermark="{l:Loc Dialog_AddNineRouterKey_NamePlaceholder}"
+                                 Text="{Binding NineRouterAddNameDraft, Mode=TwoWay}"
+                                 KeyDown="OnNineRouterAddKeyInputKeyDown" />
+                    </StackPanel>
+                    <StackPanel Spacing="4" IsVisible="{Binding SelectedNineRouterSupportsApiKey}">
+                        <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddNineRouterKey_ApiKey}" />
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBox Grid.Column="0" x:Name="NineRouterApiKeyBox" Classes="app"
+                                     PasswordChar="{Binding ShowNineRouterAddApiKey, Converter={StaticResource SecretPasswordChar}}"
+                                     Watermark="{l:Loc Dialog_AddNineRouterKey_ApiKeyPlaceholder}"
+                                     Text="{Binding NineRouterAddApiKeyDraft, Mode=TwoWay}" />
+                            <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0"
+                                    ToolTip.Tip="{l:Loc Dialog_AddNineRouterKey_ShowHideTooltip}"
+                                    Command="{Binding ToggleNineRouterAddApiKeyVisibilityCommand}">
+                                <lucide:PackIconLucide Kind="{Binding ShowNineRouterAddApiKey, Converter={StaticResource EyeIcon}}" Width="14" Height="14" />
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
+                        <Button Classes="app" Content="{l:Loc Dialog_AddNineRouterKey_Cancel}" Command="{Binding DismissNineRouterAddKeyDialogCommand}" />
+                        <Button Classes="app primary" Content="{l:Loc Dialog_AddNineRouterKey_Save}"
+                                Command="{Binding AddSelectedNineRouterApiKeyCommand}"
+                                IsVisible="{Binding SelectedNineRouterSupportsApiKey}" />
+                        <Button Classes="app primary" Content="{l:Loc Dialog_AddNineRouterKey_Save}"
+                                Command="{Binding ConnectSelectedNineRouterNoAuthCommand}"
+                                IsVisible="{Binding SelectedNineRouterSupportsNoAuth}" />
+                        <Button Classes="app primary" Content="OAuth"
+                                Command="{Binding ConnectSelectedNineRouterOAuthCommand}"
+                                IsVisible="{Binding SelectedNineRouterSupportsOAuth}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- Complete 9Router OAuth callback dialog -->
+        <Border x:Name="NineRouterOAuthCodeOverlay" IsVisible="{Binding ShowNineRouterOAuthCodeDialog}" Background="#88000000"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50"
+                KeyDown="OnNineRouterOAuthCodeDialogKeyDown" Focusable="True"
+                PointerPressed="OnNineRouterOAuthCodeOverlayPressed">
+            <Border Classes="card" Width="480" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24"
+                    PointerPressed="OnDialogCardPressed">
+                <StackPanel Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Classes="row-label" FontSize="15" Text="{l:Loc Dialog_NineRouterOAuth_Title}" />
+                        <Button Grid.Column="1" Classes="icon" Command="{Binding DismissNineRouterOAuthCodeDialogCommand}">
+                            <lucide:PackIconLucide Kind="X" Width="14" Height="14" />
+                        </Button>
+                    </Grid>
+                    <TextBlock Classes="row-desc" TextWrapping="Wrap" Text="{l:Loc Dialog_NineRouterOAuth_Description}" />
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="row-desc" Text="{l:Loc Dialog_NineRouterOAuth_Code}" />
+                        <TextBox x:Name="NineRouterOAuthCodeBox" Classes="app"
+                                 Watermark="{l:Loc Dialog_NineRouterOAuth_CodePlaceholder}"
+                                 Text="{Binding NineRouterOAuthCodeDraft, Mode=TwoWay}"
+                                 KeyDown="OnNineRouterOAuthCodeInputKeyDown" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
+                        <Button Classes="app" Content="{l:Loc Dialog_AddNineRouterKey_Cancel}" Command="{Binding DismissNineRouterOAuthCodeDialogCommand}" />
+                        <Button Classes="app primary" Content="{l:Loc Dialog_NineRouterOAuth_Submit}"
+                                Command="{Binding CompleteNineRouterOAuthCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- Edit 9Router connection name dialog -->
+        <Border x:Name="NineRouterConnectionNameOverlay" IsVisible="{Binding ShowEditNineRouterConnectionNameDialog}" Background="#88000000"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50"
+                PointerPressed="OnEditNineRouterConnectionNameOverlayPressed"
+                KeyDown="OnEditNineRouterConnectionNameKeyDown" Focusable="True">
+            <Border Classes="card" Width="480" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24"
+                    PointerPressed="OnDialogCardPressed">
+                <StackPanel Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Classes="row-label" FontSize="15" Text="{l:Loc Dialog_EditNineRouterConnectionName_Title}" VerticalAlignment="Center" />
+                        <Button Grid.Column="1" Classes="icon" Command="{Binding DismissEditNineRouterConnectionNameDialogCommand}" VerticalAlignment="Center">
+                            <lucide:PackIconLucide Kind="X" Width="14" Height="14" />
+                        </Button>
+                    </Grid>
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddNineRouterKey_Name}" />
+                        <TextBox x:Name="NineRouterConnectionNameBox" Classes="app"
+                                 Text="{Binding EditNineRouterConnectionNameDraft, Mode=TwoWay}"
+                                 KeyDown="OnEditNineRouterConnectionNameKeyDown" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
+                        <Button Classes="app" Content="{l:Loc Dialog_AddNineRouterKey_Cancel}" Command="{Binding DismissEditNineRouterConnectionNameDialogCommand}" />
+                        <Button Classes="app primary" Content="{l:Loc Dialog_EditPerplexityLabel_Save}" Command="{Binding ConfirmEditNineRouterConnectionNameCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+
         <!-- Edit Perplexity account label dialog -->
         <Border IsVisible="{Binding ShowEditPerplexityLabelDialog}" Background="#88000000"
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50"
@@ -917,6 +1071,8 @@
                 </StackPanel>
             </Border>
         </Border>
+
+        <v:NineRouterComboOverlayView DataContext="{Binding}" ZIndex="50" />
 
         <ContentControl x:Name="AgentConfigOverlayHost"
                         IsVisible="{Binding ShowAgentConfigDialog}"

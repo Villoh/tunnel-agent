@@ -5,10 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.1.0] - 2026-08-15
+
+### Added
+
+- **9Router managed engine** (`EngineCatalog`, `NineRouter/*`, `AgentConfigurationService`, `README.md`): install 9Router from npm (Node.js 18+), start and stop it alongside CLIProxyAPI and Perplexity, configure and open its dashboard, and point coding agents at `http://127.0.0.1:20128/v1` with `TUNNEL_AGENT_9ROUTER_API_KEY`.
+- **9Router provider management** (`NineRouterProviderCatalog`, `ProvidersView`, `NineRouter/*`): add API-key connections or sign in Claude / Gemini / Copilot over OAuth; filter and page the provider catalog; enable, rename, or delete connections; configure per-provider round robin; and surface custom provider icons and connection errors.
+- **9Router model combos** (`NineRouterCombosViewModel`, `NineRouterComboOverlayView`): create, edit, reorder, and delete ordered model combos with sequential, round-robin, or fusion strategies (including an optional fusion judge model).
+- **9Router usage** (`DashboardView`, `NineRouterUsageViewModel`, `QuotaView`, `TrayUsagePopup`): show seven-day request, token, cache, and cost aggregates; active requests; per-provider totals; and paginated redacted request details on Home, plus each connected account's usage and plan limits in Quota and the tray popup.
+
+### Changed
+
+- **Animated tab content** (`ConfigurationView`, `LogsView`, `ProvidersView`): sliding tab bodies now animate when the selected tab changes.
 
 ### Fixed
 
+- **Tray usage popup opened in a screen corner** (`TrayService`): the popup is now placed beside the tray-icon cursor position.
 - **Cursor quota showed the old single spend bar** (`CursorQuotaParser`, `QuotaFetchService`): Cursor Settings now reports **Auto + Composer** and **API** as separate percent buckets (`autoPercentUsed` / `apiPercentUsed`). Quota uses those bars instead of `includedSpend/limit`, keeps on-demand spend when present, and falls back to `/auth/usage` or usage-summary when `planUsage` is missing (Team/Enterprise). Token refresh retries both dashboard calls; parse/network failures surface as a quota error instead of an empty "not loaded" state.
 - **Cursor quota read a stale AppData account** (`CursorStateStore`): Scoop/portable Cursor keeps `state.vscdb` under `data/user-data`, while an older `%APPDATA%\Cursor` install can still contain an expired login. Scan and fetch now pick the newest existing database among AppData, LocalAppData, and Scoop paths.
 

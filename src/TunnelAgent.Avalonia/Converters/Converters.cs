@@ -112,6 +112,14 @@ public sealed class SectionEqualsConverter : IValueConverter
     public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
 }
 
+public sealed class StringEqualsConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is string text && parameter is string expected &&
+        string.Equals(text, expected, StringComparison.OrdinalIgnoreCase);
+    public object ConvertBack(object? v, Type t, object? p, CultureInfo c) => throw new NotImplementedException();
+}
+
 public sealed class SidebarWidthConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)

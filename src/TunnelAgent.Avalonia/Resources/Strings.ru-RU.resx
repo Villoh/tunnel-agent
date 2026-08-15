@@ -226,6 +226,12 @@
   <data name="Sidebar_Perplexity" xml:space="preserve">
     <value>Perplexity</value>
   </data>
+  <data name="Sidebar_NineRouter_StatusTooltip" xml:space="preserve">
+    <value>Открыть провайдеры 9Router</value>
+  </data>
+  <data name="Sidebar_NineRouter" xml:space="preserve">
+    <value>9Router</value>
+  </data>
   <data name="Sidebar_Version" xml:space="preserve">
     <value>v{0} · MIT</value>
   </data>
@@ -512,6 +518,9 @@
   <data name="ProvidersView_TabPerplexity" xml:space="preserve">
     <value>Perplexity</value>
   </data>
+  <data name="ProvidersView_TabNineRouter" xml:space="preserve">
+    <value>9Router</value>
+  </data>
   <data name="ProvidersView_Title" xml:space="preserve">
     <value>Сервисы</value>
   </data>
@@ -548,6 +557,93 @@
   </data>
   <data name="ProvidersView_PerplexityAccount_RemoveTooltip" xml:space="preserve">
     <value>Удалить аккаунт</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_Title" xml:space="preserve">
+    <value>Подключения 9Router</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_Description" xml:space="preserve">
+    <value>Подключения провайдеров, хранимые работающим движком 9Router.</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_AuthFiles" xml:space="preserve">
+    <value>Подключения 9Router хранятся работающим движком 9Router.</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_AddTooltip" xml:space="preserve">
+    <value>Добавить API-ключ</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_NoConnections" xml:space="preserve">
+    <value>Подключений пока нет</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_EmptyState" xml:space="preserve">
+    <value>Запустите 9Router, затем добавьте API-ключ или подключите бесплатного провайдера.</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectKiro" xml:space="preserve">
+    <value>Подключить Kiro</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectOpenCode" xml:space="preserve">
+    <value>Подключить OpenCode Free</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectClaude" xml:space="preserve">
+    <value>Подключить Claude</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectGemini" xml:space="preserve">
+    <value>Подключить Gemini</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectCopilot" xml:space="preserve">
+    <value>Подключить Copilot</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthWaiting" xml:space="preserve">
+    <value>Завершите вход в {0} в браузере.</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthConnected" xml:space="preserve">
+    <value>{0} подключён.</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthFailed" xml:space="preserve">
+    <value>Не удалось подключить {0}: {1}</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthTimeout" xml:space="preserve">
+    <value>Вход в {0} истек. Повторите после завершения в браузере.</value>
+  </data>
+  <data name="ProvidersView_NineRouterConnection_DeleteTooltip" xml:space="preserve">
+    <value>Удалить подключение</value>
+  </data>
+  <data name="ProvidersView_NineRouter_EngineNotRunning" xml:space="preserve">
+    <value>Запустите 9Router, прежде чем управлять подключениями.</value>
+  </data>
+  <data name="ProvidersView_NineRouter_CreateFailed" xml:space="preserve">
+    <value>Не удалось добавить подключение 9Router: {0}</value>
+  </data>
+  <data name="ProvidersView_NineRouter_LoadFailed" xml:space="preserve">
+    <value>Не удалось загрузить подключения 9Router: {0}</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Title" xml:space="preserve">
+    <value>Добавить API-ключ</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ProviderId" xml:space="preserve">
+    <value>Id провайдера</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ProviderIdPlaceholder" xml:space="preserve">
+    <value>openai</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Name" xml:space="preserve">
+    <value>Имя</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_NamePlaceholder" xml:space="preserve">
+    <value>Необязательное отображаемое имя</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ApiKey" xml:space="preserve">
+    <value>API-ключ</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ApiKeyPlaceholder" xml:space="preserve">
+    <value>sk-…</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ShowHideTooltip" xml:space="preserve">
+    <value>Показать или скрыть API-ключ</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Cancel" xml:space="preserve">
+    <value>Отмена</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Save" xml:space="preserve">
+    <value>Добавить</value>
   </data>
   <data name="ProvidersView_PerplexityAccount_DefaultBadge" xml:space="preserve">
     <value>по умолчанию</value>
@@ -769,6 +865,9 @@
   </data>
   <data name="ConfigView_TabPerplexity" xml:space="preserve">
     <value>Perplexity</value>
+  </data>
+  <data name="ConfigView_TabNineRouter" xml:space="preserve">
+    <value>9Router</value>
   </data>
 
   <data name="ConfigView_General_Title" xml:space="preserve">
@@ -1029,6 +1128,66 @@
   </data>
 
   <!-- ═══════════════════════════════════════════════════════════════════════════
+       CONFIGURATION VIEW - 9ROUTER
+       ═══════════════════════════════════════════════════════════════════════════ -->
+  <data name="ConfigView_NineRouter_Title" xml:space="preserve">
+    <value>9Router</value>
+  </data>
+  <data name="ConfigView_NineRouter_Subtitle" xml:space="preserve">
+    <value>Версия движка, порт и требования Node.js.</value>
+  </data>
+  <data name="ConfigView_NineRouter_UpdateSuccess" xml:space="preserve">
+    <value>Успешно обновлено до {0}</value>
+  </data>
+
+  <data name="ConfigView_NineRouter_Engine_Label" xml:space="preserve">
+    <value>9Router</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_Installed" xml:space="preserve">
+    <value>Установлено: {0}</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_Available" xml:space="preserve">
+    <value>доступно {0}</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_Check" xml:space="preserve">
+    <value>Проверить</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_UpdateNow" xml:space="preserve">
+    <value>Обновить сейчас</value>
+  </data>
+
+  <data name="ConfigView_NineRouter_EngineFolder_Label" xml:space="preserve">
+    <value>Папка установки движка</value>
+  </data>
+  <data name="ConfigView_NineRouter_EngineFolder_Description" xml:space="preserve">
+    <value>Загруженные файлы 9Router хранятся в локальном каталоге движка.</value>
+  </data>
+  <data name="ConfigView_NineRouter_EngineFolder_Open" xml:space="preserve">
+    <value>Открыть папку</value>
+  </data>
+  <data name="ConfigView_NineRouter_Dashboard_Label" xml:space="preserve">
+    <value>Панель</value>
+  </data>
+  <data name="ConfigView_NineRouter_Dashboard_Description" xml:space="preserve">
+    <value>Открывает локальную панель 9Router в браузере.</value>
+  </data>
+  <data name="ConfigView_NineRouter_Dashboard_Open" xml:space="preserve">
+    <value>Открыть</value>
+  </data>
+  <data name="ConfigView_NineRouter_ListenPort_Label" xml:space="preserve">
+    <value>Порт прослушивания</value>
+  </data>
+  <data name="ConfigView_NineRouter_ListenPort_Description" xml:space="preserve">
+    <value>Только localhost. Для применения требуется перезапуск.</value>
+  </data>
+  <data name="ConfigView_NineRouter_ListenPort_Reset" xml:space="preserve">
+    <value>Сбросить</value>
+  </data>
+  <data name="ConfigView_NineRouter_NodeMissing" xml:space="preserve">
+    <value>Для запуска 9Router требуется Node.js 18 или новее. Установите Node и перезапустите Tunnel Agent.</value>
+  </data>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
        MISCELLANEOUS
        ═══════════════════════════════════════════════════════════════════════════ -->
   <data name="Toast_NoUpdateAvailable" xml:space="preserve">
@@ -1247,6 +1406,9 @@
   </data>
   <data name="Provider_perplexity-webui-scraper_Description" xml:space="preserve">
     <value>OpenAI-совместимый локальный API на основе сессий Perplexity WebUI.</value>
+  </data>
+  <data name="Provider_9router_Description" xml:space="preserve">
+    <value>Локальный маршрутизатор, совместимый с OpenAI, для 40+ провайдеров с автоматическим переключением.</value>
   </data>
   <data name="ProvidersView_Provider_ConnectedAccountSingular" xml:space="preserve">
     <value>{0} подключённый аккаунт</value>
@@ -1568,5 +1730,26 @@
   </data>
   <data name="OAuth_Status_CopyUrl" xml:space="preserve">
     <value>Копировать ссылку</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Title" xml:space="preserve">
+    <value>Complete sign-in</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Description" xml:space="preserve">
+    <value>After signing in, copy the full callback URL from the browser and paste it here. This uses 9Router’s supported localhost callback instead of an unregistered temporary port.</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Code" xml:space="preserve">
+    <value>Callback URL or authorization code</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_CodePlaceholder" xml:space="preserve">
+    <value>http://localhost:20128/callback?code=…</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Submit" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_OAuthProviders" xml:space="preserve">
+    <value>OAUTH PROVIDERS</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_SearchPlaceholder" xml:space="preserve">
+    <value>Искать поставщиков по имени или идентификатору</value>
   </data>
 </root>

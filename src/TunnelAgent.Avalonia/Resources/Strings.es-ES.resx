@@ -71,6 +71,12 @@
   <data name="Sidebar_Fallback" xml:space="preserve">
     <value>Fallback</value>
   </data>
+  <data name="Sidebar_FallbackCliProxy" xml:space="preserve">
+    <value>Fallback (CLIProxyAPI)</value>
+  </data>
+  <data name="Sidebar_NineRouterCombos" xml:space="preserve">
+    <value>Combos (9R)</value>
+  </data>
   <data name="Fallback_Title" xml:space="preserve">
     <value>Fallback de modelos</value>
   </data>
@@ -223,6 +229,12 @@
   </data>
   <data name="Sidebar_Perplexity" xml:space="preserve">
     <value>Perplexity</value>
+  </data>
+  <data name="Sidebar_NineRouter_StatusTooltip" xml:space="preserve">
+    <value>Abrir proveedores de 9Router</value>
+  </data>
+  <data name="Sidebar_NineRouter" xml:space="preserve">
+    <value>9Router</value>
   </data>
   <data name="Sidebar_Version" xml:space="preserve">
     <value>v{0} · MIT</value>
@@ -503,6 +515,9 @@
   <data name="ProvidersView_TabPerplexity" xml:space="preserve">
     <value>Perplexity</value>
   </data>
+  <data name="ProvidersView_TabNineRouter" xml:space="preserve">
+    <value>9Router</value>
+  </data>
   <data name="ProvidersView_Title" xml:space="preserve">
     <value>Servicios</value>
   </data>
@@ -539,6 +554,165 @@
   </data>
   <data name="ProvidersView_PerplexityAccount_RemoveTooltip" xml:space="preserve">
     <value>Eliminar cuenta</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_Title" xml:space="preserve">
+    <value>Conexiones de 9Router</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_Description" xml:space="preserve">
+    <value>Conexiones de proveedores almacenadas por el motor 9Router en ejecución.</value>
+  </data>
+  <data name="ProvidersView_NineRouterProvider_RoundRobin" xml:space="preserve">
+    <value>Round robin</value>
+  </data>
+  <data name="NineRouterCombos_Title" xml:space="preserve">
+    <value>Combos de 9Router</value>
+  </data>
+  <data name="NineRouterCombos_Subtitle" xml:space="preserve">
+    <value>Agrupa modelos para fallback ordenado o round robin.</value>
+  </data>
+  <data name="NineRouterCombos_Refresh" xml:space="preserve">
+    <value>Actualizar combos</value>
+  </data>
+  <data name="NineRouterCombos_Create" xml:space="preserve">
+    <value>Crear combo</value>
+  </data>
+  <data name="NineRouterCombos_Edit" xml:space="preserve">
+    <value>Editar combo</value>
+  </data>
+  <data name="NineRouterCombos_Save" xml:space="preserve">
+    <value>Guardar cambios</value>
+  </data>
+  <data name="NineRouterCombos_CreateSubtitle" xml:space="preserve">
+    <value>Añade los modelos en su orden de fallback.</value>
+  </data>
+  <data name="NineRouterCombos_Models" xml:space="preserve">
+    <value>Modelos</value>
+  </data>
+  <data name="NineRouterCombos_ModelCount" xml:space="preserve">
+    <value>{0} modelos</value>
+  </data>
+  <data name="NineRouterCombos_DraftEmpty" xml:space="preserve">
+    <value>Añade al menos un modelo para crear el combo.</value>
+  </data>
+  <data name="NineRouterCombos_Strategy" xml:space="preserve">
+    <value>Estrategia</value>
+  </data>
+  <data name="NineRouterCombos_StrategyFallback" xml:space="preserve">
+    <value>Fallback — probar en orden</value>
+  </data>
+  <data name="NineRouterCombos_StrategyRoundRobin" xml:space="preserve">
+    <value>Round Robin — rotar</value>
+  </data>
+  <data name="NineRouterCombos_StrategyFusion" xml:space="preserve">
+    <value>Fusion — panel + juez</value>
+  </data>
+  <data name="NineRouterCombos_Judge" xml:space="preserve">
+    <value>Modelo juez</value>
+  </data>
+  <data name="NineRouterCombos_JudgeAuto" xml:space="preserve">
+    <value>Automático: usa el primer modelo si no seleccionas otro.</value>
+  </data>
+  <data name="NineRouterCombos_EngineNotRunning" xml:space="preserve">
+    <value>Inicia 9Router antes de administrar los combos.</value>
+  </data>
+  <data name="NineRouterCombos_Name" xml:space="preserve">
+    <value>Nombre del combo</value>
+  </data>
+  <data name="NineRouterCombos_NamePlaceholder" xml:space="preserve">
+    <value>mi-combo</value>
+  </data>
+  <data name="NineRouterCombos_AddModel" xml:space="preserve">
+    <value>Añadir modelo</value>
+  </data>
+  <data name="NineRouterCombos_NoModelsAvailable" xml:space="preserve">
+    <value>Aún no hay modelos de 9Router disponibles.</value>
+  </data>
+  <data name="NineRouterCombos_Empty" xml:space="preserve">
+    <value>Aún no hay combos.</value>
+  </data>
+  <data name="NineRouterCombos_RoundRobin" xml:space="preserve">
+    <value>Round robin</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_AuthFiles" xml:space="preserve">
+    <value>Las conexiones de 9Router las almacena el motor 9Router en ejecución.</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_AddTooltip" xml:space="preserve">
+    <value>Agregar clave API</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_NoConnections" xml:space="preserve">
+    <value>Sin conexiones aún</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_EmptyState" xml:space="preserve">
+    <value>Inicia 9Router y luego añade una clave API o conecta un proveedor gratuito.</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectKiro" xml:space="preserve">
+    <value>Conectar Kiro</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectOpenCode" xml:space="preserve">
+    <value>Conectar OpenCode Free</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectClaude" xml:space="preserve">
+    <value>Conectar Claude</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectGemini" xml:space="preserve">
+    <value>Conectar Gemini</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_ConnectCopilot" xml:space="preserve">
+    <value>Conectar Copilot</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthWaiting" xml:space="preserve">
+    <value>Termina de iniciar sesión en {0} en el navegador.</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthConnected" xml:space="preserve">
+    <value>{0} está conectado.</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthFailed" xml:space="preserve">
+    <value>No se pudo conectar {0}: {1}</value>
+  </data>
+  <data name="ProvidersView_NineRouter_OAuthTimeout" xml:space="preserve">
+    <value>El inicio de sesión de {0} agotó el tiempo. Vuelve a intentarlo después de terminar en el navegador.</value>
+  </data>
+  <data name="ProvidersView_NineRouterConnection_DeleteTooltip" xml:space="preserve">
+    <value>Eliminar conexión</value>
+  </data>
+  <data name="ProvidersView_NineRouter_EngineNotRunning" xml:space="preserve">
+    <value>Inicia 9Router antes de gestionar las conexiones.</value>
+  </data>
+  <data name="ProvidersView_NineRouter_CreateFailed" xml:space="preserve">
+    <value>No se pudo agregar la conexión de 9Router: {0}</value>
+  </data>
+  <data name="ProvidersView_NineRouter_LoadFailed" xml:space="preserve">
+    <value>No se pudieron cargar las conexiones de 9Router: {0}</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Title" xml:space="preserve">
+    <value>Añadir clave API</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ProviderId" xml:space="preserve">
+    <value>Id. de proveedor</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ProviderIdPlaceholder" xml:space="preserve">
+    <value>openai</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Name" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_NamePlaceholder" xml:space="preserve">
+    <value>Nombre para mostrar (opcional)</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ApiKey" xml:space="preserve">
+    <value>Clave de API</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ApiKeyPlaceholder" xml:space="preserve">
+    <value>sk-…</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_ShowHideTooltip" xml:space="preserve">
+    <value>Mostrar u ocultar clave API</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="Dialog_AddNineRouterKey_Save" xml:space="preserve">
+    <value>Añadir</value>
   </data>
   <data name="ProvidersView_PerplexityAccount_DefaultBadge" xml:space="preserve">
     <value>predeterminada</value>
@@ -750,6 +924,9 @@
   </data>
   <data name="ConfigView_TabPerplexity" xml:space="preserve">
     <value>Perplexity</value>
+  </data>
+  <data name="ConfigView_TabNineRouter" xml:space="preserve">
+    <value>9Router</value>
   </data>
 
   <data name="ConfigView_General_Title" xml:space="preserve">
@@ -1005,6 +1182,63 @@
     <value>Restablecer</value>
   </data>
 
+  <data name="ConfigView_NineRouter_Title" xml:space="preserve">
+    <value>9Router</value>
+  </data>
+  <data name="ConfigView_NineRouter_Subtitle" xml:space="preserve">
+    <value>Versión del motor, puerto y requisitos de Node.js.</value>
+  </data>
+  <data name="ConfigView_NineRouter_UpdateSuccess" xml:space="preserve">
+    <value>Actualizado exitosamente a {0}</value>
+  </data>
+
+  <data name="ConfigView_NineRouter_Engine_Label" xml:space="preserve">
+    <value>9Router</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_Installed" xml:space="preserve">
+    <value>Instalado: {0}</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_Available" xml:space="preserve">
+    <value>{0} disponible</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_Check" xml:space="preserve">
+    <value>Verificar</value>
+  </data>
+  <data name="ConfigView_NineRouter_Engine_UpdateNow" xml:space="preserve">
+    <value>Actualizar ahora</value>
+  </data>
+
+  <data name="ConfigView_NineRouter_EngineFolder_Label" xml:space="preserve">
+    <value>Carpeta de instalación del motor</value>
+  </data>
+  <data name="ConfigView_NineRouter_EngineFolder_Description" xml:space="preserve">
+    <value>Los archivos de 9Router descargados se almacenan en el directorio local del motor.</value>
+  </data>
+  <data name="ConfigView_NineRouter_EngineFolder_Open" xml:space="preserve">
+    <value>Abrir Carpeta</value>
+  </data>
+  <data name="ConfigView_NineRouter_Dashboard_Label" xml:space="preserve">
+    <value>Panel</value>
+  </data>
+  <data name="ConfigView_NineRouter_Dashboard_Description" xml:space="preserve">
+    <value>Abre el panel local de 9Router en el navegador.</value>
+  </data>
+  <data name="ConfigView_NineRouter_Dashboard_Open" xml:space="preserve">
+    <value>Abrir</value>
+  </data>
+  <data name="ConfigView_NineRouter_ListenPort_Label" xml:space="preserve">
+    <value>Puerto de escucha</value>
+  </data>
+  <data name="ConfigView_NineRouter_ListenPort_Description" xml:space="preserve">
+    <value>Solo localhost. Se requiere reinicio para aplicar.</value>
+  </data>
+  <data name="ConfigView_NineRouter_ListenPort_Reset" xml:space="preserve">
+    <value>Restablecer</value>
+  </data>
+  <data name="ConfigView_NineRouter_NodeMissing" xml:space="preserve">
+    <value>Se requiere Node.js 18 o posterior para ejecutar 9Router. Instala Node y reinicia Tunnel Agent.</value>
+  </data>
+
   
   <data name="Toast_NoUpdateAvailable" xml:space="preserve">
     <value>Sin actualizaciones disponibles. Estás en la versión más reciente.</value>
@@ -1222,6 +1456,9 @@
   </data>
   <data name="Provider_perplexity-webui-scraper_Description" xml:space="preserve">
     <value>API local compatible con OpenAI respaldada por sesiones de Perplexity WebUI.</value>
+  </data>
+  <data name="Provider_9router_Description" xml:space="preserve">
+    <value>Enrutador local compatible con OpenAI para más de 40 proveedores con conmutación automática.</value>
   </data>
   <data name="ProvidersView_Provider_ConnectedAccountSingular" xml:space="preserve">
     <value>{0} cuenta conectada</value>
@@ -1457,6 +1694,63 @@
   <data name="DashboardView_Summary_Empty" xml:space="preserve">
     <value>Aún no hay solicitudes. Apunta un agente al proxy local para ver la actividad aquí.</value>
   </data>
+  <data name="DashboardView_Tab_Local" xml:space="preserve">
+    <value>Proxy local</value>
+  </data>
+  <data name="DashboardView_Tab_NineRouter" xml:space="preserve">
+    <value>9Router</value>
+  </data>
+  <data name="DashboardView_NineRouter_EngineNotRunning" xml:space="preserve">
+    <value>Inicia 9Router para ver su uso y los detalles de las solicitudes.</value>
+  </data>
+  <data name="DashboardView_NineRouter_Title" xml:space="preserve">
+    <value>Uso de 9Router</value>
+  </data>
+  <data name="DashboardView_NineRouter_Subtitle" xml:space="preserve">
+    <value>Uso en directo y metadatos de solicitudes anonimizados de los últimos 7 días.</value>
+  </data>
+  <data name="DashboardView_NineRouter_Requests" xml:space="preserve">
+    <value>SOLICITUDES</value>
+  </data>
+  <data name="DashboardView_NineRouter_Tokens" xml:space="preserve">
+    <value>TOKENS</value>
+  </data>
+  <data name="DashboardView_NineRouter_Cached" xml:space="preserve">
+    <value>En caché {0}</value>
+  </data>
+  <data name="DashboardView_NineRouter_Cost" xml:space="preserve">
+    <value>COSTE</value>
+  </data>
+  <data name="DashboardView_NineRouter_Active" xml:space="preserve">
+    <value>ACTIVAS</value>
+  </data>
+  <data name="DashboardView_NineRouter_ActiveRequests" xml:space="preserve">
+    <value>Solicitudes activas</value>
+  </data>
+  <data name="DashboardView_NineRouter_ByProvider" xml:space="preserve">
+    <value>Uso por proveedor</value>
+  </data>
+  <data name="DashboardView_NineRouter_CachedLabel" xml:space="preserve">
+    <value>CACHÉ</value>
+  </data>
+  <data name="DashboardView_NineRouter_Empty" xml:space="preserve">
+    <value>Aún no hay uso de 9Router.</value>
+  </data>
+  <data name="DashboardView_NineRouter_RequestDetails" xml:space="preserve">
+    <value>Detalles de solicitudes</value>
+  </data>
+  <data name="DashboardView_NineRouter_RequestDetailsEmpty" xml:space="preserve">
+    <value>No se han registrado detalles de solicitudes.</value>
+  </data>
+  <data name="DashboardView_NineRouter_Connection" xml:space="preserve">
+    <value>CONEXIÓN</value>
+  </data>
+  <data name="DashboardView_NineRouter_Status" xml:space="preserve">
+    <value>ESTADO</value>
+  </data>
+  <data name="DashboardView_NineRouter_Latency" xml:space="preserve">
+    <value>LATENCIA</value>
+  </data>
 
   <data name="Quota_Error_Title" xml:space="preserve">
     <value>Cuota no disponible</value>
@@ -1542,5 +1836,26 @@ Completa el inicio de sesión en el navegador. La app detectará automáticament
   </data>
   <data name="OAuth_Status_CopyUrl" xml:space="preserve">
     <value>Copiar URL</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Title" xml:space="preserve">
+    <value>Completar inicio de sesión</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Description" xml:space="preserve">
+    <value>Tras iniciar sesión, copia la URL completa de devolución del navegador y pégala aquí. Usa el callback localhost compatible de 9Router en vez de un puerto temporal no registrado.</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Code" xml:space="preserve">
+    <value>URL de devolución o código de autorización</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_CodePlaceholder" xml:space="preserve">
+    <value>http://localhost:20128/callback?code=…</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Submit" xml:space="preserve">
+    <value>Conectar</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_OAuthProviders" xml:space="preserve">
+    <value>PROVEEDORES OAUTH</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_SearchPlaceholder" xml:space="preserve">
+    <value>Buscar proveedores por nombre o id</value>
   </data>
 </root>
