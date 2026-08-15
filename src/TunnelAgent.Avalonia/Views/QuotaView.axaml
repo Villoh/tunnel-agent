@@ -14,6 +14,7 @@
     </UserControl.Resources>
 
     <StackPanel Spacing="0" Margin="0,0,0,24">
+        <StackPanel Spacing="0" IsVisible="{Binding IsQuotaLimitsSelected}">
         <ctrl:SlidingTabBar Margin="0,0,0,16"
                             SelectedIndex="{Binding QuotaTabIndex}">
             <ctrl:SlidingTabBar.Tabs>
@@ -193,5 +194,130 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
+        </StackPanel>
+
+        <StackPanel Spacing="0" IsVisible="{Binding IsQuotaUsageSelected}">
+            <Grid Margin="0,0,0,16" ColumnDefinitions="*,Auto">
+                <StackPanel>
+                    <TextBlock Classes="page-title" Text="{l:Loc QuotaView_NineRouterUsage_Title}" />
+                    <TextBlock Classes="page-sub" Text="{l:Loc QuotaView_NineRouterUsage_Subtitle}" />
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Classes="icon"
+                        ToolTip.Tip="{l:Loc QuotaView_NineRouterUsage_RefreshAllTooltip}"
+                        VerticalAlignment="Bottom"
+                        IsEnabled="{Binding IsNineRouterEngineRunning}"
+                        Click="OnRefreshAllNineRouterUsage">
+                    <lucide:PackIconLucide Kind="RefreshCw"
+                                           Width="14"
+                                           Height="14"
+                                           Classes.spin="{Binding IsRefreshingNineRouterUsage}" />
+                </Button>
+            </Grid>
+
+            <Border Background="#18F59E0B" BorderBrush="#44F59E0B" BorderThickness="1" CornerRadius="8" Padding="10"
+                    IsVisible="{Binding IsNineRouterEngineRunning, Converter={StaticResource InvertBool}}">
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="row-label" Text="{l:Loc Fallback_AddModelPopup_ServerWarning_Title}" />
+                    <TextBlock Classes="row-desc" TextWrapping="Wrap"
+                               Text="{l:Loc QuotaView_NineRouterUsage_EngineNotRunning}" />
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card" Padding="22"
+                    IsVisible="{Binding ShowNineRouterUsageEmptyState}">
+                <StackPanel Spacing="8" HorizontalAlignment="Center">
+                    <lucide:PackIconLucide Kind="UserRoundX"
+                                           Width="30"
+                                           Height="30"
+                                           Foreground="{DynamicResource FgFaintBrush}"
+                                           HorizontalAlignment="Center" />
+                    <TextBlock Classes="row-label" Text="{l:Loc QuotaView_NoAccounts_Title}" HorizontalAlignment="Center" />
+                    <TextBlock Classes="row-desc"
+                               Text="{l:Loc QuotaView_NineRouterUsage_NoAccountsDescription}"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap"
+                               MaxWidth="420" />
+                </StackPanel>
+            </Border>
+
+            <ItemsControl ItemsSource="{Binding NineRouterConnections}"
+                          IsVisible="{Binding HasNineRouterUsageConnections}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:NineRouterConnectionViewModel">
+                        <Border Classes="card" Padding="16" Margin="0,0,0,14">
+                            <StackPanel Spacing="14">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <StackPanel Grid.Column="0" Spacing="2">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="{Binding Name}"
+                                                       FontSize="14"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource FgBrush}" />
+                                            <Border Classes="chip"
+                                                    Background="{DynamicResource AccentSoftBrush}"
+                                                    IsVisible="{Binding PlanBadge, Converter={StaticResource StringNotEmpty}}">
+                                                <TextBlock Text="{Binding PlanBadge}"
+                                                           Foreground="{DynamicResource AccentBrush}"
+                                                           FontWeight="Bold" />
+                                            </Border>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding ProviderId}"
+                                                   FontFamily="Cascadia Mono,Consolas,monospace"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource FgMutedBrush}" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1"
+                                            Classes="icon"
+                                            ToolTip.Tip="{l:Loc QuotaView_NineRouterUsage_RefreshTooltip}"
+                                            Click="OnRefreshNineRouterUsage"
+                                            Tag="{Binding}">
+                                        <lucide:PackIconLucide Kind="RefreshCw"
+                                                               Width="14"
+                                                               Height="14"
+                                                               Classes.spin="{Binding IsUsageRefreshing}" />
+                                    </Button>
+                                </Grid>
+
+                                <TextBlock Text="{Binding UsageError}"
+                                           Classes="row-desc"
+                                           Foreground="{DynamicResource ErrBrush}"
+                                           TextWrapping="Wrap"
+                                           IsVisible="{Binding UsageError, Converter={StaticResource StringNotEmpty}}" />
+
+                                <StackPanel Spacing="10" IsVisible="{Binding HasUsage}">
+                                    <TextBlock Classes="section-label" Text="{l:Loc QuotaView_Account_UsageSection}" Margin="0" />
+                                    <ItemsControl ItemsSource="{Binding UsageBars}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:QuotaBarViewModel">
+                                                <StackPanel Spacing="5" Margin="0,0,0,10">
+                                                    <Grid ColumnDefinitions="*,Auto">
+                                                        <TextBlock Grid.Column="0" Text="{Binding Title}"
+                                                                   FontSize="12" FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource FgBrush}" />
+                                                        <TextBlock Grid.Column="1" Text="{Binding UsedLabel}"
+                                                                   FontSize="12" FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource AccentBrush}" />
+                                                    </Grid>
+                                                    <ProgressBar Minimum="0" Maximum="1" Value="{Binding Used}" Height="9" />
+                                                    <TextBlock Text="{Binding ResetIn}" FontSize="10.5"
+                                                               Foreground="{DynamicResource FgFaintBrush}"
+                                                               IsVisible="{Binding ResetIn, Converter={StaticResource StringNotEmpty}}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+
+                                <Border Background="#08FFFFFF" CornerRadius="8" Padding="14"
+                                        IsVisible="{Binding HasUsage, Converter={StaticResource InvertBool}}">
+                                    <TextBlock Classes="row-desc" Text="{Binding UsageEmptyDescription}" TextWrapping="Wrap" />
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
     </StackPanel>
 </UserControl>
