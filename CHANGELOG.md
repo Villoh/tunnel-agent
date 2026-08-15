@@ -7,14 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-### Added
-
-- **9Router dashboard security** (`ConfigurationView`, `MainWindowViewModel`, `NineRouter/ApiClient`): manage client API keys and the default agent key; require API keys for `/v1`; require dashboard login; and set a dashboard password that Tunnel Agent reuses for local management requests.
-
-### Fixed
-
-- **9Router tray usage spacing** (`TrayUsagePopup`): added consistent spacing between 9Router connection cards and between individual usage bars when reset text is absent.
-
 ## [1.1.0] - 2026-08-15
 
 ### Added
@@ -23,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **9Router provider management** (`NineRouterProviderCatalog`, `ProvidersView`, `NineRouter/*`): add API-key connections or sign in Claude / Gemini / Copilot over OAuth; filter and page the provider catalog; enable, rename, or delete connections; configure per-provider round robin; and surface custom provider icons and connection errors.
 - **9Router model combos** (`NineRouterCombosViewModel`, `NineRouterComboOverlayView`): create, edit, reorder, and delete ordered model combos with sequential, round-robin, or fusion strategies (including an optional fusion judge model).
 - **9Router usage** (`DashboardView`, `NineRouterUsageViewModel`, `QuotaView`, `TrayUsagePopup`): show seven-day request, token, cache, and cost aggregates; active requests; per-provider totals; and paginated redacted request details on Home, plus each connected account's usage and plan limits in Quota and the tray popup.
+- **9Router dashboard security** (`ConfigurationView`, `MainWindowViewModel`, `NineRouter/ApiClient`): manage client API keys and the default agent key; require API keys for `/v1`; require dashboard login; and set a dashboard password that Tunnel Agent reuses for local management requests.
 
 ### Changed
 
@@ -33,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Tray usage popup opened in a screen corner** (`TrayService`): the popup is now placed beside the tray-icon cursor position.
 - **Cursor quota showed the old single spend bar** (`CursorQuotaParser`, `QuotaFetchService`): Cursor Settings now reports **Auto + Composer** and **API** as separate percent buckets (`autoPercentUsed` / `apiPercentUsed`). Quota uses those bars instead of `includedSpend/limit`, keeps on-demand spend when present, and falls back to `/auth/usage` or usage-summary when `planUsage` is missing (Team/Enterprise). Token refresh retries both dashboard calls; parse/network failures surface as a quota error instead of an empty "not loaded" state.
 - **Cursor quota read a stale AppData account** (`CursorStateStore`): Scoop/portable Cursor keeps `state.vscdb` under `data/user-data`, while an older `%APPDATA%\Cursor` install can still contain an expired login. Scan and fetch now pick the newest existing database among AppData, LocalAppData, and Scoop paths.
+- **9Router tray usage spacing** (`TrayUsagePopup`): added consistent spacing between 9Router connection cards and between individual usage bars when reset text is absent.
 
 ## [1.0.6] - 2026-07-27
 
@@ -1007,6 +1001,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
+[1.1.0]: https://github.com/Villoh/tunnel-agent/compare/v1.0.6...v1.1.0
 [1.0.6]: https://github.com/Villoh/tunnel-agent/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/Villoh/tunnel-agent/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/Villoh/tunnel-agent/compare/v1.0.3...v1.0.4
