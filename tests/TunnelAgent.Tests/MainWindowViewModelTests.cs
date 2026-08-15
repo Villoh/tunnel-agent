@@ -93,6 +93,29 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
+    public void NineRouterProviderPagination_FiltersAndNavigatesCatalog()
+    {
+        var vm = new MainWindowViewModel();
+        var providers = (System.Collections.Generic.List<NineRouterProviderViewModel>)typeof(MainWindowViewModel)
+            .GetField("_allNineRouterProviders", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
+            .GetValue(vm)!;
+        providers.AddRange(NineRouterProviderCatalog.All.Select(option => new NineRouterProviderViewModel(option)));
+        typeof(MainWindowViewModel)
+            .GetMethod("ApplyNineRouterProviderFilter", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
+            .Invoke(vm, null);
+
+        Assert.Equal(12, vm.NineRouterProviders.Count);
+        Assert.Equal(10, vm.NineRouterProviderTotalPages);
+        vm.NextNineRouterProviderPageCommand.Execute(null);
+        Assert.Equal(2, vm.NineRouterProviderCurrentPage);
+
+        vm.NineRouterProviderSearch = "claude";
+        Assert.Single(vm.NineRouterProviders);
+        Assert.Equal("claude", vm.NineRouterProviders[0].Id);
+        Assert.Equal(1, vm.NineRouterProviderCurrentPage);
+    }
+
+    [Fact]
     public async Task EngineService_InitialServerState_IsStopped()
     {
         using var temp = new TestTempDirectory();

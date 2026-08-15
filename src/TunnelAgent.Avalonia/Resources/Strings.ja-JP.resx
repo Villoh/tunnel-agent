@@ -1731,4 +1731,25 @@
   <data name="OAuth_Status_CopyUrl" xml:space="preserve">
     <value>URL をコピー</value>
   </data>
+  <data name="Dialog_NineRouterOAuth_Title" xml:space="preserve">
+    <value>Complete sign-in</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Description" xml:space="preserve">
+    <value>After signing in, copy the full callback URL from the browser and paste it here. This uses 9Router’s supported localhost callback instead of an unregistered temporary port.</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Code" xml:space="preserve">
+    <value>Callback URL or authorization code</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_CodePlaceholder" xml:space="preserve">
+    <value>http://localhost:20128/callback?code=…</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Submit" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_OAuthProviders" xml:space="preserve">
+    <value>OAUTH PROVIDERS</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_SearchPlaceholder" xml:space="preserve">
+    <value>Search providers by name or id</value>
+  </data>
 </root>

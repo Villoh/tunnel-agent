@@ -190,10 +190,7 @@ public sealed record NineRouterCreatedApiKey
     public string? MachineId { get; init; }
 }
 
-/// <summary>
-/// Curated 9Router OAuth provider ids used by Tunnel Agent
-/// (Claude, Gemini CLI, GitHub Copilot).
-/// </summary>
+/// <summary>9Router OAuth provider ids and flow helpers.</summary>
 public static class NineRouterOAuthProviders
 {
     /// <summary>Claude Code OAuth (<c>authorization_code_pkce</c>).</summary>
@@ -208,9 +205,17 @@ public static class NineRouterOAuthProviders
     /// <summary>Default wait for the user to finish browser sign-in.</summary>
     public static readonly TimeSpan DefaultTimeout = TimeSpan.FromMinutes(2.5);
 
-    /// <summary>Whether <paramref name="providerId"/> uses GitHub device-code instead of a redirect.</summary>
+    /// <summary>Whether <paramref name="providerId"/> starts through <c>GET .../device-code</c>.</summary>
     public static bool IsDeviceCode(string providerId) =>
-        string.Equals(providerId, GitHub, StringComparison.OrdinalIgnoreCase);
+        providerId.Equals("github", StringComparison.OrdinalIgnoreCase)
+        || providerId.Equals("kiro", StringComparison.OrdinalIgnoreCase)
+        || providerId.Equals("kimi", StringComparison.OrdinalIgnoreCase)
+        || providerId.Equals("kimi-coding", StringComparison.OrdinalIgnoreCase)
+        || providerId.Equals("kilocode", StringComparison.OrdinalIgnoreCase)
+        || providerId.Equals("codebuddy-cn", StringComparison.OrdinalIgnoreCase)
+        || providerId.Equals("codebuddy-intl", StringComparison.OrdinalIgnoreCase)
+        || providerId.Equals("qoder", StringComparison.OrdinalIgnoreCase)
+        || providerId.Equals("grok-cli", StringComparison.OrdinalIgnoreCase);
 }
 
 /// <summary>
@@ -245,6 +250,18 @@ public sealed record NineRouterOAuthStartResult
 
     /// <summary>Gets the suggested poll interval in seconds (GitHub default is 5).</summary>
     public int IntervalSeconds { get; init; } = 5;
+
+    /// <summary>Gets the fixed local callback port required by providers such as Codex and xAI.</summary>
+    public int? FixedPort { get; init; }
+
+    /// <summary>Gets the local callback path required by the provider.</summary>
+    public string? CallbackPath { get; init; }
+
+    /// <summary>
+    /// Gets device-flow fields that 9Router expects back as <c>extraData</c> while polling.
+    /// Sensitive values are never logged.
+    /// </summary>
+    public JsonElement? ExtraData { get; init; }
 }
 
 /// <summary>Result of one <c>POST /api/oauth/{provider}/poll</c> attempt.</summary>

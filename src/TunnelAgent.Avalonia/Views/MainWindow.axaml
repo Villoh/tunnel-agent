@@ -911,10 +911,8 @@
                     </Grid>
                     <StackPanel Spacing="4">
                         <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddNineRouterKey_ProviderId}" />
-                        <TextBox x:Name="NineRouterProviderIdBox" Classes="app"
-                                 Watermark="{l:Loc Dialog_AddNineRouterKey_ProviderIdPlaceholder}"
-                                 Text="{Binding NineRouterAddProviderIdDraft, Mode=TwoWay}"
-                                 KeyDown="OnNineRouterAddKeyInputKeyDown" />
+                        <ComboBox Classes="app" ItemsSource="{Binding NineRouterProviderOptions}"
+                                  SelectedItem="{Binding SelectedNineRouterProvider, Mode=TwoWay}" />
                     </StackPanel>
                     <StackPanel Spacing="4">
                         <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddNineRouterKey_Name}" />
@@ -923,14 +921,13 @@
                                  Text="{Binding NineRouterAddNameDraft, Mode=TwoWay}"
                                  KeyDown="OnNineRouterAddKeyInputKeyDown" />
                     </StackPanel>
-                    <StackPanel Spacing="4">
+                    <StackPanel Spacing="4" IsVisible="{Binding SelectedNineRouterSupportsApiKey}">
                         <TextBlock Classes="row-desc" Text="{l:Loc Dialog_AddNineRouterKey_ApiKey}" />
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBox Grid.Column="0" x:Name="NineRouterApiKeyBox" Classes="app"
                                      PasswordChar="{Binding ShowNineRouterAddApiKey, Converter={StaticResource SecretPasswordChar}}"
                                      Watermark="{l:Loc Dialog_AddNineRouterKey_ApiKeyPlaceholder}"
-                                     Text="{Binding NineRouterAddApiKeyDraft, Mode=TwoWay}"
-                                     KeyDown="OnNineRouterAddKeyInputKeyDown" />
+                                     Text="{Binding NineRouterAddApiKeyDraft, Mode=TwoWay}" />
                             <Button Grid.Column="1" Classes="icon-btn" Margin="8,0,0,0"
                                     ToolTip.Tip="{l:Loc Dialog_AddNineRouterKey_ShowHideTooltip}"
                                     Command="{Binding ToggleNineRouterAddApiKeyVisibilityCommand}">
@@ -940,7 +937,46 @@
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
                         <Button Classes="app" Content="{l:Loc Dialog_AddNineRouterKey_Cancel}" Command="{Binding DismissNineRouterAddKeyDialogCommand}" />
-                        <Button Classes="app primary" Content="{l:Loc Dialog_AddNineRouterKey_Save}" Click="OnConfirmNineRouterAddKey" />
+                        <Button Classes="app primary" Content="{l:Loc Dialog_AddNineRouterKey_Save}"
+                                Command="{Binding AddSelectedNineRouterApiKeyCommand}"
+                                IsVisible="{Binding SelectedNineRouterSupportsApiKey}" />
+                        <Button Classes="app primary" Content="{l:Loc Dialog_AddNineRouterKey_Save}"
+                                Command="{Binding ConnectSelectedNineRouterNoAuthCommand}"
+                                IsVisible="{Binding SelectedNineRouterSupportsNoAuth}" />
+                        <Button Classes="app primary" Content="OAuth"
+                                Command="{Binding ConnectSelectedNineRouterOAuthCommand}"
+                                IsVisible="{Binding SelectedNineRouterSupportsOAuth}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- Complete 9Router OAuth callback dialog -->
+        <Border x:Name="NineRouterOAuthCodeOverlay" IsVisible="{Binding ShowNineRouterOAuthCodeDialog}" Background="#88000000"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="50"
+                KeyDown="OnNineRouterOAuthCodeDialogKeyDown" Focusable="True"
+                PointerPressed="OnNineRouterOAuthCodeOverlayPressed">
+            <Border Classes="card" Width="480" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24"
+                    PointerPressed="OnDialogCardPressed">
+                <StackPanel Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Classes="row-label" FontSize="15" Text="{l:Loc Dialog_NineRouterOAuth_Title}" />
+                        <Button Grid.Column="1" Classes="icon" Command="{Binding DismissNineRouterOAuthCodeDialogCommand}">
+                            <lucide:PackIconLucide Kind="X" Width="14" Height="14" />
+                        </Button>
+                    </Grid>
+                    <TextBlock Classes="row-desc" TextWrapping="Wrap" Text="{l:Loc Dialog_NineRouterOAuth_Description}" />
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="row-desc" Text="{l:Loc Dialog_NineRouterOAuth_Code}" />
+                        <TextBox x:Name="NineRouterOAuthCodeBox" Classes="app"
+                                 Watermark="{l:Loc Dialog_NineRouterOAuth_CodePlaceholder}"
+                                 Text="{Binding NineRouterOAuthCodeDraft, Mode=TwoWay}"
+                                 KeyDown="OnNineRouterOAuthCodeInputKeyDown" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
+                        <Button Classes="app" Content="{l:Loc Dialog_AddNineRouterKey_Cancel}" Command="{Binding DismissNineRouterOAuthCodeDialogCommand}" />
+                        <Button Classes="app primary" Content="{l:Loc Dialog_NineRouterOAuth_Submit}"
+                                Command="{Binding CompleteNineRouterOAuthCommand}" />
                     </StackPanel>
                 </StackPanel>
             </Border>

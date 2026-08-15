@@ -193,10 +193,10 @@ public sealed class ApiClient : IDisposable
     /// (Claude, Gemini CLI) or <c>GET /api/oauth/{provider}/device-code</c>
     /// (GitHub Copilot).
     /// </summary>
-    /// <param name="providerId">9Router provider id (<c>claude</c>, <c>gemini-cli</c>, or <c>github</c>).</param>
+    /// <param name="providerId">A 9Router OAuth provider id.</param>
     /// <param name="redirectUri">
-    /// Loopback callback URI for authorize flows. Ignored for GitHub device-code.
-    /// Defaults to <c>http://127.0.0.1:{port}/callback</c>.
+    /// Callback URI for authorization-code flows. Ignored for device-code flows.
+    /// Defaults to 9Router's dashboard callback at <c>http://localhost:{port}/callback</c>.
     /// </param>
     /// <param name="ct">Token used to cancel the request.</param>
     /// <returns>Browser URL plus PKCE/device fields needed to finish the flow.</returns>
@@ -210,7 +210,7 @@ public sealed class ApiClient : IDisposable
             ? OAuthPath(providerId, "device-code")
             : OAuthPath(providerId, "authorize") + "?redirect_uri=" +
               Uri.EscapeDataString(string.IsNullOrWhiteSpace(redirectUri)
-                  ? $"http://127.0.0.1:{Port}/callback"
+                  ? $"http://localhost:{Port}/callback"
                   : redirectUri);
 
         using var response = await SendWithAuthRetryAsync(HttpMethod.Get, path, body: null, ct)
@@ -233,7 +233,10 @@ public sealed class ApiClient : IDisposable
             CodeVerifier = JsonString(root, "codeVerifier"),
             RedirectUri = JsonString(root, "redirectUri") ?? redirectUri,
             DeviceCode = JsonString(root, "device_code", "deviceCode"),
-            IntervalSeconds = JsonInt(root, "interval") is { } interval and > 0 ? interval : 5
+            IntervalSeconds = JsonInt(root, "interval") is { } interval and > 0 ? interval : 5,
+            FixedPort = JsonInt(root, "fixedPort"),
+            CallbackPath = JsonString(root, "callbackPath"),
+            ExtraData = NineRouterOAuthProviders.IsDeviceCode(providerId) ? root.Clone() : null
         };
     }
 
@@ -244,11 +247,13 @@ public sealed class ApiClient : IDisposable
     /// <param name="providerId">9Router provider id (typically <c>github</c>).</param>
     /// <param name="deviceCode">Device code from <see cref="StartOAuthAsync"/>.</param>
     /// <param name="codeVerifier">PKCE verifier when the provider uses one.</param>
+    /// <param name="extraData">Provider-specific device fields returned by 9Router's start response.</param>
     /// <param name="ct">Token used to cancel the request.</param>
     public async Task<NineRouterOAuthPollResult> PollOAuthAsync(
         string providerId,
         string deviceCode,
         string? codeVerifier = null,
+        JsonElement? extraData = null,
         CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(providerId);
@@ -256,7 +261,7 @@ public sealed class ApiClient : IDisposable
         using var response = await SendWithAuthRetryAsync(
                 HttpMethod.Post,
                 OAuthPath(providerId, "poll"),
-                new OAuthPollRequest(deviceCode, codeVerifier),
+                new OAuthPollRequest(deviceCode, codeVerifier, extraData),
                 ct)
             .ConfigureAwait(false);
         var payload = await ReadJsonAsync<OAuthPollResponse>(response, ct).ConfigureAwait(false);
@@ -274,6 +279,7 @@ public sealed class ApiClient : IDisposable
     /// <param name="providerId">9Router provider id (typically <c>github</c>).</param>
     /// <param name="deviceCode">Device code from <see cref="StartOAuthAsync"/>.</param>
     /// <param name="codeVerifier">PKCE verifier when the provider uses one.</param>
+    /// <param name="extraData">Provider-specific device fields returned by 9Router's start response.</param>
     /// <param name="timeout">Maximum time to wait (about 2–3 minutes from the UI).</param>
     /// <param name="pollInterval">Delay between polls. Defaults to 5 seconds.</param>
     /// <param name="ct">Token used to cancel the wait.</param>
@@ -283,6 +289,7 @@ public sealed class ApiClient : IDisposable
         string? codeVerifier,
         TimeSpan timeout,
         TimeSpan? pollInterval = null,
+        JsonElement? extraData = null,
         CancellationToken ct = default)
     {
         var deadline = DateTime.UtcNow + timeout;
@@ -291,7 +298,7 @@ public sealed class ApiClient : IDisposable
         while (true)
         {
             ct.ThrowIfCancellationRequested();
-            var result = await PollOAuthAsync(providerId, deviceCode, codeVerifier, ct).ConfigureAwait(false);
+            var result = await PollOAuthAsync(providerId, deviceCode, codeVerifier, extraData, ct).ConfigureAwait(false);
             if (result.Success)
             {
                 return result.Connection
@@ -594,7 +601,7 @@ public sealed class ApiClient : IDisposable
 
     private sealed record ErrorResponse(string? Error);
 
-    private sealed record OAuthPollRequest(string DeviceCode, string? CodeVerifier);
+    private sealed record OAuthPollRequest(string DeviceCode, string? CodeVerifier, JsonElement? ExtraData);
 
     private sealed record OAuthPollResponse(
         bool Success,
