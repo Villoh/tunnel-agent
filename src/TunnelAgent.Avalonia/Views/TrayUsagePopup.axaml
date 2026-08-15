@@ -503,17 +503,21 @@
                                         <Border Classes="card" Padding="14">
                                             <StackPanel Spacing="8">
                                                 <Grid ColumnDefinitions="*,Auto">
-                                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <Grid ColumnDefinitions="Auto,*">
                                                         <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold"
-                                                                   Foreground="{DynamicResource FgBrush}" />
-                                                        <Border Classes="chip"
+                                                                   Foreground="{DynamicResource FgBrush}"
+                                                                   VerticalAlignment="Center" />
+                                                        <Border Grid.Column="1"
+                                                                Classes="chip"
+                                                                Margin="8,0,0,0"
                                                                 Background="{DynamicResource AccentSoftBrush}"
+                                                                VerticalAlignment="Center"
                                                                 IsVisible="{Binding PlanBadge, Converter={StaticResource StringNotEmpty}}">
                                                             <TextBlock Text="{Binding PlanBadge}"
                                                                        Foreground="{DynamicResource AccentBrush}"
                                                                        FontWeight="Bold" />
                                                         </Border>
-                                                    </StackPanel>
+                                                    </Grid>
                                                     <Button Grid.Column="1"
                                                             Classes="icon"
                                                             ToolTip.Tip="{l:Loc QuotaView_NineRouterUsage_RefreshTooltip}"
