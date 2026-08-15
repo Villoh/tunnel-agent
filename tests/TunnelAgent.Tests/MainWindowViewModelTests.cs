@@ -3,8 +3,6 @@ using System.Text.Json;
 using IconPacks.Avalonia.SimpleIcons;
 using TunnelAgent.Services;
 using TunnelAgent.ViewModels;
-using Xunit;
-
 using TunnelAgent.Core.Engine;
 using TunnelAgent.Infrastructure.Engine;
 namespace TunnelAgent.Tests;
@@ -44,7 +42,7 @@ public sealed class MainWindowViewModelTests
         vm.SelectConfigNineRouterCommand.Execute(null);
 
         Assert.Equal(SectionKey.ConfigNineRouter, vm.SelectedSection);
-        Assert.Equal(3, vm.ConfigTabIndex);
+        Assert.Equal(2, vm.ConfigTabIndex);
         Assert.True(vm.IsConfigSection);
         Assert.Equal(EngineCatalog.NineRouter.Id, vm.FocusedConfigEngineId);
         Assert.Equal(EngineCatalog.NineRouter.DefaultPort, vm.NineRouterPort);
@@ -66,7 +64,7 @@ public sealed class MainWindowViewModelTests
         Assert.True(vm.IsNineRouterEngineSelected);
         Assert.False(vm.IsCliProxyEngineSelected);
         Assert.False(vm.IsPerplexityEngineSelected);
-        Assert.Equal(2, vm.ProvidersTabIndex);
+        Assert.Equal(1, vm.ProvidersTabIndex);
         Assert.Equal(EngineCatalog.NineRouter.Id, vm.ProvidersEngineId);
         Assert.Equal(EngineCatalog.NineRouter.Id, vm.FocusedConfigEngineId);
         Assert.Equal($"http://127.0.0.1:{EngineCatalog.NineRouter.DefaultPort}", vm.EndpointUrl);
@@ -92,6 +90,29 @@ public sealed class MainWindowViewModelTests
 
         Assert.False(vm.ShowNineRouterAddKeyDialog);
         Assert.Equal("", vm.NineRouterAddProviderIdDraft);
+    }
+
+    [Fact]
+    public void NineRouterProviderPagination_FiltersAndNavigatesCatalog()
+    {
+        var vm = new MainWindowViewModel();
+        var providers = (System.Collections.Generic.List<NineRouterProviderViewModel>)typeof(MainWindowViewModel)
+            .GetField("_allNineRouterProviders", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
+            .GetValue(vm)!;
+        providers.AddRange(NineRouterProviderCatalog.All.Select(option => new NineRouterProviderViewModel(option)));
+        typeof(MainWindowViewModel)
+            .GetMethod("ApplyNineRouterProviderFilter", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
+            .Invoke(vm, null);
+
+        Assert.Equal(12, vm.NineRouterProviders.Count);
+        Assert.Equal(10, vm.NineRouterProviderTotalPages);
+        vm.NextNineRouterProviderPageCommand.Execute(null);
+        Assert.Equal(2, vm.NineRouterProviderCurrentPage);
+
+        vm.NineRouterProviderSearch = "claude";
+        Assert.Single(vm.NineRouterProviders);
+        Assert.Equal("claude", vm.NineRouterProviders[0].Id);
+        Assert.Equal(1, vm.NineRouterProviderCurrentPage);
     }
 
     [Fact]

@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using TunnelAgent.Infrastructure.Engine.NineRouter;
@@ -264,6 +263,27 @@ public sealed class NineRouterApiClientTests
     }
 
     [Fact]
+    public async Task ListProvidersAsync_401ThenDefaultLogin_Succeeds()
+    {
+        using var handler = new FakeApiHandler();
+        handler.EnqueueJson(HttpStatusCode.Unauthorized, """{ "error": "Unauthorized" }""");
+        handler.EnqueueJson(
+            HttpStatusCode.OK,
+            """{ "success": true, "mustChangePassword": false }""",
+            setCookie: "auth_token=jwt-from-login; HttpOnly; Path=/; SameSite=Lax");
+        handler.EnqueueJson(HttpStatusCode.OK, """{ "connections": [] }""");
+        using var client = new ApiClient(Port, handler);
+
+        var providers = await client.ListProvidersAsync();
+
+        Assert.Empty(providers);
+        Assert.Equal(3, handler.Requests.Count);
+        using var loginBody = JsonDocument.Parse(handler.Requests[1].Body!);
+        Assert.Equal("123456", loginBody.RootElement.GetProperty("password").GetString());
+        Assert.Equal("auth_token=jwt-from-login", handler.Requests[2].Cookie);
+    }
+
+    [Fact]
     public async Task ListProvidersAsync_401ThenLoginFailure_ThrowsNineRouterAuthException()
     {
         using var handler = new FakeApiHandler();
@@ -321,7 +341,9 @@ public sealed class NineRouterApiClientTests
               "state": "st-1",
               "codeVerifier": "verifier-secret",
               "redirectUri": "http://127.0.0.1:4242/callback",
-              "flowType": "authorization_code_pkce"
+              "flowType": "authorization_code_pkce",
+              "fixedPort": 1455,
+              "callbackPath": "/auth/callback"
             }
             """);
         using var client = new ApiClient(Port, handler);
@@ -333,6 +355,8 @@ public sealed class NineRouterApiClientTests
         Assert.Equal("st-1", start.State);
         Assert.Equal("verifier-secret", start.CodeVerifier);
         Assert.Equal("authorization_code_pkce", start.FlowType);
+        Assert.Equal(1455, start.FixedPort);
+        Assert.Equal("/auth/callback", start.CallbackPath);
         Assert.Equal("GET", handler.Requests[0].Method);
         Assert.Equal("/api/oauth/claude/authorize", handler.Requests[0].Path);
         Assert.Contains("redirect_uri=", handler.Requests[0].Query, StringComparison.Ordinal);
@@ -361,6 +385,41 @@ public sealed class NineRouterApiClientTests
         Assert.Equal("dev-code", start.DeviceCode);
         Assert.Equal(5, start.IntervalSeconds);
         Assert.Equal("/api/oauth/github/device-code", handler.Requests[0].Path);
+    }
+
+    [Fact]
+    public async Task StartOAuthAsync_KiroDeviceCode_UsesDeviceEndpointAndRetainsExtraData()
+    {
+        using var handler = new FakeApiHandler();
+        handler.EnqueueJson(HttpStatusCode.OK, """
+            {
+              "deviceCode": "device-code",
+              "verification_uri": "https://example.test/device",
+              "clientId": "kiro-client",
+              "clientSecret": "kiro-secret"
+            }
+            """);
+        using var client = new ApiClient(Port, handler);
+
+        var start = await client.StartOAuthAsync("kiro");
+
+        Assert.Equal("/api/oauth/kiro/device-code", handler.Requests[0].Path);
+        Assert.Equal("device-code", start.DeviceCode);
+        Assert.Equal("kiro-client", start.ExtraData?.GetProperty("clientId").GetString());
+    }
+
+    [Fact]
+    public async Task PollOAuthAsync_ExtraData_PostsProviderFields()
+    {
+        using var handler = new FakeApiHandler();
+        handler.EnqueueJson(HttpStatusCode.OK, """{ "success": false, "pending": true }""");
+        using var client = new ApiClient(Port, handler);
+        using var extraDocument = JsonDocument.Parse("""{ "clientId": "kiro-client" }""");
+
+        await client.PollOAuthAsync("kiro", "device-code", extraData: extraDocument.RootElement.Clone());
+
+        using var body = JsonDocument.Parse(handler.Requests[0].Body!);
+        Assert.Equal("kiro-client", body.RootElement.GetProperty("extraData").GetProperty("clientId").GetString());
     }
 
     [Fact]
@@ -473,22 +532,6 @@ public sealed class NineRouterApiClientTests
         Assert.Equal("auth-code", body.RootElement.GetProperty("code").GetString());
         Assert.Equal("http://127.0.0.1:4242/callback", body.RootElement.GetProperty("redirectUri").GetString());
         Assert.Equal("verifier-secret", body.RootElement.GetProperty("codeVerifier").GetString());
-    }
-
-    [Fact]
-    public async Task OAuthCallbackListener_ReceivesCode_ReturnsCode()
-    {
-        using var listener = OAuthCallbackListener.Start();
-        var hit = Task.Run(async () =>
-        {
-            using var http = new HttpClient();
-            await http.GetAsync(listener.RedirectUri + "?code=loopback-code&state=st");
-        });
-
-        var code = await listener.WaitForCodeAsync(TimeSpan.FromSeconds(5));
-        await hit;
-
-        Assert.Equal("loopback-code", code);
     }
 
     private sealed class FakeApiHandler : HttpMessageHandler

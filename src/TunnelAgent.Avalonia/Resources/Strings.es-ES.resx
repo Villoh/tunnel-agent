@@ -1702,4 +1702,25 @@ Completa el inicio de sesión en el navegador. La app detectará automáticament
   <data name="OAuth_Status_CopyUrl" xml:space="preserve">
     <value>Copiar URL</value>
   </data>
+  <data name="Dialog_NineRouterOAuth_Title" xml:space="preserve">
+    <value>Completar inicio de sesión</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Description" xml:space="preserve">
+    <value>Tras iniciar sesión, copia la URL completa de devolución del navegador y pégala aquí. Usa el callback localhost compatible de 9Router en vez de un puerto temporal no registrado.</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Code" xml:space="preserve">
+    <value>URL de devolución o código de autorización</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_CodePlaceholder" xml:space="preserve">
+    <value>http://localhost:20128/callback?code=…</value>
+  </data>
+  <data name="Dialog_NineRouterOAuth_Submit" xml:space="preserve">
+    <value>Conectar</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_OAuthProviders" xml:space="preserve">
+    <value>PROVEEDORES OAUTH</value>
+  </data>
+  <data name="ProvidersView_NineRouterSection_SearchPlaceholder" xml:space="preserve">
+    <value>Buscar proveedores por nombre o id</value>
+  </data>
 </root>

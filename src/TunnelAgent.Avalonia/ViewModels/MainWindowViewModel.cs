@@ -32,6 +32,11 @@ public sealed record CliProxyApiKeyViewModel(string Value, bool IsDefault)
     public bool CanSetDefault => !IsDefault;
 }
 
+internal sealed record PendingNineRouterOAuth(
+    NineRouterProviderOption Provider,
+    NineRouterOAuthStartResult Start,
+    string RedirectUri);
+
 public sealed class RoutingStrategyOption(RoutingStrategy value, string displayKey) : ObservableObject
 {
     public RoutingStrategy Value { get; } = value;
@@ -220,11 +225,19 @@ SelectedSection is SectionKey.Logs;
     [ObservableProperty] private string _editPerplexityLabelDraft = "";
     [ObservableProperty] private bool _showResetPerplexityDialog;
     [ObservableProperty] private bool _showNineRouterAddKeyDialog;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SelectedNineRouterSupportsApiKey))]
+    [NotifyPropertyChangedFor(nameof(SelectedNineRouterSupportsOAuth))]
+    [NotifyPropertyChangedFor(nameof(SelectedNineRouterSupportsNoAuth))]
+    private NineRouterProviderOption? _selectedNineRouterProvider;
     [ObservableProperty] private string _nineRouterAddProviderIdDraft = "";
     [ObservableProperty] private string _nineRouterAddNameDraft = "";
     [ObservableProperty] private string _nineRouterAddApiKeyDraft = "";
     [ObservableProperty] private bool _showNineRouterAddApiKey;
+    [ObservableProperty] private bool _showNineRouterOAuthCodeDialog;
+    [ObservableProperty] private string _nineRouterOAuthCodeDraft = "";
     [ObservableProperty] private bool _isNineRouterBusy;
+    private PendingNineRouterOAuth? _pendingNineRouterOAuth;
 
     [ObservableProperty] private bool _showOAuthStatus;
     [ObservableProperty] private bool _oAuthStatusIsError;
@@ -353,7 +366,41 @@ SelectedSection is SectionKey.Logs;
     public ObservableCollection<ProviderViewModel> StandaloneQuotaProviders { get; } = new();
     public ObservableCollection<QuotaProviderViewModel> QuotaAccounts { get; } = new();
     public ObservableCollection<PerplexityAccountViewModel> PerplexityAccounts { get; } = new();
+    private const int NineRouterProviderPageSize = 12;
+    private readonly List<NineRouterProviderViewModel> _allNineRouterProviders = [];
+    [ObservableProperty] private string _nineRouterProviderSearch = "";
+    [ObservableProperty] private string _nineRouterProviderAuthFilter = "Both";
+    [ObservableProperty] private int _nineRouterProviderCurrentPage = 1;
+    [ObservableProperty] private int _nineRouterProviderTotalPages = 1;
     public ObservableCollection<NineRouterConnectionViewModel> NineRouterConnections { get; } = new();
+    public ObservableCollection<NineRouterProviderViewModel> NineRouterProviders { get; } = new();
+    public IReadOnlyList<string> NineRouterProviderAuthFilters { get; } = ["Both", "OAuth", "API Key"];
+    public ObservableCollection<LogPageItem> NineRouterProviderPageNavigationItems { get; } = new();
+    public bool CanGoNineRouterProviderPrev => NineRouterProviderCurrentPage > 1;
+    public bool CanGoNineRouterProviderNext => NineRouterProviderCurrentPage < NineRouterProviderTotalPages;
+    public IReadOnlyList<NineRouterProviderOption> NineRouterProviderOptions => NineRouterProviderCatalog.All;
+    public IReadOnlyList<NineRouterProviderOption> NineRouterOAuthProviderOptions =>
+        NineRouterProviderCatalog.All.Where(provider => provider.SupportsOAuth).ToList();
+    public bool SelectedNineRouterSupportsApiKey =>
+        SelectedNineRouterProvider?.SupportsApiKey == true || SelectedNineRouterProvider?.SupportsCookie == true;
+    public bool SelectedNineRouterSupportsOAuth => SelectedNineRouterProvider?.SupportsOAuth == true;
+    public bool SelectedNineRouterSupportsNoAuth => SelectedNineRouterProvider?.SupportsNoAuth == true;
+    partial void OnNineRouterProviderSearchChanged(string value)
+    {
+        NineRouterProviderCurrentPage = 1;
+        ApplyNineRouterProviderFilter();
+    }
+    partial void OnNineRouterProviderAuthFilterChanged(string value)
+    {
+        NineRouterProviderCurrentPage = 1;
+        ApplyNineRouterProviderFilter();
+    }
+    partial void OnNineRouterProviderCurrentPageChanged(int value)
+    {
+        RebuildNineRouterProviderPage();
+        ApplyNineRouterProviderPage();
+    }
+    partial void OnNineRouterProviderTotalPagesChanged(int value) => RebuildNineRouterProviderPage();
     public ObservableCollection<AgentViewModel> Agents { get; } = new();
     public ObservableCollection<EngineReleaseViewModel> EngineReleases { get; } = new();
     public ObservableCollection<AvailableModelGroupViewModel> AvailableModelGroups { get; }
@@ -474,12 +521,12 @@ SelectedSection is SectionKey.Logs;
 
     // Tab indices for SlidingTabBar
     public int ProvidersTabIndex =>
-        IsPerplexityEngineSelected ? 1 : IsNineRouterEngineSelected ? 2 : 0;
+        IsNineRouterEngineSelected ? 1 : IsPerplexityEngineSelected ? 2 : 0;
     public int ConfigTabIndex => SelectedSection switch
     {
         SectionKey.ConfigCliProxy => 1,
-        SectionKey.ConfigPerplexity => 2,
-        SectionKey.ConfigNineRouter => 3,
+        SectionKey.ConfigNineRouter => 2,
+        SectionKey.ConfigPerplexity => 3,
         _ => 0
     };
     public int QuotaTabIndex =>
@@ -1357,6 +1404,9 @@ SelectedSection is SectionKey.Logs;
                         _nineRouterModelFetchCts?.Cancel();
                         _nineRouterModelFetchCts = null;
                         NineRouterConnections.Clear();
+                        NineRouterProviders.Clear();
+                        _allNineRouterProviders.Clear();
+                        NineRouterProviderPageNavigationItems.Clear();
                         OnPropertyChanged(nameof(HasNineRouterConnections));
                     }
                     modelGroups?.Clear();
@@ -1454,6 +1504,14 @@ SelectedSection is SectionKey.Logs;
         try
         {
             using var client = new ApiClient(engine.Port);
+            var connections = await client.ListProvidersAsync(token);
+            await Dispatcher.UIThread.InvokeAsync(() => ApplyNineRouterConnections(connections));
+            if (connections.Count == 0)
+            {
+                await Dispatcher.UIThread.InvokeAsync(NineRouterModelGroups.Clear);
+                return;
+            }
+
             await _nineRouterClientKey.EnsureUserApiKeyAsync(client, token);
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested)
@@ -1462,7 +1520,8 @@ SelectedSection is SectionKey.Logs;
         }
         catch (Exception ex)
         {
-            TraceStartupWarning("Failed to sync 9Router API key", ex);
+            TraceStartupWarning("Failed to load 9Router connections or API key", ex);
+            return;
         }
 
         if (token.IsCancellationRequested) return;
@@ -2474,13 +2533,25 @@ SelectedSection is SectionKey.Logs;
     }
 
     [RelayCommand]
-    private void ShowAddNineRouterApiKey()
+    private void ShowAddNineRouterApiKey() => ShowNineRouterAddConnection(NineRouterProviderCatalog.Find("openai"));
+
+    [RelayCommand]
+    private void ShowAddNineRouterProvider(NineRouterProviderViewModel? provider) =>
+        ShowNineRouterAddConnection(provider?.Option);
+
+    private void ShowNineRouterAddConnection(NineRouterProviderOption? provider)
     {
-        NineRouterAddProviderIdDraft = "";
+        SelectedNineRouterProvider = provider ?? NineRouterProviderCatalog.Find("openai");
+        NineRouterAddProviderIdDraft = SelectedNineRouterProvider?.Id ?? "";
         NineRouterAddNameDraft = "";
         NineRouterAddApiKeyDraft = "";
         ShowNineRouterAddApiKey = false;
         ShowNineRouterAddKeyDialog = true;
+    }
+
+    partial void OnSelectedNineRouterProviderChanged(NineRouterProviderOption? value)
+    {
+        NineRouterAddProviderIdDraft = value?.Id ?? "";
     }
 
     [RelayCommand]
@@ -2493,34 +2564,68 @@ SelectedSection is SectionKey.Logs;
         NineRouterAddApiKeyDraft = "";
     }
 
-    public async Task ConfirmAddNineRouterApiKeyAsync(string providerId, string? name, string apiKey)
+    [RelayCommand]
+    private void DismissNineRouterOAuthCodeDialog()
+    {
+        _pendingNineRouterOAuth = null;
+        NineRouterOAuthCodeDraft = "";
+        ShowNineRouterOAuthCodeDialog = false;
+    }
+
+    public async Task ConfirmAddNineRouterApiKeyAsync(string providerId, string? name, string apiKey, string authType = "apikey")
     {
         DismissNineRouterAddKeyDialog();
         var displayName = string.IsNullOrWhiteSpace(name) ? providerId.Trim() : name.Trim();
-        await CreateNineRouterProviderAsync(providerId.Trim(), displayName, apiKey);
+        await CreateNineRouterProviderAsync(providerId.Trim(), displayName, apiKey, authType);
     }
 
     [RelayCommand]
-    private Task ConnectNineRouterKiroAsync() =>
-        CreateNineRouterProviderAsync("kiro", "Kiro AI", NoAuthApiKeyPlaceholder);
+    private Task AddSelectedNineRouterApiKeyAsync()
+    {
+        var provider = SelectedNineRouterProvider;
+        if (provider is null || string.IsNullOrWhiteSpace(NineRouterAddApiKeyDraft))
+            return Task.CompletedTask;
+
+        return ConfirmAddNineRouterApiKeyAsync(
+            provider.Id,
+            NineRouterAddNameDraft,
+            NineRouterAddApiKeyDraft,
+            provider.SupportsCookie && !provider.SupportsApiKey ? "cookie" : "apikey");
+    }
 
     [RelayCommand]
-    private Task ConnectNineRouterClaudeAsync() =>
-        ConnectNineRouterOAuthAsync(NineRouterOAuthProviders.Claude, "Claude");
+    private Task ConnectSelectedNineRouterNoAuthAsync()
+    {
+        var provider = SelectedNineRouterProvider;
+        return provider is null
+            ? Task.CompletedTask
+            : CreateNineRouterProviderAsync(provider.Id, provider.Name, NoAuthApiKeyPlaceholder, "apikey");
+    }
 
     [RelayCommand]
-    private Task ConnectNineRouterGeminiAsync() =>
-        ConnectNineRouterOAuthAsync(NineRouterOAuthProviders.GeminiCli, "Gemini");
+    private Task ConnectSelectedNineRouterOAuthAsync() =>
+        SelectedNineRouterProvider is { } provider
+            ? ConnectNineRouterOAuthAsync(provider)
+            : Task.CompletedTask;
 
     [RelayCommand]
-    private Task ConnectNineRouterCopilotAsync() =>
-        ConnectNineRouterOAuthAsync(NineRouterOAuthProviders.GitHub, "Copilot");
+    private Task ConnectNineRouterOAuthProviderAsync(NineRouterProviderOption? provider) =>
+        provider is null ? Task.CompletedTask : ConnectNineRouterOAuthAsync(provider);
 
-    private async Task ConnectNineRouterOAuthAsync(string providerId, string displayName)
+    private async Task ConnectNineRouterOAuthAsync(NineRouterProviderOption provider)
     {
         if (!IsNineRouterEngineRunning)
         {
             ShowNineRouterStatus(_localization.GetString("ProvidersView_NineRouter_EngineNotRunning"), isError: true);
+            return;
+        }
+
+        if (provider.OAuthFlow == NineRouterOAuthFlow.Dashboard)
+        {
+            OpenNineRouterDashboard();
+            ShowNineRouterStatus(
+                _localization.GetString("ProvidersView_NineRouter_OAuthWaiting", provider.Name),
+                isError: false);
             return;
         }
 
@@ -2531,70 +2636,54 @@ SelectedSection is SectionKey.Logs;
             using var client = new ApiClient(NineRouterEngine.Port);
             using var timeoutCts = new CancellationTokenSource(NineRouterOAuthProviders.DefaultTimeout);
 
-            if (NineRouterOAuthProviders.IsDeviceCode(providerId))
+            if (provider.OAuthFlow == NineRouterOAuthFlow.DeviceCode)
             {
-                var start = await client.StartOAuthAsync(providerId, redirectUri: null, timeoutCts.Token);
-                OpenNineRouterOAuthUrl(start.BrowserUrl!);
-                ShowNineRouterStatus(
-                    _localization.GetString("ProvidersView_NineRouter_OAuthWaiting", displayName),
-                    isError: false);
-                if (string.IsNullOrWhiteSpace(start.DeviceCode))
-                {
-                    throw new NineRouterApiException(
-                        HttpStatusCode.BadRequest,
-                        "OAuth start did not return a device code.");
-                }
+                var deviceStart = await client.StartOAuthAsync(provider.Id, redirectUri: null, timeoutCts.Token);
+                if (string.IsNullOrWhiteSpace(deviceStart.DeviceCode))
+                    throw new NineRouterApiException(HttpStatusCode.BadRequest, "OAuth start did not return a device code.");
 
+                OpenNineRouterOAuthUrl(deviceStart.BrowserUrl!);
+                ShowNineRouterStatus(
+                    _localization.GetString("ProvidersView_NineRouter_OAuthWaiting", provider.Name),
+                    isError: false);
                 await client.PollOAuthUntilConnectedAsync(
-                    providerId,
-                    start.DeviceCode,
-                    start.CodeVerifier,
+                    provider.Id,
+                    deviceStart.DeviceCode,
+                    deviceStart.CodeVerifier,
                     NineRouterOAuthProviders.DefaultTimeout,
-                    TimeSpan.FromSeconds(Math.Max(1, start.IntervalSeconds)),
+                    TimeSpan.FromSeconds(Math.Max(1, deviceStart.IntervalSeconds)),
+                    deviceStart.ExtraData,
                     timeoutCts.Token);
-            }
-            else
-            {
-                using var listener = OAuthCallbackListener.Start();
-                var start = await client.StartOAuthAsync(providerId, listener.RedirectUri, timeoutCts.Token);
-                OpenNineRouterOAuthUrl(start.BrowserUrl!);
+
+                await RefreshNineRouterConnectionsAsync();
+                RestartNineRouterModelFetch();
                 ShowNineRouterStatus(
-                    _localization.GetString("ProvidersView_NineRouter_OAuthWaiting", displayName),
+                    _localization.GetString("ProvidersView_NineRouter_OAuthConnected", provider.Name),
                     isError: false);
-                var code = await listener.WaitForCodeAsync(NineRouterOAuthProviders.DefaultTimeout, timeoutCts.Token);
-                await client.ExchangeOAuthAsync(
-                    providerId,
-                    code,
-                    start.RedirectUri ?? listener.RedirectUri,
-                    start.CodeVerifier,
-                    start.State,
-                    timeoutCts.Token);
+                return;
             }
 
-            await RefreshNineRouterConnectionsAsync();
-            RestartNineRouterModelFetch();
-            ShowNineRouterStatus(
-                _localization.GetString("ProvidersView_NineRouter_OAuthConnected", displayName),
-                isError: false);
+            var redirectUri = $"http://localhost:{NineRouterEngine.Port}/callback";
+            var start = await client.StartOAuthAsync(provider.Id, redirectUri, timeoutCts.Token);
+            if (string.IsNullOrWhiteSpace(start.BrowserUrl))
+                throw new NineRouterApiException(HttpStatusCode.BadRequest, "OAuth start did not return a browser URL.");
+
+            DismissNineRouterAddKeyDialog();
+            _pendingNineRouterOAuth = new PendingNineRouterOAuth(provider, start, redirectUri);
+            NineRouterOAuthCodeDraft = "";
+            ShowNineRouterOAuthCodeDialog = true;
+            OpenNineRouterOAuthUrl(start.BrowserUrl);
         }
         catch (Exception ex) when (ex is OperationCanceledException)
         {
             ShowNineRouterStatus(
-                _localization.GetString("ProvidersView_NineRouter_OAuthTimeout", displayName),
-                isError: true);
-        }
-        catch (NineRouterApiException ex)
-        {
-            ShowNineRouterStatus(
-                ex.StatusCode == HttpStatusCode.RequestTimeout
-                    ? _localization.GetString("ProvidersView_NineRouter_OAuthTimeout", displayName)
-                    : _localization.GetString("ProvidersView_NineRouter_OAuthFailed", displayName, ex.Message),
+                _localization.GetString("ProvidersView_NineRouter_OAuthTimeout", provider.Name),
                 isError: true);
         }
         catch (Exception ex)
         {
             ShowNineRouterStatus(
-                _localization.GetString("ProvidersView_NineRouter_OAuthFailed", displayName, ex.Message),
+                _localization.GetString("ProvidersView_NineRouter_OAuthFailed", provider.Name, ex.Message),
                 isError: true);
         }
         finally
@@ -2603,43 +2692,88 @@ SelectedSection is SectionKey.Logs;
         }
     }
 
+    [RelayCommand]
+    private async Task CompleteNineRouterOAuthAsync()
+    {
+        var pending = _pendingNineRouterOAuth;
+        var input = NineRouterOAuthCodeDraft.Trim();
+        if (pending is null || string.IsNullOrWhiteSpace(input) || IsNineRouterBusy)
+            return;
+
+        IsNineRouterBusy = true;
+        try
+        {
+            var code = ExtractNineRouterOAuthCode(input, pending.Start.State);
+            using var client = new ApiClient(NineRouterEngine.Port);
+            await client.ExchangeOAuthAsync(
+                pending.Provider.Id,
+                code,
+                pending.Start.RedirectUri ?? pending.RedirectUri,
+                pending.Start.CodeVerifier,
+                pending.Start.State);
+            DismissNineRouterOAuthCodeDialog();
+            await RefreshNineRouterConnectionsAsync();
+            RestartNineRouterModelFetch();
+            ShowNineRouterStatus(
+                _localization.GetString("ProvidersView_NineRouter_OAuthConnected", pending.Provider.Name),
+                isError: false);
+        }
+        catch (Exception ex)
+        {
+            ShowNineRouterStatus(
+                _localization.GetString("ProvidersView_NineRouter_OAuthFailed", pending.Provider.Name, ex.Message),
+                isError: true);
+        }
+        finally
+        {
+            IsNineRouterBusy = false;
+        }
+    }
+
+    private static string ExtractNineRouterOAuthCode(string input, string? expectedState)
+    {
+        if (!Uri.TryCreate(input, UriKind.Absolute, out var callback))
+            return input;
+
+        var query = callback.Query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries)
+            .Select(pair => pair.Split('=', 2))
+            .ToDictionary(
+                pair => Uri.UnescapeDataString(pair[0]),
+                pair => pair.Length == 2 ? Uri.UnescapeDataString(pair[1]) : "",
+                StringComparer.OrdinalIgnoreCase);
+        if (!query.TryGetValue("code", out var code) || string.IsNullOrWhiteSpace(code))
+            throw new NineRouterApiException(HttpStatusCode.BadRequest, "OAuth callback did not include an authorization code.");
+        if (!string.IsNullOrWhiteSpace(expectedState)
+            && query.TryGetValue("state", out var state)
+            && !string.Equals(expectedState, state, StringComparison.Ordinal))
+            throw new NineRouterApiException(HttpStatusCode.BadRequest, "OAuth callback state did not match the sign-in request.");
+        return code;
+    }
+
     private static void OpenNineRouterOAuthUrl(string url)
     {
         Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
     }
 
     [RelayCommand]
-    private async Task ConnectNineRouterOpenCodeFreeAsync()
+    private async Task ToggleNineRouterProviderAsync(NineRouterProviderViewModel? provider)
     {
-        if (!IsNineRouterEngineRunning)
-        {
-            ShowNineRouterStatus(_localization.GetString("ProvidersView_NineRouter_EngineNotRunning"), isError: true);
-            return;
-        }
-
-        if (IsNineRouterBusy) return;
+        if (provider is null || !provider.HasAccounts || !IsNineRouterEngineRunning || IsNineRouterBusy) return;
         IsNineRouterBusy = true;
         try
         {
-            Exception? last = null;
-            foreach (var providerId in OpenCodeFreeProviderIds)
+            using var client = new ApiClient(NineRouterEngine.Port);
+            foreach (var account in provider.Accounts)
             {
-                try
-                {
-                    await PostNineRouterProviderAsync(providerId, "OpenCode Free", NoAuthApiKeyPlaceholder);
-                    await RefreshNineRouterConnectionsAsync();
-                    RestartNineRouterModelFetch();
-                    return;
-                }
-                catch (Exception ex) when (ex is not OperationCanceledException)
-                {
-                    last = ex;
-                }
+                await client.UpdateProviderAsync(
+                    account.Id,
+                    new NineRouterUpdateProviderRequest { IsActive = !provider.IsEnabled });
             }
-
-            ShowNineRouterStatus(
-                _localization.GetString("ProvidersView_NineRouter_CreateFailed", last?.Message ?? "opencode"),
-                isError: true);
+            await RefreshNineRouterConnectionsAsync();
+        }
+        catch (Exception ex)
+        {
+            ShowNineRouterStatus(ex.Message, isError: true);
         }
         finally
         {
@@ -2695,7 +2829,7 @@ SelectedSection is SectionKey.Logs;
     private const string NoAuthApiKeyPlaceholder = "none";
     private static readonly string[] OpenCodeFreeProviderIds = ["opencode", "opencode-zen", "opencode-free"];
 
-    private async Task CreateNineRouterProviderAsync(string providerId, string name, string apiKey)
+    private async Task CreateNineRouterProviderAsync(string providerId, string name, string apiKey, string authType = "apikey")
     {
         if (!IsNineRouterEngineRunning)
         {
@@ -2707,7 +2841,7 @@ SelectedSection is SectionKey.Logs;
         IsNineRouterBusy = true;
         try
         {
-            await PostNineRouterProviderAsync(providerId, name, apiKey);
+            await PostNineRouterProviderAsync(providerId, name, apiKey, authType);
             await RefreshNineRouterConnectionsAsync();
             RestartNineRouterModelFetch();
         }
@@ -2723,7 +2857,7 @@ SelectedSection is SectionKey.Logs;
         }
     }
 
-    private async Task PostNineRouterProviderAsync(string providerId, string name, string apiKey)
+    private async Task PostNineRouterProviderAsync(string providerId, string name, string apiKey, string authType = "apikey")
     {
         using var client = new ApiClient(NineRouterEngine.Port);
         await client.CreateProviderAsync(new NineRouterCreateProviderRequest
@@ -2731,7 +2865,7 @@ SelectedSection is SectionKey.Logs;
             Provider = providerId,
             Name = name,
             ApiKey = apiKey,
-            AuthType = "apikey"
+            AuthType = authType
         });
     }
 
@@ -2742,6 +2876,9 @@ SelectedSection is SectionKey.Logs;
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 NineRouterConnections.Clear();
+                NineRouterProviders.Clear();
+                _allNineRouterProviders.Clear();
+                NineRouterProviderPageNavigationItems.Clear();
                 OnPropertyChanged(nameof(HasNineRouterConnections));
             });
             return;
@@ -2764,17 +2901,126 @@ SelectedSection is SectionKey.Logs;
 
     private void ApplyNineRouterConnections(IReadOnlyList<NineRouterProvider> connections)
     {
-        NineRouterConnections.Clear();
+        var providers = NineRouterProviderCatalog.All
+            .Select(option => new NineRouterProviderViewModel(option))
+            .ToDictionary(provider => provider.Id, StringComparer.OrdinalIgnoreCase);
+        var accounts = new List<NineRouterConnectionViewModel>();
+
         foreach (var connection in connections)
         {
-            NineRouterConnections.Add(new NineRouterConnectionViewModel(
+            var providerId = connection.Provider ?? "";
+            if (!providers.TryGetValue(providerId, out var provider))
+            {
+                provider = new NineRouterProviderViewModel(new NineRouterProviderOption(
+                    providerId,
+                    string.IsNullOrWhiteSpace(providerId) ? "Unknown provider" : providerId,
+                    NineRouterAuthModes.None,
+                    NineRouterOAuthFlow.None));
+                providers.Add(providerId, provider);
+            }
+
+            var account = new NineRouterConnectionViewModel(
                 connection.Id ?? "",
-                connection.Provider ?? "",
+                providerId,
                 connection.Name ?? "",
                 connection.IsActive ?? true,
-                connection.LastError));
+                connection.AuthType,
+                connection.LastError);
+            provider.Accounts.Add(account);
+            accounts.Add(account);
         }
+
+        NineRouterConnections.Clear();
+        foreach (var account in accounts)
+            NineRouterConnections.Add(account);
+        _allNineRouterProviders.Clear();
+        _allNineRouterProviders.AddRange(providers.Values
+            .OrderByDescending(provider => provider.IsEnabled)
+            .ThenByDescending(provider => provider.HasAccounts)
+            .ThenBy(provider => provider.Name, StringComparer.CurrentCultureIgnoreCase));
+        NineRouterProviderCurrentPage = 1;
+        ApplyNineRouterProviderFilter();
         OnPropertyChanged(nameof(HasNineRouterConnections));
+    }
+
+    [RelayCommand]
+    private void FirstNineRouterProviderPage() => NineRouterProviderCurrentPage = 1;
+
+    [RelayCommand]
+    private void PrevNineRouterProviderPage()
+    {
+        if (CanGoNineRouterProviderPrev) NineRouterProviderCurrentPage--;
+    }
+
+    [RelayCommand]
+    private void NextNineRouterProviderPage()
+    {
+        if (CanGoNineRouterProviderNext) NineRouterProviderCurrentPage++;
+    }
+
+    [RelayCommand]
+    private void LastNineRouterProviderPage() => NineRouterProviderCurrentPage = NineRouterProviderTotalPages;
+
+    [RelayCommand]
+    private void GoToNineRouterProviderPage(LogPageItem item)
+    {
+        if (item.PageNumber is { } page && page >= 1 && page <= NineRouterProviderTotalPages)
+            NineRouterProviderCurrentPage = page;
+    }
+
+    private void ApplyNineRouterProviderFilter()
+    {
+        var filtered = FilterNineRouterProviders();
+        NineRouterProviderTotalPages = Math.Max(1, (int)Math.Ceiling(filtered.Count / (double)NineRouterProviderPageSize));
+        if (NineRouterProviderCurrentPage > NineRouterProviderTotalPages)
+        {
+            NineRouterProviderCurrentPage = NineRouterProviderTotalPages;
+            return;
+        }
+
+        RebuildNineRouterProviderPage();
+        ApplyNineRouterProviderPage(filtered);
+    }
+
+    private void ApplyNineRouterProviderPage() => ApplyNineRouterProviderPage(FilterNineRouterProviders());
+
+    private List<NineRouterProviderViewModel> FilterNineRouterProviders()
+    {
+        var query = NineRouterProviderSearch.Trim();
+        return _allNineRouterProviders.Where(provider =>
+            provider.MatchesAuthFilter(NineRouterProviderAuthFilter)
+            && (string.IsNullOrEmpty(query)
+                || provider.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
+                || provider.Id.Contains(query, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+    }
+
+    private void ApplyNineRouterProviderPage(IEnumerable<NineRouterProviderViewModel> providers)
+    {
+        NineRouterProviders.Clear();
+        foreach (var provider in providers.Skip((NineRouterProviderCurrentPage - 1) * NineRouterProviderPageSize).Take(NineRouterProviderPageSize))
+            NineRouterProviders.Add(provider);
+    }
+
+    private void RebuildNineRouterProviderPage()
+    {
+        NineRouterProviderPageNavigationItems.Clear();
+        if (NineRouterProviderTotalPages <= 1) return;
+
+        var pages = new SortedSet<int> { 1, NineRouterProviderTotalPages };
+        for (var page = Math.Max(2, NineRouterProviderCurrentPage - 2);
+             page <= Math.Min(NineRouterProviderTotalPages - 1, NineRouterProviderCurrentPage + 2);
+             page++)
+            pages.Add(page);
+
+        var last = 0;
+        foreach (var page in pages)
+        {
+            if (page - last > 1)
+                NineRouterProviderPageNavigationItems.Add(new LogPageItem(null, "…", false, true));
+            NineRouterProviderPageNavigationItems.Add(new LogPageItem(page, page.ToString(), page == NineRouterProviderCurrentPage, false));
+            last = page;
+        }
     }
 
     private void RestartNineRouterModelFetch()

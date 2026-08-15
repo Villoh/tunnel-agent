@@ -192,7 +192,7 @@
                     BorderBrush="{DynamicResource BtnBorderBrush}"
                     BorderThickness="1"
                     CornerRadius="8"
-                    Padding="10,0">
+                    Padding="10,0,0,0">
                 <Grid ColumnDefinitions="Auto,*" VerticalAlignment="Center">
                     <lucide:PackIconLucide Grid.Column="0" Kind="Search" Width="13" Height="13"
                                            Foreground="{DynamicResource FgFaintBrush}"

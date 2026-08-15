@@ -134,6 +134,8 @@ public partial class MainWindow : Window
             Dispatcher.UIThread.Post(() => EditCustomProviderOverlay.Focus(), DispatcherPriority.Input);
         else if (args.PropertyName == nameof(MainWindowViewModel.ShowPerplexityAccountDialog) && vm.ShowPerplexityAccountDialog)
             Dispatcher.UIThread.Post(() => PerplexityAccountOverlay.Focus(), DispatcherPriority.Input);
+        else if (args.PropertyName == nameof(MainWindowViewModel.ShowNineRouterOAuthCodeDialog) && vm.ShowNineRouterOAuthCodeDialog)
+            Dispatcher.UIThread.Post(() => NineRouterOAuthCodeOverlay.Focus(), DispatcherPriority.Input);
         else if (args.PropertyName == nameof(MainWindowViewModel.ShowAgentConfigDialog) && vm.ShowAgentConfigDialog)
             Dispatcher.UIThread.Post(() => EnsureAgentConfigOverlay(vm).FocusOverlay(), DispatcherPriority.Input);
     }
@@ -314,16 +316,18 @@ public partial class MainWindow : Window
 
     private async Task ConfirmNineRouterAddKeyFromInputsAsync()
     {
-        if (DataContext is not MainWindowViewModel vm) return;
-        var providerId = NineRouterProviderIdBox.Text?.Trim() ?? "";
+        if (DataContext is not MainWindowViewModel vm || vm.SelectedNineRouterProvider is not { } provider) return;
         var name = NineRouterNameBox.Text?.Trim();
         var apiKey = NineRouterApiKeyBox.Text?.Trim() ?? "";
-        if (string.IsNullOrEmpty(providerId) || string.IsNullOrEmpty(apiKey)) return;
+        if (string.IsNullOrEmpty(apiKey)) return;
 
-        NineRouterProviderIdBox.Text = "";
         NineRouterNameBox.Text = "";
         NineRouterApiKeyBox.Text = "";
-        await vm.ConfirmAddNineRouterApiKeyAsync(providerId, string.IsNullOrEmpty(name) ? null : name, apiKey);
+        await vm.ConfirmAddNineRouterApiKeyAsync(
+            provider.Id,
+            string.IsNullOrEmpty(name) ? null : name,
+            apiKey,
+            provider.SupportsCookie && !provider.SupportsApiKey ? "cookie" : "apikey");
     }
 
     private async void OnNineRouterAddKeyInputKeyDown(object? sender, KeyEventArgs e)
@@ -350,6 +354,33 @@ public partial class MainWindow : Window
         {
             e.Handled = true;
             await ConfirmNineRouterAddKeyFromInputsAsync();
+        }
+    }
+
+    private void OnNineRouterOAuthCodeOverlayPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm) vm.DismissNineRouterOAuthCodeDialogCommand.Execute(null);
+    }
+
+    private void OnNineRouterOAuthCodeInputKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter || DataContext is not MainWindowViewModel vm) return;
+        e.Handled = true;
+        vm.CompleteNineRouterOAuthCommand.Execute(null);
+    }
+
+    private void OnNineRouterOAuthCodeDialogKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            vm.DismissNineRouterOAuthCodeDialogCommand.Execute(null);
+        }
+        else if (e.Key == Key.Enter)
+        {
+            e.Handled = true;
+            vm.CompleteNineRouterOAuthCommand.Execute(null);
         }
     }
 
