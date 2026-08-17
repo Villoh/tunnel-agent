@@ -208,11 +208,11 @@
                                                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         <TextBlock Grid.Column="1" Text="{l:Loc Sidebar_Quota}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
                                                    Opacity="{Binding SidebarContentOpacity}" />
-                                        <Panel Grid.Column="2" Width="16" VerticalAlignment="Center">
-                                            <lucide:PackIconLucide Kind="ChevronRight" Width="11" Height="11" Foreground="{DynamicResource FgMutedBrush}"
-                                                                    IsVisible="{Binding IsQuotaSubmenuExpanded, Converter={StaticResource InvertBool}}" />
-                                            <lucide:PackIconLucide Kind="ChevronDown" Width="11" Height="11" Foreground="{DynamicResource FgMutedBrush}"
-                                                                    IsVisible="{Binding IsQuotaSubmenuExpanded}" />
+                                        <Panel Grid.Column="2" Width="16" Height="16" VerticalAlignment="Center"
+                                               Classes="sidebar-chevron"
+                                               Classes.expanded="{Binding IsQuotaSubmenuExpanded}">
+                                            <lucide:PackIconLucide Kind="ChevronRight" Width="11" Height="11"
+                                                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Panel>
                                     </Grid>
                                 </Button>
@@ -256,11 +256,11 @@
                                                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         <TextBlock Grid.Column="1" Text="{l:Loc Sidebar_Fallback}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
                                                    Opacity="{Binding SidebarContentOpacity}" />
-                                        <Panel Grid.Column="2" Width="16" VerticalAlignment="Center">
-                                            <lucide:PackIconLucide Kind="ChevronRight" Width="11" Height="11" Foreground="{DynamicResource FgMutedBrush}"
-                                                                    IsVisible="{Binding IsFallbackSubmenuExpanded, Converter={StaticResource InvertBool}}" />
-                                            <lucide:PackIconLucide Kind="ChevronDown" Width="11" Height="11" Foreground="{DynamicResource FgMutedBrush}"
-                                                                    IsVisible="{Binding IsFallbackSubmenuExpanded}" />
+                                        <Panel Grid.Column="2" Width="16" Height="16" VerticalAlignment="Center"
+                                               Classes="sidebar-chevron"
+                                               Classes.expanded="{Binding IsFallbackSubmenuExpanded}">
+                                            <lucide:PackIconLucide Kind="ChevronRight" Width="11" Height="11"
+                                                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Panel>
                                     </Grid>
                                 </Button>

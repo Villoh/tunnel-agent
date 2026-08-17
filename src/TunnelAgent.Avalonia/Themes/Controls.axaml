@@ -783,6 +783,20 @@
         <Setter Property="RenderTransform" Value="rotate(90deg)" />
     </Style>
 
+    <!-- Sidebar submenu chevron: same 90° rotate as virtual-model expanders -->
+    <Style Selector="Panel.sidebar-chevron">
+        <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+        <Setter Property="RenderTransform" Value="rotate(0deg)" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.18" Easing="CubicEaseOut" />
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Panel.sidebar-chevron.expanded">
+        <Setter Property="RenderTransform" Value="rotate(90deg)" />
+    </Style>
+
     <!-- Animated collapsible region (height + fade) -->
     <Style Selector="Border.collapsible">
         <Setter Property="ClipToBounds" Value="True" />
