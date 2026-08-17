@@ -10,6 +10,7 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using Avalonia.Interactivity;
 using Avalonia.Styling;
+using Avalonia.VisualTree;
 using TunnelAgent.Infrastructure.Engine.CliProxy;
 using TunnelAgent.ViewModels;
 
@@ -50,9 +51,11 @@ public partial class MainWindow : Window
     {
         if (SidebarPill.RenderTransform is not Avalonia.Media.TranslateTransform translate) return;
 
-        var selected = SidebarNavItems.Children
+        var selected = SidebarNavItems.GetVisualDescendants()
             .OfType<Button>()
-            .FirstOrDefault(b => b.Classes.Contains("selected"));
+            .FirstOrDefault(b => b.IsVisible
+                                 && b.Classes.Contains("selected")
+                                 && !b.Classes.Contains("side-sub"));
         if (selected is null)
         {
             SidebarPill.IsVisible = false;
@@ -129,6 +132,10 @@ public partial class MainWindow : Window
         {
             UpdateSectionContent(vm);
             Dispatcher.UIThread.Post(() => MovePill(animate: true), DispatcherPriority.Render);
+        }
+        else if (args.PropertyName == nameof(MainWindowViewModel.IsSidebarCollapsed))
+        {
+            Dispatcher.UIThread.Post(() => MovePill(animate: false), DispatcherPriority.Render);
         }
         else if (args.PropertyName == nameof(MainWindowViewModel.ShowApiKeysDialog) && vm.ShowApiKeysDialog)
             Dispatcher.UIThread.Post(() => EnsureApiKeysOverlay(vm).FocusOverlay(), DispatcherPriority.Input);

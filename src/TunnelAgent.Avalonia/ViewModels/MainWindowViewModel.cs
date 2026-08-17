@@ -171,11 +171,20 @@ SelectedSection is SectionKey.Logs;
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsQuotaLimitsActive))]
     [NotifyPropertyChangedFor(nameof(IsQuotaUsageActive))]
+    [NotifyPropertyChangedFor(nameof(IsQuotaNavActive))]
+    [NotifyPropertyChangedFor(nameof(IsFallbackNavActive))]
     private SectionKey _selectedSection = SectionKey.Home;
     [ObservableProperty] private HomeDashboardTab _homeDashboardTab = HomeDashboardTab.LocalProxy;
-    [ObservableProperty] private bool _isSidebarCollapsed;
-    [ObservableProperty] private bool _isQuotaSubmenuExpanded;
-    [ObservableProperty] private bool _isFallbackSubmenuExpanded;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsQuotaSubmenuVisible))]
+    [NotifyPropertyChangedFor(nameof(IsFallbackSubmenuVisible))]
+    private bool _isSidebarCollapsed;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsQuotaSubmenuVisible))]
+    private bool _isQuotaSubmenuExpanded;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsFallbackSubmenuVisible))]
+    private bool _isFallbackSubmenuExpanded;
     [ObservableProperty] private bool _isDark;
     [ObservableProperty] private string _focusedConfigEngineId = EngineCatalog.CliProxyApi.Id;
     [ObservableProperty] private string _providersEngineId = EngineCatalog.CliProxyApi.Id;
@@ -585,6 +594,10 @@ SelectedSection is SectionKey.Logs;
     public bool IsQuotaLimitsSelected => !IsQuotaUsageSelected;
     public bool IsQuotaLimitsActive => SelectedSection == SectionKey.Quota && IsQuotaLimitsSelected;
     public bool IsQuotaUsageActive => SelectedSection == SectionKey.Quota && IsQuotaUsageSelected;
+    public bool IsQuotaNavActive => SelectedSection == SectionKey.Quota;
+    public bool IsFallbackNavActive => SelectedSection is SectionKey.Fallback or SectionKey.NineRouterCombos;
+    public bool IsQuotaSubmenuVisible => IsQuotaSubmenuExpanded && !IsSidebarCollapsed;
+    public bool IsFallbackSubmenuVisible => IsFallbackSubmenuExpanded && !IsSidebarCollapsed;
     public bool HasNineRouterUsageConnections => NineRouterConnections.Count > 0;
     public bool ShowNineRouterUsageEmptyState => IsNineRouterEngineRunning && !HasNineRouterUsageConnections;
 

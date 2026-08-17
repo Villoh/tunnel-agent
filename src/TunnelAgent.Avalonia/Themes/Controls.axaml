@@ -719,6 +719,35 @@
         <Setter Property="Cursor" Value="Arrow" />
     </Style>
 
+    <!-- Compact menu shown from collapsed sidebar items with children -->
+    <Style Selector="MenuFlyoutPresenter.sidebar-flyout">
+        <Setter Property="Background" Value="{DynamicResource SideBgBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinWidth" Value="188" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+    <!-- Fluent's presenter template ignores Padding and uses FlyoutBorderThemePadding /
+         MenuFlyoutScrollerMargin instead, which left a gap around first/last hover. -->
+    <Style Selector="MenuFlyoutPresenter.sidebar-flyout /template/ Border#LayoutRoot">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+    <Style Selector="MenuFlyoutPresenter.sidebar-flyout /template/ ItemsPresenter#PART_ItemsPresenter">
+        <Setter Property="Margin" Value="0" />
+    </Style>
+    <Style Selector="MenuFlyoutPresenter.sidebar-flyout MenuItem:nth-child(1)">
+        <Setter Property="CornerRadius" Value="7,7,0,0" />
+    </Style>
+    <Style Selector="MenuFlyoutPresenter.sidebar-flyout MenuItem:nth-last-child(1)">
+        <Setter Property="CornerRadius" Value="0,0,7,7" />
+    </Style>
+    <Style Selector="MenuFlyoutPresenter.sidebar-flyout MenuItem:nth-child(1):nth-last-child(1)">
+        <Setter Property="CornerRadius" Value="7" />
+    </Style>
+
     <!-- Borderless expand/collapse chevron (no checked highlight) -->
     <Style Selector="ToggleButton.chevron">
         <Setter Property="Background" Value="Transparent" />

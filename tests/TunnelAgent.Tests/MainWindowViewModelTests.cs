@@ -132,6 +132,29 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
+    public void CollapsedSidebar_HidesInlineSubmenusAndKeepsParentActive()
+    {
+        var vm = new MainWindowViewModel();
+
+        vm.SelectFallbackCommand.Execute(null);
+        Assert.True(vm.IsFallbackSubmenuVisible);
+        Assert.True(vm.IsFallbackNavActive);
+
+        vm.ToggleSidebarCommand.Execute(null);
+
+        Assert.True(vm.IsSidebarCollapsed);
+        Assert.True(vm.IsFallbackSubmenuExpanded);
+        Assert.False(vm.IsFallbackSubmenuVisible);
+        Assert.True(vm.IsFallbackNavActive);
+        Assert.False(vm.IsQuotaSubmenuVisible);
+
+        vm.SelectQuotaLimitsCommand.Execute(null);
+        Assert.True(vm.IsQuotaNavActive);
+        Assert.False(vm.IsFallbackNavActive);
+        Assert.False(vm.IsQuotaSubmenuVisible);
+    }
+
+    [Fact]
     public async Task QuotaSubmenu_TogglesAndSelectsBothViews()
     {
         var vm = new MainWindowViewModel();
