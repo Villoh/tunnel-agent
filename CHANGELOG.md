@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- **Icon buttons flashed a gray fill on click** (`Controls.axaml`): Fluent's pressed state still painted a background on `icon` / `icon-btn` controls. Press now stays transparent like the theme toggle, while scale feedback and the current pagination highlight are unchanged.
+
 ## [1.1.2] - 2026-08-17
 
 ### Fixed
