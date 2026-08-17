@@ -196,6 +196,7 @@
 
                             <StackPanel Spacing="2">
                                 <Button Classes="side" IsVisible="{Binding !IsSidebarCollapsed}"
+                                        Classes.selected="{Binding IsQuotaNavActive}"
                                         Command="{Binding ToggleQuotaSubmenuCommand}">
                                     <Grid ColumnDefinitions="20,*,Auto">
                                         <lucide:PackIconLucide Grid.Column="0" Kind="ChartBar" Width="15" Height="15"
@@ -224,7 +225,8 @@
                                         Classes.selected="{Binding IsQuotaNavActive}"
                                         ToolTip.Tip="{l:Loc Sidebar_Quota}">
                                     <Button.Flyout>
-                                        <MenuFlyout Placement="RightEdgeAlignedTop" FlyoutPresenterClasses="sidebar-flyout">
+                                        <MenuFlyout Placement="RightEdgeAlignedTop" FlyoutPresenterClasses="sidebar-flyout"
+                                                    Opened="OnSidebarNavFlyoutOpened" Closed="OnSidebarNavFlyoutClosed">
                                             <MenuItem Header="{l:Loc Sidebar_Quota}"
                                                       Command="{Binding SelectQuotaLimitsCommand}"
                                                       IsChecked="{Binding IsQuotaLimitsActive, Mode=OneWay}" />
@@ -242,6 +244,7 @@
 
                             <StackPanel Spacing="2">
                                 <Button Classes="side" IsVisible="{Binding !IsSidebarCollapsed}"
+                                        Classes.selected="{Binding IsFallbackNavActive}"
                                         Command="{Binding ToggleFallbackSubmenuCommand}">
                                     <Grid ColumnDefinitions="20,*,Auto">
                                         <lucide:PackIconLucide Grid.Column="0" Kind="GitFork" Width="15" Height="15"
@@ -270,7 +273,8 @@
                                         Classes.selected="{Binding IsFallbackNavActive}"
                                         ToolTip.Tip="{l:Loc Sidebar_Fallback}">
                                     <Button.Flyout>
-                                        <MenuFlyout Placement="RightEdgeAlignedTop" FlyoutPresenterClasses="sidebar-flyout">
+                                        <MenuFlyout Placement="RightEdgeAlignedTop" FlyoutPresenterClasses="sidebar-flyout"
+                                                    Opened="OnSidebarNavFlyoutOpened" Closed="OnSidebarNavFlyoutClosed">
                                             <MenuItem Header="{l:Loc Sidebar_FallbackCliProxy}"
                                                       Command="{Binding SelectFallbackCommand}"
                                                       IsChecked="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Fallback, Mode=OneWay}" />

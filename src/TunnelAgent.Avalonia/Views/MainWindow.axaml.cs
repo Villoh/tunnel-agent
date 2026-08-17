@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Threading;
 using Avalonia.Interactivity;
@@ -62,6 +63,9 @@ public partial class MainWindow : Window
             return;
         }
 
+        var origin = selected.TranslatePoint(new Point(0, 0), SidebarNav);
+        if (origin is null) return;
+
         // A pill returning from a selected submenu must snap in, not animate
         // from the last top-level item.
         var wasVisible = SidebarPill.IsVisible;
@@ -71,20 +75,32 @@ public partial class MainWindow : Window
 
         SidebarPill.Width = bounds.Width;
         SidebarPill.Height = bounds.Height;
-        translate.X = bounds.X;
+        translate.X = origin.Value.X;
 
         if (animate && wasVisible)
         {
-            translate.Y = bounds.Y;
+            translate.Y = origin.Value.Y;
         }
         else
         {
             // Place instantly by suspending the Y transition for this update.
             var transitions = translate.Transitions;
             translate.Transitions = null;
-            translate.Y = bounds.Y;
+            translate.Y = origin.Value.Y;
             translate.Transitions = transitions;
         }
+    }
+
+    private static void OnSidebarNavFlyoutOpened(object? sender, EventArgs e)
+    {
+        if (sender is FlyoutBase { Target: Control target })
+            target.Classes.Add("flyout-open");
+    }
+
+    private static void OnSidebarNavFlyoutClosed(object? sender, EventArgs e)
+    {
+        if (sender is FlyoutBase { Target: Control target })
+            target.Classes.Remove("flyout-open");
     }
 
     private void OnOpened(object? sender, EventArgs e)

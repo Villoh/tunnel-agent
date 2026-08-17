@@ -324,6 +324,13 @@
     <Style Selector="Button.side:pointerover /template/ ContentPresenter">
         <Setter Property="Background" Value="#0F000000" />
     </Style>
+    <!-- Keep the parent hover while the pointer is on its collapsed flyout. -->
+    <Style Selector="Button.side.flyout-open /template/ ContentPresenter">
+        <Setter Property="Background" Value="#0F000000" />
+    </Style>
+    <Style Selector="Button.side.flyout-open.selected /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
     <!-- Selected background is provided by the sliding pill behind the buttons
          (see MainWindow SidebarPill), so the item itself stays transparent. -->
     <Style Selector="Button.side.selected /template/ ContentPresenter">
