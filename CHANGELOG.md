@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- **Sidebar selection pill shifted after collapsing Quota or Fallback** (`MainWindow.axaml.cs`): collapsing a submenu after moving to another section left the accent pill on a stale Y and sometimes indented by the child margin, so hover/selection looked offset (e.g. on Configuration). The pill now stays full-rail width, X is pinned to 0, and it is remeasured after the submenu layout settles.
+
 ## [1.1.2] - 2026-08-17
 
 ### Fixed
