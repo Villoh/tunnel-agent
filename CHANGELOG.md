@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Sidebar nav clipped when Quota and Fallback submenus are expanded** (`MainWindow.axaml`): the navigation list now lives in the sidebar's remaining-height row inside a `ScrollViewer`, so extra items scroll instead of pushing Status and the footer off-screen in a short window.
 - **Sidebar overlay scrollbar sat on nav badges** (`MainWindow.axaml`, `Controls.axaml`): inset the nav scroller so the thumb sits in a gutter instead of against chevrons and counts.
+- **9Router left running after Tunnel Agent crashes** (`NineRouter/ProcessService`): the Node.js process tree is assigned to a Windows job with kill-on-close so a crash or Task Manager kill of Tunnel Agent also terminates 9Router, and a PID file is reaped on the next start if a leftover instance still holds the port.
 
 ## [1.1.1] - 2026-08-15
 
