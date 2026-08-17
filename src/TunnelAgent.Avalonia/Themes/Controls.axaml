@@ -354,6 +354,11 @@
         <Setter Property="TextElement.Foreground" Value="{DynamicResource AccentBrush}" />
     </Style>
 
+    <!-- Overlay thumb sits in the nav scroller padding, not on badges/chevrons. -->
+    <Style Selector="ScrollViewer.sidebar-nav /template/ ScrollBar">
+        <Setter Property="Margin" Value="0,4,2,4" />
+    </Style>
+
     <!-- Sidebar footer proxy status card (Quotio-style) -->
     <Style Selector="Button.proxy-card">
         <Setter Property="Background" Value="Transparent" />
