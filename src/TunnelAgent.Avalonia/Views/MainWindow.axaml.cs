@@ -40,8 +40,11 @@ public partial class MainWindow : Window
 
         // Keep the sliding sidebar pill sized to the selected item and following
         // layout changes (e.g. sidebar collapse/expand width animation).
-        SidebarNavItems.SizeChanged += (_, _) => MovePill(animate: false);
+        SidebarNavItems.SizeChanged += (_, _) => ScheduleMovePill(animate: false);
     }
+
+    private void ScheduleMovePill(bool animate) =>
+        Dispatcher.UIThread.Post(() => MovePill(animate), DispatcherPriority.Loaded);
 
     /// <summary>
     /// Moves the accent "pill" behind the sidebar nav buttons to the currently
@@ -63,32 +66,32 @@ public partial class MainWindow : Window
             return;
         }
 
-        var origin = selected.TranslatePoint(new Point(0, 0), SidebarNav);
+        var origin = selected.TranslatePoint(new Point(0, 0), SidebarNavItems);
         if (origin is null) return;
 
-        // A pill returning from a selected submenu must snap in, not animate
-        // from the last top-level item.
         var wasVisible = SidebarPill.IsVisible;
         SidebarPill.IsVisible = true;
         var bounds = selected.Bounds;
         if (bounds.Height <= 0) return;
 
-        SidebarPill.Width = bounds.Width;
+        // Top-level rows span the rail. Never keep a leftover X/width from the
+        // indented submenu stack (Margin 18), or the pill sits shifted right.
+        SidebarPill.Width = SidebarNavItems.Bounds.Width > 0
+            ? SidebarNavItems.Bounds.Width
+            : bounds.Width;
         SidebarPill.Height = bounds.Height;
-        translate.X = origin.Value.X;
 
-        if (animate && wasVisible)
-        {
-            translate.Y = origin.Value.Y;
-        }
-        else
-        {
-            // Place instantly by suspending the Y transition for this update.
-            var transitions = translate.Transitions;
+        var y = origin.Value.Y;
+        var snap = !animate || !wasVisible;
+        var transitions = translate.Transitions;
+        if (snap)
             translate.Transitions = null;
-            translate.Y = origin.Value.Y;
+
+        translate.X = 0;
+        translate.Y = y;
+
+        if (snap)
             translate.Transitions = transitions;
-        }
     }
 
     private static void OnSidebarNavFlyoutOpened(object? sender, EventArgs e)
@@ -149,9 +152,13 @@ public partial class MainWindow : Window
             UpdateSectionContent(vm);
             Dispatcher.UIThread.Post(() => MovePill(animate: true), DispatcherPriority.Render);
         }
-        else if (args.PropertyName == nameof(MainWindowViewModel.IsSidebarCollapsed))
+        else if (args.PropertyName is nameof(MainWindowViewModel.IsSidebarCollapsed)
+                 or nameof(MainWindowViewModel.IsQuotaSubmenuExpanded)
+                 or nameof(MainWindowViewModel.IsFallbackSubmenuExpanded)
+                 or nameof(MainWindowViewModel.IsQuotaSubmenuVisible)
+                 or nameof(MainWindowViewModel.IsFallbackSubmenuVisible))
         {
-            Dispatcher.UIThread.Post(() => MovePill(animate: false), DispatcherPriority.Render);
+            ScheduleMovePill(animate: false);
         }
         else if (args.PropertyName == nameof(MainWindowViewModel.ShowApiKeysDialog) && vm.ShowApiKeysDialog)
             Dispatcher.UIThread.Post(() => EnsureApiKeysOverlay(vm).FocusOverlay(), DispatcherPriority.Input);

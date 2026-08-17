@@ -187,8 +187,11 @@
             </Transitions>
         </Setter>
     </Style>
-    <!-- Override Fluent's default hover fill while retaining the scale feedback. -->
+    <!-- Override Fluent's default hover/press fill while retaining the scale feedback. -->
     <Style Selector="Button.icon:pointerover /template/ ContentPresenter, Button.icon-btn:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.icon:pressed /template/ ContentPresenter, Button.icon-btn:pressed /template/ ContentPresenter">
         <Setter Property="Background" Value="Transparent" />
     </Style>
     <Style Selector="Button.icon:pointerover, Button.icon-btn:pointerover">
@@ -211,9 +214,6 @@
         <Setter Property="Padding" Value="0" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
-    </Style>
-    <Style Selector="Button.icon:pressed /template/ ContentPresenter">
-        <Setter Property="Background" Value="#26000000" />
     </Style>
 
     <Style Selector="Button.engine-action">
@@ -458,9 +458,6 @@
     </Style>
     <Style Selector="Button:pressed > Grid.theme-icon">
         <Setter Property="RenderTransform" Value="rotate(180deg) scale(0.85)" />
-    </Style>
-    <Style Selector="Button.theme-toggle:pressed /template/ ContentPresenter">
-        <Setter Property="Background" Value="Transparent" />
     </Style>
 
     <!-- Status indicator -->
@@ -833,9 +830,6 @@
         <Setter Property="Foreground" Value="{DynamicResource FgBrush}" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
-    </Style>
-    <Style Selector="Button.icon-btn:pressed /template/ ContentPresenter">
-        <Setter Property="Background" Value="#22000000" />
     </Style>
     <Style Selector="Button.icon-btn.engine-action:pressed /template/ ContentPresenter">
         <Setter Property="Background" Value="Transparent" />
