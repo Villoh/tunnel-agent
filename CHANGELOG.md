@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Sidebar nav clipped when Quota and Fallback submenus are expanded** (`MainWindow.axaml`): the navigation list now lives in the sidebar's remaining-height row inside a `ScrollViewer`, so extra items scroll instead of pushing Status and the footer off-screen in a short window.
+- **Sidebar overlay scrollbar sat on nav badges** (`MainWindow.axaml`, `Controls.axaml`): inset the nav scroller so the thumb sits in a gutter instead of against chevrons and counts.
 
 ## [1.1.1] - 2026-08-15
 
