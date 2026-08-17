@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 using TunnelAgent.Core.Engine;
+using TunnelAgent.Infrastructure.Engine;
 using TunnelAgent.Infrastructure.Engine.NineRouter;
 
 namespace TunnelAgent.Tests;
@@ -81,6 +82,36 @@ public sealed class NineRouterProcessServiceTests
         Assert.True(
             startInfo.Environment.ContainsKey("PATH") || startInfo.Environment.ContainsKey("Path"),
             "Current process environment should be inherited.");
+    }
+
+    [Fact]
+    public async Task StartAsync_ReapsRecordedLeftoverProcess()
+    {
+        using var temp = new TestTempDirectory();
+        var serverPath = CreateServerEntry(temp);
+        var pidPath = EnginePidFile.PathForServerEntry(serverPath);
+        var port = GetFreePort();
+        var missingNode = temp.File(OperatingSystem.IsWindows() ? "nonexistent-node.exe" : "nonexistent-node");
+
+        using var leftover = EnginePidFileTests.StartHangProcess();
+        try
+        {
+            EnginePidFile.Write(pidPath, leftover, serverPath);
+            var service = new ProcessService();
+
+            await service.StartAsync(missingNode, serverPath, port);
+
+            leftover.WaitForExit(2000);
+            leftover.Refresh();
+            Assert.True(leftover.HasExited);
+            Assert.False(File.Exists(pidPath));
+            Assert.Equal(EngineState.Error, service.State);
+            Assert.Equal(EngineErrorKind.LaunchFailed, service.LastErrorKind);
+        }
+        finally
+        {
+            EnginePidFileTests.TryKill(leftover);
+        }
     }
 
     [Fact]
