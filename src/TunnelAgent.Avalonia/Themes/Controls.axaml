@@ -324,6 +324,13 @@
     <Style Selector="Button.side:pointerover /template/ ContentPresenter">
         <Setter Property="Background" Value="#0F000000" />
     </Style>
+    <!-- Keep the parent hover while the pointer is on its collapsed flyout. -->
+    <Style Selector="Button.side.flyout-open /template/ ContentPresenter">
+        <Setter Property="Background" Value="#0F000000" />
+    </Style>
+    <Style Selector="Button.side.flyout-open.selected /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
     <!-- Selected background is provided by the sliding pill behind the buttons
          (see MainWindow SidebarPill), so the item itself stays transparent. -->
     <Style Selector="Button.side.selected /template/ ContentPresenter">
@@ -722,6 +729,35 @@
         <Setter Property="CornerRadius" Value="10" />
         <Setter Property="Padding" Value="14" />
         <Setter Property="Cursor" Value="Arrow" />
+    </Style>
+
+    <!-- Compact menu shown from collapsed sidebar items with children -->
+    <Style Selector="MenuFlyoutPresenter.sidebar-flyout">
+        <Setter Property="Background" Value="{DynamicResource SideBgBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinWidth" Value="188" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+    <!-- Fluent's presenter template ignores Padding and uses FlyoutBorderThemePadding /
+         MenuFlyoutScrollerMargin instead, which left a gap around first/last hover. -->
+    <Style Selector="MenuFlyoutPresenter.sidebar-flyout /template/ Border#LayoutRoot">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+    <Style Selector="MenuFlyoutPresenter.sidebar-flyout /template/ ItemsPresenter#PART_ItemsPresenter">
+        <Setter Property="Margin" Value="0" />
+    </Style>
+    <Style Selector="MenuFlyoutPresenter.sidebar-flyout MenuItem:nth-child(1)">
+        <Setter Property="CornerRadius" Value="7,7,0,0" />
+    </Style>
+    <Style Selector="MenuFlyoutPresenter.sidebar-flyout MenuItem:nth-last-child(1)">
+        <Setter Property="CornerRadius" Value="0,0,7,7" />
+    </Style>
+    <Style Selector="MenuFlyoutPresenter.sidebar-flyout MenuItem:nth-child(1):nth-last-child(1)">
+        <Setter Property="CornerRadius" Value="7" />
     </Style>
 
     <!-- Borderless expand/collapse chevron (no checked highlight) -->

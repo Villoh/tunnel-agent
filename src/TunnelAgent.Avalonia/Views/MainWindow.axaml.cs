@@ -6,10 +6,12 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Threading;
 using Avalonia.Interactivity;
 using Avalonia.Styling;
+using Avalonia.VisualTree;
 using TunnelAgent.Infrastructure.Engine.CliProxy;
 using TunnelAgent.ViewModels;
 
@@ -50,14 +52,19 @@ public partial class MainWindow : Window
     {
         if (SidebarPill.RenderTransform is not Avalonia.Media.TranslateTransform translate) return;
 
-        var selected = SidebarNavItems.Children
+        var selected = SidebarNavItems.GetVisualDescendants()
             .OfType<Button>()
-            .FirstOrDefault(b => b.Classes.Contains("selected"));
+            .FirstOrDefault(b => b.IsVisible
+                                 && b.Classes.Contains("selected")
+                                 && !b.Classes.Contains("side-sub"));
         if (selected is null)
         {
             SidebarPill.IsVisible = false;
             return;
         }
+
+        var origin = selected.TranslatePoint(new Point(0, 0), SidebarNav);
+        if (origin is null) return;
 
         // A pill returning from a selected submenu must snap in, not animate
         // from the last top-level item.
@@ -68,20 +75,32 @@ public partial class MainWindow : Window
 
         SidebarPill.Width = bounds.Width;
         SidebarPill.Height = bounds.Height;
-        translate.X = bounds.X;
+        translate.X = origin.Value.X;
 
         if (animate && wasVisible)
         {
-            translate.Y = bounds.Y;
+            translate.Y = origin.Value.Y;
         }
         else
         {
             // Place instantly by suspending the Y transition for this update.
             var transitions = translate.Transitions;
             translate.Transitions = null;
-            translate.Y = bounds.Y;
+            translate.Y = origin.Value.Y;
             translate.Transitions = transitions;
         }
+    }
+
+    private static void OnSidebarNavFlyoutOpened(object? sender, EventArgs e)
+    {
+        if (sender is FlyoutBase { Target: Control target })
+            target.Classes.Add("flyout-open");
+    }
+
+    private static void OnSidebarNavFlyoutClosed(object? sender, EventArgs e)
+    {
+        if (sender is FlyoutBase { Target: Control target })
+            target.Classes.Remove("flyout-open");
     }
 
     private void OnOpened(object? sender, EventArgs e)
@@ -129,6 +148,10 @@ public partial class MainWindow : Window
         {
             UpdateSectionContent(vm);
             Dispatcher.UIThread.Post(() => MovePill(animate: true), DispatcherPriority.Render);
+        }
+        else if (args.PropertyName == nameof(MainWindowViewModel.IsSidebarCollapsed))
+        {
+            Dispatcher.UIThread.Post(() => MovePill(animate: false), DispatcherPriority.Render);
         }
         else if (args.PropertyName == nameof(MainWindowViewModel.ShowApiKeysDialog) && vm.ShowApiKeysDialog)
             Dispatcher.UIThread.Post(() => EnsureApiKeysOverlay(vm).FocusOverlay(), DispatcherPriority.Input);

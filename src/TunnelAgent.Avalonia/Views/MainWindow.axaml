@@ -200,13 +200,15 @@
                             </Button>
 
                             <StackPanel Spacing="2">
-                                <Button Classes="side" Command="{Binding ToggleQuotaSubmenuCommand}">
+                                <Button Classes="side" IsVisible="{Binding !IsSidebarCollapsed}"
+                                        Classes.selected="{Binding IsQuotaNavActive}"
+                                        Command="{Binding ToggleQuotaSubmenuCommand}">
                                     <Grid ColumnDefinitions="20,*,Auto">
                                         <lucide:PackIconLucide Grid.Column="0" Kind="ChartBar" Width="15" Height="15"
                                                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         <TextBlock Grid.Column="1" Text="{l:Loc Sidebar_Quota}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
-                                                   Opacity="{Binding SidebarContentOpacity}" IsVisible="{Binding !IsSidebarCollapsed}" />
-                                        <Panel Grid.Column="2" Width="16" VerticalAlignment="Center" IsVisible="{Binding !IsSidebarCollapsed}">
+                                                   Opacity="{Binding SidebarContentOpacity}" />
+                                        <Panel Grid.Column="2" Width="16" VerticalAlignment="Center">
                                             <lucide:PackIconLucide Kind="ChevronRight" Width="11" Height="11" Foreground="{DynamicResource FgMutedBrush}"
                                                                     IsVisible="{Binding IsQuotaSubmenuExpanded, Converter={StaticResource InvertBool}}" />
                                             <lucide:PackIconLucide Kind="ChevronDown" Width="11" Height="11" Foreground="{DynamicResource FgMutedBrush}"
@@ -214,28 +216,47 @@
                                         </Panel>
                                     </Grid>
                                 </Button>
-                                <StackPanel Spacing="2" Margin="18,0,0,0" IsVisible="{Binding IsQuotaSubmenuExpanded}">
+                                <StackPanel Spacing="2" Margin="18,0,0,0" IsVisible="{Binding IsQuotaSubmenuVisible}">
                                     <Button Classes="side side-sub" Classes.selected="{Binding IsQuotaLimitsActive}"
                                             Command="{Binding SelectQuotaLimitsCommand}">
-                                        <TextBlock Text="{l:Loc Sidebar_Quota}" FontSize="11" Margin="0"
-                                                   IsVisible="{Binding !IsSidebarCollapsed}" />
+                                        <TextBlock Text="{l:Loc Sidebar_Quota}" FontSize="11" Margin="0" />
                                     </Button>
                                     <Button Classes="side side-sub" Classes.selected="{Binding IsQuotaUsageActive}"
                                             Command="{Binding SelectQuotaUsageCommand}">
-                                        <TextBlock Text="{l:Loc Sidebar_NineRouterUsage}" FontSize="11" Margin="0"
-                                                   IsVisible="{Binding !IsSidebarCollapsed}" />
+                                        <TextBlock Text="{l:Loc Sidebar_NineRouterUsage}" FontSize="11" Margin="0" />
                                     </Button>
                                 </StackPanel>
+                                <Button Classes="side" IsVisible="{Binding IsSidebarCollapsed}"
+                                        Classes.selected="{Binding IsQuotaNavActive}"
+                                        ToolTip.Tip="{l:Loc Sidebar_Quota}">
+                                    <Button.Flyout>
+                                        <MenuFlyout Placement="RightEdgeAlignedTop" FlyoutPresenterClasses="sidebar-flyout"
+                                                    Opened="OnSidebarNavFlyoutOpened" Closed="OnSidebarNavFlyoutClosed">
+                                            <MenuItem Header="{l:Loc Sidebar_Quota}"
+                                                      Command="{Binding SelectQuotaLimitsCommand}"
+                                                      IsChecked="{Binding IsQuotaLimitsActive, Mode=OneWay}" />
+                                            <MenuItem Header="{l:Loc Sidebar_NineRouterUsage}"
+                                                      Command="{Binding SelectQuotaUsageCommand}"
+                                                      IsChecked="{Binding IsQuotaUsageActive, Mode=OneWay}" />
+                                        </MenuFlyout>
+                                    </Button.Flyout>
+                                    <Grid ColumnDefinitions="20,*">
+                                        <lucide:PackIconLucide Grid.Column="0" Kind="ChartBar" Width="15" Height="15"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Button>
                             </StackPanel>
 
                             <StackPanel Spacing="2">
-                                <Button Classes="side" Command="{Binding ToggleFallbackSubmenuCommand}">
+                                <Button Classes="side" IsVisible="{Binding !IsSidebarCollapsed}"
+                                        Classes.selected="{Binding IsFallbackNavActive}"
+                                        Command="{Binding ToggleFallbackSubmenuCommand}">
                                     <Grid ColumnDefinitions="20,*,Auto">
                                         <lucide:PackIconLucide Grid.Column="0" Kind="GitFork" Width="15" Height="15"
                                                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         <TextBlock Grid.Column="1" Text="{l:Loc Sidebar_Fallback}" FontSize="13" VerticalAlignment="Center" Margin="6,0,0,0"
-                                                   Opacity="{Binding SidebarContentOpacity}" IsVisible="{Binding !IsSidebarCollapsed}" />
-                                        <Panel Grid.Column="2" Width="16" VerticalAlignment="Center" IsVisible="{Binding !IsSidebarCollapsed}">
+                                                   Opacity="{Binding SidebarContentOpacity}" />
+                                        <Panel Grid.Column="2" Width="16" VerticalAlignment="Center">
                                             <lucide:PackIconLucide Kind="ChevronRight" Width="11" Height="11" Foreground="{DynamicResource FgMutedBrush}"
                                                                     IsVisible="{Binding IsFallbackSubmenuExpanded, Converter={StaticResource InvertBool}}" />
                                             <lucide:PackIconLucide Kind="ChevronDown" Width="11" Height="11" Foreground="{DynamicResource FgMutedBrush}"
@@ -243,18 +264,35 @@
                                         </Panel>
                                     </Grid>
                                 </Button>
-                                <StackPanel Spacing="2" Margin="18,0,0,0" IsVisible="{Binding IsFallbackSubmenuExpanded}">
+                                <StackPanel Spacing="2" Margin="18,0,0,0" IsVisible="{Binding IsFallbackSubmenuVisible}">
                                     <Button Classes="side side-sub" Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Fallback}"
                                             Command="{Binding SelectFallbackCommand}">
-                                        <TextBlock Text="{l:Loc Sidebar_FallbackCliProxy}" FontSize="11" Margin="0"
-                                                   IsVisible="{Binding !IsSidebarCollapsed}" />
+                                        <TextBlock Text="{l:Loc Sidebar_FallbackCliProxy}" FontSize="11" Margin="0" />
                                     </Button>
                                     <Button Classes="side side-sub" Classes.selected="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=NineRouterCombos}"
                                             Command="{Binding SelectNineRouterCombosCommand}">
-                                        <TextBlock Text="{l:Loc Sidebar_NineRouterCombos}" FontSize="11" Margin="0"
-                                                   IsVisible="{Binding !IsSidebarCollapsed}" />
+                                        <TextBlock Text="{l:Loc Sidebar_NineRouterCombos}" FontSize="11" Margin="0" />
                                     </Button>
                                 </StackPanel>
+                                <Button Classes="side" IsVisible="{Binding IsSidebarCollapsed}"
+                                        Classes.selected="{Binding IsFallbackNavActive}"
+                                        ToolTip.Tip="{l:Loc Sidebar_Fallback}">
+                                    <Button.Flyout>
+                                        <MenuFlyout Placement="RightEdgeAlignedTop" FlyoutPresenterClasses="sidebar-flyout"
+                                                    Opened="OnSidebarNavFlyoutOpened" Closed="OnSidebarNavFlyoutClosed">
+                                            <MenuItem Header="{l:Loc Sidebar_FallbackCliProxy}"
+                                                      Command="{Binding SelectFallbackCommand}"
+                                                      IsChecked="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=Fallback, Mode=OneWay}" />
+                                            <MenuItem Header="{l:Loc Sidebar_NineRouterCombos}"
+                                                      Command="{Binding SelectNineRouterCombosCommand}"
+                                                      IsChecked="{Binding SelectedSection, Converter={StaticResource SectionEq}, ConverterParameter=NineRouterCombos, Mode=OneWay}" />
+                                        </MenuFlyout>
+                                    </Button.Flyout>
+                                    <Grid ColumnDefinitions="20,*">
+                                        <lucide:PackIconLucide Grid.Column="0" Kind="GitFork" Width="15" Height="15"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Button>
                             </StackPanel>
 
                             <Button Classes="side"
