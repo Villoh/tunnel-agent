@@ -120,7 +120,7 @@
                                               IsChecked="{Binding IsExpanded, Mode=TwoWay}">
                                     <lucide:PackIconLucide Kind="ChevronRight" Width="14" Height="14"
                                                            HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource FgMutedBrush}" />
+                                                           Foreground="{DynamicResource FgBrush}" />
                                 </ToggleButton>
 
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">

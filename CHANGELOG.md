@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- **Sidebar submenu chevrons** (`MainWindow.axaml`, `Controls.axaml`, `FallbackView.axaml`): Quota and Fallback arrows now use the primary foreground color and rotate 90° with the same 0.18s CubicEaseOut transition as virtual-model expanders, instead of swapping muted right/down icons.
+
 ### Fixed
 
 - **Icon buttons flashed a gray fill on click** (`Controls.axaml`): Fluent's pressed state still painted a background on `icon` / `icon-btn` controls. Press now stays transparent like the theme toggle, while scale feedback and the current pagination highlight are unchanged.
