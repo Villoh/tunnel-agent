@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.1.2] - 2026-08-17
+
 ### Fixed
 
 - **Collapsed sidebar hid Quota and Fallback children** (`MainWindow.axaml`, `MainWindow.axaml.cs`, `Controls.axaml`): collapsing the rail left empty selected submenu pills because child labels were hidden in-place. Those groups now open a flyout beside the icon, the parent keeps the sliding pill and hover while a child is active or the flyout is open, and first/last flyout hover fills the rounded corners.
@@ -1016,6 +1018,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
+[1.1.2]: https://github.com/Villoh/tunnel-agent/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/Villoh/tunnel-agent/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/Villoh/tunnel-agent/compare/v1.0.6...v1.1.0
 [1.0.6]: https://github.com/Villoh/tunnel-agent/compare/v1.0.5...v1.0.6
