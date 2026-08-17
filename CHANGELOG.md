@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- **Collapsed sidebar hid Quota and Fallback children** (`MainWindow.axaml`, `MainWindow.axaml.cs`, `Controls.axaml`): collapsing the rail left empty selected submenu pills because child labels were hidden in-place. Those groups now open a flyout beside the icon, the parent keeps the sliding pill and hover while a child is active or the flyout is open, and first/last flyout hover fills the rounded corners.
+
 ## [1.1.1] - 2026-08-15
 
 ### Added
