@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TunnelAgent.Core.Engine;
+using TunnelAgent.Infrastructure.Engine;
 
 namespace TunnelAgent.Infrastructure.Engine.NineRouter;
 
@@ -38,9 +39,13 @@ public sealed class ProcessService
     public event EventHandler? StateChanged;
 
     private Process? _process;
+    private KillOnCloseJob? _job;
+    private string? _pidFilePath;
 
     /// <summary>
     /// Starts Node.js against the extracted standalone server on loopback.
+    /// Reaps a leftover instance recorded from a previous crash, then assigns the
+    /// new process to a Windows kill-on-close job so the tree dies with Tunnel Agent.
     /// Does not throw when the port is taken or the executable cannot be launched;
     /// those cases set <see cref="State"/> to <see cref="EngineState.Error"/>.
     /// </summary>
@@ -52,11 +57,11 @@ public sealed class ProcessService
     {
         Port = port;
         SetState(EngineState.Starting);
-
-        if (_process is not null)
+        StopProcess();
+        if (ReapLeftoverEngine(serverEntryPath))
         {
-            _process.Dispose();
-            _process = null;
+            for (var i = 0; i < 10 && IsPortInUse(port); i++)
+                await Task.Delay(100, ct);
         }
 
         // Pre-flight: fail fast with a clear message if the port is already taken.
@@ -97,6 +102,7 @@ public sealed class ProcessService
         try
         {
             _process.Start();
+            AttachLifetimeGuards(serverEntryPath);
         }
         catch (Exception ex)
         {
@@ -109,7 +115,17 @@ public sealed class ProcessService
 
         _process.BeginErrorReadLine();
 
-        var result = await WaitForHealthAsync(port, ct);
+        HealthResult result;
+        try
+        {
+            result = await WaitForHealthAsync(port, ct);
+        }
+        catch
+        {
+            StopProcess();
+            throw;
+        }
+
         if (result != HealthResult.Healthy)
         {
             if (result == HealthResult.ProcessExited)
@@ -170,6 +186,42 @@ public sealed class ProcessService
         return startInfo;
     }
 
+    private void AttachLifetimeGuards(string serverEntryPath)
+    {
+        if (_process is null)
+            return;
+
+        _job = KillOnCloseJob.TryCreate();
+        if (_job is not null && !_job.TryAssign(_process))
+        {
+            _job.Dispose();
+            _job = null;
+        }
+
+        try
+        {
+            _pidFilePath = EnginePidFile.PathForServerEntry(serverEntryPath);
+            EnginePidFile.Write(_pidFilePath, _process, serverEntryPath);
+        }
+        catch
+        {
+            _pidFilePath = null;
+        }
+    }
+
+    private static bool ReapLeftoverEngine(string serverEntryPath)
+    {
+        try
+        {
+            return EnginePidFile.TryKillRecorded(EnginePidFile.PathForServerEntry(serverEntryPath), serverEntryPath);
+        }
+        catch
+        {
+            // Starting still proceeds; a leftover will surface as port-in-use.
+            return false;
+        }
+    }
+
     private void StopProcess()
     {
         try
@@ -182,6 +234,13 @@ public sealed class ProcessService
         {
             _process?.Dispose();
             _process = null;
+            _job?.Dispose();
+            _job = null;
+            if (_pidFilePath is not null)
+            {
+                EnginePidFile.Delete(_pidFilePath);
+                _pidFilePath = null;
+            }
         }
     }
 

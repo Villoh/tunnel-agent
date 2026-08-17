@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- **9Router left running after Tunnel Agent crashes** (`NineRouter/ProcessService`): the Node.js process tree is assigned to a Windows job with kill-on-close so a crash or Task Manager kill of Tunnel Agent also terminates 9Router, and a PID file is reaped on the next start if a leftover instance still holds the port.
+
 ## [1.1.1] - 2026-08-15
 
 ### Added
