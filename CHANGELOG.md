@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Icon buttons flashed a gray fill on click** (`Controls.axaml`): Fluent's pressed state still painted a background on `icon` / `icon-btn` controls. Press now stays transparent like the theme toggle, while scale feedback and the current pagination highlight are unchanged.
 - **Sidebar selection pill shifted after collapsing Quota or Fallback** (`MainWindow.axaml.cs`): collapsing a submenu after moving to another section left the accent pill on a stale Y and sometimes indented by the child margin, so hover/selection looked offset (e.g. on Configuration). The pill now stays full-rail width, X is pinned to 0, and it is remeasured after the submenu layout settles.
 
 ## [1.1.2] - 2026-08-17
