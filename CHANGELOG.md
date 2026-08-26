@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.1.6] - 2026-08-26
+
 ### Added
 
 - **Management key visibility toggle** (`ConfigurationView`, `MainWindowViewModel`): the management key field is masked by default, matching every other credential input in the app, with an eye/eye-off button to reveal it.
@@ -1051,6 +1053,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine always reads version from binary at startup (never trusts cached value)
 - Update notification triggers reactively from `StateChanged` rather than at a fixed startup point
 
+[1.1.6]: https://github.com/Villoh/tunnel-agent/compare/v1.1.5...v1.1.6
+[1.1.5]: https://github.com/Villoh/tunnel-agent/compare/v1.1.4...v1.1.5
+[1.1.4]: https://github.com/Villoh/tunnel-agent/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/Villoh/tunnel-agent/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/Villoh/tunnel-agent/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/Villoh/tunnel-agent/compare/v1.1.0...v1.1.1
