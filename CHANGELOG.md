@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- **Management key visibility toggle** (`ConfigurationView`, `MainWindowViewModel`): the management key field is masked by default, matching every other credential input in the app, with an eye/eye-off button to reveal it.
+
+### Fixed
+
+- **Management key row broke on narrow panels** (`ConfigurationView`): the control group (field, eye, copy, regenerate, apply) wrapped onto a new line instead of squeezing the label down to one character per line on narrow windows.
+
 ## [1.1.5] - 2026-08-26
 
 ### Added

@@ -13,6 +13,8 @@
         <cv:ServerStateToTextConverter x:Key="StateToText" />
         <cv:ServerStateToBrushConverter x:Key="StateToBrush" />
         <cv:ServerStateRunningConverter x:Key="StateIsRunning" />
+        <cv:SecretPasswordCharConverter x:Key="SecretPasswordChar" />
+        <cv:BoolToEyeIconConverter x:Key="EyeIcon" />
     </UserControl.Resources>
 
     <Panel>
@@ -302,12 +304,17 @@
                                     <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_ManagementKey_Label}"/>
                                     <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_ManagementKey_Description}"/>
                                 </StackPanel>
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <WrapPanel Grid.Column="1" HorizontalAlignment="Right">
                                     <TextBox Classes="app" Text="{Binding EditableManagementKey, Mode=TwoWay}"
-                                             Width="200" Height="24" MinHeight="0" Padding="8,0" MaxLength="128"
+                                             PasswordChar="{Binding ShowManagementKey, Converter={StaticResource SecretPasswordChar}}"
+                                             Width="130" Height="24" MinHeight="0" Padding="8,0" MaxLength="128"
                                              FontFamily="Cascadia Mono,Consolas,monospace" FontSize="11.5"
-                                             VerticalContentAlignment="Center" />
-                                    <Button Classes="icon-btn copy-endpoint"
+                                             VerticalContentAlignment="Center" Margin="0,0,6,4" />
+                                    <Button Classes="icon-btn copy-endpoint" Margin="0,0,6,4" ToolTip.Tip="{l:Loc ConfigView_CLIProxy_ManagementKey_ShowHideTooltip}"
+                                            Command="{Binding ToggleManagementKeyVisibilityCommand}">
+                                        <lucide:PackIconLucide Kind="{Binding ShowManagementKey, Converter={StaticResource EyeIcon}}" Width="13" Height="13" />
+                                    </Button>
+                                    <Button Classes="icon-btn copy-endpoint" Margin="0,0,6,4"
                                             Classes.copied="{Binding ManagementKeyCopied}"
                                             ToolTip.Tip="{l:Loc ConfigView_CLIProxy_ManagementKey_CopyTooltip}"
                                             Click="OnCopyManagementKey">
@@ -316,14 +323,14 @@
                                             <lucide:PackIconLucide Kind="Check" Width="13" Height="13" IsVisible="{Binding ManagementKeyCopied}" />
                                         </Panel>
                                     </Button>
-                                    <Button Classes="icon-btn" ToolTip.Tip="{l:Loc ConfigView_CLIProxy_ManagementKey_RegenerateTooltip}"
+                                    <Button Classes="icon-btn copy-endpoint" Margin="0,0,6,4" ToolTip.Tip="{l:Loc ConfigView_CLIProxy_ManagementKey_RegenerateTooltip}"
                                             Command="{Binding RegenerateManagementKeyCommand}">
                                         <lucide:PackIconLucide Kind="RefreshCw" Width="13" Height="13" />
                                     </Button>
-                                    <Button Classes="app primary" Content="{l:Loc ConfigView_ListenPort_Apply}"
+                                    <Button Classes="app primary" Margin="0,0,0,4" Content="{l:Loc ConfigView_ListenPort_Apply}"
                                             Command="{Binding ApplyManagementKeyCommand}"
                                             IsEnabled="{Binding CanApplyManagementKey}" />
-                                </StackPanel>
+                                </WrapPanel>
                             </Grid>
                             <Border Classes="row-divider"/>
                             <Grid Margin="14,11" ColumnDefinitions="*,Auto">

@@ -1135,6 +1135,9 @@
   <data name="ConfigView_CLIProxy_ManagementKey_Description" xml:space="preserve">
     <value>Password for the management API and web control panel login. Changing it restarts CLIProxyAPI.</value>
   </data>
+  <data name="ConfigView_CLIProxy_ManagementKey_ShowHideTooltip" xml:space="preserve">
+    <value>Show/hide management key</value>
+  </data>
   <data name="ConfigView_CLIProxy_ManagementKey_CopyTooltip" xml:space="preserve">
     <value>Copy management key</value>
   </data>

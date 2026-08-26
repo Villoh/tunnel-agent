@@ -215,6 +215,7 @@ SelectedSection is SectionKey.Logs;
     [ObservableProperty] private bool _showManagementKeyRepairedToast;
     [ObservableProperty] private bool _endpointCopied;
     [ObservableProperty] private bool _managementKeyCopied;
+    [ObservableProperty] private bool _showManagementKey;
     [ObservableProperty] private bool _showUpdateSuccess;
     [ObservableProperty] private bool _showCliProxyUpdateSuccess;
     [ObservableProperty] private bool _showPerplexityUpdateSuccess;
@@ -2638,6 +2639,7 @@ SelectedSection is SectionKey.Logs;
         await ConnectOAuthAsync(AddAccountTarget.Id);
     }
 
+    [RelayCommand] private void ToggleManagementKeyVisibility() => ShowManagementKey = !ShowManagementKey;
     [RelayCommand] private void ToggleApiKeyDraftVisibility() => ShowApiKeyDraft = !ShowApiKeyDraft;
     [RelayCommand] private void ToggleAddAccountApiKeyVisibility() => ShowAddAccountApiKey = !ShowAddAccountApiKey;
     [RelayCommand] private void TogglePerplexitySessionTokenVisibility() => ShowPerplexitySessionToken = !ShowPerplexitySessionToken;
