@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **CLIProxyAPI web control panel toggle** (`ConfigurationView`, `MainWindowViewModel`, `ConfigService`): a new setting under Configuration → CLIProxyAPI → Security lets you serve the management page (`management.html`) on the proxy port instead of always disabling it. Toggling restarts CLIProxyAPI if it's running.
+- **CLIProxyAPI web control panel toggle** (`ConfigurationView`, `MainWindowViewModel`, `ConfigService`): a new setting under Configuration → CLIProxyAPI → Security lets you serve the management page (`management.html`) on the proxy port instead of always disabling it. Toggling restarts CLIProxyAPI if it's running. A copy button next to the toggle copies the panel's login password (`ManagementKey`) to the clipboard.
 
 ## [1.1.3] - 2026-08-17
 

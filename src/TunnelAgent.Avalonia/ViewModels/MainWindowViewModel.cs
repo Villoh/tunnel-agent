@@ -214,6 +214,7 @@ SelectedSection is SectionKey.Logs;
     [ObservableProperty] private bool _showAppNoUpdateToast;
     [ObservableProperty] private bool _showManagementKeyRepairedToast;
     [ObservableProperty] private bool _endpointCopied;
+    [ObservableProperty] private bool _managementKeyCopied;
     [ObservableProperty] private bool _showUpdateSuccess;
     [ObservableProperty] private bool _showCliProxyUpdateSuccess;
     [ObservableProperty] private bool _showPerplexityUpdateSuccess;
@@ -936,6 +937,9 @@ SelectedSection is SectionKey.Logs;
         foreach (var q in QuotaAccounts)
             q.MaskEmails = mask;
     }
+
+    /// <summary>Password for CLIProxyAPI's web control panel login (plain value; the config file stores it bcrypt-hashed).</summary>
+    public string ManagementKey => _settings.Current.ManagementKey;
 
     public bool EnableControlPanel
     {

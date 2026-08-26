@@ -79,4 +79,15 @@ public partial class ConfigurationView : UserControl
         await Task.Delay(2000);
         vm.EndpointCopied = false;
     }
+
+    private async void OnCopyManagementKey(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+        if (clipboard is null) return;
+        await clipboard.SetTextAsync(vm.ManagementKey);
+        vm.ManagementKeyCopied = true;
+        await Task.Delay(2000);
+        vm.ManagementKeyCopied = false;
+    }
 }
