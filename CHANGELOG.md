@@ -7,12 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [1.1.5] - 2026-08-26
+
+### Added
+
+- **Editable management key** (`ConfigurationView`, `MainWindowViewModel`): the management API / control panel password (`ManagementKey`) can now be copied, typed in directly, or regenerated to a new random value from Configuration → CLIProxyAPI → Security. Any change rewrites `proxy-config.yaml` and restarts CLIProxyAPI if it's running.
+
 ## [1.1.4] - 2026-08-26
 
 ### Added
 
 - **CLIProxyAPI web control panel toggle** (`ConfigurationView`, `MainWindowViewModel`, `ConfigService`): a new setting under Configuration → CLIProxyAPI → Security lets you serve the management page (`management.html`) on the proxy port instead of always disabling it. Toggling restarts CLIProxyAPI if it's running.
-- **Editable management key** (`ConfigurationView`, `MainWindowViewModel`): the management API / control panel password (`ManagementKey`) can now be copied, typed in directly, or regenerated to a new random value from Configuration → CLIProxyAPI → Security. Any change rewrites `proxy-config.yaml` and restarts CLIProxyAPI if it's running.
 
 ## [1.1.3] - 2026-08-17
 
