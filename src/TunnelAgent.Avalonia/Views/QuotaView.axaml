@@ -189,6 +189,50 @@
                                     <TextBlock Classes="row-desc" Text="{Binding QuotaEmptyDescription}" />
                                 </StackPanel>
                             </Border>
+
+                            <Border Background="#08FFFFFF"
+                                    CornerRadius="8"
+                                    IsVisible="{Binding HasCodexResetCredits}">
+                                <StackPanel>
+                                    <Grid ColumnDefinitions="Auto,*,Auto" Margin="12,10" ColumnSpacing="8">
+                                        <ToggleButton Grid.Column="0" Classes="chevron" Width="22" Height="22" VerticalAlignment="Center"
+                                                      IsChecked="{Binding IsCodexResetSectionExpanded, Mode=TwoWay}">
+                                            <lucide:PackIconLucide Kind="ChevronRight" Width="14" Height="14"
+                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                   Foreground="{DynamicResource FgBrush}" />
+                                        </ToggleButton>
+                                        <TextBlock Grid.Column="1" Classes="row-label" VerticalAlignment="Center"
+                                                   Text="{l:Loc QuotaView_Codex_ResetSection_Title}" />
+                                        <Border Grid.Column="2" CornerRadius="999" Background="#1850C878" Padding="8,3" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding CodexResetCountBadge}" FontSize="11" FontWeight="SemiBold" Foreground="#50C878" />
+                                        </Border>
+                                    </Grid>
+
+                                    <Border Classes="collapsible" Classes.expanded="{Binding IsCodexResetSectionExpanded}">
+                                        <StackPanel Margin="12,0,12,10" Spacing="10">
+                                            <Border Classes="row-divider" Margin="0,0,0,4" />
+                                            <ItemsControl ItemsSource="{Binding CodexResetCredits}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:CodexResetCreditViewModel">
+                                                        <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                                                            <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="2">
+                                                                <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold"
+                                                                           Foreground="{DynamicResource FgBrush}" />
+                                                                <TextBlock Text="{Binding ExpiresLabel}" Classes="row-desc" />
+                                                            </StackPanel>
+                                                            <Button Grid.Column="1" Classes="app" VerticalAlignment="Center" Margin="10,0,0,0"
+                                                                    Content="{l:Loc QuotaView_Codex_ResetButton}"
+                                                                    IsEnabled="{Binding Account.IsResettingCodexQuota, Converter={StaticResource InvertBool}}"
+                                                                    Click="OnResetCodexQuota"
+                                                                    Tag="{Binding}" />
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </Border>
                 </DataTemplate>

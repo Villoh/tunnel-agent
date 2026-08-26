@@ -1983,6 +1983,9 @@ SelectedSection is SectionKey.Logs;
         return provider is not null ? _quota.FetchAccountPublicAsync(provider.Id, account) : Task.CompletedTask;
     }
 
+    /// <summary>Spends a saved Codex rate-limit reset ("banked reset") — a direct OpenAI account call, not routed through CLIProxyAPI.</summary>
+    public Task ConsumeCodexResetQuotaAsync(ProviderAccountViewModel account, string creditId) => _quota.ConsumeCodexResetCreditAsync(account, creditId);
+
     public async Task RefreshAllQuotaProvidersAsync()
     {
         if (IsRefreshingAllQuotaProviders) return;

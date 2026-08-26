@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Management key visibility toggle** (`ConfigurationView`, `MainWindowViewModel`): the management key field is masked by default, matching every other credential input in the app, with an eye/eye-off button to reveal it.
+- **Codex saved rate-limit resets ("banked resets")** (`QuotaFetchService`, `ProviderViewModel`, `QuotaView`, `MainWindowViewModel`): Codex accounts on an eligible plan can bank an early reset of the current usage window. Quota now shows a collapsible "Usage limit resets" section per account listing every redeemable reset (title + expiry) with a "Use reset" button; consuming one re-fetches usage so the bars update immediately. Calls ChatGPT's own backend directly, independent of CLIProxyAPI.
 
 ### Fixed
 

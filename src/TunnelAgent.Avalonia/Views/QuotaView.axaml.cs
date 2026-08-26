@@ -33,6 +33,25 @@ public partial class QuotaView : UserControl
         }
     }
 
+    private async void OnResetCodexQuota(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        if (sender is not Button { Tag: CodexResetCreditViewModel credit }) return;
+        var account = credit.Account;
+        if (account.IsResettingCodexQuota) return;
+
+        account.IsResettingCodexQuota = true;
+        try
+        {
+            await vm.ConsumeCodexResetQuotaAsync(account, credit.Id);
+        }
+        catch { }
+        finally
+        {
+            Dispatcher.UIThread.Post(() => account.IsResettingCodexQuota = false);
+        }
+    }
+
     private async void OnRefreshAllNineRouterUsage(object? sender, RoutedEventArgs e)
     {
         if (DataContext is MainWindowViewModel vm)

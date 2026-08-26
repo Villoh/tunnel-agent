@@ -903,6 +903,15 @@
   <data name="QuotaView_Account_UsageSection" xml:space="preserve">
     <value>USO</value>
   </data>
+  <data name="QuotaView_Codex_ResetSection_Title" xml:space="preserve">
+    <value>Reinicios de límite de uso</value>
+  </data>
+  <data name="QuotaView_Codex_ResetCount" xml:space="preserve">
+    <value>{0} disponibles</value>
+  </data>
+  <data name="QuotaView_Codex_ResetButton" xml:space="preserve">
+    <value>Usar reset</value>
+  </data>
 
   
   <data name="ActivityView_Title" xml:space="preserve">
@@ -1552,6 +1561,18 @@
   </data>
   <data name="Quota_ResetInMinutes" xml:space="preserve">
     <value>Se reinicia en {0}m</value>
+  </data>
+  <data name="Quota_ExpiresInNow" xml:space="preserve">
+    <value>Expira ahora</value>
+  </data>
+  <data name="Quota_ExpiresInDaysHours" xml:space="preserve">
+    <value>Expira en {0}d {1}h</value>
+  </data>
+  <data name="Quota_ExpiresInHoursMinutes" xml:space="preserve">
+    <value>Expira en {0}h {1}m</value>
+  </data>
+  <data name="Quota_ExpiresInMinutes" xml:space="preserve">
+    <value>Expira en {0}m</value>
   </data>
   <data name="Quota_ResetPendingSession" xml:space="preserve">
     <value>El temporizador empieza al usar esta cuota</value>

@@ -310,6 +310,7 @@ public sealed class QuotaFetchService
                     return;
                 }
                 await ParseCodexUsageAsync(account, resp2, ct);
+                await FetchCodexResetCreditsAsync(account, token, accountId, ct);
                 return;
             }
 
@@ -319,9 +320,94 @@ public sealed class QuotaFetchService
                 return;
             }
             await ParseCodexUsageAsync(account, resp, ct);
+            await FetchCodexResetCreditsAsync(account, token, accountId, ct);
         }
         catch (OperationCanceledException) { throw; }
         catch { }
+    }
+
+    // ── Codex saved rate-limit reset ("banked reset") ──────────────────────────
+    // Real ChatGPT/Codex account feature, unrelated to CLIProxyAPI: eligible plans can bank
+    // an early reset of the current usage window and spend it on demand. Same undocumented
+    // WHAM endpoints the Codex desktop app / IDE extensions use.
+    // GET  https://chatgpt.com/backend-api/wham/rate-limit-reset-credits
+    //   { "credits": [{ "id": "...", "status": "available", "expires_at": "..." }], "available_count": 1 }
+    // POST https://chatgpt.com/backend-api/wham/rate-limit-reset-credits/consume
+    //   { "credit_id": "...", "redeem_request_id": "<uuid>" } -> { "code": "reset" | "already_redeemed" | "no_credit" | "nothing_to_reset" }
+
+    private async Task FetchCodexResetCreditsAsync(ProviderAccountViewModel account, string token, string? accountId, CancellationToken ct)
+    {
+        try
+        {
+            using var req = new HttpRequestMessage(HttpMethod.Get,
+                "https://chatgpt.com/backend-api/wham/rate-limit-reset-credits");
+            req.Headers.Add("Authorization", $"Bearer {token}");
+            req.Headers.Add("Accept", "application/json");
+            req.Headers.Add("User-Agent", "TunnelAgent/1.0");
+            if (!string.IsNullOrEmpty(accountId))
+                req.Headers.Add("ChatGPT-Account-Id", accountId);
+
+            using var resp = await Http.SendAsync(req, ct);
+            if (!resp.IsSuccessStatusCode) return;
+
+            var doc = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
+            var available = (doc?["credits"]?.AsArray() ?? new JsonArray())
+                .Where(c => string.Equals(c?["status"]?.GetValue<string>(), "available", StringComparison.OrdinalIgnoreCase)
+                         && !string.IsNullOrEmpty(c?["id"]?.GetValue<string>()))
+                .Select(c => new CodexResetCreditViewModel(
+                    account,
+                    c!["id"]!.GetValue<string>(),
+                    c["title"]?.GetValue<string>() ?? "Rate limit reset",
+                    FormatExpiresAtIso(c["expires_at"]?.GetValue<string>())))
+                .ToList();
+
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                account.CodexResetCredits.Clear();
+                foreach (var credit in available)
+                    account.CodexResetCredits.Add(credit);
+            });
+        }
+        catch (OperationCanceledException) { throw; }
+        catch { /* non-fatal — reset-credit visibility is a bonus, not required for quota */ }
+    }
+
+    /// <summary>Spends one saved Codex reset, then re-fetches usage so the bars and the remaining reset list update.</summary>
+    public async Task ConsumeCodexResetCreditAsync(ProviderAccountViewModel account, string creditId, CancellationToken ct = default)
+    {
+        if (string.IsNullOrEmpty(creditId)) return;
+
+        var (token, accountId, lastRefresh) = ReadCodexToken(account.Email);
+        if (token is null) return;
+
+        try
+        {
+            token = await RefreshCodexTokenIfNeededAsync(account.Email, token, lastRefresh, ct) ?? token;
+
+            using var req = new HttpRequestMessage(HttpMethod.Post,
+                "https://chatgpt.com/backend-api/wham/rate-limit-reset-credits/consume");
+            req.Headers.Add("Authorization", $"Bearer {token}");
+            req.Headers.Add("Accept", "application/json");
+            req.Headers.Add("User-Agent", "TunnelAgent/1.0");
+            if (!string.IsNullOrEmpty(accountId))
+                req.Headers.Add("ChatGPT-Account-Id", accountId);
+            req.Content = new StringContent(
+                System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    credit_id = creditId,
+                    redeem_request_id = Guid.NewGuid().ToString(),
+                }),
+                System.Text.Encoding.UTF8, "application/json");
+
+            using var resp = await Http.SendAsync(req, ct);
+            var respDoc = JsonNode.Parse(await resp.Content.ReadAsStringAsync(ct));
+            var code = respDoc?["code"]?.GetValue<string>();
+
+            if (resp.IsSuccessStatusCode && string.Equals(code, "reset", StringComparison.OrdinalIgnoreCase))
+                await FetchCodexAsync(account, ct); // re-fetches usage + whatever reset credits remain
+        }
+        catch (OperationCanceledException) { throw; }
+        catch { /* leave the credit in the list so the user can retry */ }
     }
 
     private async Task ParseCodexUsageAsync(
@@ -1697,6 +1783,21 @@ public sealed class QuotaFetchService
         if (string.IsNullOrEmpty(iso)) return "";
         if (!DateTimeOffset.TryParse(iso, out var dt)) return "";
         return FormatDiff(dt - DateTimeOffset.UtcNow);
+    }
+
+    /// <summary>Codex saved resets *expire* rather than reset — same countdown math as FormatResetAtIso, different copy.</summary>
+    private static string FormatExpiresAtIso(string? iso)
+    {
+        if (string.IsNullOrEmpty(iso)) return "";
+        if (!DateTimeOffset.TryParse(iso, out var dt)) return "";
+        var diff = dt - DateTimeOffset.UtcNow;
+        if (diff <= TimeSpan.Zero)
+            return "loc:Quota_ExpiresInNow";
+        if (diff.TotalDays >= 1)
+            return $"loc:Quota_ExpiresInDaysHours|{(int)diff.TotalDays}|{diff.Hours}";
+        if (diff.TotalHours >= 1)
+            return $"loc:Quota_ExpiresInHoursMinutes|{(int)diff.TotalHours}|{diff.Minutes}";
+        return $"loc:Quota_ExpiresInMinutes|{diff.Minutes}";
     }
 
     private static string FormatDiff(TimeSpan diff)

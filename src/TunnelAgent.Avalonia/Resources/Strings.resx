@@ -942,6 +942,15 @@
   <data name="QuotaView_Account_UsageSection" xml:space="preserve">
     <value>USAGE</value>
   </data>
+  <data name="QuotaView_Codex_ResetSection_Title" xml:space="preserve">
+    <value>Usage limit resets</value>
+  </data>
+  <data name="QuotaView_Codex_ResetCount" xml:space="preserve">
+    <value>{0} available</value>
+  </data>
+  <data name="QuotaView_Codex_ResetButton" xml:space="preserve">
+    <value>Use reset</value>
+  </data>
 
   <!-- ═══════════════════════════════════════════════════════════════════════════
        ACTIVITY VIEW
@@ -1625,6 +1634,18 @@
   </data>
   <data name="Quota_ResetInMinutes" xml:space="preserve">
     <value>Resets in {0}m</value>
+  </data>
+  <data name="Quota_ExpiresInNow" xml:space="preserve">
+    <value>Expires now</value>
+  </data>
+  <data name="Quota_ExpiresInDaysHours" xml:space="preserve">
+    <value>Expires in {0}d {1}h</value>
+  </data>
+  <data name="Quota_ExpiresInHoursMinutes" xml:space="preserve">
+    <value>Expires in {0}h {1}m</value>
+  </data>
+  <data name="Quota_ExpiresInMinutes" xml:space="preserve">
+    <value>Expires in {0}m</value>
   </data>
   <data name="Quota_ResetPendingSession" xml:space="preserve">
     <value>Timer starts once you use this quota</value>
