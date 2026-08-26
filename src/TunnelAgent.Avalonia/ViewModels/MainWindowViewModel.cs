@@ -938,8 +938,43 @@ SelectedSection is SectionKey.Logs;
             q.MaskEmails = mask;
     }
 
-    /// <summary>Password for CLIProxyAPI's web control panel login (plain value; the config file stores it bcrypt-hashed).</summary>
+    /// <summary>Password for CLIProxyAPI's management API and web control panel login (plain value; the config file stores it bcrypt-hashed).</summary>
     public string ManagementKey => _settings.Current.ManagementKey;
+
+    private string? _editableManagementKey;
+    public string EditableManagementKey
+    {
+        get => _editableManagementKey ?? ManagementKey;
+        set
+        {
+            if (SetProperty(ref _editableManagementKey, value))
+                OnPropertyChanged(nameof(CanApplyManagementKey));
+        }
+    }
+
+    public bool CanApplyManagementKey => EditableManagementKey.Trim() is { Length: >= 8 } trimmed
+        && trimmed != ManagementKey;
+
+    [RelayCommand]
+    private void ApplyManagementKey()
+    {
+        if (!CanApplyManagementKey) return;
+        SetManagementKey(EditableManagementKey.Trim());
+    }
+
+    [RelayCommand]
+    private void RegenerateManagementKey() => SetManagementKey(Guid.NewGuid().ToString());
+
+    private void SetManagementKey(string value)
+    {
+        _settings.Current.ManagementKey = value;
+        _settings.Save();
+        _editableManagementKey = null;
+        OnPropertyChanged(nameof(ManagementKey));
+        OnPropertyChanged(nameof(EditableManagementKey));
+        OnPropertyChanged(nameof(CanApplyManagementKey));
+        _ = ApplyManagementKeyChangeAsync();
+    }
 
     public bool EnableControlPanel
     {
@@ -4658,6 +4693,15 @@ SelectedSection is SectionKey.Logs;
 
     private async Task RepairManagementKeyAsync()
     {
+        await ApplyManagementKeyChangeAsync();
+        ShowManagementKeyRepairedToast = true;
+        _ = Task.Delay(4000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowManagementKeyRepairedToast = false));
+    }
+
+    /// <summary>Force-rewrites proxy-config.yaml with the current settings' secret-key and restarts
+    /// CLIProxyAPI if running, so a changed/repaired ManagementKey takes effect.</summary>
+    private async Task ApplyManagementKeyChangeAsync()
+    {
         await _configService.WriteConfigAsync(forceManagementKey: true);
         if (CliProxyEngine.State is EngineState.Running or EngineState.Starting)
         {
@@ -4667,9 +4711,6 @@ SelectedSection is SectionKey.Logs;
             _logs.SetManagementApiAvailable(true);
             _usage.SetManagementApiAvailable(true);
         }
-
-        ShowManagementKeyRepairedToast = true;
-        _ = Task.Delay(4000).ContinueWith(_ => Dispatcher.UIThread.Post(() => ShowManagementKeyRepairedToast = false));
     }
 
     [RelayCommand]

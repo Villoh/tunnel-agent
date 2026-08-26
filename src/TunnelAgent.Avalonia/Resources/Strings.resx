@@ -1129,8 +1129,17 @@
   <data name="ConfigView_CLIProxy_ControlPanel_Description" xml:space="preserve">
     <value>Serves the CLIProxyAPI management page (management.html) on the proxy port.</value>
   </data>
-  <data name="ConfigView_CLIProxy_ControlPanel_CopyKeyTooltip" xml:space="preserve">
-    <value>Copy control panel login password</value>
+  <data name="ConfigView_CLIProxy_ManagementKey_Label" xml:space="preserve">
+    <value>Management key</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ManagementKey_Description" xml:space="preserve">
+    <value>Password for the management API and web control panel login. Changing it restarts CLIProxyAPI.</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ManagementKey_CopyTooltip" xml:space="preserve">
+    <value>Copy management key</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ManagementKey_RegenerateTooltip" xml:space="preserve">
+    <value>Generate a new random key</value>
   </data>
   <data name="ConfigView_CLIProxy_ApiKeys_Description" xml:space="preserve">
     <value>Keys accepted by CLIProxyAPI clients. Agent setup uses the default key.</value>

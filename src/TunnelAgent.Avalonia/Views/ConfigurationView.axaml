@@ -293,19 +293,36 @@
                                     <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_ControlPanel_Label}"/>
                                     <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_ControlPanel_Description}"/>
                                 </StackPanel>
+                                <ToggleButton Grid.Column="1" Classes="enable-toggle"
+                                              IsChecked="{Binding EnableControlPanel, Mode=TwoWay}" />
+                            </Grid>
+                            <Border Classes="row-divider"/>
+                            <Grid Margin="14,11" ColumnDefinitions="*,Auto">
+                                <StackPanel>
+                                    <TextBlock Classes="row-label" Text="{l:Loc ConfigView_CLIProxy_ManagementKey_Label}"/>
+                                    <TextBlock Classes="row-desc" Text="{l:Loc ConfigView_CLIProxy_ManagementKey_Description}"/>
+                                </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <TextBox Classes="app" Text="{Binding EditableManagementKey, Mode=TwoWay}"
+                                             Width="200" Height="24" MinHeight="0" Padding="8,0" MaxLength="128"
+                                             FontFamily="Cascadia Mono,Consolas,monospace" FontSize="11.5"
+                                             VerticalContentAlignment="Center" />
                                     <Button Classes="icon-btn copy-endpoint"
                                             Classes.copied="{Binding ManagementKeyCopied}"
-                                            IsVisible="{Binding EnableControlPanel}"
-                                            ToolTip.Tip="{l:Loc ConfigView_CLIProxy_ControlPanel_CopyKeyTooltip}"
+                                            ToolTip.Tip="{l:Loc ConfigView_CLIProxy_ManagementKey_CopyTooltip}"
                                             Click="OnCopyManagementKey">
                                         <Panel>
                                             <lucide:PackIconLucide Kind="Copy" Width="13" Height="13" IsVisible="{Binding !ManagementKeyCopied}" />
                                             <lucide:PackIconLucide Kind="Check" Width="13" Height="13" IsVisible="{Binding ManagementKeyCopied}" />
                                         </Panel>
                                     </Button>
-                                    <ToggleButton Classes="enable-toggle"
-                                                  IsChecked="{Binding EnableControlPanel, Mode=TwoWay}" />
+                                    <Button Classes="icon-btn" ToolTip.Tip="{l:Loc ConfigView_CLIProxy_ManagementKey_RegenerateTooltip}"
+                                            Command="{Binding RegenerateManagementKeyCommand}">
+                                        <lucide:PackIconLucide Kind="RefreshCw" Width="13" Height="13" />
+                                    </Button>
+                                    <Button Classes="app primary" Content="{l:Loc ConfigView_ListenPort_Apply}"
+                                            Command="{Binding ApplyManagementKeyCommand}"
+                                            IsEnabled="{Binding CanApplyManagementKey}" />
                                 </StackPanel>
                             </Grid>
                             <Border Classes="row-divider"/>
