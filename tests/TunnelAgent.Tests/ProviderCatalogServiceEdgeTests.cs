@@ -47,7 +47,9 @@ public sealed class ProviderCatalogServiceEdgeTests
         Assert.True(File.Exists(unmanagedFile));
         Assert.False(File.Exists(oauthFile));
         Assert.False(File.Exists(customFile));
-        Assert.True(Directory.Exists(Path.Combine(authDir, ".tunnelagent-backup")));
+        // Backups must live outside auth-dir so CLIProxyAPI's own credential scan never sees them.
+        Assert.False(Directory.Exists(Path.Combine(authDir, ".tunnelagent-backup")));
+        Assert.True(Directory.Exists(Path.Combine(IPlatformInfo.Current.LocalDataDirectory, "credential-backups")));
     }
 
     [Fact]
@@ -119,7 +121,8 @@ public sealed class ProviderCatalogServiceEdgeTests
         Assert.Contains(catalog.Providers, p => p.Id == "claude");
         Assert.False(File.Exists(claudeFile));
         Assert.True(File.Exists(unrelatedFile));
-        Assert.True(Directory.Exists(Path.Combine(authDir, ".tunnelagent-backup")));
+        Assert.False(Directory.Exists(Path.Combine(authDir, ".tunnelagent-backup")));
+        Assert.True(Directory.Exists(Path.Combine(IPlatformInfo.Current.LocalDataDirectory, "credential-backups")));
     }
 
     [Fact]

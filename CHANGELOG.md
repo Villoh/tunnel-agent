@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Management key row broke on narrow panels** (`ConfigurationView`): the control group (field, eye, copy, regenerate, apply) wrapped onto a new line instead of squeezing the label down to one character per line on narrow windows.
+- **Credential backups showed up as accounts in CLIProxyAPI's own management UI** (`ProviderCatalogService`): resetting, disconnecting, or removing an OAuth account backed up the deleted token file to `.tunnelagent-backup\` inside `auth-dir` — the exact folder CLIProxyAPI scans for its `management.html` credential list, so old backups appeared there as extra accounts. Backups now go to `LocalDataDirectory\credential-backups\` instead, outside `auth-dir`.
 
 ## [1.1.5] - 2026-08-26
 

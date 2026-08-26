@@ -323,7 +323,9 @@ public sealed class ProviderCatalogService : IDisposable
     {
         try
         {
-            var backupDir = Path.Combine(Path.GetDirectoryName(file)!, ".tunnelagent-backup",
+            // Backups must live outside auth-dir: CLIProxyAPI's own management UI scans
+            // auth-dir for credential files and would otherwise list these backups as accounts.
+            var backupDir = Path.Combine(IPlatformInfo.Current.LocalDataDirectory, "credential-backups",
                 DateTime.UtcNow.ToString("yyyyMMddHHmmss"));
             Directory.CreateDirectory(backupDir);
 
