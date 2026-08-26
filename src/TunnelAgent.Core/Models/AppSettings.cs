@@ -75,6 +75,9 @@ public sealed class AppSettings
     /// <summary>Auto-generated key for the CLIProxyAPI management API (enables /v0/management/* and logging).</summary>
     public string ManagementKey { get; set; } = "";
 
+    /// <summary>Whether CLIProxyAPI serves its web control panel (management.html) on the proxy port.</summary>
+    public bool EnableControlPanel { get; set; } = false;
+
     /// <summary>Whether the raw proxy logs view polls automatically for new entries.</summary>
     public bool LogsAutoRefresh { get; set; } = false;
 

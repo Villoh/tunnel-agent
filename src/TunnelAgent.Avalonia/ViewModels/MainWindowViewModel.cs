@@ -937,6 +937,28 @@ SelectedSection is SectionKey.Logs;
             q.MaskEmails = mask;
     }
 
+    public bool EnableControlPanel
+    {
+        get => _settings.Current.EnableControlPanel;
+        set
+        {
+            if (_settings.Current.EnableControlPanel == value) return;
+            _settings.Current.EnableControlPanel = value;
+            _settings.Save();
+            OnPropertyChanged();
+            _ = ApplyControlPanelChangeAsync();
+        }
+    }
+
+    private async Task ApplyControlPanelChangeAsync()
+    {
+        var engine = CliProxyEngine;
+        var wasRunning = engine.IsRunning;
+        if (wasRunning) await engine.StopAsync();
+        await engine.WriteConfigAsync();
+        if (wasRunning) await engine.StartAsync();
+    }
+
     public RoutingStrategy RoutingStrategy
     {
         get => _settings.Current.RoutingStrategy;

@@ -1123,6 +1123,12 @@
   <data name="ConfigView_CLIProxy_ApiKeys_Label" xml:space="preserve">
     <value>API keys</value>
   </data>
+  <data name="ConfigView_CLIProxy_ControlPanel_Label" xml:space="preserve">
+    <value>Web control panel</value>
+  </data>
+  <data name="ConfigView_CLIProxy_ControlPanel_Description" xml:space="preserve">
+    <value>Serves the CLIProxyAPI management page (management.html) on the proxy port.</value>
+  </data>
   <data name="ConfigView_CLIProxy_ApiKeys_Description" xml:space="preserve">
     <value>Keys accepted by CLIProxyAPI clients. Agent setup uses the default key.</value>
   </data>

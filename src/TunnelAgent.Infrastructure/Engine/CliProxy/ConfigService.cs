@@ -250,7 +250,7 @@ public sealed class ConfigService
             routing:
               strategy: "{routingStrategy}"
             remote-management:
-              disable-control-panel: true
+              disable-control-panel: {(s.EnableControlPanel ? "false" : "true")}
               secret-key: "{secretKey}"
 
             """);
